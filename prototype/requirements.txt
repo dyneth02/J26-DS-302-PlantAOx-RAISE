@@ -1,0 +1,15 @@
+pandas
+numpy
+scikit-learn
+pyarrow
+biopython
+joblib
+fastapi
+uvicorn
+
+# only needed by scripts/generate_c3_artifacts.py, to run the real external
+# Multi-AOP predictor (CPU inference; no GPU required)
+torch
+torch_geometric
+rdkit
+xlstm

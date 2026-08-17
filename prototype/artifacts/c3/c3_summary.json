@@ -1,0 +1,23 @@
+{
+  "component": "C3_AOP_BCS",
+  "prototype_mode": true,
+  "data_mode": "real_sequences_real_predictors_real_perturbations",
+  "n_audited": 250,
+  "predictors_audited": [
+    "c2_logreg",
+    "multiaop_pretrained"
+  ],
+  "bcs_by_predictor": {
+    "c2_logreg": 0.5508,
+    "multiaop_pretrained": 0.4779
+  },
+  "reliability_flag_by_predictor": {
+    "c2_logreg": "MEDIUM",
+    "multiaop_pretrained": "MEDIUM"
+  },
+  "notes": [
+    "Two real predictors are audited with the identical perturbation set, through a shared PredictorAdapter interface: this prototype's own Component 2 logistic regression, and a real previously-trained external model (Multi-AOP, sequence xLSTM + molecular-graph MPNN hybrid) loaded from its actual checkpoint.",
+    "The Multi-AOP checkpoint reports val accuracy 0.9056603773584906 at its own training epoch 17 -- that number is from the original authors' training run, not recomputed here.",
+    "IR/FSR/BCS formulas are fixed conventions documented in each bcs_report__*.json's metric_definitions; the source architecture doc left the exact formula unspecified."
+  ]
+}

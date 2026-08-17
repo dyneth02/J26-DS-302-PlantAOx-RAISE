@@ -1,0 +1,37 @@
+{
+  "description": "Real PLM-scaling comparison: mean-pooled ESM-2 embeddings at 4 scales for the same real curated AOP-BenchPos sequences, evaluated by mechanism-tier retrieval Recall@10 and KMeans prototype purity. No fine-tuning; raw mean-pooled embeddings only.",
+  "results": [
+    {
+      "model": "esm2_t12_35M_UR50D",
+      "params": "35M",
+      "embedding_dim": 480,
+      "n_sequences": 1573,
+      "recall_at_10": 0.5333,
+      "prototype_purity": 0.25
+    },
+    {
+      "model": "esm2_t30_150M_UR50D",
+      "params": "150M",
+      "embedding_dim": 640,
+      "n_sequences": 1573,
+      "recall_at_10": 0.54,
+      "prototype_purity": 0.286
+    },
+    {
+      "model": "esm2_t33_650M_UR50D",
+      "params": "650M",
+      "embedding_dim": 1280,
+      "n_sequences": 1573,
+      "recall_at_10": 0.5373,
+      "prototype_purity": 0.2953
+    },
+    {
+      "model": "esm2_t36_3B_UR50D",
+      "params": "3B",
+      "embedding_dim": 2560,
+      "n_sequences": 1573,
+      "recall_at_10": 0.529,
+      "prototype_purity": 0.299
+    }
+  ]
+}

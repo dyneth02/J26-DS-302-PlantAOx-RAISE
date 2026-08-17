@@ -1,0 +1,18 @@
+{
+  "predictor": "c2_logreg",
+  "predictor_display_name": "C2 PU-AOP logistic regression (this prototype)",
+  "n_audited": 250,
+  "delta_threshold": 0.05,
+  "invariance_rate": 0.612,
+  "false_sensitivity_rate": 0.1,
+  "bcs": 0.5508,
+  "redox_sensitivity_rate": 0.568,
+  "random_substitution_sensitivity_rate": 0.568,
+  "reliability_flag": "MEDIUM",
+  "metric_definitions": {
+    "invariance_rate": "Fraction of BLOSUM62-conservative (P2) perturbations with |delta score| <= threshold.",
+    "false_sensitivity_rate": "Fraction of P2 perturbations that flip the predicted class label despite being conservative.",
+    "bcs": "IR * (1 - FSR)",
+    "redox_sensitivity_rate": "Fraction of alanine scans (P1) at redox residues that reduce the score by more than threshold (higher is mechanistically better, not part of BCS)."
+  }
+}

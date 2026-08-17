@@ -1,0 +1,33 @@
+{
+  "component": "C1_AOP_ProCon",
+  "prototype_mode": true,
+  "data_mode": "real_curated_data_real_embeddings",
+  "source_datasets": [
+    "AnOxPePred",
+    "DFBP",
+    "Multi-AOP",
+    "MungBeanMeal_MCP_Sonklin2021",
+    "MungBean_MCP_Chunkao2020",
+    "Peptipedia",
+    "RiceBran_MCP_Fernandez2025",
+    "Sunflower_MCP_Enriquez2025",
+    "Walnut_MCP_Fan2023"
+  ],
+  "total_sequences": 1573,
+  "training_eligible_sequences": 649,
+  "tier_counts": {
+    "Tier1_FRS": 565,
+    "Tier2_MC": 84,
+    "Tier3_GEN": 858,
+    "Tier_Dual": 66
+  },
+  "embedding_model": "esm2_t33_650M_UR50D",
+  "embedding_dimension": 1280,
+  "prototype_purity": 0.2953,
+  "projection_method": "PCA(2) over real ESM-2 650M embeddings",
+  "notes": [
+    "Sequence curation, mechanism tiers, descriptors and embeddings are all real (not synthetic).",
+    "The 2D scatter layout uses PCA as a stand-in for the final trained positive-only SupCon projection.",
+    "Prototype purity is a KMeans-agreement proxy, not the final contrastive-model purity."
+  ]
+}

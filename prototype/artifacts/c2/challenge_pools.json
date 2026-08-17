@@ -1,0 +1,17 @@
+{
+  "pool_c1_random_easy": {
+    "size": 1573,
+    "source": "synthetic random-composition decoys",
+    "purpose": "baseline easy-negative evaluation, matches how most published AOP predictors are benchmarked"
+  },
+  "pool_c2_non_aop_bioactive": {
+    "size": 1573,
+    "source": "Peptipedia (real, non-AOP-labelled bioactive peptides)",
+    "purpose": "moderate-difficulty negative pool"
+  },
+  "pool_c3_hard_descriptor_nearest": {
+    "size": 1573,
+    "source": "Peptipedia subset closest to AOP positive centroid in descriptor space",
+    "purpose": "hard-negative evaluation used to compute RNIS"
+  }
+}

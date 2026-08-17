@@ -1,0 +1,7 @@
+{
+  "definition": "PARRS = enrichment_factor(Tier1 among top-50 ranked) / enrichment_factor(Tier1 among all candidates)",
+  "ef_top50": 1.0,
+  "ef_full_pool": 0.86,
+  "parrs": 1.1628,
+  "interpretation": "PARRS > 1 means the ranking preferentially surfaces in-domain (Tier1) candidates rather than ranking by chance."
+}

@@ -1,0 +1,342 @@
+[
+  {
+    "query": {
+      "sequence": "KGLWE",
+      "mechanism_tier": "Tier1"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "sequence": "ISELWG",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 2,
+        "sequence": "ISELGW",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 3,
+        "sequence": "NGLEGLK",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 4,
+        "sequence": "WISELGW",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 5,
+        "sequence": "WISELG",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 6,
+        "sequence": "KLSDW",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 7,
+        "sequence": "ISELGF",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 8,
+        "sequence": "SGQYFL",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 9,
+        "sequence": "VLEANPRSF",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 10,
+        "sequence": "YVEEL",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      }
+    ]
+  },
+  {
+    "query": {
+      "sequence": "KYL",
+      "mechanism_tier": "Tier1"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "sequence": "RYL",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 2,
+        "sequence": "YYL",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 3,
+        "sequence": "YNL",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 4,
+        "sequence": "YNL",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 5,
+        "sequence": "YVY",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 6,
+        "sequence": "YYV",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 7,
+        "sequence": "RYLGY",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 8,
+        "sequence": "YLLLK",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 9,
+        "sequence": "LYY",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      },
+      {
+        "rank": 10,
+        "sequence": "YLYP",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9998
+      }
+    ]
+  },
+  {
+    "query": {
+      "sequence": "GIISHR",
+      "mechanism_tier": "Tier1"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "sequence": "GIVSPH",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 2,
+        "sequence": "GVDFIRHR",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 3,
+        "sequence": "DFIRHR",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 4,
+        "sequence": "GVDFIRH",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 5,
+        "sequence": "LPHSGY",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 6,
+        "sequence": "WHNVSGSP",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 7,
+        "sequence": "AIQSPH",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 8,
+        "sequence": "HMPVTK",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 9,
+        "sequence": "FLHRP",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 10,
+        "sequence": "YLGAK",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      }
+    ]
+  },
+  {
+    "query": {
+      "sequence": "LLHH",
+      "mechanism_tier": "Tier2"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "sequence": "LLHH",
+        "mechanism_tier": "Tier2",
+        "similarity": 1.0
+      },
+      {
+        "rank": 2,
+        "sequence": "LLPHH",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 3,
+        "sequence": "LLPHH",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 4,
+        "sequence": "LLPHHH",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 5,
+        "sequence": "LLPHHH",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 6,
+        "sequence": "LHH",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 7,
+        "sequence": "LHH",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 8,
+        "sequence": "LLPH",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 9,
+        "sequence": "LLPH",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 10,
+        "sequence": "LHL",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      }
+    ]
+  },
+  {
+    "query": {
+      "sequence": "YQLD",
+      "mechanism_tier": "Tier1"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "sequence": "FRADHPFL",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 2,
+        "sequence": "YQIGL",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 3,
+        "sequence": "YVGD",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 4,
+        "sequence": "YLGAK",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 5,
+        "sequence": "EFQL",
+        "mechanism_tier": "Tier2",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 6,
+        "sequence": "EFQL",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 7,
+        "sequence": "YLAGMN",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 8,
+        "sequence": "LLPF",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 9,
+        "sequence": "VHDY",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      },
+      {
+        "rank": 10,
+        "sequence": "KLSDW",
+        "mechanism_tier": "Tier1",
+        "similarity": 0.9999
+      }
+    ]
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "predictor": "multiaop_pretrained",
+  "peptide_id": "AOP_000661",
+  "original_sequence": "DFIRHR",
+  "original_score": 0.4433,
+  "perturbations": [
+    {
+      "type": "P1_alanine_scan",
+      "sequence": "DFIRAR",
+      "score": 0.4298,
+      "delta": -0.0135
+    },
+    {
+      "type": "P2_blosum62_conservative",
+      "sequence": "EFIRHR",
+      "score": 0.4949,
+      "delta": 0.0516
+    },
+    {
+      "type": "P3_random_control",
+      "sequence": "DFKRHR",
+      "score": 0.4515,
+      "delta": 0.0082
+    }
+  ]
+}

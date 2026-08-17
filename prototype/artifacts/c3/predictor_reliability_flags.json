@@ -1,0 +1,12 @@
+{
+  "c2_logreg": {
+    "display_name": "C2 PU-AOP logistic regression (this prototype)",
+    "bcs": 0.5508,
+    "flag": "MEDIUM"
+  },
+  "multiaop_pretrained": {
+    "display_name": "Multi-AOP pretrained (xLSTM + graph MPNN, external, real checkpoint)",
+    "bcs": 0.4779,
+    "flag": "MEDIUM"
+  }
+}
