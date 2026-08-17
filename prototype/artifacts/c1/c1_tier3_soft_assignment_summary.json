@@ -1,0 +1,10 @@
+{
+  "n_sequences": 858,
+  "closest_prototype_counts": {
+    "GEN (Tier3)": 748,
+    "FRS (Tier1)": 110
+  },
+  "mean_sim_frs": 0.9975,
+  "mean_sim_mc": -0.8547,
+  "mean_sim_gen": 0.9981
+}

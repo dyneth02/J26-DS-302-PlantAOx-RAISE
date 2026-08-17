@@ -1,0 +1,10 @@
+{
+  "easy_pool": {
+    "n_test": 787,
+    "mcc": 0.4696
+  },
+  "hard_pool": {
+    "n_test": 3146,
+    "mcc": 0.4769
+  }
+}

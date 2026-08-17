@@ -1,0 +1,35 @@
+{
+  "description": "Recall@10, Tier2 Recall@5, and ARI recomputed here from the real checkpoints (not copied from the log), using the exact LSO retrieval and ARI methodology extracted from the student's own evaluation notebook.",
+  "results": [
+    {
+      "model": "Baseline (original Phase 4)",
+      "recall@10": 0.9515,
+      "tier2_recall@5": 0.6184,
+      "ari": 0.1039
+    },
+    {
+      "model": "Primary-v2",
+      "recall@10": 0.9413,
+      "tier2_recall@5": 0.5526,
+      "ari": -0.015
+    },
+    {
+      "model": "HP1-Random",
+      "recall@10": 0.977,
+      "tier2_recall@5": 0.7368,
+      "ari": 0.1038
+    },
+    {
+      "model": "HP2-Fusion",
+      "recall@10": 0.9439,
+      "tier2_recall@5": 0.6447,
+      "ari": 0.1176
+    },
+    {
+      "model": "Primary-v2-Balanced",
+      "recall@10": 0.9541,
+      "tier2_recall@5": 0.5921,
+      "ari": -0.0253
+    }
+  ]
+}

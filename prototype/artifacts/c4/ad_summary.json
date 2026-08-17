@@ -1,0 +1,12 @@
+{
+  "reference_cloud": "descriptor-space centroid of real training-eligible AOP-BenchPos positives",
+  "n_reference_sequences": 649,
+  "mu": 3.5573,
+  "sigma": 1.16,
+  "n_candidates": 350,
+  "tier_counts": {
+    "Tier1": 301,
+    "Tier2": 35,
+    "Tier3_abstain": 14
+  }
+}

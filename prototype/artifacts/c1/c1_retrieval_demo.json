@@ -1,0 +1,397 @@
+[
+  {
+    "query": {
+      "peptide_id": "AOP_000703",
+      "sequence": "PAIDL",
+      "mechanism_tier": "Tier2_MC"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "peptide_id": "AOP_001508",
+        "sequence": "IDLAY",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.974
+      },
+      {
+        "rank": 2,
+        "peptide_id": "AOP_001237",
+        "sequence": "LTADILPR",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9712
+      },
+      {
+        "rank": 3,
+        "peptide_id": "AOP_000891",
+        "sequence": "DSAIDLGD",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9708
+      },
+      {
+        "rank": 4,
+        "peptide_id": "AOP_000720",
+        "sequence": "ADASVLPK",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9705
+      },
+      {
+        "rank": 5,
+        "peptide_id": "AOP_000773",
+        "sequence": "DSAI",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9696
+      },
+      {
+        "rank": 6,
+        "peptide_id": "AOP_001560",
+        "sequence": "IPSEVLA",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9695
+      },
+      {
+        "rank": 7,
+        "peptide_id": "AOP_001431",
+        "sequence": "TELAL",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9687
+      },
+      {
+        "rank": 8,
+        "peptide_id": "AOP_001191",
+        "sequence": "EAAVYPL",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9682
+      },
+      {
+        "rank": 9,
+        "peptide_id": "AOP_000067",
+        "sequence": "PMDYMVT",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9682
+      },
+      {
+        "rank": 10,
+        "peptide_id": "AOP_001549",
+        "sequence": "LRIPVA",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.968
+      }
+    ]
+  },
+  {
+    "query": {
+      "peptide_id": "AOP_000248",
+      "sequence": "YQY",
+      "mechanism_tier": "Tier1_FRS"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "peptide_id": "AOP_000245",
+        "sequence": "QYY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9837
+      },
+      {
+        "rank": 2,
+        "peptide_id": "AOP_000220",
+        "sequence": "YRY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9833
+      },
+      {
+        "rank": 3,
+        "peptide_id": "AOP_000212",
+        "sequence": "YEY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9828
+      },
+      {
+        "rank": 4,
+        "peptide_id": "AOP_000218",
+        "sequence": "YHY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9828
+      },
+      {
+        "rank": 5,
+        "peptide_id": "AOP_000240",
+        "sequence": "YWY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9822
+      },
+      {
+        "rank": 6,
+        "peptide_id": "AOP_000247",
+        "sequence": "YNY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9815
+      },
+      {
+        "rank": 7,
+        "peptide_id": "AOP_000231",
+        "sequence": "YVY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9814
+      },
+      {
+        "rank": 8,
+        "peptide_id": "AOP_000257",
+        "sequence": "YSY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9814
+      },
+      {
+        "rank": 9,
+        "peptide_id": "AOP_000261",
+        "sequence": "YCY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9811
+      },
+      {
+        "rank": 10,
+        "peptide_id": "AOP_000211",
+        "sequence": "YDY",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9807
+      }
+    ]
+  },
+  {
+    "query": {
+      "peptide_id": "AOP_000661",
+      "sequence": "DFIRHR",
+      "mechanism_tier": "Tier2_MC"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "peptide_id": "AOP_000643",
+        "sequence": "DFIRH",
+        "mechanism_tier": "Tier2_MC",
+        "similarity": 0.9909
+      },
+      {
+        "rank": 2,
+        "peptide_id": "AOP_000663",
+        "sequence": "GVDFIRHR",
+        "mechanism_tier": "Tier2_MC",
+        "similarity": 0.9796
+      },
+      {
+        "rank": 3,
+        "peptide_id": "AOP_001376",
+        "sequence": "DVFNPR",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9774
+      },
+      {
+        "rank": 4,
+        "peptide_id": "AOP_000650",
+        "sequence": "GVDFIRH",
+        "mechanism_tier": "Tier2_MC",
+        "similarity": 0.975
+      },
+      {
+        "rank": 5,
+        "peptide_id": "AOP_000398",
+        "sequence": "DRVYIHPF",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9739
+      },
+      {
+        "rank": 6,
+        "peptide_id": "AOP_000528",
+        "sequence": "DVFRELRVQ",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9732
+      },
+      {
+        "rank": 7,
+        "peptide_id": "AOP_000285",
+        "sequence": "NHRYDR",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9705
+      },
+      {
+        "rank": 8,
+        "peptide_id": "AOP_000544",
+        "sequence": "GIISHR",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9704
+      },
+      {
+        "rank": 9,
+        "peptide_id": "AOP_001184",
+        "sequence": "DKIHPF",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.97
+      },
+      {
+        "rank": 10,
+        "peptide_id": "AOP_001217",
+        "sequence": "DAQEFKR",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9684
+      }
+    ]
+  },
+  {
+    "query": {
+      "peptide_id": "AOP_000480",
+      "sequence": "RHPHP",
+      "mechanism_tier": "Tier1_FRS"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "peptide_id": "AOP_000479",
+        "sequence": "ARHPHP",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9739
+      },
+      {
+        "rank": 2,
+        "peptide_id": "AOP_000380",
+        "sequence": "RADHP",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9684
+      },
+      {
+        "rank": 3,
+        "peptide_id": "AOP_000083",
+        "sequence": "HLHP",
+        "mechanism_tier": "Tier_Dual",
+        "similarity": 0.967
+      },
+      {
+        "rank": 4,
+        "peptide_id": "AOP_000071",
+        "sequence": "HHLP",
+        "mechanism_tier": "Tier_Dual",
+        "similarity": 0.9627
+      },
+      {
+        "rank": 5,
+        "peptide_id": "AOP_000087",
+        "sequence": "HHP",
+        "mechanism_tier": "Tier_Dual",
+        "similarity": 0.9624
+      },
+      {
+        "rank": 6,
+        "peptide_id": "AOP_001457",
+        "sequence": "PVRGLHP",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9601
+      },
+      {
+        "rank": 7,
+        "peptide_id": "AOP_000886",
+        "sequence": "HLPLP",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9601
+      },
+      {
+        "rank": 8,
+        "peptide_id": "AOP_000075",
+        "sequence": "HPHL",
+        "mechanism_tier": "Tier_Dual",
+        "similarity": 0.9598
+      },
+      {
+        "rank": 9,
+        "peptide_id": "AOP_000070",
+        "sequence": "HPLH",
+        "mechanism_tier": "Tier_Dual",
+        "similarity": 0.9597
+      },
+      {
+        "rank": 10,
+        "peptide_id": "AOP_000085",
+        "sequence": "HHPL",
+        "mechanism_tier": "Tier_Dual",
+        "similarity": 0.959
+      }
+    ]
+  },
+  {
+    "query": {
+      "peptide_id": "AOP_000099",
+      "sequence": "LHK",
+      "mechanism_tier": "Tier1_FRS"
+    },
+    "top_matches": [
+      {
+        "rank": 1,
+        "peptide_id": "AOP_000102",
+        "sequence": "LHN",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9815
+      },
+      {
+        "rank": 2,
+        "peptide_id": "AOP_000997",
+        "sequence": "LQK",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9788
+      },
+      {
+        "rank": 3,
+        "peptide_id": "AOP_000104",
+        "sequence": "LHR",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9774
+      },
+      {
+        "rank": 4,
+        "peptide_id": "AOP_000105",
+        "sequence": "LHS",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9756
+      },
+      {
+        "rank": 5,
+        "peptide_id": "AOP_000095",
+        "sequence": "LHE",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9753
+      },
+      {
+        "rank": 6,
+        "peptide_id": "AOP_000094",
+        "sequence": "LHD",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9738
+      },
+      {
+        "rank": 7,
+        "peptide_id": "AOP_000106",
+        "sequence": "LHT",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9734
+      },
+      {
+        "rank": 8,
+        "peptide_id": "AOP_000098",
+        "sequence": "LHI",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9733
+      },
+      {
+        "rank": 9,
+        "peptide_id": "AOP_000355",
+        "sequence": "LDK",
+        "mechanism_tier": "Tier1_FRS",
+        "similarity": 0.9724
+      },
+      {
+        "rank": 10,
+        "peptide_id": "AOP_000933",
+        "sequence": "LEK",
+        "mechanism_tier": "Tier3_GEN",
+        "similarity": 0.9718
+      }
+    ]
+  }
+]

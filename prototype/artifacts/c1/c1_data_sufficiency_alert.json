@@ -1,0 +1,12 @@
+{
+  "alert_level": "HIGH",
+  "issue": "Tiers below target: {'Tier2_MC': 84}",
+  "tier_counts": {
+    "Tier1_FRS": 565,
+    "Tier2_MC": 84,
+    "Tier3_GEN": 858,
+    "Tier_Dual": 66
+  },
+  "target_minimum": 150,
+  "history": "AnOxPePred alone gives only 11 Tier2_MC sequences. Merging Multi-AOP, DFBP, Peptipedia and 5 plant-MCP papers raised Tier2_MC to 84, meeting the target."
+}

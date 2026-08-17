@@ -1,0 +1,7 @@
+{
+  "classifier": "logistic_regression (descriptor-only, 14 physicochemical features)",
+  "mcc_c1_easy": 0.4696,
+  "mcc_c3_hard": 0.4769,
+  "rnis": -0.0073,
+  "interpretation": "No strong evidence of inflation between easy and hard negative pools for this classifier."
+}

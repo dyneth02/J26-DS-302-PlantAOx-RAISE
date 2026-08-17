@@ -1,0 +1,21 @@
+{
+  "component": "C4_PlantAOP_Screen",
+  "prototype_mode": true,
+  "data_mode": "real_uniprot_proteome_real_digestion_real_c1c2c3_integration",
+  "source": "25 reviewed UniProt Arabidopsis thaliana antioxidant/defense-keyword proteins (KW-0929)",
+  "n_source_proteins": 25,
+  "n_candidate_fragments": 350,
+  "ad_tier_counts": {
+    "Tier1": 301,
+    "Tier2": 35,
+    "Tier3_abstain": 14
+  },
+  "parrs": 1.1628,
+  "pdss": 0.9715,
+  "arr": 1.0,
+  "notes": [
+    "Digestion (trypsin+pepsin cleavage rules), descriptor computation, C2 predictor probabilities, and the C3 reliability flag are all real and computed live from upstream component artifacts.",
+    "AD distance uses descriptor-space standardized-Euclidean distance (documented Level-3 fallback), not ESM-2 embedding distance, since no embeddings were computed for plant fragments.",
+    "Input proteome is a real but small (25-protein) UniProt subset, standing in for the full multi-species plant digestome planned for the full project."
+  ]
+}

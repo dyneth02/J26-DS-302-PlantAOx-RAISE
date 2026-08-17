@@ -1,0 +1,5 @@
+Hypothesis,p_value,effect_r,effect_size,significant_raw_a=0.05,significant_bonferroni_a=0.0125
+HP1 (mechanism-aware > random),0.9961696420127566,-0.03826530612244894,negligible,False,False
+"HP2 (fusion > ESM-2 alone, ARI)",0.09503109778392865,0.07577499999999993,negligible,False,False
+HP3 (Tier1 vs Tier2 nDCG@10 differ),1.8433467921331582e-36,0.8775816122584943,large,True,True
+HP4 (random split > LSO),0.09330874401069511,0.02554270115689583,negligible,False,False

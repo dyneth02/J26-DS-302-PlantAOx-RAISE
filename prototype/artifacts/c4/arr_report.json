@@ -1,0 +1,6 @@
+{
+  "definition": "ARR = fraction of the top-20 ranked candidates that are NOT abstained (AD tier != Tier3)",
+  "n_top_nominations": 20,
+  "arr": 1.0,
+  "interpretation": "ARR close to 1 means the framework can make a confident, non-abstained call on nearly all of its own top picks."
+}

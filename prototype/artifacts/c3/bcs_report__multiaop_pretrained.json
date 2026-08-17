@@ -1,0 +1,18 @@
+{
+  "predictor": "multiaop_pretrained",
+  "predictor_display_name": "Multi-AOP pretrained (xLSTM + graph MPNN, external, real checkpoint)",
+  "n_audited": 250,
+  "delta_threshold": 0.05,
+  "invariance_rate": 0.548,
+  "false_sensitivity_rate": 0.128,
+  "bcs": 0.4779,
+  "redox_sensitivity_rate": 0.272,
+  "random_substitution_sensitivity_rate": 0.504,
+  "reliability_flag": "MEDIUM",
+  "metric_definitions": {
+    "invariance_rate": "Fraction of BLOSUM62-conservative (P2) perturbations with |delta score| <= threshold.",
+    "false_sensitivity_rate": "Fraction of P2 perturbations that flip the predicted class label despite being conservative.",
+    "bcs": "IR * (1 - FSR)",
+    "redox_sensitivity_rate": "Fraction of alanine scans (P1) at redox residues that reduce the score by more than threshold (higher is mechanistically better, not part of BCS)."
+  }
+}

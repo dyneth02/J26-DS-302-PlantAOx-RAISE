@@ -1,0 +1,7 @@
+{
+  "definition": "PDSS = mean(AD distance of plant fragments) / mean(AD self-distance of AOP-BenchPos positives)",
+  "mean_plant_ad_distance": 3.4559,
+  "mean_benchpos_ad_distance": 3.5573,
+  "pdss": 0.9715,
+  "interpretation": "PDSS close to 1 means the plant digestome sits inside the same descriptor distribution as the training positives; PDSS >> 1 flags distributional shift."
+}

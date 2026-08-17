@@ -1,0 +1,34 @@
+[
+  {
+    "Hypothesis":"HP1 (mechanism-aware > random)",
+    "p_value":0.996169642,
+    "effect_r":-0.0382653061,
+    "effect_size":"negligible",
+    "significant_raw_a=0.05":false,
+    "significant_bonferroni_a=0.0125":false
+  },
+  {
+    "Hypothesis":"HP2 (fusion > ESM-2 alone, ARI)",
+    "p_value":0.0950310978,
+    "effect_r":0.075775,
+    "effect_size":"negligible",
+    "significant_raw_a=0.05":false,
+    "significant_bonferroni_a=0.0125":false
+  },
+  {
+    "Hypothesis":"HP3 (Tier1 vs Tier2 nDCG@10 differ)",
+    "p_value":1.843346792e-36,
+    "effect_r":0.8775816123,
+    "effect_size":"large",
+    "significant_raw_a=0.05":true,
+    "significant_bonferroni_a=0.0125":true
+  },
+  {
+    "Hypothesis":"HP4 (random split > LSO)",
+    "p_value":0.093308744,
+    "effect_r":0.0255427012,
+    "effect_size":"negligible",
+    "significant_raw_a=0.05":false,
+    "significant_bonferroni_a=0.0125":false
+  }
+]

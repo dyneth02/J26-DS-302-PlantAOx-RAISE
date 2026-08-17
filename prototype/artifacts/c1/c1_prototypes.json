@@ -1,0 +1,66 @@
+{
+  "Tier1_FRS": {
+    "prototype_id": "PROTO_TIER1_FRS",
+    "embedding_dim": 1280,
+    "n_support_sequences": 565,
+    "centroid_preview": [
+      0.1142,
+      0.1258,
+      0.158,
+      0.1623,
+      0.0471,
+      -0.0387,
+      -0.0689,
+      0.2946
+    ],
+    "purity": 0.4983
+  },
+  "Tier2_MC": {
+    "prototype_id": "PROTO_TIER2_MC",
+    "embedding_dim": 1280,
+    "n_support_sequences": 84,
+    "centroid_preview": [
+      0.0701,
+      0.1381,
+      0.16,
+      0.1652,
+      0.0458,
+      -0.0443,
+      -0.071,
+      0.243
+    ],
+    "purity": 0.0589
+  },
+  "Tier3_GEN": {
+    "prototype_id": "PROTO_TIER3_GEN",
+    "embedding_dim": 1280,
+    "n_support_sequences": 858,
+    "centroid_preview": [
+      0.0805,
+      0.1227,
+      0.1503,
+      0.1672,
+      0.0586,
+      -0.0292,
+      -0.0575,
+      0.248
+    ],
+    "purity": 0.577
+  },
+  "Tier_Dual": {
+    "prototype_id": "PROTO_TIER_DUAL",
+    "embedding_dim": 1280,
+    "n_support_sequences": 66,
+    "centroid_preview": [
+      0.1147,
+      0.1413,
+      0.1754,
+      0.1864,
+      0.0745,
+      -0.0499,
+      -0.0914,
+      0.3029
+    ],
+    "purity": 0.0468
+  }
+}

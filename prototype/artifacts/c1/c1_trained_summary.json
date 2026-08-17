@@ -1,0 +1,25 @@
+{
+  "component": "C1_AOP_ProCon",
+  "data_mode": "real_trained_model_promoted",
+  "promoted_from": "Option 1+2: k-NN + ARI checkpoint",
+  "checkpoint_epoch": 3,
+  "prototype_distances": {
+    "Tier1-Tier2": 0.376,
+    "Tier1-Tier3": 1.821,
+    "Tier2-Tier3": 1.9459
+  },
+  "primary_metrics": {
+    "recall@5": 0.9668,
+    "recall@10": 0.9821,
+    "recall@20": 0.9949,
+    "ndcg@10": 0.8737,
+    "tier2_recall@5": 0.8289,
+    "ari": 0.1238,
+    "n_query": 392,
+    "n_gallery": 389
+  },
+  "notes": [
+    "This is the BEST model found so far (Option 1+2: k-NN + ARI checkpoint), promoted here after the Phase 5c pairing/checkpoint experiment -- not the original Phase 4 checkpoint. The original run's numbers are preserved for comparison in the 'Improvement experiment' and 'Ablation comparison' sections below, not lost.",
+    "Projection head, prototypes, embedding space, retrieval metrics, and ARI are all computed from this model's actual weights, same as before."
+  ]
+}
