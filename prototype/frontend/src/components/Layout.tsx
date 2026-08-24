@@ -1,6 +1,9 @@
+import { useRef } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "../hooks/useTheme";
+import PresentationToolbar from "./PresentationToolbar";
+import SnapshotButton from "./SnapshotButton";
 
 const NAV_ITEMS = [
   { to: "/", label: "Home", tag: "00", end: true },
@@ -62,10 +65,13 @@ function ThemeToggle() {
 
 export default function Layout() {
   const location = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
+  const snapshotName = `plantaox-${location.pathname === "/" ? "home" : location.pathname.replace("/", "")}`;
 
   return (
     <div className="min-h-screen flex">
-      <div className="fixed right-6 top-6 z-50">
+      <div className="fixed right-6 top-6 z-50 flex items-center gap-2">
+        <SnapshotButton targetRef={mainRef} filename={snapshotName} />
         <ThemeToggle />
       </div>
 
@@ -133,7 +139,7 @@ export default function Layout() {
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0">
+      <main ref={mainRef} className="flex-1 min-w-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -146,6 +152,8 @@ export default function Layout() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      <PresentationToolbar />
     </div>
   );
 }
