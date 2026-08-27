@@ -23,6 +23,9 @@ export const c1Api = {
   statisticalTests: () => client.get("/c1/statistical-tests").then((r) => r.data),
   tier3Summary: () => client.get("/c1/tier3-summary").then((r) => r.data),
   improvementExperiment: () => client.get("/c1/improvement-experiment").then((r) => r.data),
+  livePool: () => client.get("/c1/live-pool").then((r) => r.data),
+  liveRetrieval: (queryId: string, topK = 10) =>
+    client.post("/c1/live-retrieval", { query_id: queryId, top_k: topK }).then((r) => r.data),
 };
 
 export const c2Api = {
@@ -32,6 +35,8 @@ export const c2Api = {
   classificationMetrics: () => client.get("/c2/classification-metrics").then((r) => r.data),
   calibration: () => client.get("/c2/calibration").then((r) => r.data),
   stageComparison: () => client.get("/c2/stage-comparison").then((r) => r.data),
+  liveRnis: (pools: string[]) => client.post("/c2/live-rnis", { pools }).then((r) => r.data),
+  liveCalibration: (pools: string[]) => client.post("/c2/live-calibration", { pools }).then((r) => r.data),
 };
 
 export const c3Api = {
@@ -43,6 +48,8 @@ export const c3Api = {
     client.get("/c3/example-perturbation", { params: { predictor } }).then((r) => r.data),
   perturbationResults: (predictor: string) =>
     client.get("/c3/perturbation-results", { params: { predictor } }).then((r) => r.data),
+  livePerturbation: (sequence: string) =>
+    client.post("/c3/live-perturbation", { sequence }).then((r) => r.data),
 };
 
 export const c4Api = {

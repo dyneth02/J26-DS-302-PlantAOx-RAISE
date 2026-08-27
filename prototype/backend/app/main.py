@@ -1,12 +1,28 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import c1, c2, c3, c4, meta
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Load the live-computation models/data once at startup (not per-request) so the
+    # 3 new live endpoints (C1 retrieval, C2 RNIS, C3 perturbation) stay demo-responsive.
+    from app.live import c1_retrieval, c2_rnis, c3_perturbation
+
+    c1_retrieval.load_c1_state()
+    c2_rnis.load_c2_state()
+    c3_perturbation.load_c3_state()
+    yield
+
+
 app = FastAPI(
     title="PlantAOx-RAISE Prototype API",
     description="Backend API for the PlantAOx-RAISE proposal prototype",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
