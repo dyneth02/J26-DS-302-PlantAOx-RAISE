@@ -1,0 +1,22 @@
+{
+  "n_input_sequences": 1205,
+  "n_parsed_cluster_members": 1205,
+  "n_sequences_dropped_by_cdhit": 0,
+  "n_clusters_after_cdhit90": 925,
+  "representative_tier_counts": {
+    "E1": 491,
+    "E2": 434
+  },
+  "cluster_size_distribution": {
+    "1": 758,
+    "2": 115,
+    "3": 32,
+    "4": 4,
+    "5": 7,
+    "6": 4,
+    "7": 2,
+    "9": 2,
+    "14": 1
+  },
+  "largest_cluster_size": 14
+}
