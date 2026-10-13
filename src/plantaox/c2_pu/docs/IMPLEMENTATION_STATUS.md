@@ -13,6 +13,54 @@
 
 ## 🔄 Current work in progress
 
+### Bucket 1, Tasks 1.1–1.4 — Positive Pool Acquisition, Cleaning, and Evidence Tiering
+- **Status:** Raw sources acquired and placed (`data/raw/c2_pu/Multi-AOP/combined_data.csv`,
+  `data/raw/c2_pu/AnOxPePred/Supplementary_Data_S1_Marcatili.csv`). Standardization, cross-source
+  conflict resolution, and E1/E2 tiering implemented and run end-to-end
+  (`plantaox.c2_pu.curation.{adapters,standardize,tiers}`, orchestrated by
+  `plantaox.c2_pu.run.run_fr1_positives`). **Not yet done: CD-HIT 90% dedup (1.5), GraphPart 40%
+  split (1.6), 1.7 freeze.** The output below is provisional, pre-clustering, pre-split.
+- **What the pipeline does:**
+  - Loads Multi-AOP (label==1 only, per AGENTS.md) and AnOxPePred (FRS/Chelator independent assay
+    columns — either flag being 1 counts as confirmed antioxidant activity per the proposal's
+    background section, p.12).
+  - Resolves cross-source conflicts: a sequence Multi-AOP calls positive but AnOxPePred's own assay
+    reports inactive on BOTH mechanisms (FRS=0 AND Chelator=0) is excluded from the positive pool,
+    logged in full with provenance in `data/interim/c2_pu/label_conflicts_anox_vs_multiaop.csv`, and
+    flagged as an external-control *candidate* pending manual review — never silently dropped, never
+    auto-reclassified as E3, never auto-added to the control set.
+  - Assigns E1 (AnOxPePred assay-confirmed) vs E2 (Multi-AOP-only, no per-record assay metadata
+    available — tier is explicitly provisional, `assay_verified="unknown"`).
+  - Applies the shared 3–50 AA length window to positives (matching C1/C2/C3), logging exclusions.
+- **Latest run stats (full files, 2026-10-14):**
+  - E1 (assay-confirmed): 697 → 670 after length filter
+  - E2 (provisional, Multi-AOP-only): 553 → 535 after length filter
+  - **Accepted positive pool: 1,205** sequences (pre-CD-HIT) — comfortably clears the SO1 floor of
+    ≥800, with headroom for shrinkage during CD-HIT 90% clustering.
+  - **Conflicts excluded: 179** sequences (82.5% of AnOxPePred's 217 true-inactive sequences are
+    contested by Multi-AOP — see Known Issues #5). 141 of the 179 (79%) are exact tripeptides,
+    consistent with short-fragment sequence collision across unrelated source studies rather than a
+    data-entry error.
+  - **Clean external-control set: 38** sequences (AnOxPePred inactive, uncontested) — much smaller
+    than the ~217 the proposal cites, because most of that 217 turns out to be contested once
+    cross-referenced against Multi-AOP. Flag this shrinkage for supervisor awareness: the external
+    control used in later RNIS/calibration work will be this smaller, cleaner 38, not ~217.
+  - Length-excluded from positive pool: 45 (all <3 AA).
+  - 156 sequences in Multi-AOP appear under both label=0 and label=1 on different rows; per the
+    existing "ignore Multi-AOP's negative labels" rule this doesn't block their label=1 assertion,
+    but it's logged here as a data-quality note.
+- **Outputs:**
+  - `data/processed/c2_pu/aop_positives_provisional.parquet` (1,205 rows; NOT the frozen FR1
+    artifact — name says "provisional" deliberately, see AGENTS.md rule #4)
+  - `data/interim/c2_pu/label_conflicts_anox_vs_multiaop.csv` (179 rows, full provenance)
+  - `data/processed/c2_pu/anoxpepred_inactives_clean.csv` (38 rows — external control, Bucket 2.6
+    input, still needs its own homology check against positives before freeze)
+  - `data/processed/c2_pu/fr1_positive_pool_provenance.jsonl` (run provenance log)
+- **What's NOT done:** CD-HIT 90% clustering (1.5), GraphPart 40% split (1.6), the 179 conflicts'
+  manual/supervisor review, the 553 provisional-E2 records' supervisor sign-off, and the FR1
+  acceptance freeze (1.7). CD-HIT and GraphPart are external bioinformatics tools not yet installed
+  in this environment — flagged as a decision/setup item, not started.
+
 ### Bucket 2, Task 2.1 — C1 Random Decoy Construction
 - **Status:** Pipeline built and functioning; full-file validation **not yet done**.
 - **What exists:** A Colab/Python script that queries UniProtKB REST (`reviewed:true AND length:[3 TO 50]` plus keyword exclusions), applies a secondary Python keyword blocklist, randomly samples 5,000 records (seed 42), and writes a provenance log.
@@ -30,18 +78,32 @@
 2. **Residual filtering imperfection is expected, not a bug.** Six rounds of manual review caught progressively more obscure contamination (toxins → hormones → AMPs → antioxidant enzymes → metallothionein → frog skin peptides). This is diminishing returns, not an unresolved defect. The agreed plan is to document it as a limitation in the FR2 report (see `PU_AOP_RESEARCH_CONTEXT.md` §7), **not** to keep iterating indefinitely. Do not reopen this unless full-file validation (above) finds something structurally different from the spot-check pattern.
 3. **Full-file validation gap** (see Current Work above) — this is the one open item that *does* need closing before C1/FR2 can be marked complete, as distinct from #2 which is an accepted limitation.
 4. **A real case-sensitivity bug occurred once already** (keyword added with a capital letter never matched because `.lower()` was only applied to the description, not the keyword). Fixed via the list-comprehension lowercasing pattern in `PU_AOP_RESEARCH_CONTEXT.md` §5. Any agent editing the blocklist should be aware this class of bug is easy to reintroduce.
+5. **179 of 1,384 candidate positives (Multi-AOP ∩ AnOxPePred-inactive) are cross-source contradicted — resolved, but needs supervisor visibility.** See Bucket 1 section above. Excluded from both the positive pool and the external control pending manual review; logged in full in `label_conflicts_anox_vs_multiaop.csv`. This is the exact "contradictory labels across databases" phenomenon the proposal's own lit review (p.14, citing Isaac et al.) names as a field-wide problem — worth citing directly in the FR1 report as in-practice confirmation of the research motivation, not just a data-cleaning footnote.
+6. **C1 decoy pool has only 3,786 unique sequences across its 5,000 FASTA records** (checked directly against the full file, not a sample). Short 3–50 AA fragments repeat across species for biologically ordinary reasons (conserved motifs), so this isn't necessarily a defect, but it means the "5,000 records" acceptance criterion (Bucket 2.7, FR2 checklist) is satisfied at the record level, not the unique-sequence level — needs an explicit decision on which one the acceptance checklist actually means before FR2 sign-off.
+7. **One known AOP positive sequence (`DRVYIHPF`) was found inside the existing C1 decoy FASTA** — direct sequence-identity leakage between Stage C1 and the positive pool. Expected: C1 was built (2026-10-07) before the FR1 positive pool existed, so its only contamination screen was the generic bioactivity keyword blocklist, not a direct identity check. This is exactly what Bucket 2.4 ("Find and resolve overlap among challenge pools and curated positives") is for — flagging here so it isn't missed, not proposing a new policy.
 
 ## ⏭️ Next tasks (in order)
 
-1. **Close out 2.1 (C1) properly:**
-   - Write a validation script that loads the *full* `stage_c1_decoys.fasta`, re-applies the blocklist, and reports any residual hits (expect a small nonzero number — document it, don't chase it to zero).
-   - Confirm record count = 5,000, length range 3–50 AA, no duplicate accessions.
-   - Re-run the full pipeline once from scratch with the same seed and diff against the saved file to confirm reproducibility.
-   - Write the accession/fragment-coordinate mapping and exclusion log artifacts still outstanding from the 2.1 checklist.
-2. **Start Bucket 1 (FR1 — positive pool), task 1.1:** Acquire Multi-AOP and AnOxPePred, register sources/versions/checksums. This is mandatory-path work that hasn't been touched yet and is a hard dependency for everything downstream (tiering, CD-HIT, GraphPart).
-3. **In parallel once 1.1 is underway: begin ESM-2 environment setup** (Bucket 3, task 3.2) since C3 (task 2.3) depends on it and it's a known multi-day setup risk (GPU/CPU fallback, model download, tokenization config).
-4. **Task 2.2 (C2 — Peptipedia bioactive pool)** can start any time; not blocked on anything above.
-5. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
+1. **Decide on CD-HIT and GraphPart installation** (Bucket 1.5/1.6) — neither is installed in this
+   environment yet. CD-HIT is a standalone binary (not pip-installable on Windows without WSL/conda);
+   GraphPart is a pip package. This blocks the FR1 freeze (1.7) and needs a setup-path decision before
+   either can run.
+2. **Get supervisor/manual eyes on the two provisional buckets** before treating FR1 as close to done:
+   the 179 logged conflicts (`label_conflicts_anox_vs_multiaop.csv`) and the 553 provisional-E2
+   records (`aop_positives_provisional.parquet`, `evidence_tier == "E2"`). Both are usable for
+   continued pipeline development now, but neither should be presented as final without that review.
+3. **Close out 2.1 (C1) properly**, now with two new concrete findings to fold in:
+   - Decide whether "5,000 records" (Bucket 2.7 acceptance criterion) means 5,000 FASTA entries or
+     5,000 unique sequences — currently 3,786 unique (see Known Issues #6).
+   - Run Bucket 2.4's positive-vs-C1 identity check now that the FR1 positive pool exists; at least
+     one known positive (`DRVYIHPF`) is currently sitting inside the C1 decoy file (Known Issues #7).
+   - Confirm record count, length range 3–50 AA, re-run reproducibility, and finish the
+     accession/fragment-coordinate mapping and exclusion log artifacts still outstanding from the 2.1
+     checklist.
+4. **In parallel: begin ESM-2 environment setup** (Bucket 3, task 3.2) since C3 (task 2.3) depends on
+   it and it's a known multi-day setup risk (GPU/CPU fallback, model download, tokenization config).
+5. **Task 2.2 (C2 — Peptipedia bioactive pool)** can start any time; not blocked on anything above.
+6. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
 
 ## 📝 Experiment decisions log
 
@@ -53,5 +115,8 @@
 | 2026-10-07 | Query-level keyword exclusions: Toxin, Hormone, Neuropeptide, Antimicrobial, Antibiotic, Antioxidant, "Amphibian defense peptide" | Based on UniProt's own controlled-vocabulary keywords (confirmed IDs: KW-0929 Antimicrobial, KW-0044 Antibiotic, KW-0049 Antioxidant, KW-0878 Amphibian defense peptide); chosen over trying to enumerate every peptide family name in Python alone |
 | 2026-10-14 | Component 02 is self-contained under `src/plantaox/c2_pu/` (own `common/` and `curation/` subpackages) instead of using the shared top-level `src/plantaox/common/`/`curation/` | The shared top-level folders were empty scaffold stubs with no agreed interface and no other member had started using them yet; keeping PU-AOP self-contained avoids unilaterally defining a cross-component contract and keeps this component independently gradable. Flag for supervisor/team discussion if a genuinely shared utility layer is wanted later. |
 | 2026-10-14 | `data_registry.csv` is kept component-scoped at `data/processed/c2_pu/data_registry.csv` for now, instead of a single shared top-level registry | AGENTS.md's "don't duplicate the registry" rule assumes one shared `data_registry.csv` already exists, but none does yet and no shared convention has been agreed with the other 3 members. Documented here rather than silently picked; flagged for consolidation once the team agrees on a shared registry convention. |
+| 2026-10-14 | Cross-source conflict policy: a Multi-AOP positive contradicted by AnOxPePred's own assay (FRS=0 AND Chelator=0) is excluded from BOTH the positive pool and the external control, logged with full provenance, and flagged as a manual-review/external-control candidate — never silently dropped, never auto-reclassified as E3 | Assay-level evidence (AnOxPePred, per-sequence) outranks an undocumented benchmark annotation (Multi-AOP, no per-record assay metadata), matching the E1>E2 precedence the whole tiering scheme is built on. Confirmed with the project owner 2026-10-14; this resolved 179 of 1,384 candidate positives. Flag for supervisor sign-off — it materially affects both the positive-pool count and the external-control size. |
+| 2026-10-14 | Multi-AOP-only positives (no AnOxPePred row) default to E2, explicitly provisional (`evidence_basis="benchmark_positive_annotation"`, `assay_verified="unknown"`), flagged for supervisor review and promotable to E1 later if primary-source assay evidence is recovered | Multi-AOP provides no per-record assay-type metadata — only a bare binary label (its `name` column is a leftover train/test split tag, not a provenance ID) — so E1 cannot be defensibly claimed for these. Confirmed with the project owner 2026-10-14; affects 553 of 1,205 accepted positives (pre-CD-HIT). |
+| 2026-10-14 | Positive pool applies the shared 3–50 AA length window (same as C1/C2/C3), dropping 45 sub-3-AA sequences, rather than keeping the full literature-cited 2–50 AA range | Keeps positives and unlabeled pools on the same length distribution so the curriculum can't trivially shortcut on length; documented in the FR1 report rather than silently applied. Confirmed with the project owner 2026-10-14. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
