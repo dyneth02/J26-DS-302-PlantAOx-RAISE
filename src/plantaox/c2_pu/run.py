@@ -13,13 +13,19 @@ from pathlib import Path
 
 import pandas as pd
 
-from plantaox.c2_pu.common.io import append_provenance_log
+from plantaox.c2_pu.common.io import append_provenance_log, write_fasta
 from plantaox.c2_pu.common.schemas import (
     CONFLICT_LOG_COLUMNS,
     EXTERNAL_CONTROL_COLUMNS,
     POSITIVE_POOL_COLUMNS,
 )
 from plantaox.c2_pu.curation.adapters import load_anoxpepred, load_multiaop
+from plantaox.c2_pu.curation.dedup import (
+    build_cluster_report,
+    clusters_to_dataframe,
+    parse_cdhit_clusters,
+    run_cdhit,
+)
 from plantaox.c2_pu.curation.tiers import build_positive_pool
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -34,6 +40,12 @@ POSITIVE_POOL_PATH = PROCESSED_DIR / "aop_positives_provisional.parquet"
 CONFLICT_LOG_PATH = INTERIM_DIR / "label_conflicts_anox_vs_multiaop.csv"
 EXTERNAL_CONTROL_PATH = PROCESSED_DIR / "anoxpepred_inactives_clean.csv"
 PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr1_positive_pool_provenance.jsonl"
+
+POSITIVE_POOL_FASTA_PATH = INTERIM_DIR / "aop_positives_provisional.fasta"
+CDHIT_OUTPUT_PREFIX = INTERIM_DIR / "aop_positives_cdhit90"
+CDHIT_CLUSTERS_PATH = PROCESSED_DIR / "cdhit_clusters.tsv"
+CDHIT_REPORT_PATH = PROCESSED_DIR / "cdhit_before_after_report.json"
+POSITIVE_POOL_CDHIT_PATH = PROCESSED_DIR / "aop_positives_cdhit90.parquet"
 
 
 def run_fr1_positives(seed: int = 42) -> dict:
@@ -51,9 +63,20 @@ def run_fr1_positives(seed: int = 42) -> dict:
     INTERIM_DIR.mkdir(parents=True, exist_ok=True)
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
-    positive_df = positive_df.reindex(columns=POSITIVE_POOL_COLUMNS)
-    conflict_df = conflict_df.reindex(columns=CONFLICT_LOG_COLUMNS)
-    external_control_df = external_control_df.reindex(columns=EXTERNAL_CONTROL_COLUMNS)
+    # peptide_id is a content-derived hash, so sorting by it is a fully
+    # deterministic tie-break independent of Python's per-process hash-seed
+    # randomization (set/dict iteration order is NOT guaranteed stable across
+    # runs). This matters downstream: CD-HIT's representative selection for
+    # exact-tie clusters depends on input FASTA order.
+    positive_df = positive_df.reindex(columns=POSITIVE_POOL_COLUMNS).sort_values(
+        "peptide_id"
+    ).reset_index(drop=True)
+    conflict_df = conflict_df.reindex(columns=CONFLICT_LOG_COLUMNS).sort_values(
+        "peptide_id"
+    ).reset_index(drop=True)
+    external_control_df = external_control_df.reindex(columns=EXTERNAL_CONTROL_COLUMNS).sort_values(
+        "peptide_id"
+    ).reset_index(drop=True)
 
     positive_df.to_parquet(POSITIVE_POOL_PATH, index=False)
     conflict_df.to_csv(CONFLICT_LOG_PATH, index=False)
@@ -77,15 +100,78 @@ def run_fr1_positives(seed: int = 42) -> dict:
     return summary
 
 
+def run_fr1_cluster() -> dict:
+    """Bucket 1.5: CD-HIT 90% identity clustering of the provisional positive pool.
+
+    Reads POSITIVE_POOL_PATH (written by run_fr1_positives) -- does not
+    modify it. Writes a representatives-only FASTA, the cluster membership
+    map (data_registry's canonical `cdhit_clusters.tsv`), a before/after
+    report, and a reduced positive-pool parquet carrying forward each
+    cluster's representative row (still not GraphPart-split -- see
+    run_fr1_split, Bucket 1.6).
+    """
+    if not POSITIVE_POOL_PATH.exists():
+        raise FileNotFoundError(
+            f"{POSITIVE_POOL_PATH} not found -- run `fr1-positives` first."
+        )
+    positive_df = pd.read_parquet(POSITIVE_POOL_PATH)
+
+    INTERIM_DIR.mkdir(parents=True, exist_ok=True)
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+
+    records = list(zip(positive_df["peptide_id"], positive_df["sequence"]))
+    write_fasta(POSITIVE_POOL_FASTA_PATH, records)
+
+    rep_fasta_path, clstr_path = run_cdhit(POSITIVE_POOL_FASTA_PATH, CDHIT_OUTPUT_PREFIX)
+
+    members = parse_cdhit_clusters(clstr_path)
+    clusters_df = clusters_to_dataframe(members)
+    clusters_df.to_csv(CDHIT_CLUSTERS_PATH, sep="\t", index=False)
+
+    report = build_cluster_report(clusters_df, positive_df, n_input_sequences=len(positive_df))
+
+    rep_ids = clusters_df.loc[clusters_df["is_representative"], "peptide_id"]
+    reduced_df = (
+        positive_df[positive_df["peptide_id"].isin(rep_ids)]
+        .sort_values("peptide_id")
+        .reset_index(drop=True)
+    )
+    reduced_df.to_parquet(POSITIVE_POOL_CDHIT_PATH, index=False)
+
+    with open(CDHIT_REPORT_PATH, "w", encoding="utf-8") as handle:
+        json.dump(report, handle, indent=2)
+
+    append_provenance_log(
+        PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr1_cdhit90_clustering",
+            "input": str(POSITIVE_POOL_PATH),
+            "outputs": {
+                "representative_fasta": str(rep_fasta_path),
+                "clusters_tsv": str(CDHIT_CLUSTERS_PATH),
+                "report": str(CDHIT_REPORT_PATH),
+                "reduced_positive_pool": str(POSITIVE_POOL_CDHIT_PATH),
+            },
+            "report": report,
+        },
+    )
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
     sub.add_parser("fr1-positives", help="Build the conflict-resolved FR1 positive pool")
+    sub.add_parser("fr1-cluster", help="CD-HIT 90% identity clustering (Bucket 1.5)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
         summary = run_fr1_positives()
         print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr1-cluster":
+        report = run_fr1_cluster()
+        print(json.dumps(report, indent=2))
         return 0
     return 1
 

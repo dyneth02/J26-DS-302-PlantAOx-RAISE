@@ -61,6 +61,39 @@
   acceptance freeze (1.7). CD-HIT and GraphPart are external bioinformatics tools not yet installed
   in this environment — flagged as a decision/setup item, not started.
 
+### Bucket 1, Task 1.5 — CD-HIT 90% Clustering
+- **Status:** Code complete and tested (`curation/dedup.py`, `run.py::run_fr1_cluster`), **not yet
+  executed against real data** — blocked on a one-time manual setup step (see below). Fails fast with
+  a clear, actionable error (not a raw subprocess traceback) when cd-hit isn't available yet.
+- **Short-peptide handling (explicitly required, see decision log):** 417 of 1,205 positives (35%)
+  are under 5 AA. CD-HIT's officially recommended word length for 90% identity (`-n 5`) cannot build
+  a k-mer index for anything shorter than 5 residues, which would silently exclude over a third of
+  the pool from clustering. Using `-n 2` (CD-HIT's minimum) instead — this costs clustering
+  speed/sensitivity, not correctness; the 90% identity threshold itself is still enforced exactly.
+- **Reproducibility fix applied before this could be built safely:** `run.py::run_fr1_positives` now
+  sorts every output table by `peptide_id` (a content-derived hash) before writing. The positive pool
+  was previously built via Python `set` operations whose iteration order is randomized per-process —
+  harmless for a flat table, but CD-HIT's representative selection for exact-identity ties depends on
+  input FASTA order, so this needed fixing before generating CD-HIT input. Re-ran `fr1-positives`
+  after the fix: identical counts, now deterministically ordered.
+- **Environment blocker (needs the project owner to run one command):** WSL Ubuntu 24.04 is present
+  with network access, but has no `cd-hit`, `pip3`, or working `python3 -m venv` — all three need
+  `sudo apt install`, which needs an interactively-typed password an agent can't supply. One-time fix:
+  `wsl -d Ubuntu -e sudo apt install -y cd-hit python3-pip python3.12-venv`.
+- **Outputs once run:** `data/interim/c2_pu/aop_positives_provisional.fasta` (CD-HIT input),
+  `data/processed/c2_pu/cdhit_clusters.tsv` (canonical registry name per AGENTS.md), full
+  before/after report (`cdhit_before_after_report.json`), and a reduced
+  `aop_positives_cdhit90.parquet` carrying forward one representative row per cluster. Still not the
+  FR1 freeze — GraphPart (1.6) runs next.
+
+### Bucket 1, Task 1.6 — GraphPart 40% Homology Split
+- **Status:** Not started. GraphPart's exact CLI (flag names, output format) will be verified against
+  `graphpart --help` once it's actually installed, rather than implemented from memory — the
+  AnOxPePred inactive-count exercise (Bucket 1.4) already turned up a real correctness issue in an
+  assumption that looked right at first glance, so unverified tool-interface guesses aren't worth the
+  risk here. Blocked on the same WSL setup step as 1.5 (needs `pip3` to `pip3 install --user
+  graph-part`).
+
 ### Bucket 2, Task 2.1 — C1 Random Decoy Construction
 - **Status:** Pipeline built and functioning; full-file validation **not yet done**.
 - **What exists:** A Colab/Python script that queries UniProtKB REST (`reviewed:true AND length:[3 TO 50]` plus keyword exclusions), applies a secondary Python keyword blocklist, randomly samples 5,000 records (seed 42), and writes a provenance log.
@@ -84,10 +117,10 @@
 
 ## ⏭️ Next tasks (in order)
 
-1. **Decide on CD-HIT and GraphPart installation** (Bucket 1.5/1.6) — neither is installed in this
-   environment yet. CD-HIT is a standalone binary (not pip-installable on Windows without WSL/conda);
-   GraphPart is a pip package. This blocks the FR1 freeze (1.7) and needs a setup-path decision before
-   either can run.
+1. **Run the one-time WSL setup command** (see Bucket 1.5 above) — blocks both 1.5 and 1.6.
+   `wsl -d Ubuntu -e sudo apt install -y cd-hit python3-pip python3.12-venv`. Once done:
+   `python -m plantaox.c2_pu.run fr1-cluster` runs CD-HIT end-to-end; GraphPart's wrapper gets
+   written next, against its real `--help` output.
 2. **Get supervisor/manual eyes on the two provisional buckets** before treating FR1 as close to done:
    the 179 logged conflicts (`label_conflicts_anox_vs_multiaop.csv`) and the 553 provisional-E2
    records (`aop_positives_provisional.parquet`, `evidence_tier == "E2"`). Both are usable for
@@ -118,5 +151,7 @@
 | 2026-10-14 | Cross-source conflict policy: a Multi-AOP positive contradicted by AnOxPePred's own assay (FRS=0 AND Chelator=0) is excluded from BOTH the positive pool and the external control, logged with full provenance, and flagged as a manual-review/external-control candidate — never silently dropped, never auto-reclassified as E3 | Assay-level evidence (AnOxPePred, per-sequence) outranks an undocumented benchmark annotation (Multi-AOP, no per-record assay metadata), matching the E1>E2 precedence the whole tiering scheme is built on. Confirmed with the project owner 2026-10-14; this resolved 179 of 1,384 candidate positives. Flag for supervisor sign-off — it materially affects both the positive-pool count and the external-control size. |
 | 2026-10-14 | Multi-AOP-only positives (no AnOxPePred row) default to E2, explicitly provisional (`evidence_basis="benchmark_positive_annotation"`, `assay_verified="unknown"`), flagged for supervisor review and promotable to E1 later if primary-source assay evidence is recovered | Multi-AOP provides no per-record assay-type metadata — only a bare binary label (its `name` column is a leftover train/test split tag, not a provenance ID) — so E1 cannot be defensibly claimed for these. Confirmed with the project owner 2026-10-14; affects 553 of 1,205 accepted positives (pre-CD-HIT). |
 | 2026-10-14 | Positive pool applies the shared 3–50 AA length window (same as C1/C2/C3), dropping 45 sub-3-AA sequences, rather than keeping the full literature-cited 2–50 AA range | Keeps positives and unlabeled pools on the same length distribution so the curriculum can't trivially shortcut on length; documented in the FR1 report rather than silently applied. Confirmed with the project owner 2026-10-14. |
+| 2026-10-14 | `run_fr1_positives` output tables are sorted by `peptide_id` before writing, instead of leaving them in whatever order Python's internal `set` iteration happened to produce | The positive-pool build used set operations whose iteration order is randomized per Python process (hash-seed randomization) — harmless for a flat table, but CD-HIT's representative selection for exact-tie clusters depends on input FASTA order, so an undeterministic order would have broken task 1.7's "same seed -> same output" reproducibility check once CD-HIT (1.5) started consuming this file. Fixed before generating any CD-HIT input; re-ran, counts unchanged. |
+| 2026-10-14 | CD-HIT word length set to `-n 2` instead of the officially recommended `-n 5` for 90% identity | 417 of 1,205 positives (35%) are under 5 AA; a 5-mer index cannot be built for shorter sequences, which would silently exclude over a third of the pool from clustering. A shorter word length only costs CD-HIT speed/sensitivity — the identity threshold itself is still enforced exactly, it is not relaxed. Confirmed with the project owner 2026-10-14 (explicit short-peptide-edge-case requirement). |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

@@ -70,3 +70,18 @@ def test_no_duplicate_peptide_ids(built_pool):
     positive_df, conflict_df, control_df, _ = built_pool
     for df in (positive_df, conflict_df, control_df):
         assert df["peptide_id"].is_unique
+
+
+def test_two_builds_from_the_same_input_agree_on_content(built_pool):
+    # build_positive_pool uses set operations internally; this guards against
+    # Python's per-process hash-seed randomization silently changing which
+    # rows come out (content, not just order -- run.py's sort_values handles
+    # order separately). Rebuild once more from the same inputs and diff.
+    mo_df = load_multiaop(MULTIAOP_PATH)
+    an_df = load_anoxpepred(ANOXPEPRED_PATH)
+    positive_df, conflict_df, control_df, summary = built_pool
+    positive_df2, conflict_df2, control_df2, summary2 = build_positive_pool(mo_df, an_df)
+    assert summary == summary2
+    assert set(positive_df["sequence"]) == set(positive_df2["sequence"])
+    assert set(conflict_df["sequence"]) == set(conflict_df2["sequence"])
+    assert set(control_df["sequence"]) == set(control_df2["sequence"])
