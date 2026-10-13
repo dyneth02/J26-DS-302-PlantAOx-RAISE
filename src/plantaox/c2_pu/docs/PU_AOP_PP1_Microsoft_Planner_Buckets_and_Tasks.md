@@ -56,13 +56,17 @@
 **Definition of done:** A frozen, provenance-traceable, evidence-tiered positive pool with deduplication, leakage-checked homology partitions, and a documented sufficiency decision.
 
 ## 1.1 — Dataset Acquisition
-- [ ] Download/locate Multi-AOP unified benchmark and identify the positive records.
-- [ ] Download/locate AnOxPePred and separate active versus experimentally inactive records.
-- [ ] Acquire any annotation references required to justify E1/E2 tier assignments.
-- [ ] Register source URLs, access dates, releases, citations, and license/access restrictions.
-- [ ] Validate file checksums, parser compatibility, and source record counts.
+- [x] Download/locate Multi-AOP unified benchmark and identify the positive records.
+- [x] Download/locate AnOxPePred and separate active versus experimentally inactive records.
+- [ ] Acquire any annotation references required to justify E1/E2 tier assignments. *(tiering uses AnOxPePred's own FRS/Chelator assay columns directly; no additional external annotation reference was acquired beyond the two source files)*
+- [ ] Register source URLs, access dates, releases, citations, and license/access restrictions. *(not done — see 1.2; `fr1_acceptance_report.md` §4/§9)*
+- [x] Validate file checksums, parser compatibility, and source record counts. *(SHA-256 computed, parsers tested, counts verified — `fr1_acceptance_report.md` §4)*
 
 ## 1.2 — Dataset Registry and Versioning
+**Not started.** No `data_registry.csv` exists yet; this entire bucket is an open gap, explicitly
+named (not silently skipped) in `fr1_acceptance_report.md` §4/§9 and `IMPLEMENTATION_STATUS.md`'s
+decision log (2026-10-14). Recommend scheduling separately — it does not block FR2/FR3 work on
+`pp1_baseline_v1`.
 - [ ] Update the existing dataset-registry compendium rather than creating duplicate registries.
 - [ ] Assign source IDs and immutable raw-file version IDs.
 - [ ] Record schemas, row/sequence counts, file sizes, and checksums.
@@ -70,46 +74,46 @@
 - [ ] Document provenance and redistributability in a dataset README.
 
 ## 1.3 — Positive Pool Integration and Cleaning
-- [ ] Extract AOP-positive records from both sources using verified label meanings.
-- [ ] Normalize amino-acid case, alphabet, sequence whitespace, and invalid residues.
-- [ ] Apply and document agreed peptide-length inclusion/exclusion rules.
-- [ ] Generate stable unique peptide IDs and standardized FASTA headers.
-- [ ] Merge records without discarding their multiple-source evidence links.
-- [ ] Detect and remove exact cross-source sequence duplicates; log all exclusions.
+- [x] Extract AOP-positive records from both sources using verified label meanings.
+- [x] Normalize amino-acid case, alphabet, sequence whitespace, and invalid residues.
+- [x] Apply and document agreed peptide-length inclusion/exclusion rules.
+- [x] Generate stable unique peptide IDs and standardized FASTA headers.
+- [x] Merge records without discarding their multiple-source evidence links.
+- [x] Detect and remove exact cross-source sequence duplicates; log all exclusions.
 
 ## 1.4 — Evidence Tier Classification
-- [ ] Assign **E1** only where an AOP-specific experimental assay is documented.
-- [ ] Assign **E2** to antioxidant-annotated peptides lacking assay-level documentation.
-- [ ] Identify **E3** bioactivity-adjacent records; exclude these from labeled positives and treat as unlabeled when appropriate.
-- [ ] Store assay type, assay evidence, source reference, annotation, and original IDs.
-- [ ] Establish precedence and review rules for contradictory labels or multiple sources.
-- [ ] Summarize E1/E2/E3 counts and provenance, separating unknown/unresolved evidence.
-- [ ] Review ambiguous tier assignments and record supervisor-approved adjudications.
+- [x] Assign **E1** only where an AOP-specific experimental assay is documented.
+- [x] Assign **E2** to antioxidant-annotated peptides lacking assay-level documentation.
+- [ ] Identify **E3** bioactivity-adjacent records; exclude these from labeled positives and treat as unlabeled when appropriate. *(no E3 source integrated yet — depends on later bioactivity-pool work, e.g. Bucket 2.2)*
+- [x] Store assay type, assay evidence, source reference, annotation, and original IDs.
+- [x] Establish precedence and review rules for contradictory labels or multiple sources. *(the 179-conflict resolution policy, see `fr1_acceptance_report.md` §6)*
+- [x] Summarize E1/E2/E3 counts and provenance, separating unknown/unresolved evidence.
+- [ ] Review ambiguous tier assignments and record supervisor-approved adjudications. *(pending — see Supervisor Acceptance Checklist below)*
 
 ## 1.5 — CD-HIT Redundancy Reduction
-- [ ] Install/configure CD-HIT and record the software version.
-- [ ] Run the proposed **90% identity** clustering on curated labeled positives.
-- [ ] Apply reproducible cluster-representative selection rules.
-- [ ] Preserve evidence/provenance for sequences merged into each cluster.
-- [ ] Export cluster assignments, representatives, and before/after counts.
-- [ ] Verify representative integrity and no unintended evidence loss.
+- [x] Install/configure CD-HIT and record the software version. *(4.8.1, user-space micromamba env — no root access was available; see IMPLEMENTATION_STATUS.md)*
+- [x] Run the proposed **90% identity** clustering on curated labeled positives.
+- [x] Apply reproducible cluster-representative selection rules.
+- [x] Preserve evidence/provenance for sequences merged into each cluster.
+- [x] Export cluster assignments, representatives, and before/after counts.
+- [x] Verify representative integrity and no unintended evidence loss. *(0 sequences dropped, confirmed by test)*
 
 ## 1.6 — GraphPart Homology-Controlled Splitting
-- [ ] Install/configure GraphPart and record software version and parameters.
-- [ ] Create **40% identity** homology-controlled folds/splits for positives.
-- [ ] Export and freeze train/validation/test or CV-fold indices.
-- [ ] Programmatically verify cross-partition homology constraints.
-- [ ] Check independence from reserved AnOxPePred experimentally inactive controls.
-- [ ] Compare the final pool count against the proposal's approximately 500–800 and SO1 ≥800 targets.
-- [ ] Export E1/E2, cluster, fold, and length summary tables.
+- [x] Install/configure GraphPart and record software version and parameters. *(graph-part 1.0.2 + EMBOSS 6.6.0.0, same env as CD-HIT)*
+- [x] Create **40% identity** homology-controlled folds/splits for positives.
+- [x] Export and freeze train/validation/test or CV-fold indices. *(frozen under `pp1_baseline_v1`)*
+- [x] Programmatically verify cross-partition homology constraints. *(GraphPart's own convergence report: 0 residual violations)*
+- [ ] Check independence from reserved AnOxPePred experimentally inactive controls. *(confirmed disjoint by exact sequence identity; the deeper 40%-homology check against the external control is Bucket 2.6's job and hasn't started)*
+- [x] Compare the final pool count against the proposal's approximately 500–800 and SO1 ≥800 targets.
+- [x] Export E1/E2, cluster, fold, and length summary tables.
 
 ## 1.7 — FR1 Acceptance Testing and Freeze
-- [ ] Re-run the FR1 pipeline from versioned raw inputs and fixed configuration.
-- [ ] Run automated tests for parsing, evidence assignment, duplicate detection, and split integrity.
-- [ ] Confirm all leakage gates pass or document blocking exceptions.
-- [ ] Record achieved pool size, tier distribution, and target deviations.
-- [ ] Freeze curated positive-pool version, configuration, and split index files.
-- [ ] Publish FR1 completion report and demonstration-ready artifacts.
+- [x] Re-run the FR1 pipeline from versioned raw inputs and fixed configuration. *(byte-identical outputs confirmed, `test_fr1_reproducibility.py`)*
+- [x] Run automated tests for parsing, evidence assignment, duplicate detection, and split integrity. *(55 tests, `tests/c2_pu/`)*
+- [x] Confirm all leakage gates pass or document blocking exceptions.
+- [x] Record achieved pool size, tier distribution, and target deviations.
+- [x] Freeze curated positive-pool version, configuration, and split index files. *(`pp1_baseline_v1`, checksummed manifest)*
+- [x] Publish FR1 completion report and demonstration-ready artifacts. *([`fr1_acceptance_report.md`](fr1_acceptance_report.md))*
 
 **FR1 evidence attachments:** dataset registry, provenance table, curated FASTA/CSV/parquet, evidence-tier counts, CD-HIT clusters, GraphPart indices, validation logs, version manifest, and acceptance report.
 
@@ -394,13 +398,19 @@
 # Supervisor Acceptance Checklist
 
 ## FR1 — Evidence-Tiered Positive Pool
-- [ ] Multi-AOP / AnOxPePred sources and versions documented.
-- [ ] Original labels, assays, and provenance traceable.
-- [ ] E1/E2/E3 operational rules consistently applied and validated.
-- [ ] CD-HIT 90% output reproducible and reviewed.
-- [ ] GraphPart 40% indices frozen and cross-partition checks pass.
-- [ ] Positive-pool count and data-sufficiency decision documented.
-- [ ] Validated files, summary report, and runnable commands attached.
+**These are the supervisor's boxes to check, not the pipeline's** — technical acceptance evidence for
+every line below is in `fr1_acceptance_report.md` (frozen as `pp1_baseline_v1`, 2026-10-14), but
+checking them here would conflate "the pipeline is correct and reproducible" with "a supervisor
+reviewed and approved it," which this project's own conflict-resolution and tiering decisions
+explicitly should not skip. Left unchecked on purpose; see `fr1_acceptance_report.md` §10 for the
+four items that most need a human look.
+- [ ] Multi-AOP / AnOxPePred sources and versions documented. *(sources yes — formal registry/version IDs no, see Bucket 1.2)*
+- [ ] Original labels, assays, and provenance traceable. *(evidence: §4, 13 passing provenance tests)*
+- [ ] E1/E2/E3 operational rules consistently applied and validated. *(E1/E2 yes; E3 not yet populated; the 179-conflict policy needs sign-off, §6/§10)*
+- [ ] CD-HIT 90% output reproducible and reviewed. *(reproducibility: evidence attached, §5/§7; "reviewed" = supervisor's part)*
+- [ ] GraphPart 40% indices frozen and cross-partition checks pass. *(evidence: §6/§7 — 0 residual violations)*
+- [ ] Positive-pool count and data-sufficiency decision documented. *(§2: 1,205 → 925 → 834, vs. SO1 ≥800)*
+- [ ] Validated files, summary report, and runnable commands attached. *(§1 commands, §8 frozen files)*
 
 ## FR2 — Three-Stage Challenge Pools
 - [ ] C1 has **5,000 verified records**, with source, seed, and screening log.

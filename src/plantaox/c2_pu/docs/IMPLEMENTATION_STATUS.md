@@ -9,138 +9,34 @@
 
 ## ✅ Completed tasks
 
-*(None yet. A task moves here only once its acceptance evidence exists — see `AGENTS.md` §Validation. Partial/in-progress work stays in the section below, not here.)*
+### Bucket 1, Tasks 1.1–1.7 — FR1 Positive Pool: Curation, Conflict Resolution, CD-HIT, GraphPart, Freeze
+- **Status: technical acceptance passed, frozen as `pp1_baseline_v1` (2026-10-14).** Full detail,
+  methodology, every number, and the acceptance-checklist mapping live in
+  **[`fr1_acceptance_report.md`](fr1_acceptance_report.md)** — this entry is a pointer + headline
+  numbers, not a duplicate of that report.
+- **Important distinction (AGENTS.md rule #3):** "technical acceptance passed" is not "FR1 is
+  scientifically signed off." Four items are explicitly pending supervisor approval (see
+  `fr1_acceptance_report.md` §10) and are **not** blocking — they're documented limitations a
+  defensible PP1 baseline is allowed to carry, not things silently glossed over.
+- **Headline numbers:** 1,205 accepted positives (670 E1 + 535 E2) → 925 CD-HIT 90%-identity
+  clusters (0 dropped) → 834 GraphPart 40%-identity 5-fold-split sequences (91 excluded for
+  cross-fold homology, zero residual violations in GraphPart's own convergence report).
+- **Reproducibility re-verified 2026-10-14:** full pipeline re-run from raw inputs produces
+  byte-identical outputs (automated via `tests/c2_pu/test_fr1_reproducibility.py`, not just a manual
+  check) — confirmed no stochastic steps exist in Buckets 1.1–1.6.
+- **Provenance chain verified end-to-end:** every retained sequence traces to a named, typed source
+  (`tests/c2_pu/test_fr1_provenance_acceptance.py`, 13 tests); peptide IDs form an unbroken,
+  duplicate-free chain from the raw-source merge through every stage boundary.
+- **Known gap, explicitly not fixed here (out of 1.7's scope):** Bucket 1.1/1.2's formal
+  `data_registry.csv` was never created as a standalone artifact. SHA-256 checksums of the two raw
+  source files are recorded in `fr1_acceptance_report.md` §4 as a stopgap, not a substitute — flagged
+  for separate follow-up, not silently treated as done.
+- **Frozen baseline:** `data/processed/c2_pu/frozen/pp1_baseline_v1/` (10 files + checksummed
+  `MANIFEST.json`, via `plantaox.c2_pu.curation.freeze`). Per AGENTS.md rule #4, do not regenerate or
+  mutate this directory in place — a genuine future change gets a new version ID (`pp1_baseline_v2`),
+  logged with a reason for superseding this one.
 
 ## 🔄 Current work in progress
-
-### Bucket 1, Tasks 1.1–1.4 — Positive Pool Acquisition, Cleaning, and Evidence Tiering
-- **Status:** Raw sources acquired and placed (`data/raw/c2_pu/Multi-AOP/combined_data.csv`,
-  `data/raw/c2_pu/AnOxPePred/Supplementary_Data_S1_Marcatili.csv`). Standardization, cross-source
-  conflict resolution, and E1/E2 tiering implemented and run end-to-end
-  (`plantaox.c2_pu.curation.{adapters,standardize,tiers}`, orchestrated by
-  `plantaox.c2_pu.run.run_fr1_positives`). **Not yet done: CD-HIT 90% dedup (1.5), GraphPart 40%
-  split (1.6), 1.7 freeze.** The output below is provisional, pre-clustering, pre-split.
-- **What the pipeline does:**
-  - Loads Multi-AOP (label==1 only, per AGENTS.md) and AnOxPePred (FRS/Chelator independent assay
-    columns — either flag being 1 counts as confirmed antioxidant activity per the proposal's
-    background section, p.12).
-  - Resolves cross-source conflicts: a sequence Multi-AOP calls positive but AnOxPePred's own assay
-    reports inactive on BOTH mechanisms (FRS=0 AND Chelator=0) is excluded from the positive pool,
-    logged in full with provenance in `data/interim/c2_pu/label_conflicts_anox_vs_multiaop.csv`, and
-    flagged as an external-control *candidate* pending manual review — never silently dropped, never
-    auto-reclassified as E3, never auto-added to the control set.
-  - Assigns E1 (AnOxPePred assay-confirmed) vs E2 (Multi-AOP-only, no per-record assay metadata
-    available — tier is explicitly provisional, `assay_verified="unknown"`).
-  - Applies the shared 3–50 AA length window to positives (matching C1/C2/C3), logging exclusions.
-- **Latest run stats (full files, 2026-10-14):**
-  - E1 (assay-confirmed): 697 → 670 after length filter
-  - E2 (provisional, Multi-AOP-only): 553 → 535 after length filter
-  - **Accepted positive pool: 1,205** sequences (pre-CD-HIT) — comfortably clears the SO1 floor of
-    ≥800, with headroom for shrinkage during CD-HIT 90% clustering.
-  - **Conflicts excluded: 179** sequences (82.5% of AnOxPePred's 217 true-inactive sequences are
-    contested by Multi-AOP — see Known Issues #5). 141 of the 179 (79%) are exact tripeptides,
-    consistent with short-fragment sequence collision across unrelated source studies rather than a
-    data-entry error.
-  - **Clean external-control set: 38** sequences (AnOxPePred inactive, uncontested) — much smaller
-    than the ~217 the proposal cites, because most of that 217 turns out to be contested once
-    cross-referenced against Multi-AOP. Flag this shrinkage for supervisor awareness: the external
-    control used in later RNIS/calibration work will be this smaller, cleaner 38, not ~217.
-  - Length-excluded from positive pool: 45 (all <3 AA).
-  - 156 sequences in Multi-AOP appear under both label=0 and label=1 on different rows; per the
-    existing "ignore Multi-AOP's negative labels" rule this doesn't block their label=1 assertion,
-    but it's logged here as a data-quality note.
-- **Outputs:**
-  - `data/processed/c2_pu/aop_positives_provisional.parquet` (1,205 rows; NOT the frozen FR1
-    artifact — name says "provisional" deliberately, see AGENTS.md rule #4)
-  - `data/interim/c2_pu/label_conflicts_anox_vs_multiaop.csv` (179 rows, full provenance)
-  - `data/processed/c2_pu/anoxpepred_inactives_clean.csv` (38 rows — external control, Bucket 2.6
-    input, still needs its own homology check against positives before freeze)
-  - `data/processed/c2_pu/fr1_positive_pool_provenance.jsonl` (run provenance log)
-- **What's NOT done:** CD-HIT 90% clustering (1.5), GraphPart 40% split (1.6), the 179 conflicts'
-  manual/supervisor review, the 553 provisional-E2 records' supervisor sign-off, and the FR1
-  acceptance freeze (1.7). CD-HIT and GraphPart are external bioinformatics tools not yet installed
-  in this environment — flagged as a decision/setup item, not started.
-
-### Bucket 1, Task 1.5 — CD-HIT 90% Clustering
-- **Status:** Done and run against the full provisional pool (not the FR1 freeze yet — see 1.6/1.7).
-- **Environment:** `sudo apt install` was not available (no password for this agent to use
-  non-interactively). Installed a user-space conda environment instead — no root needed at all:
-  ```
-  curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest -o /tmp/micromamba.tar.bz2
-  # extract bin/micromamba from the tarball to ~/micromamba/bin (bzip2 missing on this image;
-  # used Python's stdlib tarfile module instead of the system `tar`/`bzip2`)
-  export MAMBA_ROOT_PREFIX=$HOME/micromamba
-  ~/micromamba/bin/micromamba create -y -n pu_aop -c conda-forge -c bioconda cd-hit "python=3.11" pip
-  ```
-  `src/plantaox/c2_pu/common/wsl.py` wraps every call as
-  `wsl.exe -d Ubuntu -e bash -lc "... micromamba run -n pu_aop <tool> ..."`.
-- **Short-peptide handling:** 417 of 1,205 positives (35%) are under 5 AA. CD-HIT's officially
-  recommended word length for 90% identity (`-n 5`) cannot build a k-mer index for anything shorter
-  than 5 residues (and its default `-l` throw-away-length is 10 AA — confirmed directly via
-  `cd-hit -h`, not assumed — which would have silently discarded most of this pool). Used `-n 2 -l 2`
-  instead: costs clustering speed/sensitivity, not correctness, since the 90% threshold itself is
-  still exact.
-- **Reproducibility fix applied before this could be built safely:** `run.py::run_fr1_positives` now
-  sorts every output table by `peptide_id` (content-derived hash) before writing, since the previous
-  build relied on Python `set` iteration order (randomized per process) and CD-HIT's representative
-  selection for exact-tie clusters depends on input FASTA order.
-- **Result (full file, 2026-10-14): 1,205 → 925 clusters, 0 sequences dropped** (confirms the
-  `-l 2` fix worked — none of the 417 sub-5-AA sequences were silently excluded). Cluster-size
-  distribution: 758 singletons, up to one cluster of 14. Representative tier split: 491 E1 / 434 E2.
-  Still comfortably above the SO1 ≥800 floor.
-- **Outputs:** `data/interim/c2_pu/aop_positives_provisional.fasta` (CD-HIT input),
-  `data/processed/c2_pu/cdhit_clusters.tsv` (canonical registry name, full cluster membership —
-  every member, not just representatives), `cdhit_before_after_report.json`, and
-  `aop_positives_cdhit90.parquet` (925 rows, one representative per cluster).
-
-### Bucket 1, Task 1.6 — GraphPart 40% Homology Split
-- **Status:** Done and run against the CD-HIT output (925 → 834 retained across 5 folds). Not the
-  FR1 freeze yet — see 1.7 and the open items below.
-- **Environment:** Same `pu_aop` conda env; added `graph-part` (pip) and `emboss` (bioconda, for the
-  `needle`/`needleall` aligner GraphPart's "needle" mode shells out to). CLI and output schema were
-  verified directly against the installed package (`graphpart needle --help`, and reading
-  `graph_part.py`/`needle_utils.py`) rather than guessed from memory.
-- **Real bug found and fixed in our own wrapper, not GraphPart:** `common/wsl.py`'s
-  `subprocess.run(..., text=True)` defaulted to the Windows console's locale encoding (cp1252) to
-  decode WSL's UTF-8 stdout, which crashed on non-ASCII bytes in GraphPart's progress output. Fixed
-  by passing `encoding="utf-8", errors="replace"` explicitly.
-- **Genuine partitioning infeasibility hit, diagnosed, and resolved (not worked around):** the first
-  real attempt — `-dn shortest` (matching CD-HIT's own identity definition, chosen for cross-stage
-  consistency) — made GraphPart fail outright: *"Impossible to generate the desired 5 partitions at
-  the current partitioning threshold. Removal of sequences to achieve separation results in loss of
-  4 complete partitions."* Root cause, confirmed empirically (not just theorized): 657 of 925 CD-HIT
-  representatives (71%) are under 10 AA, and `shortest`-denominator global-alignment identity is
-  dominated by chance matches at that length (a 5-mer differing by 2 residues already clears 40%
-  identity), collapsing the partition graph into one blob. Tested a minimum-length floor as an
-  alternative fix: floor=7 AA still failed; floor=8 AA "succeeded" but produced a degenerate
-  357/2/5/1/1 fold split (useless for CV); floor=10 AA gave a clean 47/63/45/34/31 split but threw
-  away 71% of the pool. Instead, switched the denominator to `full` (GraphPart's own default, which
-  penalizes length-mismatched pairs) on the complete 925-sequence pool: this resolved the collapse
-  cleanly with no length floor needed. **This was re-derived from evidence, not a parameter I pattern
-  matched into working** — the "shortest" choice was reasonable-sounding but wrong, because CD-HIT
-  (90% identity, near-duplicate redundancy removal) and GraphPart (40% identity, cross-fold leakage
-  prevention) are different problems and don't need the same identity definition.
-- **Fold label-balance improvement (not required by the proposal, but cheap and clearly worth it):**
-  an unstratified 5-fold split put 86% E1 in fold 0 vs 34% E1 in fold 4 — a real confound for any
-  per-fold metric comparison later (FR3/FR4/FR6). GraphPart supports label-stratified partitioning
-  natively (`-ln`); added `write_stratified_fasta` to embed `|tier=E1`/`|tier=E2` in headers and pass
-  `-ln tier`. Residual imbalance dropped to a 44–64% E1 range across folds — real trade-off (fold
-  sizes got less even, 834 pool instead of 841, to satisfy both homology and label-balance
-  simultaneously), but the worst-case distortion shrank substantially.
-- **Result (full file, 2026-10-14): 834 of 925 retained, 91 removed for cross-fold homology
-  violation (9.8%).** Fold sizes: 124/134/137/173/266 (fold 4 is the largest and most E1-heavy —
-  residual imbalance, documented, not hidden). GraphPart's own self-report confirms convergence to
-  **zero residual cross-partition homology violations** (`Connectivity: 0, #Problematics: 0` in the
-  final removal round) — this is the cross-split homology validation itself, not a separate
-  after-the-fact check, since GraphPart's job *is* computing exactly this distance.
-- **Outputs:** `data/processed/c2_pu/graphpart_splits.csv` (canonical registry name, 834 rows: fold
-  0-4), `graphpart_excluded_for_homology.csv` (the 91 excluded sequences, named individually with
-  their evidence tier — never silently dropped or back-filled), `graphpart_splits_report.json`
-  (GraphPart's own self-report), `graphpart_split_summary.json` (our before/after digest).
-- **Open items before this can be called frozen (1.7):** the 91 homology-excluded sequences and the
-  residual fold-4 tier imbalance should both be named explicitly in the FR1 report as documented
-  limitations, not silently absorbed. The 179 cross-source conflicts and 553 provisional-E2 records
-  from Bucket 1.4 are still pending supervisor review, unaffected by this stage's work.
 
 ### Bucket 2, Task 2.1 — C1 Random Decoy Construction
 - **Status:** Pipeline built and functioning; full-file validation **not yet done**.
@@ -165,13 +61,10 @@
 
 ## ⏭️ Next tasks (in order)
 
-1. **FR1 acceptance freeze (1.7):** re-run the full pipeline (`fr1-positives` → `fr1-cluster` →
-   `fr1-split`) once more from raw inputs to reconfirm reproducibility end-to-end, then write
-   `fr1_acceptance_report.md` naming, explicitly, every documented limitation so far: the 179
-   cross-source conflicts, the 553 provisional-E2 records, the 91 GraphPart homology exclusions, and
-   the fold-4 tier-balance residual. Get supervisor sign-off on all four before calling FR1 "done" —
-   none of them block continued pipeline development, but AGENTS.md rule #3 means none of them let
-   FR1 be marked complete either.
+1. **Get supervisor sign-off on the four pending FR1 approvals** (`fr1_acceptance_report.md` §10) —
+   the conflict-resolution policy, the E2 provisional-tier default, the C1 source ambiguity, and the
+   missing formal `data_registry.csv`. None block continued FR2/FR3 work on `pp1_baseline_v1`, but
+   FR1 isn't *scientifically* closed until these are addressed.
 2. **Close out 2.1 (C1) properly**, now with two new concrete findings to fold in:
    - Decide whether "5,000 records" (Bucket 2.7 acceptance criterion) means 5,000 FASTA entries or
      5,000 unique sequences — currently 3,786 unique (see Known Issues #6).
@@ -204,5 +97,7 @@
 | 2026-10-14 | CD-HIT, GraphPart, and EMBOSS (needle/needleall) installed into a user-space `pu_aop` micromamba environment inside WSL Ubuntu, instead of `apt install` | No root access was available to this agent in this environment (no sudo password); `apt-cache policy` confirmed all three packages exist, but `sudo apt install` needs an interactive password. Micromamba installs entirely under `$HOME`, no root needed. All WSL tool invocations now go through `common/wsl.py`'s `run_in_conda_env`, which activates this env. |
 | 2026-10-14 | GraphPart's identity denominator (`-dn`) set to `full` (GraphPart's own default), not `shortest` (which would have matched CD-HIT's own identity definition) | First attempt used `shortest` for cross-stage consistency with CD-HIT, and GraphPart failed outright ("Impossible to generate the desired 5 partitions... loss of 4 complete partitions"). Root cause, confirmed empirically: 71% of CD-HIT representatives are under 10 AA, and `shortest`-denominator identity for very short peptides is dominated by chance matches, collapsing the partition graph into one component. Tested length floors (7 AA still fails, 8 AA "succeeds" but gives a degenerate 357/2/5/1/1 split, 10 AA gives a clean split but throws away 71% of the pool) before trying `full`, which resolved the collapse cleanly on the complete 925-sequence pool with no data loss from a length floor. CD-HIT (90% identity, redundancy removal) and GraphPart (40% identity, leakage prevention) are different problems; they don't need the same identity definition. |
 | 2026-10-14 | GraphPart splits are label-stratified by evidence tier (`-ln tier`, via `write_stratified_fasta`'s `\|tier=E1`/`\|tier=E2` FASTA headers), not left unstratified | An unstratified 5-fold split put 86% E1 in fold 0 vs 34% E1 in fold 4 — a real confound for any per-fold metric comparison in FR3/FR4/FR6. Stratifying narrowed the range to 44–64% E1 across folds, at the cost of less even fold sizes (124–266) and slightly more sequences excluded for homology (91 vs 84). Not requested explicitly, but cheap and clearly worth it; flagged here for visibility rather than silently applied. |
+| 2026-10-14 | FR1 declared technically accepted and frozen as `pp1_baseline_v1`, with scientific/supervisor sign-off tracked as a separate, still-open item rather than bundled into the same status | AGENTS.md rule #3 requires acceptance evidence before marking a task complete, and that evidence (reproducibility, provenance chain, leakage checks, full-file tests) is now in hand — see `fr1_acceptance_report.md`. But conflating "the pipeline is correct and reproducible" with "the conclusions are supervisor-approved" would overclaim; the four pending-approval items (fr1_acceptance_report.md §10) are listed separately so neither status gets confused for the other. |
+| 2026-10-14 | `data_registry.csv` (Bucket 1.1/1.2) is explicitly logged as NOT done, rather than fabricating one or quietly treating the per-stage provenance logs as a substitute | No formal source registry (IDs, license, access date, release/commit hash) was ever built; `fr1_positive_pool_provenance.jsonl` and this file capture run-level provenance, which is not the same artifact. Inventing placeholder registry content (e.g. a guessed access date) would be worse than naming the gap. Flagged in `fr1_acceptance_report.md` §4/§9 for separate follow-up, out of Bucket 1.7's scope. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
