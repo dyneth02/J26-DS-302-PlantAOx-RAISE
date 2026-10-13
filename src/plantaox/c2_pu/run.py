@@ -114,8 +114,8 @@ def run_fr1_positives(seed: int = 42) -> dict:
     ).reset_index(drop=True)
 
     positive_df.to_parquet(POSITIVE_POOL_PATH, index=False)
-    conflict_df.to_csv(CONFLICT_LOG_PATH, index=False)
-    external_control_df.to_csv(EXTERNAL_CONTROL_PATH, index=False)
+    conflict_df.to_csv(CONFLICT_LOG_PATH, index=False, lineterminator="\n")
+    external_control_df.to_csv(EXTERNAL_CONTROL_PATH, index=False, lineterminator="\n")
 
     append_provenance_log(
         PROVENANCE_LOG_PATH,
@@ -161,7 +161,7 @@ def run_fr1_cluster() -> dict:
 
     members = parse_cdhit_clusters(clstr_path)
     clusters_df = clusters_to_dataframe(members)
-    clusters_df.to_csv(CDHIT_CLUSTERS_PATH, sep="\t", index=False)
+    clusters_df.to_csv(CDHIT_CLUSTERS_PATH, sep="\t", index=False, lineterminator="\n")
 
     report = build_cluster_report(clusters_df, positive_df, n_input_sequences=len(positive_df))
 
@@ -173,7 +173,7 @@ def run_fr1_cluster() -> dict:
     )
     reduced_df.to_parquet(POSITIVE_POOL_CDHIT_PATH, index=False)
 
-    with open(CDHIT_REPORT_PATH, "w", encoding="utf-8") as handle:
+    with open(CDHIT_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
         json.dump(report, handle, indent=2)
 
     append_provenance_log(
@@ -221,9 +221,9 @@ def run_fr1_split() -> dict:
     report, excluded_df = build_split_report(
         splits_df, positive_df, graphpart_report_path, n_partitions_requested=5
     )
-    with open(GRAPHPART_SPLIT_SUMMARY_PATH, "w", encoding="utf-8") as handle:
+    with open(GRAPHPART_SPLIT_SUMMARY_PATH, "w", encoding="utf-8", newline="\n") as handle:
         json.dump(report, handle, indent=2)
-    excluded_df.to_csv(GRAPHPART_EXCLUDED_PATH, index=False)
+    excluded_df.to_csv(GRAPHPART_EXCLUDED_PATH, index=False, lineterminator="\n")
 
     append_provenance_log(
         PROVENANCE_LOG_PATH,
