@@ -26,6 +26,12 @@ from plantaox.c2_pu.curation.dedup import (
     parse_cdhit_clusters,
     run_cdhit,
 )
+from plantaox.c2_pu.curation.splits import (
+    build_split_report,
+    load_graphpart_splits,
+    run_graphpart,
+    write_stratified_fasta,
+)
 from plantaox.c2_pu.curation.tiers import build_positive_pool
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -46,6 +52,13 @@ CDHIT_OUTPUT_PREFIX = INTERIM_DIR / "aop_positives_cdhit90"
 CDHIT_CLUSTERS_PATH = PROCESSED_DIR / "cdhit_clusters.tsv"
 CDHIT_REPORT_PATH = PROCESSED_DIR / "cdhit_before_after_report.json"
 POSITIVE_POOL_CDHIT_PATH = PROCESSED_DIR / "aop_positives_cdhit90.parquet"
+
+REP_FASTA_PATH = CDHIT_OUTPUT_PREFIX  # cd-hit writes representatives exactly to this path
+GRAPHPART_INPUT_FASTA_PATH = INTERIM_DIR / "aop_positives_cdhit90_for_graphpart.fasta"
+GRAPHPART_SPLITS_PATH = PROCESSED_DIR / "graphpart_splits.csv"  # canonical registry name
+GRAPHPART_REPORT_PATH = PROCESSED_DIR / "graphpart_splits_report.json"
+GRAPHPART_SPLIT_SUMMARY_PATH = PROCESSED_DIR / "graphpart_split_summary.json"
+GRAPHPART_EXCLUDED_PATH = PROCESSED_DIR / "graphpart_excluded_for_homology.csv"
 
 
 def run_fr1_positives(seed: int = 42) -> dict:
@@ -158,11 +171,61 @@ def run_fr1_cluster() -> dict:
     return report
 
 
+def run_fr1_split() -> dict:
+    """Bucket 1.6: GraphPart 40% identity homology-controlled 5-fold split.
+
+    Reads the CD-HIT representative FASTA (written by run_fr1_cluster) and
+    the reduced positive pool -- does not modify either. Writes the frozen
+    split assignment (`graphpart_splits.csv`, the canonical registry name)
+    plus GraphPart's own homology-validation self-report.
+    """
+    if not REP_FASTA_PATH.exists() or not POSITIVE_POOL_CDHIT_PATH.exists():
+        raise FileNotFoundError(
+            f"{REP_FASTA_PATH} / {POSITIVE_POOL_CDHIT_PATH} not found -- run `fr1-cluster` first."
+        )
+    positive_df = pd.read_parquet(POSITIVE_POOL_CDHIT_PATH)
+
+    write_stratified_fasta(
+        positive_df["peptide_id"].tolist(),
+        positive_df["sequence"].tolist(),
+        positive_df["evidence_tier"].tolist(),
+        GRAPHPART_INPUT_FASTA_PATH,
+    )
+    splits_csv_path, graphpart_report_path = run_graphpart(
+        GRAPHPART_INPUT_FASTA_PATH, GRAPHPART_SPLITS_PATH, labels_name="tier"
+    )
+    splits_df = load_graphpart_splits(splits_csv_path)
+
+    report, excluded_df = build_split_report(
+        splits_df, positive_df, graphpart_report_path, n_partitions_requested=5
+    )
+    with open(GRAPHPART_SPLIT_SUMMARY_PATH, "w", encoding="utf-8") as handle:
+        json.dump(report, handle, indent=2)
+    excluded_df.to_csv(GRAPHPART_EXCLUDED_PATH, index=False)
+
+    append_provenance_log(
+        PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr1_graphpart_split",
+            "input": str(GRAPHPART_INPUT_FASTA_PATH),
+            "outputs": {
+                "splits_csv": str(splits_csv_path),
+                "graphpart_self_report": str(graphpart_report_path),
+                "split_summary": str(GRAPHPART_SPLIT_SUMMARY_PATH),
+                "excluded_for_homology": str(GRAPHPART_EXCLUDED_PATH),
+            },
+            "report": report,
+        },
+    )
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
     sub.add_parser("fr1-positives", help="Build the conflict-resolved FR1 positive pool")
     sub.add_parser("fr1-cluster", help="CD-HIT 90% identity clustering (Bucket 1.5)")
+    sub.add_parser("fr1-split", help="GraphPart 40% identity 5-fold split (Bucket 1.6)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -171,6 +234,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr1-cluster":
         report = run_fr1_cluster()
+        print(json.dumps(report, indent=2))
+        return 0
+    if args.stage == "fr1-split":
+        report = run_fr1_split()
         print(json.dumps(report, indent=2))
         return 0
     return 1

@@ -13,11 +13,12 @@ silently excluding ~35% of the pool from clustering.
 from __future__ import annotations
 
 import re
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
+
+from plantaox.c2_pu.common.wsl import check_tool_available, run_in_conda_env, to_wsl_path
 
 CDHIT_IDENTITY = 0.90
 CDHIT_WORD_LENGTH = 2  # see module docstring -- deliberately NOT the "recommended" 5
@@ -30,24 +31,11 @@ _CLSTR_MEMBER_RE = re.compile(
 
 
 class CDHitNotAvailableError(RuntimeError):
-    """Raised when cd-hit cannot be invoked (e.g. WSL/apt setup not done yet)."""
-
-
-def to_wsl_path(windows_path: Path) -> str:
-    """Translate an absolute Windows path to its /mnt/<drive>/... WSL path."""
-    resolved = Path(windows_path).resolve()
-    drive_letter = resolved.drive.rstrip(":").lower()
-    rest = str(resolved)[len(resolved.drive) + 1 :].replace("\\", "/")
-    return f"/mnt/{drive_letter}/{rest}"
+    """Raised when cd-hit cannot be invoked (e.g. the WSL conda env isn't set up yet)."""
 
 
 def check_cdhit_available(wsl_distro: str = "Ubuntu") -> bool:
-    result = subprocess.run(
-        ["wsl.exe", "-d", wsl_distro, "-e", "bash", "-lc", "command -v cd-hit"],
-        capture_output=True,
-        text=True,
-    )
-    return result.returncode == 0 and bool(result.stdout.strip())
+    return check_tool_available("cd-hit", wsl_distro=wsl_distro)
 
 
 def run_cdhit(
@@ -58,7 +46,7 @@ def run_cdhit(
     throwaway_length: int = CDHIT_THROWAWAY_LENGTH,
     wsl_distro: str = "Ubuntu",
 ) -> tuple[Path, Path]:
-    """Run CD-HIT (inside WSL) on ``input_fasta``.
+    """Run CD-HIT (inside the WSL ``pu_aop`` conda env) on ``input_fasta``.
 
     Returns (representative_fasta_path, clstr_path), both as native Windows
     Path objects pointing at the same files CD-HIT wrote inside WSL (paths
@@ -66,17 +54,14 @@ def run_cdhit(
     """
     if not check_cdhit_available(wsl_distro):
         raise CDHitNotAvailableError(
-            f"cd-hit not found in WSL distro '{wsl_distro}'. Install it with: "
-            f"wsl -d {wsl_distro} -e sudo apt install -y cd-hit"
+            f"cd-hit not found in the WSL '{wsl_distro}' distro's pu_aop conda env. "
+            "See IMPLEMENTATION_STATUS.md for the micromamba setup steps "
+            "(`micromamba create -n pu_aop -c conda-forge -c bioconda cd-hit python=3.11 pip`)."
         )
 
     wsl_in = to_wsl_path(input_fasta)
     wsl_out = to_wsl_path(output_prefix)
     cmd = [
-        "wsl.exe",
-        "-d",
-        wsl_distro,
-        "-e",
         "cd-hit",
         "-i",
         wsl_in,
@@ -95,7 +80,7 @@ def run_cdhit(
         "-T",
         "0",  # use all available threads
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = run_in_conda_env(cmd, wsl_distro=wsl_distro)
     if result.returncode != 0:
         raise RuntimeError(
             f"cd-hit failed (exit {result.returncode}):\n{result.stdout}\n{result.stderr}"

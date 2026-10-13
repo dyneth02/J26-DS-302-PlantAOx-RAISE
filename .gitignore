@@ -220,3 +220,6 @@ __marimo__/
 .streamlit/secrets.toml
 
 src/plantaox/c2_pu/docs/Proposal Report - IT23183018.pdf
+
+# EMBOSS (needleall, invoked by GraphPart) writes this to the CWD by default
+needleall.error
