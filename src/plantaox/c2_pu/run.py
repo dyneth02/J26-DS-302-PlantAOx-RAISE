@@ -49,6 +49,15 @@ from plantaox.c2_pu.curation.audit import (
     sequence_integrity_report,
 )
 from plantaox.c2_pu.curation.biopep import BIOPEP_CITATION, BIOPEP_SEARCH_URL, fetch_biopep_by_activity
+from plantaox.c2_pu.common.descriptors import DESCRIPTOR_NAMES, SCHEMA_VERSION as DESCRIPTOR_SCHEMA_VERSION
+from plantaox.c2_pu.curation.descriptor_extraction import (
+    build_coverage_report,
+    build_validation_report,
+    extract_c1_descriptors,
+    extract_external_control_descriptors,
+    extract_fr1_positive_descriptors,
+    extract_id_prefixed_pool_descriptors,
+)
 from plantaox.c2_pu.curation.distribution_audit import (
     amino_acid_composition,
     compare_pools_ks,
@@ -1932,6 +1941,95 @@ def run_fr2_freeze() -> Path:
     return manifest_path
 
 
+# Bucket 3.1 -- 15-descriptor physicochemical feature extraction over the
+# frozen FR1/FR2 canonical pools. Reads frozen/pp1_baseline_v1 and
+# frozen/pp2_baseline_v1 only -- never the superseded working-tree copies,
+# and never writes into either frozen directory.
+FR3_DESCRIPTOR_SCHEMA_PATH = PROCESSED_DIR / "fr3_descriptor_schema.json"
+FR3_DESCRIPTOR_TABLE_PATH = PROCESSED_DIR / "fr3_descriptor_table.parquet"
+FR3_RECORD_MAP_PATH = PROCESSED_DIR / "fr3_record_map.csv"
+FR3_COVERAGE_REPORT_PATH = PROCESSED_DIR / "fr3_coverage_report.json"
+FR3_VALIDATION_REPORT_PATH = PROCESSED_DIR / "fr3_validation_report.json"
+FR3_DESCRIPTORS_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr3_descriptors_provenance.jsonl"
+
+
+def run_fr3_descriptors() -> dict:
+    """Bucket 3.1: compute the canonical 15-descriptor vector for every
+    unique sequence in FR1's positive pool and FR2's canonical C1/C2/C3/
+    external-control pools, with full peptide-ID/record provenance
+    preserved. Never fits or applies any cross-dataset statistic -- raw,
+    per-sequence descriptors only.
+    """
+    for p in (FROZEN_POSITIVE_POOL_PATH, C1_CLEAN_FASTA_V3_PATH, C2_FASTA_V2_PATH, C3_FASTA_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found.")
+
+    fr1_descriptors, fr1_records = extract_fr1_positive_descriptors(
+        FROZEN_POSITIVE_POOL_PATH, GRAPHPART_SPLITS_PATH if GRAPHPART_SPLITS_PATH.exists() else None
+    )
+    c1_descriptors, c1_records = extract_c1_descriptors(C1_CLEAN_FASTA_V3_PATH, C1_ACCESSION_MAP_V3_PATH)
+    c2_descriptors, c2_records = extract_id_prefixed_pool_descriptors(C2_FASTA_V2_PATH, "C2")
+    c3_descriptors, c3_records = extract_id_prefixed_pool_descriptors(C3_FASTA_PATH, "C3")
+
+    descriptor_tables = {
+        "FR1_positives": fr1_descriptors,
+        "C1": c1_descriptors,
+        "C2": c2_descriptors,
+        "C3": c3_descriptors,
+    }
+    record_maps = {
+        "FR1_positives": fr1_records,
+        "C1": c1_records,
+        "C2": c2_records,
+        "C3": c3_records,
+    }
+    if EXT_CONTROL_VALIDATED_PATH.exists():
+        ext_descriptors, ext_records = extract_external_control_descriptors(EXT_CONTROL_VALIDATED_PATH)
+        descriptor_tables["external_control"] = ext_descriptors
+        record_maps["external_control"] = ext_records
+
+    combined_descriptors = pd.concat(descriptor_tables.values(), ignore_index=True)
+    combined_descriptors.to_parquet(FR3_DESCRIPTOR_TABLE_PATH, index=False)
+
+    combined_records = pd.concat(record_maps.values(), ignore_index=True)
+    combined_records.to_csv(FR3_RECORD_MAP_PATH, index=False, lineterminator="\n")
+
+    schema = {
+        "schema_version": DESCRIPTOR_SCHEMA_VERSION,
+        "descriptor_names": list(DESCRIPTOR_NAMES),
+        "n_descriptors": len(DESCRIPTOR_NAMES),
+    }
+    with open(FR3_DESCRIPTOR_SCHEMA_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(schema, handle, indent=2)
+
+    coverage = build_coverage_report(descriptor_tables, record_maps)
+    with open(FR3_COVERAGE_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(coverage, handle, indent=2)
+
+    validation = build_validation_report(combined_descriptors)
+    with open(FR3_VALIDATION_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(validation, handle, indent=2)
+
+    summary = {
+        "schema": schema,
+        "coverage": coverage,
+        "total_descriptor_rows": int(len(combined_descriptors)),
+        "total_source_records": int(len(combined_records)),
+        "outputs": {
+            "descriptor_schema": str(FR3_DESCRIPTOR_SCHEMA_PATH),
+            "descriptor_table": str(FR3_DESCRIPTOR_TABLE_PATH),
+            "record_map": str(FR3_RECORD_MAP_PATH),
+            "coverage_report": str(FR3_COVERAGE_REPORT_PATH),
+            "validation_report": str(FR3_VALIDATION_REPORT_PATH),
+        },
+    }
+    append_provenance_log(
+        FR3_DESCRIPTORS_PROVENANCE_LOG_PATH,
+        {"stage": "fr3_descriptor_extraction", "summary": {k: v for k, v in summary.items() if k != "coverage"} | {"coverage": coverage}},
+    )
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -1954,6 +2052,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr2-external-control-build", help="Validate AnOxPePred external control + homology audit (Bucket 2.6)")
     sub.add_parser("fr2-freeze", help="Freeze the validated FR2 baseline as pp2_baseline_v1 (Bucket 2.7)")
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
+    sub.add_parser("fr3-descriptors", help="15-descriptor physicochemical feature extraction over frozen FR1/FR2 pools (Bucket 3.1)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -2021,6 +2120,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "esm2-smoketest":
         report = run_esm2_smoke_test()
         print(json.dumps({k: v for k, v in report.items() if k != "per_peptide"}, indent=2))
+        return 0
+    if args.stage == "fr3-descriptors":
+        summary = run_fr3_descriptors()
+        print(json.dumps(summary, indent=2, default=str))
         return 0
     return 1
 
