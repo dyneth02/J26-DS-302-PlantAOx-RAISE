@@ -229,16 +229,16 @@ IMPLEMENTATION_STATUS.md.)*
 - [x] Configure PyTorch/fair-esm and GPU/CPU fallback. *(torch 2.14.1+cpu + fair-esm 2.0.0 in the existing `pu_aop` env; CPU-only by confirmed decision despite a real GPU being present — see IMPLEMENTATION_STATUS.md. `resolve_device()` fallback tested both paths: forced-CPU and CUDA-reported-unavailable.)*
 - [x] Freeze **esm2_t12_35M_UR50D**, representation layer, tokenization, and pooling method. *(layer 12, 480-dim, BOS/EOS/PAD-excluding mean pool — every element confirmed by inspecting the loaded model/tokenizer directly, not assumed; `common/embeddings.py` module docstring is the canonical spec.)*
 - [x] Implement batch inference and input validation. *(`embed_sequences()`: batch_size-chunked inference verified batch-size-invariant; mismatched-length/duplicate-ID/ambiguous-residue inputs all raise explicit errors rather than silently misbehaving.)*
-- [ ] Extract embeddings for remaining positives and C1/C2/C3 sequences. *(explicitly out of scope for this task — deliberately deferred, not forgotten. Blocked on deciding the ambiguous-residue policy first, since 260/5,000 C1 decoys will otherwise hard-stop extraction — IMPLEMENTATION_STATUS.md Known Issues #9/#10.)*
-- [ ] Verify dimensions, ordering, dtype, and completeness. *(verified for a 5-sequence smoke test; "completeness" at full-dataset scale depends on the extraction task above, not yet done.)*
-- [ ] Record model, device, runtime, and extraction parameters. *(the recording mechanism is built and demonstrated — `esm2_smoketest_report.json` — but this checklist item's real target is a full extraction run's parameters, which hasn't happened yet.)*
+- [x] Extract embeddings for remaining positives and C1/C2/C3 sequences. *(all 9,356 unique sequences from `fr3_descriptor_table.parquet`: 1,205 FR1 positives + 3,788 C1 + 2,000 C2 + 2,325 C3-union + 38 external control. 3,159 reused directly from Bucket 2.3's existing caches, 6,197 freshly embedded. CLI stage `fr3-embeddings`, see IMPLEMENTATION_STATUS.md.)*
+- [x] Verify dimensions, ordering, dtype, and completeness. *(`fr3_embeddings_validation_report.json`: shape (9356, 480), dtype float32, all finite, peptide_id order confirmed identical to `fr3_descriptor_table.parquet`'s row order.)*
+- [x] Record model, device, runtime, and extraction parameters. *(`fr3_embeddings_manifest.json`: model name/layer/dim, reused-vs-fresh counts, per-pool coverage, peptide-ID-order and cache SHA-256, elapsed seconds.)*
 
 ## 3.3 — Feature Fusion and Preprocessing
-- [ ] Align ESM-2 and physicochemical features by stable peptide ID.
-- [ ] Concatenate embeddings and 15-descriptor vectors.
-- [ ] Fit normalization/scaling using **training fold only**.
-- [ ] Apply fitted transforms to validation/test data without refitting.
-- [ ] Validate fused model-input shape and ordering.
+- [x] Align ESM-2 and physicochemical features by stable peptide ID. *(`load_and_validate_fusion_inputs()`: hard-fails on any peptide_id/order/pool mismatch between `fr3_descriptor_table.parquet` and `fr3_embeddings.npz`, rather than silently reindexing.)*
+- [x] Concatenate embeddings and 15-descriptor vectors. *(`build_raw_fused_matrix()`: [esm2_0..esm2_479, then descriptors_v1's 15 names], schema `fusion_v1`, 9,356×495 float32.)*
+- [x] Fit normalization/scaling using **training fold only**. *(one z-score scaler per GraphPart fold, fit exclusively on that fold's training-positive rows — mirrors the C3 fold-safe-centroid precedent; see IMPLEMENTATION_STATUS.md for the full rationale.)*
+- [x] Apply fitted transforms to validation/test data without refitting. *(`apply_scaler()` is transform-only; verified applying each fold's scaler to its own held-out positives + every unlabeled pool produces finite output with no refit call anywhere in the path.)*
+- [x] Validate fused model-input shape and ordering. *(`fr3_fusion_validation_report.json`: shape (9356, 495), all finite, peptide-ID order confirmed identical to Task 3.1/3.2's own order via matching SHA-256.)*
 
 ## 3.4 — Feature Cache and Reproducibility
 - [ ] Save cached `.npy` matrices and metadata/index mappings.
