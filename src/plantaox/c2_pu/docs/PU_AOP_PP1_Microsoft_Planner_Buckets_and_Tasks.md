@@ -176,12 +176,15 @@ C1/C2 are now `stage_c1_decoys_v3.fasta` / `stage_c2_bioactive_unlabeled_v2.fast
 - [x] Save automated integrity report and rerunnable checks. *(`python -m plantaox.c2_pu.run fr2-pool-audit`, `fr2-c1-cross-pool-fix`, `fr2-c2-cross-pool-fix`; 55 tests across audit/biopep/C3-contract/pools-fix/acceptance files, all passing, including byte-identical reproducibility for both fixes)*
 
 ## 2.5 — Biological Distribution and Shortcut-Bias Checks
-- [ ] Plot positive-versus-C1/C2/C3 peptide-length distributions.
-- [ ] Implement agreed length-stratified sampling or report residual mismatches.
-- [ ] Compare amino-acid composition by pool.
-- [ ] Compare selected physicochemical descriptor distributions by pool.
-- [ ] Optionally produce exploratory UMAP/t-SNE views; do not claim they prove separation.
-- [ ] Record potential family/organism/source shortcuts and residual biases.
+*(Status 2026-10-14: COMPLETE, against the canonical C1 v3/C2 v2/C3 union. Uses a small, independently-
+computed descriptor set — NOT Bucket 3.1's 15-descriptor pipeline, which remains unstarted; see
+IMPLEMENTATION_STATUS.md.)*
+- [x] Plot positive-versus-C1/C2/C3 peptide-length distributions. *(quantified via two-sample KS-test rather than visual-only comparison, length KS=0.63-0.86 across pools, all p≈0; one summary chart rendered for the user; full per-sequence table in `distribution_descriptor_table.csv`)*
+- [x] Implement agreed length-stratified sampling or report residual mismatches. *(residual mismatches reported, not resampled — a resample would be a further dataset-version change outside this read-only task's scope and wasn't requested)*
+- [x] Compare amino-acid composition by pool. *(`distribution_aa_composition.csv` — FR1 positives are Pro-enriched (10.6% vs 4-6% in C1/C2/C3), C2 is Cys-enriched (5.5% vs 1.4-2.6% elsewhere), both biologically explainable, not noise)*
+- [x] Compare selected physicochemical descriptor distributions by pool. *(molecular weight, net charge pH7, GRAVY, aromaticity — `distribution_ks_comparison.csv`; every pool differs significantly from positives on every descriptor)*
+- [x] Optionally produce exploratory UMAP/t-SNE views; do not claim they prove separation. *(deliberately deferred — the KS-test results already answer the underlying question more precisely than a 2D projection would; not silently skipped)*
+- [x] Record potential family/organism/source shortcuts and residual biases. *(`distribution_shortcut_report.json`: C1 spans 1,708 organisms, no single organism >2.1% share; C2 spans 123 activity tags, "Therapeutic" largest at 14.4%; FR1 positives have NO organism metadata available — documented as an unchecked gap, not assumed clean)*
 
 ## 2.6 — External Inactive-Control Preparation
 - [ ] Extract genuinely experimentally tested inactive AnOxPePred peptides.

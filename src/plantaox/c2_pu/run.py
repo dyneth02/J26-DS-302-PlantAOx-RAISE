@@ -48,6 +48,11 @@ from plantaox.c2_pu.curation.audit import (
     sequence_integrity_report,
 )
 from plantaox.c2_pu.curation.biopep import BIOPEP_CITATION, BIOPEP_SEARCH_URL, fetch_biopep_by_activity
+from plantaox.c2_pu.curation.distribution_audit import (
+    amino_acid_composition,
+    compare_pools_ks,
+    pool_descriptor_table,
+)
 from plantaox.c2_pu.curation.uniref import fetch_uniref50_candidates, UNIREF50_QUERY, UNIREF50_SORT
 from plantaox.c2_pu.curation.splits import (
     GRAPHPART_DENOMINATOR,
@@ -1484,6 +1489,110 @@ def run_fr2_pool_audit() -> dict:
     return summary
 
 
+# Bucket 2.5 -- Biological Distribution and Shortcut-Bias Checks.
+DISTRIBUTION_DESCRIPTOR_TABLE_PATH = PROCESSED_DIR / "distribution_descriptor_table.csv"
+DISTRIBUTION_AA_COMPOSITION_PATH = PROCESSED_DIR / "distribution_aa_composition.csv"
+DISTRIBUTION_KS_COMPARISON_PATH = PROCESSED_DIR / "distribution_ks_comparison.csv"
+DISTRIBUTION_SHORTCUT_REPORT_PATH = PROCESSED_DIR / "distribution_shortcut_report.json"
+DISTRIBUTION_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr2_distribution_provenance.jsonl"
+
+DISTRIBUTION_DESCRIPTOR_COLUMNS = ["length", "molecular_weight", "net_charge_ph7", "gravy", "aromaticity"]
+
+
+def run_fr2_distribution_audit() -> dict:
+    """Bucket 2.5: length/composition/descriptor distribution comparisons
+    across FR1's accepted positives and the canonical C1 v3/C2 v2/C3 union,
+    plus a shortcut-bias scan (organism diversity for C1, activity-tag
+    diversity for C2). Read-only -- writes only new `distribution_*`
+    report files, never touches any pool artifact.
+
+    Uses a small, independently-computed set of descriptors (molecular
+    weight, net charge at pH 7, GRAVY, aromaticity) -- NOT Bucket 3.1's
+    15-descriptor feature-extraction pipeline, which is a separate,
+    not-yet-started task (see curation/distribution_audit.py docstring).
+    """
+    for p in (POSITIVE_POOL_PATH, C1_CLEAN_FASTA_V3_PATH, C2_FASTA_V2_PATH, C3_FASTA_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found.")
+
+    positive_df = pd.read_parquet(POSITIVE_POOL_PATH)
+    pools_seqs = {
+        "FR1_positives": positive_df["sequence"].tolist(),
+        "C1_v3": [s for _, s in read_fasta(C1_CLEAN_FASTA_V3_PATH)],
+        "C2_v2": [s for _, s in read_fasta(C2_FASTA_V2_PATH)],
+        "C3_union": [s for _, s in read_fasta(C3_FASTA_PATH)],
+    }
+
+    # --- amino-acid composition per pool ---
+    aa_comp = pd.DataFrame({name: amino_acid_composition(seqs) for name, seqs in pools_seqs.items()}).T
+    aa_comp.index.name = "pool"
+    aa_comp.to_csv(DISTRIBUTION_AA_COMPOSITION_PATH, lineterminator="\n")
+
+    # --- per-sequence descriptor table, all pools concatenated ---
+    descriptor_tables = {name: pool_descriptor_table(name, seqs) for name, seqs in pools_seqs.items()}
+    combined = pd.concat(descriptor_tables.values(), ignore_index=True)
+    combined.to_csv(DISTRIBUTION_DESCRIPTOR_TABLE_PATH, index=False, lineterminator="\n")
+
+    # --- KS-test: FR1 positives vs. each challenge pool, per descriptor ---
+    challenge_tables = {k: v for k, v in descriptor_tables.items() if k != "FR1_positives"}
+    ks_df = compare_pools_ks(
+        descriptor_tables["FR1_positives"], challenge_tables, columns=DISTRIBUTION_DESCRIPTOR_COLUMNS
+    )
+    ks_df.to_csv(DISTRIBUTION_KS_COMPARISON_PATH, index=False, lineterminator="\n")
+
+    # --- shortcut-bias scan: organism diversity (C1), activity-tag diversity (C2) ---
+    shortcut_report: dict = {
+        "fr1_positives": {
+            "organism_metadata_available": False,
+            "note": "Multi-AOP/AnOxPePred carry no per-record organism field -- cannot check "
+            "organism-family shortcut risk for the positive pool itself with current source data. "
+            "Documented as a limitation, not assumed absent.",
+        }
+    }
+    if C1_ACCESSION_MAP_V3_PATH.exists():
+        c1_map = pd.read_csv(C1_ACCESSION_MAP_V3_PATH)
+        organism_counts = c1_map["organism"].value_counts()
+        organism_fracs = organism_counts / organism_counts.sum()
+        shortcut_report["c1_v3"] = {
+            "n_unique_organisms": int(c1_map["organism"].nunique()),
+            "top_10_organisms_by_share": {k: round(float(v), 4) for k, v in organism_fracs.head(10).items()},
+            "max_single_organism_share": round(float(organism_fracs.max()), 4),
+        }
+    if C2_ACTIVITY_MAP_V2_PATH.exists():
+        c2_map = pd.read_csv(C2_ACTIVITY_MAP_V2_PATH)
+        tag_counts: dict[str, int] = {}
+        for tags in c2_map["activity_names"].astype(str):
+            for tag in tags.split(";"):
+                tag_counts[tag.strip()] = tag_counts.get(tag.strip(), 0) + 1
+        total_tags = sum(tag_counts.values())
+        top_tags = sorted(tag_counts.items(), key=lambda kv: -kv[1])[:10]
+        shortcut_report["c2_v2"] = {
+            "n_unique_activity_tags": len(tag_counts),
+            "top_10_tags_by_share": {k: round(v / total_tags, 4) for k, v in top_tags},
+        }
+
+    with open(DISTRIBUTION_SHORTCUT_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(shortcut_report, handle, indent=2)
+
+    summary = {
+        "pool_sizes": {k: len(v) for k, v in pools_seqs.items()},
+        "descriptor_columns": DISTRIBUTION_DESCRIPTOR_COLUMNS,
+        "ks_significant_mismatches": ks_df[ks_df["p_value"] < 0.01][["pool", "descriptor", "ks_statistic", "p_value"]].to_dict("records"),
+        "shortcut_report": shortcut_report,
+        "outputs": {
+            "descriptor_table": str(DISTRIBUTION_DESCRIPTOR_TABLE_PATH),
+            "aa_composition": str(DISTRIBUTION_AA_COMPOSITION_PATH),
+            "ks_comparison": str(DISTRIBUTION_KS_COMPARISON_PATH),
+            "shortcut_report": str(DISTRIBUTION_SHORTCUT_REPORT_PATH),
+        },
+    }
+    append_provenance_log(
+        DISTRIBUTION_PROVENANCE_LOG_PATH,
+        {"stage": "fr2_distribution_shortcut_audit", "summary": summary},
+    )
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -1502,6 +1611,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr2-pool-audit", help="Pool contamination and leakage audit (Bucket 2.4)")
     sub.add_parser("fr2-c1-cross-pool-fix", help="Decision A: remove C1/C2 exact overlap (Bucket 2.4 resolution)")
     sub.add_parser("fr2-c2-cross-pool-fix", help="Decision B: exclude C2 homolog of an E1 positive (Bucket 2.4 resolution)")
+    sub.add_parser("fr2-distribution-audit", help="Biological distribution and shortcut-bias checks (Bucket 2.5)")
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     args = parser.parse_args(argv)
 
@@ -1548,6 +1658,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr2-c2-cross-pool-fix":
         summary = run_fr2_c2_cross_pool_fix()
         print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-distribution-audit":
+        summary = run_fr2_distribution_audit()
+        print(json.dumps(summary, indent=2, default=str))
         return 0
     if args.stage == "fr2-pool-audit":
         summary = run_fr2_pool_audit()

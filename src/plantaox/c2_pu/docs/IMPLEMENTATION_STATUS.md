@@ -414,6 +414,51 @@
   silently decided or hidden. AODB/DFBP remain the only incomplete external checks, both for
   documented access reasons outside this project's control.
 
+### Bucket 2, Task 2.5 — Biological Distribution and Shortcut-Bias Checks
+- **Status: complete.** Compared FR1's 1,205 accepted positives against the corrected canonical
+  C1 v3 (5,000)/C2 v2 (2,000)/C3 union (2,325) on length, amino-acid composition, and 4 independently-
+  computed descriptors (molecular weight, net charge at pH 7, GRAVY hydrophobicity, aromaticity).
+- **Not Bucket 3.1's descriptor pipeline, deliberately.** `curation/distribution_audit.py` implements
+  its own small, documented descriptor set (standard Kyte-Doolittle/Expasy-style formulas) purely for
+  this comparison — Bucket 3.1's `common/descriptors.py` (the project's canonical 15-descriptor
+  feature-extraction module) remains an empty scaffold stub, untouched, so this task doesn't silently
+  do Bucket 3.1's job or create two divergent descriptor implementations.
+- **Every pool differs significantly from FR1 positives on every descriptor tested** (two-sample
+  Kolmogorov-Smirnov, FR1 positives vs. each of C1/C2/C3): KS statistics 0.63–0.86 on
+  length/molecular-weight, 0.27–0.42 on net charge, 0.14–0.27 on GRAVY, 0.25–0.34 on aromaticity, all
+  with p-values effectively zero (smallest reported ~1e-322, i.e. below double-precision resolution).
+  This is a real, quantified shortcut-bias risk, not a surprising discovery that invalidates the
+  pools — length/charge/hydrophobicity differences between positives (short, often Pro-rich food-
+  derived fragments) and the challenge pools (built from entirely different source distributions:
+  reviewed UniProtKB, Peptipedia's broad bioactive corpus, UniRef50) were always structurally likely
+  given how differently each pool was constructed; this task is what turns that intuition into a
+  measured number for the FR2/FR6 report. Full per-pool/per-descriptor table:
+  `distribution_ks_comparison.csv`.
+- **Amino-acid composition confirms a specific, biologically-sensible signal, not noise:** FR1
+  positives are markedly Proline-enriched (10.6%) vs. C1 (4.1%), C2 (5.6%), C3 (5.1%) — consistent
+  with food-derived antioxidant/ACE-inhibitory peptide literature (casein/collagen-derived fragments).
+  C2 is notably Cysteine-enriched (5.5%) vs. positives (1.4%), C1 (2.3%), C3 (2.6%) — consistent with
+  Peptipedia's heavy representation of disulfide-stabilized antimicrobial/defensin peptides (Bucket
+  2.2's own activity-tag distribution: Antimicrobial 805/2,000, Antibacterial 535/2,000). Full table:
+  `distribution_aa_composition.csv`.
+- **Shortcut-bias scan:** C1's 5,000 records span 1,708 distinct organisms (`c1_accession_map_v3.csv`),
+  no single organism exceeding 2.1% share (*E. coli* K12) — no obvious single-organism shortcut. C2's
+  2,000 records span 123 distinct activity tags, "Therapeutic" the largest at 14.4% (an expected broad
+  parent category, not a narrow shortcut signal). **FR1 positives have no organism metadata at all**
+  (Multi-AOP/AnOxPePred carry no per-record source-organism field) — explicitly documented as an
+  unchecked gap, not assumed clean.
+- **No exploratory UMAP/t-SNE produced this pass** — the Planner marks this step optional
+  ("do not claim they prove separation"), and the KS-test results already give a more precise, directly
+  interpretable answer to the same underlying question (are the pools distributionally distinct) than
+  a 2D projection would; flagged as deferred, not silently skipped.
+- **Length-stratified sampling was NOT implemented** — the Planner's checklist offers this as an
+  alternative to "report residual mismatches," and report-the-mismatch is what was done here (hard
+  re-sampling any of C1/C2/C3 by length now would be yet another dataset-version change, outside this
+  task's read-only, report-only scope, and not requested).
+- **Tests:** 9 unit tests (`test_distribution_audit.py`, including a sanity check that KS correctly
+  distinguishes identical vs. obviously-different synthetic distributions) + 4 full-file acceptance
+  tests. Full suite: 155 passed, 1 skipped, zero regression.
+
 ### Bucket 3, Task 3.2 — ESM-2 Environment Setup and Smoke Test
 - **Status: environment configured, interface built and tested, smoke test passing.** This is
   explicitly NOT full feature generation — embedding the full positive pool and C1/C2/C3 (Bucket
@@ -578,17 +623,21 @@ tasks below.)*
    read these, not v2/the original C2. One open, non-blocking item: whether to act further on the
    11 remaining C1↔C2 near-duplicate families (recommended to accept as documented limitation; see
    Known Issue #14).
-6. **Task 2.5 (Biological Distribution and Shortcut-Bias Checks)** is next per the Planner sequence:
-   length/composition/descriptor distribution comparisons across positives vs. C1/C2/C3, optional
-   exploratory UMAP/t-SNE (not a separation proof), and recording family/organism/source shortcut
-   risks. Not started.
-7. **Bucket 3.1 (15 physicochemical descriptors)** can start any time in parallel — not blocked on
+6. **Task 2.5 is complete** — see Completed tasks above. Every challenge pool differs significantly
+   from FR1 positives on length/MW/charge/GRAVY/aromaticity (quantified via KS-test); this is a
+   known, measured shortcut-bias risk for FR3/FR4 modeling to be aware of, not a defect to fix in
+   FR2. UMAP/t-SNE and length-stratified resampling both deliberately deferred (see above).
+7. **Bucket 2.6 (External Inactive-Control Preparation)** is next per the Planner sequence — the
+   38-record AnOxPePred external control already exists (frozen in `pp1_baseline_v1`) but this
+   bucket's own homology-boundary check against the positive pool hasn't been run as a dedicated
+   stage yet. Not started.
+8. **Bucket 3.1 (15 physicochemical descriptors)** can start any time in parallel — not blocked on
    anything above.
-8. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
+9. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
    selection-leakage risk later.
-9. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
+10. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
 
 ## 📝 Experiment decisions log
 
@@ -645,5 +694,8 @@ tasks below.)*
 | 2026-10-14 | Decision B: `C2-EFDBC5460B` ("LYQEPVLGPVRGPFP") excluded from C2 as a conservative leakage-risk decision (not claimed inactive), replaced 1:1 from the experimentally-reported Peptipedia tier, screened against FR1 positives/179 conflicts/remaining C2/C1 v3/C3; canonical C2 is now `stage_c2_bioactive_unlabeled_v2.fasta` | Project-owner-approved, backed by a real EMBOSS needle alignment (77.8% full-length identity, 14/18 identical aligned positions, 22.2% gaps) against the E1-confirmed positive YQEPVLGPVRGPFPIIV -- not a borderline call. C1 v3 (not v2) was used as the cross-screen specifically so Decision B's replacement could never collide with Decision A's. |
 | 2026-10-14 | The 14 other candidate C1<->C2 homology pairs found by the audit are NOT bulk-excluded by CD-HIT cluster membership; 3 resolved as a side effect of Decision A, 11 reviewed individually and recommended as an accepted, documented limitation rather than further exclusion | Explicit instruction: distinguish genuinely concerning biological similarity from short-sequence chance matches, and do not auto-exclude whole clusters. All 11 are C1<->C2 only (no FR1-positive involvement, so no label-leakage mechanism) and from peptide families (ribosomal/zinc-ribbon, protamine-like, homeodomain CPP, actin/gliadin fragments, defensin-like) with no plausible antioxidant mechanism. Presented with full evidence for project-owner override rather than silently decided either way. |
 | 2026-10-14 | C3 was not rebuilt in response to Decisions A/B -- both fixes proactively screened their replacement candidates against C3's existing union before writing anything, confirmed by re-verifying zero exact overlap between C3 and the new C1 v3/C2 v2 | Avoids the cascading C3 rebuild the instructions flagged as a possible consequence, by preventing the problem at its source (the replacement-candidate screen) rather than reactively detecting and fixing it after the fact. `load_fold_challenges(path, fold_id)` needed no changes. |
+
+| 2026-10-14 | Task 2.5's distribution comparison uses a small, independently-computed descriptor set (`curation/distribution_audit.py`: molecular weight, net charge at pH 7, GRAVY, aromaticity), not Bucket 3.1's 15-descriptor pipeline | Bucket 3.1's `common/descriptors.py` is still an empty scaffold stub (not started). Implementing it properly belongs to Bucket 3.1; Task 2.5 only needed enough descriptors to detect distributional shortcuts, so a narrower, clearly-labeled, independent implementation avoided either blocking on Bucket 3.1 or creating two divergent "canonical" descriptor implementations later. |
+| 2026-10-14 | Distributional mismatch between FR1 positives and C1/C2/C3 reported via two-sample KS-test statistics, not solely via plots | Quantifies "how different" precisely (statistic + p-value per pool per descriptor) rather than relying on visual judgment of histogram overlays, which the Planner's own "do not claim [UMAP/t-SNE] prove separation" caution suggests is exactly the kind of imprecision this task should avoid. matplotlib was not installed for this (no plotting library was in the environment); one summary chart was rendered directly for the user via the session's visualization tool instead of adding a new project dependency for a single exploratory comparison. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
