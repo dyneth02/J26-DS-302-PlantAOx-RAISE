@@ -52,7 +52,7 @@ def freeze_baseline(
         "file_checksums": checksums,
     }
     manifest_path = freeze_dir / "MANIFEST.json"
-    with open(manifest_path, "w", encoding="utf-8") as handle:
+    with open(manifest_path, "w", encoding="utf-8", newline="\n") as handle:
         json.dump(manifest, handle, indent=2)
     return manifest_path
 

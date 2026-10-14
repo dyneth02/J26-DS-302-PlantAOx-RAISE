@@ -1,4 +1,13 @@
-"""FASTA/CSV/parquet I/O helpers and provenance logging for Component 02."""
+"""FASTA/CSV/parquet I/O helpers and provenance logging for Component 02.
+
+Every text write in this module and in run.py/curation/freeze.py pins
+``newline="\\n"`` (or pandas' ``lineterminator="\\n"``) explicitly. Without
+it, Python's/pandas' default text-mode write translates "\\n" to
+``os.linesep``, which is CRLF on Windows -- silently changing the SHA-256 of
+every checksummed artifact depending on which OS produced it, breaking the
+FR1 freeze/reproducibility guarantees (see IMPLEMENTATION_STATUS.md decision
+log).
+"""
 
 from __future__ import annotations
 
@@ -39,5 +48,5 @@ def append_provenance_log(path: str | Path, entry: dict) -> None:
     entry = {"timestamp": _dt.datetime.now().isoformat(), **entry}
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a", encoding="utf-8") as handle:
+    with open(path, "a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(entry) + "\n")

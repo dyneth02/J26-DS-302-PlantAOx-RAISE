@@ -1,0 +1,7 @@
+{
+  "n_folds": 5,
+  "fold_safety_verified": true,
+  "all_folds_have_exact_top_n": true,
+  "union_fasta_matches_ranking": true,
+  "top_n_per_fold": 2000
+}

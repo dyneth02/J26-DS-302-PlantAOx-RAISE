@@ -1,0 +1,15 @@
+{
+  "n_input_records": 5000,
+  "n_contaminated_removed": 1,
+  "n_replacements_needed": 1,
+  "n_replacements_available": 2246,
+  "n_replacements_made": 1,
+  "n_output_records": 5000,
+  "shortfall": 0,
+  "n_unique_sequences_output": 3786,
+  "seed": 42,
+  "n_unique_sequences": 3786,
+  "min_length": 4,
+  "max_length": 50,
+  "screen_set_size": 1384
+}

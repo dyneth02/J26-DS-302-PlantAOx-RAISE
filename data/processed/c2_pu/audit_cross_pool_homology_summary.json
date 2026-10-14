@@ -1,0 +1,21 @@
+{
+  "identity_threshold": 0.9,
+  "length_floor_for_interpretation": 15,
+  "n_total_clusters": 7819,
+  "n_cross_pool_clusters_raw": 464,
+  "n_cross_pool_clusters_short_fragment_only_not_interpretable": 453,
+  "n_cross_pool_clusters_real_homology_candidates": 11,
+  "real_homology_cluster_ids": [
+    91,
+    173,
+    759,
+    1076,
+    1562,
+    1823,
+    1832,
+    2356,
+    2958,
+    3997,
+    4014
+  ]
+}

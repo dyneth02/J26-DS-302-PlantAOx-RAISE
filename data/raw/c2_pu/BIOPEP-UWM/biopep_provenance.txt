@@ -1,0 +1,6 @@
+BIOPEP-UWM Antioxidative Reference Set - Provenance Log
+Generated: 2026-10-14T09:05:53.695319
+Source: https://biochemia.uwm.edu.pl/biopep/peptide_data_search.php?txt_search=antioxidative&menu_search=activity
+Access: open, no registration required
+Citation: Minkiewicz P, Iwaniak A, Darewicz M. BIOPEP-UWM database of bioactive peptides: current opportunities. Int J Mol Sci. 2019;20(23):5978. doi:10.3390/ijms20235978
+Records fetched: 1039

@@ -1,0 +1,27 @@
+{
+  "source_version": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\stage_c2_bioactive_unlabeled.fasta",
+  "output_version": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\stage_c2_bioactive_unlabeled_v2.fasta",
+  "n_excluded": 1,
+  "n_replaced": 1,
+  "n_output_records": 2000,
+  "n_unique_sequences": 2000,
+  "seed": 42,
+  "screened_against": [
+    "FR1_positives",
+    "conflicts_179",
+    "C2_remaining",
+    "C1_v3",
+    "C3_union"
+  ],
+  "replacement_tier_summary": {
+    "n_total_eligible_unique_sequences": 2721076,
+    "n_experimental_tier": 64122,
+    "n_predicted_only_tier": 2656954,
+    "n_sampled_from_experimental": 1,
+    "n_sampled_from_predicted_only": 0,
+    "n_output_records": 1,
+    "n_requested": 1,
+    "shortfall": 0,
+    "seed": 42
+  }
+}

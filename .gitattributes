@@ -1,0 +1,8 @@
+# Pipeline-generated data artifacts (CSV/TSV/JSON/FASTA/parquet under data/)
+# must be checked out byte-for-byte identical to what's committed, on every
+# platform and git config. core.autocrlf=true (common on Windows) otherwise
+# silently rewrites LF -> CRLF in the working tree on checkout, which breaks
+# every SHA-256 checksum the FR1 freeze mechanism (curation/freeze.py) and
+# reproducibility tests depend on, without changing what's actually stored.
+# See IMPLEMENTATION_STATUS.md decision log, 2026-10-14.
+data/** -text

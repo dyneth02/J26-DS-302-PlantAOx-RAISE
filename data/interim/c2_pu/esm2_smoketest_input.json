@@ -1,0 +1,18 @@
+{
+  "peptide_ids": [
+    "SMOKE-SHORT",
+    "SMOKE-MED",
+    "SMOKE-CHARGED",
+    "SMOKE-HYDROPHOBIC",
+    "SMOKE-LONG"
+  ],
+  "sequences": [
+    "KPEEDWGR",
+    "MIRIISRANSVTSSNEVNRLVTGQIPHD",
+    "KKKKKEEEEE",
+    "LLLVVVIIIAAA",
+    "MTPSLSSFLNSLILGAVIVVVPITLALLFVSQKDRTIR"
+  ],
+  "force_cpu": false,
+  "validate_alphabet": true
+}

@@ -65,11 +65,17 @@ Every row in the frozen positive pool traces to a named, typed source — verifi
 - Peptide IDs form an unbroken chain with no gaps or duplicates: provisional pool (1,205) → CD-HIT cluster membership (1,205, exact set match) → CD-HIT representatives (925, exact set match) → GraphPart retained ∪ excluded (834 + 91 = 925, exact set match).
 - The 179 conflicted sequences and the 38 (and 179 contested) external-control sequences are confirmed absent from the final 925-sequence CD-HIT/GraphPart pool by sequence identity, not just by ID.
 
-**Raw-source checksums** (SHA-256, computed 2026-10-14):
+**Raw-source checksums** (SHA-256, re-verified against the git-stored blob, not just a working-tree
+read — see the line-ending finding below):
 | File | SHA-256 |
 |---|---|
 | `Multi-AOP/combined_data.csv` | `f4ef313fdbd7692a2b0ed5c24e639ef18f3a5369075c474e74ba92ff6a3e6578` |
-| `AnOxPePred/Supplementary_Data_S1_Marcatili.csv` | `a985123d1fbf99b1f624d42dd86c647c855a61e8ec0adcce631fb16a086b5995` |
+| `AnOxPePred/Supplementary_Data_S1_Marcatili.csv` | `6d69f4f705d9683cb63eb11547b01c039fbed956920e606f0c8ddb5e26cb1754` |
+
+**Correction:** the AnOxPePred checksum originally recorded here (`a985123d...`) was computed on a
+CRLF-converted working-tree read, before the line-ending issue below was found and fixed. The value
+above is verified identical to `git show HEAD:<path>` — i.e., to what is actually stored in the
+repository, independent of any platform's checkout behavior.
 
 **Known gap (not an FR1 acceptance blocker, but real):** Bucket 1.1/1.2's formal `data_registry.csv` (source IDs, license, access date, release/commit hash) was never created as a standalone artifact — the checksums above are a partial substitute computed for this report, not the registry Bucket 1.2 specifies. Flagged in §9.
 
@@ -125,5 +131,20 @@ Technical acceptance (§7) is **not** scientific sign-off. The following require
 3. **C1 source ambiguity** (SwissProt vs. UniRef50, `PU_AOP_RESEARCH_CONTEXT.md` §4) — not FR1 scope, but still open and relevant to the overall PP1 submission.
 4. **Bucket 1.1/1.2 formal data registry** (§4): no `data_registry.csv` exists yet; the checksums in this report are a stopgap, not the registry artifact itself. Recommend scheduling this separately from the FR1 freeze.
 
+## 11. Addendum (2026-10-14, caught starting FR2): cross-platform line-ending bug, fixed and re-frozen
+
+A routine fresh pipeline run on a new branch failed two acceptance tests
+(`test_fr1_reproducibility.py`, `test_fr1_freeze_acceptance.py`) — i.e., the acceptance tests built
+for §7 did exactly their job. Root cause: pandas' `to_csv` and Python's default text-mode `open()`
+both translate `\n` to `os.linesep` on write, which is CRLF on Windows, so every checksummed CSV/JSON
+artifact's SHA-256 depended on which OS happened to run the pipeline. Fixed by pinning
+`lineterminator="\n"` / `newline="\n"` on every write in `run.py`/`curation/freeze.py`/`common/io.py`,
+and adding `.gitattributes` (`data/** -text`) so git never re-expands line endings on checkout either.
+`pp1_baseline_v1` was regenerated in place with corrected checksums — not re-versioned as
+`pp1_baseline_v2` — since nothing had consumed v1 yet (one session old, pre-FR2); file *contents* are
+unchanged, only the byte-level line-ending encoding was corrected. §4's AnOxPePred raw-file checksum
+was also corrected for the same reason (see §4's note). All 55 tests pass after the fix; full
+re-verification: `pytest tests/c2_pu`.
+
 ---
-*Generated 2026-10-14 against commit `02d0324365729684a401e147907561bd6f417ec6`. Re-run `pytest tests/c2_pu` to reverify any claim in this report.*
+*Generated 2026-10-14 against commit `02d0324365729684a401e147907561bd6f417ec6`; line-ending fix and re-freeze in §11 postdate that commit. Re-run `pytest tests/c2_pu` to reverify any claim in this report.*
