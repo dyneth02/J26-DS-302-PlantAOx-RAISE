@@ -200,12 +200,12 @@ decision log (2026-10-14). Recommend scheduling separately — it does not block
 - [ ] Save descriptor matrices with peptide-ID mappings.
 
 ## 3.2 — ESM-2 Embedding Pipeline
-- [ ] Configure PyTorch/fair-esm and GPU/CPU fallback.
-- [ ] Freeze **esm2_t12_35M_UR50D**, representation layer, tokenization, and pooling method.
-- [ ] Implement batch inference and input validation.
-- [ ] Extract embeddings for remaining positives and C1/C2/C3 sequences.
-- [ ] Verify dimensions, ordering, dtype, and completeness.
-- [ ] Record model, device, runtime, and extraction parameters.
+- [x] Configure PyTorch/fair-esm and GPU/CPU fallback. *(torch 2.14.1+cpu + fair-esm 2.0.0 in the existing `pu_aop` env; CPU-only by confirmed decision despite a real GPU being present — see IMPLEMENTATION_STATUS.md. `resolve_device()` fallback tested both paths: forced-CPU and CUDA-reported-unavailable.)*
+- [x] Freeze **esm2_t12_35M_UR50D**, representation layer, tokenization, and pooling method. *(layer 12, 480-dim, BOS/EOS/PAD-excluding mean pool — every element confirmed by inspecting the loaded model/tokenizer directly, not assumed; `common/embeddings.py` module docstring is the canonical spec.)*
+- [x] Implement batch inference and input validation. *(`embed_sequences()`: batch_size-chunked inference verified batch-size-invariant; mismatched-length/duplicate-ID/ambiguous-residue inputs all raise explicit errors rather than silently misbehaving.)*
+- [ ] Extract embeddings for remaining positives and C1/C2/C3 sequences. *(explicitly out of scope for this task — deliberately deferred, not forgotten. Blocked on deciding the ambiguous-residue policy first, since 260/5,000 C1 decoys will otherwise hard-stop extraction — IMPLEMENTATION_STATUS.md Known Issues #9/#10.)*
+- [ ] Verify dimensions, ordering, dtype, and completeness. *(verified for a 5-sequence smoke test; "completeness" at full-dataset scale depends on the extraction task above, not yet done.)*
+- [ ] Record model, device, runtime, and extraction parameters. *(the recording mechanism is built and demonstrated — `esm2_smoketest_report.json` — but this checklist item's real target is a full extraction run's parameters, which hasn't happened yet.)*
 
 ## 3.3 — Feature Fusion and Preprocessing
 - [ ] Align ESM-2 and physicochemical features by stable peptide ID.
@@ -417,7 +417,7 @@ four items that most need a human look.
 purpose, annotated with where the evidence lives.**
 - [ ] C1 has **5,000 verified records**, with source, seed, and screening log. *(5,000 records confirmed, reproducible from seed 42, 0 remaining leakage against FR1 positives/conflicts — see Bucket 2.1 close-out, IMPLEMENTATION_STATUS.md. Still open: 260 non-standard-residue sequences unresolved, Known Issues #9.)*
 - [ ] C2 has approximately **2,000 curated bioactive unlabeled** records. *(not started)*
-- [ ] C3 has **2,000 ESM-2-nearest unlabeled** candidates with ranked distances. *(not started, blocked on ESM-2 env setup)*
+- [ ] C3 has **2,000 ESM-2-nearest unlabeled** candidates with ranked distances. *(not started; ESM-2 env/interface setup is now done (Bucket 3.2), so this is unblocked but still not begun)*
 - [ ] AOP exclusion and pool overlap audits documented. *(done for C1 vs. FR1 positives; C2/C3 not started)*
 - [ ] Length, composition, and descriptor checks included. *(C1 length range confirmed 4-50 AA; composition/descriptor checks not yet done for any pool)*
 - [ ] External experimentally inactive controls remain separate and verified. *(38-sequence clean external control frozen under FR1's pp1_baseline_v1; its own homology check against positives, per Bucket 2.6, not started)*

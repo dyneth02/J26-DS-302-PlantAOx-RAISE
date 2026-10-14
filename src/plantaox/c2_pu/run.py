@@ -15,6 +15,7 @@ from pathlib import Path
 import pandas as pd
 
 from plantaox.c2_pu.common.io import append_provenance_log, read_fasta, write_fasta
+from plantaox.c2_pu.common.wsl import run_in_conda_env, to_wsl_path
 from plantaox.c2_pu.common.schemas import (
     CONFLICT_LOG_COLUMNS,
     EXTERNAL_CONTROL_COLUMNS,
@@ -440,6 +441,86 @@ def run_fr2_c1_clean(seed: int = 42) -> dict:
     return summary
 
 
+# Bucket 3.2 — ESM-2 embedding interface smoke test. torch/fair-esm live
+# only in the WSL pu_aop conda env (installed there per the project owner's
+# explicit decision, 2026-10-14: CPU-only, since the 35M-param model's
+# workload doesn't benefit from this machine's ~1hr-download GPU stack) --
+# this stage shells out via common/wsl.py, exactly like CD-HIT/GraphPart,
+# rather than importing common.embeddings (which imports torch) directly
+# into this Windows-side process.
+ESM2_CLI_SCRIPT_PATH = Path(__file__).resolve().parent / "esm2_cli.py"
+ESM2_SMOKETEST_INPUT_PATH = INTERIM_DIR / "esm2_smoketest_input.json"
+ESM2_SMOKETEST_REPORT_PATH = PROCESSED_DIR / "esm2_smoketest_report.json"
+ESM2_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr3_esm2_provenance.jsonl"
+
+# Small, fixed set -- NOT full feature generation (that's a later, separate
+# Bucket 3.2 task). Mix of length/composition classes mirroring Bucket 3.1's
+# own "short/long/charged/hydrophobic" testing convention, so the smoke test
+# exercises genuinely different embedding regions, not five near-identical
+# inputs.
+ESM2_SMOKETEST_PEPTIDES = {
+    "SMOKE-SHORT": "KPEEDWGR",
+    "SMOKE-MED": "MIRIISRANSVTSSNEVNRLVTGQIPHD",
+    "SMOKE-CHARGED": "KKKKKEEEEE",
+    "SMOKE-HYDROPHOBIC": "LLLVVVIIIAAA",
+    "SMOKE-LONG": "MTPSLSSFLNSLILGAVIVVVPITLALLFVSQKDRTIR",
+}
+
+
+def run_esm2_smoke_test(force_cpu: bool = False) -> dict:
+    """Bucket 3.2: configure PyTorch/fair-esm, freeze the ESM-2 spec, and
+    smoke-test embedding extraction on a small fixed peptide set.
+
+    Explicitly NOT full feature generation -- extracting embeddings for the
+    full positive pool and C1/C2/C3 is a separate, later task. Writes only a
+    summary report (shape/dtype/finiteness/norm per peptide); raw embedding
+    vectors are never written to a committed path.
+    """
+    INTERIM_DIR.mkdir(parents=True, exist_ok=True)
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+
+    payload = {
+        "peptide_ids": list(ESM2_SMOKETEST_PEPTIDES.keys()),
+        "sequences": list(ESM2_SMOKETEST_PEPTIDES.values()),
+        "force_cpu": force_cpu,
+        "validate_alphabet": True,
+    }
+    with open(ESM2_SMOKETEST_INPUT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(payload, handle, indent=2)
+
+    result = run_in_conda_env(
+        [
+            "python",
+            to_wsl_path(ESM2_CLI_SCRIPT_PATH),
+            to_wsl_path(ESM2_SMOKETEST_INPUT_PATH),
+            to_wsl_path(ESM2_SMOKETEST_REPORT_PATH),
+        ],
+        timeout=600,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"ESM-2 smoke test failed (exit {result.returncode}):\n{result.stdout}\n{result.stderr}"
+        )
+    if not ESM2_SMOKETEST_REPORT_PATH.exists():
+        raise RuntimeError(
+            "esm2_cli.py reported success but no report was written:\n" + result.stdout
+        )
+
+    with open(ESM2_SMOKETEST_REPORT_PATH, encoding="utf-8") as handle:
+        report = json.load(handle)
+
+    append_provenance_log(
+        ESM2_PROVENANCE_LOG_PATH,
+        {
+            "stage": "bucket3_esm2_smoke_test",
+            "input": str(ESM2_SMOKETEST_INPUT_PATH),
+            "output": str(ESM2_SMOKETEST_REPORT_PATH),
+            "summary": {k: v for k, v in report.items() if k != "per_peptide"},
+        },
+    )
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -448,6 +529,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr1-split", help="GraphPart 40% identity 5-fold split (Bucket 1.6)")
     sub.add_parser("fr1-freeze", help="Snapshot validated FR1 artifacts as a versioned baseline (Bucket 1.7)")
     sub.add_parser("fr2-c1-clean", help="Resolve C1/positive-pool leakage (Bucket 2.1 close-out)")
+    sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -469,6 +551,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr2-c1-clean":
         summary = run_fr2_c1_clean()
         print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "esm2-smoketest":
+        report = run_esm2_smoke_test()
+        print(json.dumps({k: v for k, v in report.items() if k != "per_peptide"}, indent=2))
         return 0
     return 1
 

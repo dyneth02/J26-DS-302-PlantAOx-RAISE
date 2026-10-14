@@ -81,9 +81,91 @@
   SHA-256 hashes of every output file — byte-identical. 13 new tests total (`test_pools.py`,
   `test_fr2_c1_clean_acceptance.py`), all passing alongside the full existing suite (73 total).
 
+### Bucket 3, Task 3.2 — ESM-2 Environment Setup and Smoke Test
+- **Status: environment configured, interface built and tested, smoke test passing.** This is
+  explicitly NOT full feature generation — embedding the full positive pool and C1/C2/C3 (Bucket
+  3.2's later checklist items) is separate, deliberately out-of-scope work for next time.
+- **Environment:** `torch` 2.14.1+cpu and `fair-esm` 2.0.0 installed into the existing `pu_aop`
+  WSL micromamba environment (not a new env) alongside CD-HIT 4.8.1 / graph-part 1.0.2 / EMBOSS
+  6.6.0.0, all confirmed still working afterward. `pytest` 9.1.1 was also added to `pu_aop` so the
+  new torch-dependent tests can actually execute where torch lives (see architecture note below).
+  numpy (2.4.6) and pandas (3.0.6) were unaffected — checked analytically before installing (torch's
+  PyPI metadata declares no numpy/pandas version constraint at all) and confirmed empirically after.
+- **CPU vs. GPU decision (confirmed with the project owner, 2026-10-14):** this machine has a real,
+  WSL-passthrough-configured GPU (NVIDIA RTX 4050 Laptop, 6GB VRAM, driver 610.62) — not assumed,
+  verified via `nvidia-smi` inside WSL. A full CUDA-enabled PyTorch install (`cu128`, ~2.5GB:
+  torch + cuDNN + cuBLAS + the rest of the CUDA runtime stack) was measured at ~45-60 minutes over
+  this connection's ~700KB/s throughput. Given `esm2_t12_35M_UR50D` is a 35M-parameter model whose
+  actual workload (a few thousand short peptides) runs in well under a second on CPU alone (measured:
+  0.096s for 5 sequences; see smoke test below), GPU acceleration would not meaningfully help this
+  task or the eventual full C1/C2/C3+positives embedding pass. Installed CPU-only instead.
+  `torch.cuda.is_available()` correctly reports `False` on this build — GPU acceleration is not
+  claimed anywhere in this component, consistent with the explicit instruction not to claim it
+  without verification. If a larger ESM-2 checkpoint (150M/650M) is adopted later for better C3
+  hard-challenge quality, this trade-off should be revisited.
+- **Architecture: embedding code runs inside WSL via subprocess, not imported into run.py directly.**
+  `common/embeddings.py` imports `torch` at module level, and torch is *only* installed in the
+  `pu_aop` WSL env — the Windows-side Python running `run.py` for every other stage does not have
+  it. Importing `embeddings.py` directly into `run.py`'s top-level imports would have broken every
+  existing command (`fr1-positives`, `fr1-cluster`, etc.) the moment Windows tried to import torch.
+  Instead, `esm2_cli.py` is a standalone entrypoint that runs *inside* `pu_aop` (reads a small JSON
+  input, writes a small JSON summary report — never raw embedding arrays), invoked from `run.py` via
+  `common/wsl.py`'s `run_in_conda_env`, the exact same subprocess pattern already used for CD-HIT and
+  GraphPart. `run.py` itself never imports `embeddings.py`.
+- **Frozen embedding specification** (`common/embeddings.py` module docstring is the canonical
+  reference — do not change without a new decision-log entry, since every cached embedding and C3
+  centroid downstream will assume it):
+  - Model: `esm2_t12_35M_UR50D`, loaded via `esm.pretrained.esm2_t12_35M_UR50D()`.
+  - Representation layer: **12** — confirmed empirically (`model.num_layers == 12`) to be the
+    model's actual final layer, not assumed from the checkpoint name alone.
+  - Tokenization: the model's own `alphabet.get_batch_converter()`. Verified empirically (not
+    assumed from fair-esm's docs) that `prepend_bos=True`, `append_eos=True`, and that a 4-residue
+    and an 8-residue test sequence tokenize exactly as `[BOS, res..., EOS, PAD...]` — i.e., real
+    residues occupy token positions `1..len(seq)`, confirmed by direct inspection of the token
+    tensor, not inferred.
+  - Pooling: mean over positions `1..len(seq)` only — BOS, EOS, and PAD are excluded by construction
+    (using each sequence's own known length), not a padding-mask heuristic.
+  - Output: float32 numpy array, shape `(480,)` per sequence — `480` confirmed empirically
+    (`model.embed_dim == 480`) and asserted at load time (`load_embedder` raises if it ever differs).
+  - Device: CUDA only if `torch.cuda.is_available()` **and** a real tensor op on it succeeds — never
+    assumed from driver/`nvidia-smi` presence. Currently always resolves to CPU (CPU-only torch
+    build installed).
+  - Inference: `model.eval()` + `torch.no_grad()` — confirmed deterministic by running the same
+    5-sequence smoke-test batch twice and diffing the output arrays (bit-identical).
+- **Ambiguous residues (X/B/Z/U): explicitly NOT silently handled.** `embed_sequences()` validates
+  every sequence against the 20-letter standard alphabet by default and raises
+  `AmbiguousResidueError` (naming every offending peptide_id/sequence/residue) rather than silently
+  embedding or silently dropping them — callers must pass `validate_alphabet=False` only after an
+  explicit, documented policy decision. **That policy decision itself has not been made yet** — this
+  is the same open question as Known Issues #9 (260/5,000 C1 decoys carry X/B/Z/U) and now also
+  applies to whatever fraction of C1/C2/C3/positives carry these residues once full feature
+  generation starts. Flagging here as a prerequisite for that later task, not resolving it now.
+- **Smoke test (`python -m plantaox.c2_pu.run esm2-smoketest`):** 5 fixed, varied peptides
+  (short/medium/long/charged/hydrophobic — mirroring Bucket 3.1's own testing convention). All 5
+  produced finite, correctly-shaped `(480,)` float32 vectors with plausible norms (L2 norm ≈ 6.8-7.3)
+  in 0.096s total on CPU. Report (shape/dtype/finiteness/mean/std/L2-norm per peptide — **no raw
+  embedding vectors**, per the "don't commit large embedding arrays" constraint) written to
+  `data/processed/c2_pu/esm2_smoketest_report.json`.
+- **Tests:** 12 new tests (`tests/c2_pu/test_embeddings.py`) covering device resolution (forced-CPU
+  and CUDA-unavailable paths), model/dimension verification, shape/finiteness, determinism,
+  batch-size invariance (batching by 32 vs. by 1 gives numerically identical results), the
+  ambiguous-residue rejection *and* its explicit opt-out, and input-validation errors (mismatched
+  lengths, duplicate IDs). These import `torch` at module level and are gated by
+  `pytest.importorskip("torch")`, so they run for real inside `pu_aop`
+  (`micromamba run -n pu_aop python -m pytest tests/c2_pu/test_embeddings.py` — 12 passed) and skip
+  cleanly (not fail) when the main suite runs from the Windows `.venv`, which has no torch
+  (`pytest tests/c2_pu` — 73 passed, 1 skipped, confirming zero regression to the existing suite).
+- **Forward note for C3 (not implemented yet, flagging per explicit instruction):** when C3
+  hard-challenge selection is built, its embedding centroid must be fit on the training partition
+  only and applied (not refit) elsewhere, per AGENTS.md rule #5 — this module's job stops at
+  producing per-sequence embeddings; fold-safety is the caller's responsibility when that stage is
+  built.
+
 ## 🔄 Current work in progress
 
-*(Bucket 2, Task 2.1 moved to Completed below — see that section for the close-out evidence.)*
+*(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
+above. Full feature generation — Bucket 3.2's remaining checklist items — is still open, see Next
+tasks below.)*
 
 ## ⚠️ Known issues / open risks
 
@@ -95,7 +177,8 @@
 6. **RESOLVED 2026-10-14.** C1's "5,000 records / 3,786 unique sequences" question was confirmed with the project owner as satisfied at the record level — see Bucket 2, Task 2.1 (close-out) above. Kept here for history; not an open item anymore.
 7. **RESOLVED 2026-10-14.** The `DRVYIHPF` leakage was found, screened conservatively (against all 1,205 positives + 179 conflicts, not just the frozen 834), and fixed by a 1-for-1 deterministic swap — see Bucket 2, Task 2.1 (close-out) above. `pp1_baseline_v1` was unaffected (the sequence was never in the frozen split).
 8. **The one new C1 replacement record (`RL34_XANVE`) has not had an independent manual spot-check**, distinct from the six historical rounds covering the other 4,999 unchanged records. Noted in the Task 2.1 close-out rather than silently assumed covered by the prior rounds.
-9. **NEW: 260 of 5,000 C1 decoys (5.2%) contain non-standard residue codes** — X (251, "unknown residue"), B (7, Asx ambiguity), Z (3, Glx ambiguity), U (3, selenocysteine — a genuine 21st proteinogenic amino acid, not an error). `common/sequence.py`'s `is_standard_alphabet()` (enforced throughout FR1's positive pool) would reject all of these. Found while verifying the Planner's "remove malformed sequences" checklist item for Bucket 2.1 — **not fixed**, since resolving it means either another leakage-style swap (small, same pattern as the `DRVYIHPF` fix) or a documented decision to keep them (relevant: U is biologically real, X/B/Z are genuinely ambiguous/unknown). Out of scope for the leakage-only close-out just completed; flagged for the project owner before Bucket 2.1's "malformed sequences" checkbox can be marked done, and before ESM-2/descriptor feature extraction (Bucket 3) hits these residues downstream.
+9. **260 of 5,000 C1 decoys (5.2%) contain non-standard residue codes** — X (251, "unknown residue"), B (7, Asx ambiguity), Z (3, Glx ambiguity), U (3, selenocysteine — a genuine 21st proteinogenic amino acid, not an error). `common/sequence.py`'s `is_standard_alphabet()` (enforced throughout FR1's positive pool, and now also the default in `embed_sequences()`) would reject all of these. Found while verifying the Planner's "remove malformed sequences" checklist item for Bucket 2.1 — **still not fixed**, now also directly blocking: `embed_sequences()` will raise `AmbiguousResidueError` on any of these 260 the moment full C1 feature extraction is attempted. The policy decision (exclude via another leakage-style swap? keep U but not X/B/Z? keep all and pass `validate_alphabet=False` explicitly?) needs to happen before Bucket 3.2's "extract embeddings for... C1" checklist item can proceed, not just before Bucket 2.1's "malformed sequences" checkbox.
+10. **Ambiguous-residue handling policy has not been decided for any pool** (C1's 260, and whatever fraction of C2/C3/positives turn out to carry X/B/Z/U once those exist) — `embed_sequences()` refuses to make this decision silently (raises `AmbiguousResidueError` by default) by design, but the actual policy is still open. This blocks full feature generation (Bucket 3.2's later checklist items), not the environment/interface/smoke-test work just completed.
 
 ## ⏭️ Next tasks (in order)
 
@@ -105,11 +188,15 @@
    FR1 isn't *scientifically* closed until these are addressed.
 2. **Bucket 2.1 (C1) is closed out** — see Completed tasks above. Optional follow-up: an independent
    spot-check of the one new replacement record (`RL34_XANVE`), low priority.
-3. **In parallel: begin ESM-2 environment setup** (Bucket 3, task 3.2) — the `pu_aop` WSL conda env
-   built for CD-HIT/GraphPart is a natural place to add PyTorch/fair-esm too, since it already solves
-   the "no root access" problem this environment has.
+3. **Bucket 3.2's environment/interface/smoke-test scope is closed out** — see Completed tasks above.
+   Before starting full embedding extraction (the remaining Bucket 3.2 checklist items: "extract
+   embeddings for remaining positives and C1/C2/C3," "verify dimensions/ordering/dtype/completeness"):
+   decide the ambiguous-residue policy (Known Issues #9/#10) — it will otherwise hard-stop on the
+   first contaminated C1 sequence.
 4. **Task 2.2 (C2 — Peptipedia bioactive pool)** can start any time; not blocked on anything above.
-5. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
+5. **Bucket 3.1 (15 physicochemical descriptors)** can also start any time in parallel with C2/C3 —
+   not blocked on the ESM-2 work.
+6. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
 
 ## 📝 Experiment decisions log
 
@@ -135,5 +222,9 @@
 | 2026-10-14 | C1's "5,000 records" acceptance criterion is satisfied at the FASTA-entry level (3,786 unique sequences retained, not resampled for uniqueness) | Confirmed with the project owner. Short 4–50 AA fragments legitimately repeat across species; forcing uniqueness would mean a live UniProt resample, more work for a result the Planner doc doesn't clearly demand. Documented explicitly so the record-vs-unique distinction isn't silently glossed over if this dataset's size is cited later. |
 | 2026-10-14 | C1 leakage (`DRVYIHPF`) resolved by a 1-for-1 deterministic swap from the already-saved candidate pool, screened against all 1,205 FR1 positives *and* the 179 conflicts (not just the 834-sequence frozen split) | Conservative screening confirmed with the project owner — a conflicted sequence might still be a real positive under a different reading of the evidence, so it's excluded from the "safe to use as a decoy" set too. No live UniProt query was needed since `uniprotkb_candidates.fasta` (the original 8,830-candidate universe) was already saved locally; re-applying the documented secondary blocklist to it reproduced exactly 8,233 kept / 597 excluded, matching `stage_c1_provenance.txt` precisely, before any new candidates were drawn. |
 | 2026-10-14 | The corrected C1 pool is a new processed-tier artifact (`data/processed/c2_pu/stage_c1_decoys.fasta`) under the same canonical filename; the raw, still-contaminated original is left untouched at `data/raw/c2_pu/UniProt_decoys/stage_c1_decoys.fasta` | Explicit instruction: preserve the original as historical evidence, version the corrected artifact, rather than editing raw data in place. Mirrors the raw-vs-processed pattern already used for the FR1 positive pool (raw Multi-AOP/AnOxPePred CSVs vs. processed `aop_positives_*.parquet`). |
+| 2026-10-14 | PyTorch installed CPU-only (not CUDA) in the `pu_aop` env, despite a real, verified GPU (RTX 4050, 6GB VRAM) being present | Confirmed with the project owner. A full CUDA build (`cu128` + cuDNN + cuBLAS, ~2.5GB) measured at ~45-60 min over this connection's ~700KB/s throughput; `esm2_t12_35M_UR50D`'s actual workload (a few thousand short peptides) runs in well under a second on CPU alone (measured: 0.096s for 5 sequences). GPU would not meaningfully help this task. `torch.cuda.is_available()` correctly reports `False` — no GPU acceleration is claimed anywhere. Revisit if a larger ESM-2 checkpoint is adopted later. |
+| 2026-10-14 | `common/embeddings.py` (imports torch) is never imported directly into `run.py` (which runs on the Windows-side Python that has no torch) — the actual inference runs inside WSL's `pu_aop` env via a standalone `esm2_cli.py` entrypoint, invoked through `common/wsl.py`'s `run_in_conda_env` | Importing embeddings.py's module-level `import torch` into run.py's top-level imports would have broken every existing command (`fr1-positives`, `fr1-cluster`, etc.) the instant Windows tried to import torch. Mirrors the exact subprocess pattern already used for CD-HIT and GraphPart, which are also WSL-only. `pytest` was added to the `pu_aop` env specifically so the new torch-dependent tests (`test_embeddings.py`) can actually execute for real there, while still skipping cleanly (not failing) when the main suite runs from the Windows `.venv` via `pytest.importorskip("torch")`. |
+| 2026-10-14 | `embed_sequences()` validates every sequence against the standard 20-letter alphabet by default and raises `AmbiguousResidueError` (naming every offending peptide_id/sequence/residue) rather than embedding or dropping non-standard residues (X/B/Z/U) silently; `validate_alphabet=False` is an explicit, named opt-out | Explicit instruction: ambiguous residues must never be silently translated. The actual *policy* (how C1's 260 non-standard sequences, and any future C2/C3/positives cases, should be handled) has NOT been decided — this only guarantees the decision can't be skipped accidentally once full feature generation starts (Known Issues #9/#10). |
+| 2026-10-14 | Representation layer frozen at 12 and embedding dimension at 480, both confirmed by directly inspecting the loaded `esm2_t12_35M_UR50D` model's `num_layers`/`embed_dim` attributes (and `load_embedder` now asserts the dimension at load time) rather than assumed from the checkpoint name | The BOS/EOS/PAD token layout (`prepend_bos=True`, `append_eos=True`, residues at positions `1..len(seq)`) was likewise confirmed by tokenizing two real test sequences and inspecting the token tensor directly, not inferred from fair-esm's documentation. Matches the project's established practice (GraphPart's CLI/denominator semantics were verified the same way in Bucket 1.6) of verifying third-party tool behavior empirically before writing code against it. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

@@ -1,0 +1,60 @@
+{
+  "model_name": "esm2_t12_35M_UR50D",
+  "representation_layer": 12,
+  "device": "cpu",
+  "embedding_dim": 480,
+  "n_sequences": 5,
+  "elapsed_seconds": 0.09638397600008375,
+  "per_peptide": {
+    "SMOKE-SHORT": {
+      "shape": [
+        480
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "mean": 0.004919089376926422,
+      "std": 0.3281913101673126,
+      "l2_norm": 7.19111967086792
+    },
+    "SMOKE-MED": {
+      "shape": [
+        480
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "mean": 0.004784158896654844,
+      "std": 0.3247816264629364,
+      "l2_norm": 7.11638069152832
+    },
+    "SMOKE-CHARGED": {
+      "shape": [
+        480
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "mean": 0.004247047007083893,
+      "std": 0.33402401208877563,
+      "l2_norm": 7.318691253662109
+    },
+    "SMOKE-HYDROPHOBIC": {
+      "shape": [
+        480
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "mean": 0.004087391309440136,
+      "std": 0.3303679823875427,
+      "l2_norm": 7.238553524017334
+    },
+    "SMOKE-LONG": {
+      "shape": [
+        480
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "mean": 0.0053228167816996574,
+      "std": 0.3108748495578766,
+      "l2_norm": 6.811924934387207
+    }
+  }
+}
