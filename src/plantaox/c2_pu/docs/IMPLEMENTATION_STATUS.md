@@ -632,6 +632,95 @@
   producing per-sequence embeddings; fold-safety is the caller's responsibility when that stage is
   built.
 
+### Bucket 3, Task 3.1 — 15-Dimensional Physicochemical Descriptor Extraction
+- **Status: technical acceptance passed.** The canonical 15-descriptor schema is frozen as
+  `descriptors_v1` in `common/descriptors.py`; `common/descriptors.py` is no longer an empty stub
+  (Known Issue cross-reference: resolves the decision-log entry below about Task 2.5's narrower set).
+- **No prior document in the repo enumerated the 15 descriptors** — the Planner's Task 3.1 bullet
+  ("define the exact 15 descriptors") was itself the authoring task, confirmed by direct inspection of
+  `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, `PU_AOP_RESEARCH_CONTEXT.md`, and the Proposal
+  Report PDF (which only confirms the count "15" and, in Component 01's architecture diagram box,
+  "via BioPython" — not itemized for Component 02). A proposed 15-descriptor list was presented to
+  the project owner with explicit trade-offs and **approved before implementation**, per AGENTS.md's
+  "when in doubt" policy.
+- **The frozen 15:** `length`, `molecular_weight`, `net_charge_ph7`, `isoelectric_point`, `gravy`,
+  `aromaticity`, `instability_index`, `aliphatic_index`, `hydrophobic_moment`, `frac_charged`,
+  `frac_polar`, `frac_hydrophobic`, `frac_positive`, `frac_negative`, `frac_proline` — covering both
+  the proposal's own named AOP mechanism axes (FRS ← hydrophobicity/aromaticity; chelation ← charge).
+- **Mid-implementation substitution, flagged not silently made:** the originally-approved 9th feature
+  (Boman index) was dropped after no independently verifiable source for its per-residue scale could
+  be located (two targeted searches turned up only unverified/possibly-confused tables) — reproducing
+  an unverifiable 20-value constant into a frozen scientific schema was judged a worse risk than a
+  documented substitution. Replaced with `frac_proline`: trivially self-verifying (a residue count)
+  and directly motivated by this project's own Task 2.5 finding that FR1 positives are proline-enriched
+  (10.6%) vs. every challenge pool (4.1–5.6%) — a project-evidenced choice, not just a textbook one.
+- **Numerical provenance, not hand-transcribed:** the instability-index dipeptide weight table (`DIWV`,
+  Guruprasad et al. 1990, 400 cells) was downloaded directly from Biopython's
+  `Bio.SeqUtils.ProtParamData` (BSD/Biopython-licensed) rather than reconstructed from memory, since a
+  silently-wrong entry in a 400-cell table would not be caught by ordinary unit tests. The Eisenberg
+  (1984) hydrophobic-moment scale and the Ikai (1980) aliphatic-index coefficients (a=2.9, b=3.9) were
+  verified against ExPASy ProtScale / the original citation before use.
+- **Single source of truth, no divergent copies:** `curation/distribution_audit.py`'s 4 Task-2.5
+  formulas (molecular weight, GRAVY, aromaticity, net charge at pH 7) now import from
+  `common/descriptors.py` instead of defining their own copies — the two modules can no longer
+  silently diverge. `distribution_audit.py`'s public API (function names/signatures) is unchanged, so
+  its existing 9 tests pass unmodified.
+- **Net charge / pI reuse the exact pKa table already validated in Task 2.5** (Expasy/EMBOSS-style),
+  for cross-task consistency. Isoelectric point is a genuine new bisection root-find on the same
+  charge function (always well-defined for a 3–50 AA peptide, since every peptide has both a basic
+  N-terminus and acidic C-terminus ionizable group).
+- **Pipeline (`curation/descriptor_extraction.py` + `run.py::run_fr3_descriptors()`, CLI stage
+  `fr3-descriptors`), run against the real frozen baselines, not a sample:** reads
+  `frozen/pp1_baseline_v1/aop_positives_provisional.parquet` (1,205 records) and
+  `frozen/pp2_baseline_v1/{stage_c1_decoys_v3.fasta, stage_c2_bioactive_unlabeled_v2.fasta,
+  stage_c3_esm2_hard_challenges.fasta, anoxpepred_external_control_validated.csv}` exclusively — never
+  the superseded working-tree copies. Computed and recorded counts match the frozen manifests exactly:
+  FR1 1,205 records → 1,205 unique sequences; **C1 5,000 records → 3,788 unique sequences** (descriptor
+  rows, not 5,000 — record-level duplication does not multiply the feature table, verified directly);
+  C2 2,000; C3 2,325 (the fold-UNION, per the Planner's explicit "acceptable to compute once per unique
+  sequence" allowance — fold-specific training must still go through `c3.py::load_fold_challenges` and
+  join by `peptide_id`, never read descriptors "by fold" from this table directly); external control 38
+  (kept in its own `pool="external_control"`, never merged with C1/C2/C3, confirmed disjoint by test).
+- **C1 peptide IDs, newly assigned:** C1's frozen FASTA headers are raw UniProt deflines, not peptide
+  IDs, and `c1_accession_map_v3.csv` has no `peptide_id` column either — content-addressed `C1-`-
+  prefixed IDs (`common.sequence.make_peptide_id`, consistent with the project's existing `C2-`/`C3-`/
+  `AOP-` convention) were generated from sequence, with every one of the 5,000 source accessions
+  preserved in a separate `fr3_record_map.csv`, joinable by `peptide_id`.
+- **FR1 GraphPart fold/evidence-tier provenance preserved, not re-derived by hand:** `fr3_record_map.csv`
+  attaches `graphpart_fold`/`graphpart_retained` via `curation/splits.py::load_graphpart_splits()` —
+  verified directly against the real artifact: 834 retained (matches `pp1_baseline_v1` exactly), 371
+  excluded, per-fold held-out sizes 124/134/137/173/266 (byte-for-byte match to the frozen split
+  summary, not re-trusted from the manifest).
+- **Numerical validation against the complete real dataset (9,356 descriptor rows, not a sample):**
+  zero missing values, zero non-finite values, zero near-constant features across all 15 descriptors.
+  Diagnostic-only correlation scan flags exactly one pair ≥|0.9|: `length`/`molecular_weight` (r=0.99,
+  expected and already documented as the project's primary known confound by Task 2.5) — reported, not
+  acted on (no feature selection performed, per explicit Task 3.1 scope).
+- **No cross-dataset statistic fit anywhere** (no scaling, centering, PCA) — every value is a raw,
+  per-sequence physicochemical property; learned preprocessing is explicitly deferred to Bucket 3.3.
+- **Outputs** (flat files under `data/processed/c2_pu/`, matching the project's established
+  non-nested, stage-prefixed convention — NOT the Planner Deliverable Registry's aspirational
+  `descriptors.npy + ID map` naming, since the project's actual established convention for every other
+  feature/report table is CSV/parquet, consistent with "use the repository's existing preferred file
+  formats" from the task brief): `fr3_descriptor_schema.json` (versioned name list),
+  `fr3_descriptor_table.parquet` (peptide_id/sequence/pool + 15 columns, one row per unique sequence
+  per pool), `fr3_record_map.csv` (every source record, including C1's 5,000), `fr3_coverage_report.json`,
+  `fr3_validation_report.json`, `fr3_descriptors_provenance.jsonl`.
+- **Tests:** 29 unit tests (`test_descriptors.py` — schema contract, reference-value correctness,
+  length boundaries, representative short/long/charged/aromatic/hydrophobic/cysteine-rich/proline-rich
+  sequences, invalid-alphabet/length rejection, batch==single numerical equivalence, determinism,
+  no-input-mutation, 300-sequence finite-value sweep) + 12 full-file acceptance tests
+  (`test_fr3_descriptors_acceptance.py` — exact frozen-count matching, no duplicate peptide IDs within
+  a pool, record-preservation, GraphPart fold-size matching, schema-order column check, full-dataset
+  finiteness, external-control disjointness, byte-for-byte rerun reproducibility), all gated to skip
+  cleanly when frozen inputs aren't present. `distribution_audit.py`'s existing 9 tests pass unmodified
+  after the refactor. `pp1_baseline_v1` and `pp2_baseline_v1` confirmed untouched via `git status`
+  before and after every run (frozen directories show zero diff).
+- **Scientific vs. technical acceptance:** technically complete and passing every stated acceptance
+  criterion. Scientific sign-off on the descriptor-list substitution (Boman index → `frac_proline`) and
+  on the overall 15-feature composition should still be confirmed by the project owner/supervisor at
+  the next review, consistent with this project's standing distinction between the two.
+
 ## 🔄 Current work in progress
 
 *(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
@@ -739,10 +828,10 @@ tasks below.)*
 5. **AODB/DFBP/BIOPEP-UWM cross-reference:** BIOPEP-UWM done (zero hits in C1/C2/C3/external
    control). AODB/DFBP remain unscreened for documented access reasons (Known Issue #15), not an
    unstarted task — revisit only if either resource becomes reachable or a DFBP hosting URL surfaces.
-6. **Bucket 3.1 (15 physicochemical descriptors)** is the next FR3-prerequisite item — can start any
-   time, not blocked on anything above. Note: this is a DIFFERENT, more complete descriptor set than
-   the 4-descriptor comparison Task 2.5 used internally (`curation/distribution_audit.py`) — don't
-   confuse the two or treat Task 2.5's narrower set as already satisfying Bucket 3.1.
+6. **RESOLVED 2026-10-14. Bucket 3.1 (15 physicochemical descriptors) is complete** — see Completed
+   tasks above (`common/descriptors.py`, schema `descriptors_v1`, CLI stage `fr3-descriptors`). Kept
+   here for history; not an open item anymore. Bucket 3.2's remaining full-embedding-extraction work
+   and Bucket 3.3 (feature fusion) can now both proceed using this frozen 15-feature contract.
 7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
@@ -818,5 +907,8 @@ tasks below.)*
 
 | 2026-10-14 | FR2 frozen as `pp2_baseline_v1` after an independent end-to-end re-verification (fresh `fr2-pool-audit` rerun + the COMPLETE test suite, 177 passed/1 skipped/16m34s, not just the fast development subset) | Per explicit instruction: do not rely only on previous acceptance-report summaries; re-run the full reproducibility-inclusive suite as the final gate. `run_fr2_freeze()` hard-fails if `fr2_pool_audit_report.json`'s `ready_for_technical_acceptance` is False, so the freeze cannot silently proceed past an unresolved finding. |
 | 2026-10-14 | `pp2_baseline_v1`'s manifest declares its `pp1_baseline_v1` dependency explicitly and references (rather than copies) the large Peptipedia raw dump by SHA-256 + DOI | Mirrors the project's established "don't commit large raw datasets" rule (already applied to ESM-2 weights and the Peptipedia dump itself); `verify_frozen_baseline` was run against `pp1_baseline_v1` both immediately before and immediately after the FR2 freeze, confirming zero interference rather than assuming it from "we didn't write to that path." |
+| 2026-10-14 | Bucket 3.1's 15-descriptor schema's 9th feature, originally approved as Boman index, was substituted with `frac_proline` mid-implementation | Two targeted web searches for Boman (2003)'s per-residue solubility scale turned up only unverified/possibly-confused tables, not the original paper's Table 2. Freezing an unverifiable 20-value constant into a schema every downstream FR3/FR4 experiment depends on was judged a worse risk than a documented, project-owner-flagged substitution. `frac_proline` is trivially self-verifying (a residue count) and is itself motivated by this project's own Task 2.5 finding (FR1 positives are Pro-enriched at 10.6% vs. 4.1–5.6% in C1/C2/C3). Flagged for the project owner to confirm or override at next review — not silently decided. |
+| 2026-10-14 | The instability-index dipeptide weight table (Guruprasad et al. 1990, 400 cells) was downloaded verbatim from Biopython's `Bio.SeqUtils.ProtParamData` source file rather than hand-transcribed from training-data memory | A single wrong entry in a 400-cell lookup table would not be caught by a handful of reference-sequence unit tests, and this schema is meant to be frozen project-wide — verified provenance was judged worth the extra step over reconstructing the table from memory. Eisenberg (1984) hydrophobic-moment values and Ikai (1980) aliphatic-index coefficients were independently cross-checked against ExPASy ProtScale / the original citation for the same reason. |
+| 2026-10-14 | Bucket 3.1's descriptor cache uses flat CSV/parquet files directly under `data/processed/c2_pu/` (`fr3_descriptor_table.parquet`, `fr3_record_map.csv`, etc.), not the Planner Deliverable Registry's literal `descriptors.npy + ID map` naming | The Planner's `.npy`-based registry entry predates this project's actual established artifact convention — FR1's own positive pool is `.parquet`, every Task-2.5 descriptor/report table is `.csv`, and the task brief itself says to prefer the repository's existing preferred formats. Matching the registry's literal filename would have meant inventing a second, inconsistent feature-storage convention alongside the one every other stage already uses. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
