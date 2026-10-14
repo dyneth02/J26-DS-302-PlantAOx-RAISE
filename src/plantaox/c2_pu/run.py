@@ -50,6 +50,18 @@ from plantaox.c2_pu.curation.audit import (
 )
 from plantaox.c2_pu.curation.biopep import BIOPEP_CITATION, BIOPEP_SEARCH_URL, fetch_biopep_by_activity
 from plantaox.c2_pu.common.descriptors import DESCRIPTOR_NAMES, SCHEMA_VERSION as DESCRIPTOR_SCHEMA_VERSION
+from plantaox.c2_pu.curation.feature_fusion import (
+    ESM2_DIM,
+    FUSED_DIM,
+    FUSED_FEATURE_NAMES,
+    N_DESCRIPTORS,
+    SCHEMA_VERSION,
+    apply_scaler,
+    build_raw_fused_matrix,
+    compute_all_fold_scalers,
+    load_and_validate_fusion_inputs,
+    peptide_id_order_sha256,
+)
 from plantaox.c2_pu.curation.descriptor_extraction import (
     build_coverage_report,
     build_validation_report,
@@ -824,15 +836,30 @@ def run_fr2_c3_fetch_candidates(target_size: int = C3_TARGET_CANDIDATE_SIZE) -> 
     return {"n_fetched": len(records), "target_size": target_size, "elapsed_seconds": elapsed}
 
 
-def _embed_via_wsl(
-    peptide_ids: list[str], sequences: list[str], cache_path: Path, label: str, force_cpu: bool = False
+def embed_via_wsl(
+    peptide_ids: list[str],
+    sequences: list[str],
+    cache_path: Path,
+    label: str,
+    force_cpu: bool = False,
+    embed_input_path: Path | None = None,
+    summary_report_path: Path | None = None,
+    timeout: float = 1800,
 ) -> dict[str, np.ndarray]:
     """Shell out to esm2_cli.py (inside the WSL pu_aop env) to embed a batch
     of sequences, caching the raw vectors at ``cache_path`` (gitignored --
     never committed, same "don't commit large embedding arrays" rule as
     model weights). Returns peptide_id -> float32 480-dim vector.
+
+    Shared by Bucket 2.3 (C3 hard-challenge embedding) and Bucket 3.2 (full
+    feature-cache embedding) -- the WSL subprocess/caching mechanics don't
+    change between callers, only the input batch and cache path do.
+    ``embed_input_path`` defaults to the historical C3 input-scratch path
+    for backward compatibility with existing callers; a new caller should
+    pass its own path so concurrent/sequential jobs never share one file.
     """
     INTERIM_DIR.mkdir(parents=True, exist_ok=True)
+    embed_input_path = embed_input_path or C3_EMBED_INPUT_PATH
     payload = {
         "peptide_ids": peptide_ids,
         "sequences": sequences,
@@ -841,18 +868,18 @@ def _embed_via_wsl(
         "batch_size": 64,
         "save_embeddings_path": to_wsl_path(cache_path),
     }
-    with open(C3_EMBED_INPUT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+    with open(embed_input_path, "w", encoding="utf-8", newline="\n") as handle:
         json.dump(payload, handle, indent=2)
 
-    summary_report_path = INTERIM_DIR / f"c3_embed_{label}_report.json"
+    summary_report_path = summary_report_path or (INTERIM_DIR / f"c3_embed_{label}_report.json")
     result = run_in_conda_env(
         [
             "python",
             to_wsl_path(ESM2_CLI_SCRIPT_PATH),
-            to_wsl_path(C3_EMBED_INPUT_PATH),
+            to_wsl_path(embed_input_path),
             to_wsl_path(summary_report_path),
         ],
-        timeout=1800,
+        timeout=timeout,
     )
     if result.returncode != 0:
         raise RuntimeError(f"ESM-2 embedding of {label} failed (exit {result.returncode}):\n{result.stdout}\n{result.stderr}")
@@ -924,11 +951,11 @@ def run_fr2_c3_build(force_cpu: bool = False) -> dict:
 
     candidate_id_map = {make_peptide_id(seq, prefix="C3"): seq for _, seq in candidate_records}
 
-    positive_embeddings = _embed_via_wsl(
+    positive_embeddings = embed_via_wsl(
         training_df["peptide_id"].tolist(), training_df["sequence"].tolist(),
         C3_POSITIVE_EMBEDDINGS_CACHE, label="positives", force_cpu=force_cpu,
     )
-    candidate_embeddings = _embed_via_wsl(
+    candidate_embeddings = embed_via_wsl(
         list(candidate_id_map.keys()), list(candidate_id_map.values()),
         C3_CANDIDATE_EMBEDDINGS_CACHE, label="candidates", force_cpu=force_cpu,
     )
@@ -2030,6 +2057,318 @@ def run_fr3_descriptors() -> dict:
     return summary
 
 
+# Bucket 3.2 (remaining work) -- full ESM-2 embedding extraction over the
+# Task 3.1 descriptor contract. The environment, frozen spec, embed_via_wsl
+# subprocess mechanism, and esm2_cli.py entrypoint already exist (Bucket
+# 2.3/3.2 setup) and are reused as-is, not rebuilt. Embeddings are computed
+# once per unique sequence, in the EXACT row order of
+# fr3_descriptor_table.parquet, so alignment with the descriptor table is
+# true by construction rather than a separately-maintained convention.
+#
+# C3 fold-safety is unaffected: this cache holds one embedding per C3-union
+# peptide_id (2,325 rows, same union as the descriptor table) -- it is NOT
+# a fold-specific accessor and does not replace
+# curation/c3.py::load_fold_challenges(path, fold_id). Fold-specific
+# training code must still call that function to get a fold's peptide_ids,
+# then join them against this cache by peptide_id.
+ESM2_MODEL_NAME = "esm2_t12_35M_UR50D"
+ESM2_REPRESENTATION_LAYER = 12
+ESM2_EMBEDDING_DIM = 480
+
+FR3_EMBEDDINGS_CACHE_PATH = INTERIM_DIR / "fr3_embeddings.npz"  # gitignored, regeneratable
+FR3_FRESH_EMBEDDINGS_CACHE_PATH = INTERIM_DIR / "fr3_fresh_embeddings.npz"  # gitignored scratch
+FR3_EMBED_INPUT_PATH = INTERIM_DIR / "fr3_embed_input.json"  # gitignored scratch
+FR3_EMBED_SUMMARY_PATH = INTERIM_DIR / "fr3_embed_report.json"  # gitignored, huge per-peptide scalars
+FR3_EMBEDDINGS_MANIFEST_PATH = PROCESSED_DIR / "fr3_embeddings_manifest.json"
+FR3_EMBEDDINGS_VALIDATION_REPORT_PATH = PROCESSED_DIR / "fr3_embeddings_validation_report.json"
+FR3_EMBEDDINGS_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr3_embeddings_provenance.jsonl"
+
+# Bucket 2.3's own C3 embedding caches, already built under the identical
+# frozen spec, plus this stage's own prior combined output (so re-running
+# fr3-embeddings is idempotent and never re-embeds work it already did) --
+# checked for direct reuse before any fresh ESM-2 inference is run.
+EXISTING_EMBEDDING_CACHES = (
+    FR3_EMBEDDINGS_CACHE_PATH,
+    C3_POSITIVE_EMBEDDINGS_CACHE,
+    C3_CANDIDATE_EMBEDDINGS_CACHE,
+)
+
+
+def _load_reusable_embeddings(caches: tuple[Path, ...] = EXISTING_EMBEDDING_CACHES) -> tuple[dict[str, np.ndarray], list[str]]:
+    """Load peptide_id -> vector from every existing, already-built
+    embedding cache under the frozen spec, so Bucket 3.2 doesn't re-run
+    ESM-2 on sequences already embedded elsewhere (Bucket 2.3's C3
+    positive/candidate caches). Any cached vector that fails a basic
+    shape/dtype/finiteness sanity check is reported as incompatible and
+    excluded from reuse (forcing it to be freshly embedded) rather than
+    trusted blindly.
+    """
+    reusable: dict[str, np.ndarray] = {}
+    incompatible: list[str] = []
+    for cache_path in caches:
+        if not cache_path.exists():
+            continue
+        with np.load(cache_path, allow_pickle=False) as npz:
+            ids = npz["peptide_ids"]
+            matrix = npz["embeddings"]
+        for i, pid in enumerate(ids):
+            vec = matrix[i]
+            if vec.shape != (ESM2_EMBEDDING_DIM,) or vec.dtype != np.float32 or not np.isfinite(vec).all():
+                incompatible.append(f"{pid} ({cache_path.name}): shape={vec.shape} dtype={vec.dtype}")
+                continue
+            reusable[str(pid)] = vec
+    return reusable, incompatible
+
+
+def run_fr3_embeddings(force_cpu: bool = False, force_regenerate: bool = False) -> dict:
+    """Bucket 3.2 (remaining work): extract/reuse the frozen 480-dim
+    esm2_t12_35M_UR50D layer-12 mean-pooled embedding for every one of the
+    9,356 unique pool-specific sequences in fr3_descriptor_table.parquet
+    (Task 3.1's frozen output), in that table's exact row order.
+
+    ``force_regenerate=True`` ignores every existing cache and re-embeds
+    everything from scratch (for an independent reproducibility check);
+    the default reuses Bucket 2.3's C3 caches wherever their peptide_ids
+    already cover what's needed here, and only invokes ESM-2 fresh for the
+    remainder.
+    """
+    if not FR3_DESCRIPTOR_TABLE_PATH.exists():
+        raise FileNotFoundError(
+            f"{FR3_DESCRIPTOR_TABLE_PATH} not found -- run `fr3-descriptors` (Task 3.1) first."
+        )
+    descriptor_df = pd.read_parquet(FR3_DESCRIPTOR_TABLE_PATH)
+    peptide_ids = descriptor_df["peptide_id"].tolist()
+    sequences = descriptor_df["sequence"].tolist()
+    pools = descriptor_df["pool"].tolist()
+
+    if len(set(peptide_ids)) != len(peptide_ids):
+        dupes = descriptor_df[descriptor_df.duplicated("peptide_id", keep=False)]["peptide_id"].tolist()
+        raise ValueError(
+            f"fr3_descriptor_table.parquet has {len(dupes)} globally duplicate peptide_id rows -- "
+            f"refusing to embed (would silently conflate distinct sequences): {dupes[:10]}"
+        )
+    id_to_sequence = dict(zip(peptide_ids, sequences))
+
+    reused, incompatible = ({}, []) if force_regenerate else _load_reusable_embeddings()
+    reused_for_this_run = {pid: vec for pid, vec in reused.items() if pid in id_to_sequence}
+
+    to_embed_ids = [pid for pid in peptide_ids if pid not in reused_for_this_run]
+    to_embed_sequences = [id_to_sequence[pid] for pid in to_embed_ids]
+
+    embeddings: dict[str, np.ndarray] = dict(reused_for_this_run)
+    elapsed_seconds = 0.0
+    if to_embed_ids:
+        import time as _time
+
+        start = _time.time()
+        fresh = embed_via_wsl(
+            to_embed_ids,
+            to_embed_sequences,
+            FR3_FRESH_EMBEDDINGS_CACHE_PATH,
+            label="fr3_fresh",
+            force_cpu=force_cpu,
+            embed_input_path=FR3_EMBED_INPUT_PATH,
+            summary_report_path=FR3_EMBED_SUMMARY_PATH,
+            timeout=1800,
+        )
+        elapsed_seconds = _time.time() - start
+        embeddings.update(fresh)
+
+    missing = [pid for pid in peptide_ids if pid not in embeddings]
+    if missing:
+        raise RuntimeError(f"{len(missing)} peptide_id(s) have no embedding after extraction: {missing[:10]}")
+
+    matrix = np.stack([embeddings[pid] for pid in peptide_ids]).astype(np.float32)
+    np.savez_compressed(
+        FR3_EMBEDDINGS_CACHE_PATH,
+        peptide_ids=np.array(peptide_ids),
+        embeddings=matrix,
+        pools=np.array(pools),
+    )
+
+    coverage = {
+        pool: int((descriptor_df["pool"] == pool).sum()) for pool in descriptor_df["pool"].unique()
+    }
+    manifest = {
+        "model_name": ESM2_MODEL_NAME,
+        "representation_layer": ESM2_REPRESENTATION_LAYER,
+        "embedding_dim": ESM2_EMBEDDING_DIM,
+        "total_embeddings": int(len(peptide_ids)),
+        "reused_from_existing_caches": int(len(reused_for_this_run)),
+        "freshly_embedded": int(len(to_embed_ids)),
+        "incompatible_cached_vectors_excluded": incompatible,
+        "coverage_by_pool": coverage,
+        "peptide_id_order_sha256": hashlib.sha256("\n".join(peptide_ids).encode("utf-8")).hexdigest(),
+        "embeddings_cache_sha256": hashlib.sha256(FR3_EMBEDDINGS_CACHE_PATH.read_bytes()).hexdigest(),
+        "fresh_embedding_elapsed_seconds": elapsed_seconds,
+        "descriptor_table_source": str(FR3_DESCRIPTOR_TABLE_PATH),
+    }
+    with open(FR3_EMBEDDINGS_MANIFEST_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(manifest, handle, indent=2)
+
+    validation = {
+        "n_rows": int(len(peptide_ids)),
+        "shape_correct": bool(matrix.shape == (len(peptide_ids), ESM2_EMBEDDING_DIM)),
+        "dtype_correct": bool(matrix.dtype == np.float32),
+        "all_finite": bool(np.isfinite(matrix).all()),
+        "peptide_id_order_matches_descriptor_table": bool(peptide_ids == descriptor_df["peptide_id"].tolist()),
+        "l2_norm_min": float(np.linalg.norm(matrix, axis=1).min()),
+        "l2_norm_max": float(np.linalg.norm(matrix, axis=1).max()),
+        "l2_norm_mean": float(np.linalg.norm(matrix, axis=1).mean()),
+    }
+    with open(FR3_EMBEDDINGS_VALIDATION_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(validation, handle, indent=2)
+
+    summary = {
+        "manifest": manifest,
+        "validation": validation,
+        "outputs": {
+            "embeddings_cache": str(FR3_EMBEDDINGS_CACHE_PATH),
+            "manifest": str(FR3_EMBEDDINGS_MANIFEST_PATH),
+            "validation_report": str(FR3_EMBEDDINGS_VALIDATION_REPORT_PATH),
+        },
+    }
+    append_provenance_log(
+        FR3_EMBEDDINGS_PROVENANCE_LOG_PATH,
+        {"stage": "fr3_embeddings_extraction", "summary": {k: v for k, v in summary.items() if k != "validation"} | {"validation": validation}},
+    )
+    return summary
+
+
+# Bucket 3.3 -- feature fusion and leakage-safe preprocessing. Reuses Task
+# 3.1's descriptor table and Task 3.2's embedding cache as-is (neither is
+# recomputed here). See curation/feature_fusion.py's module docstring for
+# the full leakage-safe-scaling design rationale (mirrors the C3 fold-safe
+# centroid precedent: a fold's scaler is fit on that fold's training
+# positives ONLY, never on held-out positives or any unlabeled pool).
+FR3_FUSION_SCHEMA_PATH = PROCESSED_DIR / "fr3_fusion_schema.json"
+FR3_FUSED_RAW_CACHE_PATH = INTERIM_DIR / "fr3_fused_raw.npz"  # gitignored, regeneratable
+FR3_FUSION_SCALERS_PATH = PROCESSED_DIR / "fr3_fusion_scalers.json"
+FR3_FUSION_VALIDATION_REPORT_PATH = PROCESSED_DIR / "fr3_fusion_validation_report.json"
+FR3_FUSION_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr3_fusion_provenance.jsonl"
+
+
+def run_fr3_feature_fusion(n_folds: int = 5) -> dict:
+    """Bucket 3.3: concatenate Task 3.1's descriptor table + Task 3.2's
+    embedding cache into a 495-dim raw fused matrix, then fit one
+    leakage-safe z-score scaler per GraphPart fold (training-positives-only
+    -- see curation/feature_fusion.py). Does not fit anything on the full
+    dataset, does not materialize 5 separate scaled caches (that full-
+    fused-per-fold cache responsibility belongs to Task 3.4), and does not
+    touch any frozen FR1/FR2 artifact or the Task 3.1/3.2 outputs it reads.
+    """
+    for p in (FR3_DESCRIPTOR_TABLE_PATH, FR3_EMBEDDINGS_CACHE_PATH, FR3_RECORD_MAP_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Task 3.1 (`fr3-descriptors`) and Task 3.2 (`fr3-embeddings`) first.")
+
+    descriptor_df = pd.read_parquet(FR3_DESCRIPTOR_TABLE_PATH)
+    with np.load(FR3_EMBEDDINGS_CACHE_PATH, allow_pickle=False) as npz:
+        embedding_peptide_ids = npz["peptide_ids"]
+        embedding_matrix = npz["embeddings"]
+        embedding_pools = npz["pools"]
+    record_map_df = pd.read_csv(FR3_RECORD_MAP_PATH)
+
+    load_and_validate_fusion_inputs(descriptor_df, embedding_peptide_ids, embedding_pools)
+
+    peptide_ids = descriptor_df["peptide_id"].tolist()
+    fused_matrix = build_raw_fused_matrix(descriptor_df, embedding_matrix)
+    if fused_matrix.shape != (len(peptide_ids), FUSED_DIM):
+        raise RuntimeError(f"Unexpected fused matrix shape {fused_matrix.shape}, expected ({len(peptide_ids)}, {FUSED_DIM}).")
+    if not np.isfinite(fused_matrix).all():
+        raise RuntimeError("Non-finite value(s) in the raw fused matrix -- refusing to proceed to scaler fitting.")
+
+    np.savez_compressed(
+        FR3_FUSED_RAW_CACHE_PATH,
+        peptide_ids=np.array(peptide_ids),
+        pools=np.array(descriptor_df["pool"].tolist()),
+        features=fused_matrix,
+        feature_names=np.array(FUSED_FEATURE_NAMES),
+    )
+
+    fold_scalers = compute_all_fold_scalers(peptide_ids, fused_matrix, record_map_df, n_folds=n_folds)
+
+    # Cross-fold leakage check: no fold's training set may contain another
+    # fold's held-out positives, and a fold's own held-out positives must
+    # never appear in its own training set.
+    for fold_id, scaler in fold_scalers.items():
+        training_set = set(scaler["training_peptide_ids"])
+        held_out_set = set(scaler["held_out_peptide_ids"])
+        if training_set & held_out_set:
+            raise RuntimeError(f"Fold {fold_id}: {len(training_set & held_out_set)} peptide_id(s) in both its own training and held-out sets.")
+
+    schema = {
+        "schema_version": SCHEMA_VERSION,
+        "fused_dim": FUSED_DIM,
+        "esm2_dim": ESM2_DIM,
+        "n_descriptors": N_DESCRIPTORS,
+        "feature_order": "esm2_0..esm2_479, then descriptors_v1's 15 names in their frozen order",
+        "feature_names": list(FUSED_FEATURE_NAMES),
+        "descriptor_schema_version": DESCRIPTOR_SCHEMA_VERSION,
+        "n_folds": n_folds,
+    }
+    with open(FR3_FUSION_SCHEMA_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(schema, handle, indent=2)
+
+    scalers_out = {
+        str(fold_id): {
+            "mean": scaler["mean"].tolist(),
+            "std": scaler["std"].tolist(),
+            "n_training_samples": scaler["n_training_samples"],
+            "training_peptide_ids": scaler["training_peptide_ids"],
+            "held_out_peptide_ids": scaler["held_out_peptide_ids"],
+        }
+        for fold_id, scaler in fold_scalers.items()
+    }
+    with open(FR3_FUSION_SCALERS_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(scalers_out, handle, indent=2)
+
+    # Validation: for each fold, confirm the scaler's own training rows
+    # standardize to mean~0/std~1 (sanity on the fit itself), and that
+    # applying it to EVERY row (training, held-out, and every unlabeled
+    # pool) produces finite output -- never fit on anything but that
+    # fold's training rows.
+    id_to_row = {pid: i for i, pid in enumerate(peptide_ids)}
+    per_fold_validation = {}
+    for fold_id, scaler in fold_scalers.items():
+        training_rows = fused_matrix[[id_to_row[pid] for pid in scaler["training_peptide_ids"]]]
+        transformed_training = apply_scaler(training_rows, scaler)
+        transformed_all = apply_scaler(fused_matrix, scaler)
+        per_fold_validation[str(fold_id)] = {
+            "n_training_samples": scaler["n_training_samples"],
+            "n_held_out_samples": len(scaler["held_out_peptide_ids"]),
+            "training_rows_transformed_mean_abs_max": float(np.abs(transformed_training.mean(axis=0)).max()),
+            "training_rows_transformed_std_min_max": [
+                float(transformed_training.std(axis=0, ddof=0).min()),
+                float(transformed_training.std(axis=0, ddof=0).max()),
+            ],
+            "all_rows_transformed_all_finite": bool(np.isfinite(transformed_all).all()),
+        }
+
+    validation = {
+        "n_rows": int(len(peptide_ids)),
+        "fused_dim_correct": bool(fused_matrix.shape[1] == FUSED_DIM),
+        "raw_matrix_all_finite": bool(np.isfinite(fused_matrix).all()),
+        "peptide_id_order_sha256": peptide_id_order_sha256(peptide_ids),
+        "per_fold": per_fold_validation,
+    }
+    with open(FR3_FUSION_VALIDATION_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(validation, handle, indent=2)
+
+    summary = {
+        "schema": {k: v for k, v in schema.items() if k != "feature_names"},
+        "fold_training_sizes": {str(k): v["n_training_samples"] for k, v in fold_scalers.items()},
+        "validation": {k: v for k, v in validation.items() if k != "per_fold"} | {"per_fold": per_fold_validation},
+        "outputs": {
+            "fusion_schema": str(FR3_FUSION_SCHEMA_PATH),
+            "fused_raw_cache": str(FR3_FUSED_RAW_CACHE_PATH),
+            "fusion_scalers": str(FR3_FUSION_SCALERS_PATH),
+            "validation_report": str(FR3_FUSION_VALIDATION_REPORT_PATH),
+        },
+    }
+    append_provenance_log(FR3_FUSION_PROVENANCE_LOG_PATH, {"stage": "fr3_feature_fusion", "summary": summary})
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -2053,6 +2392,8 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr2-freeze", help="Freeze the validated FR2 baseline as pp2_baseline_v1 (Bucket 2.7)")
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     sub.add_parser("fr3-descriptors", help="15-descriptor physicochemical feature extraction over frozen FR1/FR2 pools (Bucket 3.1)")
+    sub.add_parser("fr3-embeddings", help="Full ESM-2 embedding extraction over the Task 3.1 descriptor contract (Bucket 3.2)")
+    sub.add_parser("fr3-feature-fusion", help="Fuse descriptors + embeddings into a 495-dim feature matrix with leakage-safe per-fold scalers (Bucket 3.3)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -2124,6 +2465,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr3-descriptors":
         summary = run_fr3_descriptors()
         print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr3-embeddings":
+        summary = run_fr3_embeddings()
+        print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr3-feature-fusion":
+        summary = run_fr3_feature_fusion()
+        print(json.dumps({k: v for k, v in summary.items() if k != "validation"}, indent=2, default=str))
         return 0
     return 1
 
