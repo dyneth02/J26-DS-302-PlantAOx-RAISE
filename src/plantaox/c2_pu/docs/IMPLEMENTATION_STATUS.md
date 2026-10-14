@@ -371,8 +371,14 @@
 - **The remaining 14 "other" homology candidates were reviewed individually, not bulk-excluded by CD-HIT
   cluster membership** (per explicit instruction). **3 resolved automatically as a side effect of
   Decision A** (their shared member was one of the 8 exact duplicates, now gone from C1); **11 remain**
-  as genuine (≥15 AA, not short-fragment-artifact) near-duplicate C1↔C2 pairs. All 11 are C1↔C2 only —
-  **none involve FR1 positives**, so there is no label-leakage mechanism, unlike Decision B. Inspected
+  as genuine (≥15 AA, not short-fragment-artifact) near-duplicate C1↔C2 pairs. **Re-verified precisely
+  2026-10-14 (Task 2.6 follow-up):** 2 of these 11 CD-HIT clusters also contain short (3 AA) FR1-
+  positive fragments as incidental members — but strictly as the same short-fragment chance-match
+  noise already established (below the 15 AA interpretability floor), never as part of the ≥15 AA
+  "real" homology relationship itself, which in all 11 clusters is C1↔C2 only. **Approved 2026-10-14
+  by the project owner as a documented PP1 limitation**, conditional on exactly this confirmation
+  (that the real, length-qualifying relationship never involves FR1 positives) — condition verified,
+  not assumed. No label-leakage mechanism exists here, unlike Decision B. Inspected
   each family: ribosomal bL36-type zinc-ribbon proteins, protamine-like cationic peptides, an
   Antennapedia-homeodomain-type cell-penetrating peptide, a β-actin fragment, a proline-rich
   gliadin/gluten-like repeat, and cysteine-rich defensin-like peptides — none are antioxidant-
@@ -458,6 +464,56 @@
 - **Tests:** 9 unit tests (`test_distribution_audit.py`, including a sanity check that KS correctly
   distinguishes identical vs. obviously-different synthetic distributions) + 4 full-file acceptance
   tests. Full suite: 155 passed, 1 skipped, zero regression.
+
+### Bucket 2, Task 2.6 — External Inactive-Control Preparation
+- **Status: complete and technically accepted.** Validated the frozen `pp1_baseline_v1`'s 38-record
+  AnOxPePred external inactive-control set (re-confirmed count directly from the frozen artifact, not
+  assumed) and ran a dedicated homology audit against the FR1 positive pool using real pairwise
+  alignments (EMBOSS `needleall`), not CD-HIT percent identity.
+- **Integrity confirmed:** 38 records, 38 unique IDs, 38 unique sequences, standard alphabet, all
+  within 3–50 AA, stored lengths match actual sequence lengths exactly. **Zero exact-sequence overlap**
+  with FR1 positives, the 179 conflicts, C1 v3, C2 v2, or C3 (re-verified independently here, not just
+  carried over from Bucket 2.4's audit).
+- **A real completeness bug caught and fixed before trusting any result:** EMBOSS `needleall`'s own
+  default `-minscore 1.0` silently DROPS any aligned pair scoring below it from the output entirely —
+  confirmed empirically (the first real run returned only 35,076 of the expected 38×1,205=45,790
+  pairs). Fixed by setting `-minscore` far below any realistic score (`curation/homology_alignment.py`);
+  the corrected run returned all 45,790 pairs, verified by an explicit count check that raises if any
+  are missing (`run_fr2_external_control_build` now hard-fails rather than silently accepting a
+  short result).
+- **Homology audit result: zero genuine hits.** Using the same length-floor discipline established in
+  Bucket 2.4 (≥15 AA for a percent-identity to be biologically interpretable, since shorter alignments
+  are dominated by chance substring matches), **no external-control/positive pair reaches both ≥15 AA
+  alignment length and ≥40% identity** (the Planner's proposed boundary) — the highest identity among
+  length-≥15 AA pairs is 33.3%, well below threshold. 394 pairs *do* exceed 40% identity, but every one
+  of them is a ≤12 AA short-fragment chance match (max alignment length 12), the same artifact already
+  documented for Bucket 2.4's cross-pool scan — reported in full for transparency
+  (`ext_control_homology_pairs.csv`, all 45,790 pairs), not hidden, but explicitly not counted as real
+  homology.
+- **Held-out evaluation-fold independence confirmed, not merely assumed:** since the global screen
+  (all 1,205 positives) found zero real hits, and any GraphPart fold's held-out positives are a strict
+  subset of those 1,205, there is structurally no possible fold-specific violation either — stated
+  explicitly in the report with that reasoning, plus a per-hit fold lookup column that would have
+  populated if any real hit existed.
+- **The 2 BIOPEP-UWM-vs-AnOxPePred conflicts reconciled, not silently resolved.** `AOP-37BD4B4933`
+  ("FCM") and `AOP-DDCD54E4BA` ("YPQLLPNE") are reported inactive by AnOxPePred's own FRS/Chelator
+  assays (traceable to specific DOIs: 10.1007/s13594-015-0226-5 and 10.1016/j.foodchem.2016.02.119)
+  but independently listed as "Antioxidative peptide" in BIOPEP-UWM (a database annotation with no
+  per-record assay/reference metadata visible in the scraped table). **Recommendation presented, not
+  unilaterally applied:** retain both in the primary external control, per the same assay-outranks-
+  undocumented-annotation precedent already established for FR1's own Multi-AOP/AnOxPePred conflict
+  policy (Bucket 1) — flagged explicitly (`has_biopep_antioxidative_conflict` column in the validated
+  artifact) rather than excluded or quietly ignored.
+- **Versioned, not overwritten:** `anoxpepred_external_control_validated.csv` is a new artifact (same
+  38 records as the frozen original, plus 2 validation columns) — the frozen `pp1_baseline_v1` copy is
+  confirmed untouched via `git status`.
+- **Critical labeling rule maintained throughout:** every output explicitly states these 38 records are
+  inactive *under the AnOxPePred FRS/Chelator assay definitions*, not proven universally non-
+  antioxidant — and remain structurally separate from C1/C2/C3 (never merged into the unlabeled
+  training pools, consistent with AGENTS.md rule 2).
+- **Tests:** 3 new unit tests (`test_homology_alignment.py`, including a regression test pinning the
+  `-minscore` fix) + 9 full-file acceptance tests (`test_fr2_external_control_acceptance.py`, including
+  byte-identical reproducibility of a full re-run). Full suite: 166 passed, 1 skipped, zero regression.
 
 ### Bucket 3, Task 3.2 — ESM-2 Environment Setup and Smoke Test
 - **Status: environment configured, interface built and tested, smoke test passing.** This is
@@ -586,11 +642,14 @@ tasks below.)*
 14. **RESOLVED 2026-10-14 (Decision B).** `C2-EFDBC5460B` ("LYQEPVLGPVRGPFP") excluded as a
     conservative leakage-risk decision (needle-alignment-confirmed 77.8% full-length identity to an
     E1 positive) and replaced. Canonical C2 artifact is now `stage_c2_bioactive_unlabeled_v2.fasta`.
-    **11 of the 14 other candidate C1↔C2 homology pairs remain** (3 resolved as a side effect of
-    Decision A) — reviewed individually, recommended to accept as a documented limitation (no
-    FR1-positive involvement, no plausible antioxidant mechanism in any of the peptide families
-    involved); not unilaterally acted on, open to project-owner override. See Bucket 2.4 resolution
-    section above.
+    **RESOLVED (accepted as a documented limitation) 2026-10-14.** 11 of the 14 other candidate C1↔C2
+    homology pairs remain (3 resolved as a side effect of Decision A) — reviewed individually, no
+    plausible antioxidant mechanism in any peptide family involved. **Explicitly approved by the
+    project owner** as a documented PP1 limitation, conditional on the audit confirming no FR1-
+    positive involvement in the real (≥15 AA) homology relationship — condition re-verified precisely
+    (2 of the 11 clusters contain incidental short FR1-positive fragments as the same already-
+    documented chance-match noise, never part of the ≥15 AA relationship itself). No further
+    exclusion applied. See Bucket 2.4 resolution section above.
 15. **AODB and DFBP remain unscreened**, for a documented access reason rather than an unstarted
     task: AODB's server returned HTTP 502 + an expired TLS certificate; DFBP has no discoverable
     hosting URL. BIOPEP-UWM **is** screened (zero hits in C1 v3/C2 v2/C3). Revisit if either resource
@@ -697,5 +756,10 @@ tasks below.)*
 
 | 2026-10-14 | Task 2.5's distribution comparison uses a small, independently-computed descriptor set (`curation/distribution_audit.py`: molecular weight, net charge at pH 7, GRAVY, aromaticity), not Bucket 3.1's 15-descriptor pipeline | Bucket 3.1's `common/descriptors.py` is still an empty scaffold stub (not started). Implementing it properly belongs to Bucket 3.1; Task 2.5 only needed enough descriptors to detect distributional shortcuts, so a narrower, clearly-labeled, independent implementation avoided either blocking on Bucket 3.1 or creating two divergent "canonical" descriptor implementations later. |
 | 2026-10-14 | Distributional mismatch between FR1 positives and C1/C2/C3 reported via two-sample KS-test statistics, not solely via plots | Quantifies "how different" precisely (statistic + p-value per pool per descriptor) rather than relying on visual judgment of histogram overlays, which the Planner's own "do not claim [UMAP/t-SNE] prove separation" caution suggests is exactly the kind of imprecision this task should avoid. matplotlib was not installed for this (no plotting library was in the environment); one summary chart was rendered directly for the user via the session's visualization tool instead of adding a new project dependency for a single exploratory comparison. |
+
+| 2026-10-14 | The 11 remaining C1↔C2 near-duplicate homology families are accepted as a documented PP1 limitation, no further exclusion applied | Explicit project-owner approval, conditional on the audit confirming zero FR1-positive involvement in the real (≥15 AA) homology relationship. Re-verified precisely (not just re-asserted): 2 of the 11 clusters contain short FR1-positive fragments, but strictly as already-documented short-fragment chance-match noise below the 15 AA interpretability floor, never part of the qualifying relationship. |
+| 2026-10-14 | Bucket 2.6's external-control-vs-positive homology audit uses EMBOSS `needleall` (real global alignment, all 45,790 pairs) instead of CD-HIT percent identity | Explicit instruction: CD-HIT's shorter-sequence-normalized identity is already known (Bucket 2.4) to be unreliable for very short peptides. `needleall` reports identity, similarity, gaps, and alignment length directly per pair, batched in one call rather than one `needle` call per pair. |
+| 2026-10-14 | `needleall`'s default `-minscore 1.0` is overridden to a very low value (−10,000) in `curation/homology_alignment.py::run_needleall` | Found empirically: the default silently drops any pair scoring below it from the output entirely (a 38×1,205 run returned only 35,076 of the expected 45,790 pairs at the default). A completeness-audited homology scan must account for every pair, including irrelevant low/negative-score ones, so results can be trusted as complete rather than silently partial. |
+| 2026-10-14 | The 2 BIOPEP-UWM-vs-AnOxPePred external-control conflicts (`AOP-37BD4B4933`/"FCM", `AOP-DDCD54E4BA`/"YPQLLPNE") are flagged (`has_biopep_antioxidative_conflict`) but NOT excluded from the primary external-control set — a recommendation presented for approval, not yet confirmed by the project owner | Per explicit instruction to seek approval before a primary-vs-sensitivity-set policy change -- this row records the proposal and its rationale (AnOxPePred's FRS/Chelator assay results are per-sequence, DOI-traceable experimental evidence; BIOPEP-UWM's listing is a database annotation with no per-record assay/reference metadata visible in the scraped table; the project's own established precedent favors assay evidence), not a decision. Update this row once the project owner responds. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

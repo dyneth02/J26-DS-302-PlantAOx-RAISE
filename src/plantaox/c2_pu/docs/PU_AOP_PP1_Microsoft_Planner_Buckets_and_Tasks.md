@@ -187,11 +187,13 @@ IMPLEMENTATION_STATUS.md.)*
 - [x] Record potential family/organism/source shortcuts and residual biases. *(`distribution_shortcut_report.json`: C1 spans 1,708 organisms, no single organism >2.1% share; C2 spans 123 activity tags, "Therapeutic" largest at 14.4%; FR1 positives have NO organism metadata available — documented as an unchecked gap, not assumed clean)*
 
 ## 2.6 — External Inactive-Control Preparation
-- [ ] Extract genuinely experimentally tested inactive AnOxPePred peptides.
-- [ ] Keep them separate from C1/C2/C3 and training unlabeled labels.
-- [ ] Run homology checks against the training-positive pool at the proposed 40% boundary.
-- [ ] Exclude violating entries and document reasons.
-- [ ] Freeze external negative-control records and their provenance.
+*(Status 2026-10-14: COMPLETE and technically accepted. 38 records validated against the frozen
+`pp1_baseline_v1` copy; canonical validated artifact is `anoxpepred_external_control_validated.csv`.)*
+- [x] Extract genuinely experimentally tested inactive AnOxPePred peptides. *(already extracted in Bucket 1 as `anoxpepred_inactives_clean.csv`, frozen in `pp1_baseline_v1`; 38 records re-verified here, not re-extracted)*
+- [x] Keep them separate from C1/C2/C3 and training unlabeled labels. *(confirmed zero exact-sequence overlap with C1 v3/C2 v2/C3/positives/179 conflicts; the labeling rule — "inactive under AnOxPePred's assay, not universally proven non-antioxidant" — stated explicitly in every output)*
+- [x] Run homology checks against the training-positive pool at the proposed 40% boundary. *(EMBOSS `needleall`, all 38×1,205=45,790 pairs, not CD-HIT shortcut; zero pairs reach both ≥40% identity and a biologically-interpretable ≥15 AA alignment length — the 394 pairs above 40% are all ≤12 AA short-fragment chance matches, reported not hidden; held-out-fold independence confirmed structurally)*
+- [x] Exclude violating entries and document reasons. *(zero violations found — nothing to exclude; the 2 BIOPEP-UWM-vs-AnOxPePred conflicts are flagged, with a recommendation to retain presented for project-owner approval, not unilaterally excluded)*
+- [x] Freeze external negative-control records and their provenance. *("Freeze" realized as `anoxpepred_external_control_validated.csv` + `ext_control_validation_report.json` + `fr2_ext_control_provenance.jsonl`; full immutable-package freeze happens at Task 2.7/FR2 freeze, which bundles this output)*
 
 ## 2.7 — FR2 Acceptance Testing and Freeze
 - [ ] Regenerate all three pools from frozen scripts/configs.

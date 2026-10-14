@@ -247,3 +247,12 @@ data/interim/c2_pu/c3_candidate_embeddings.npz
 data/interim/c2_pu/c3_embed_input.json
 data/interim/c2_pu/c3_embed_positives_report.json
 data/interim/c2_pu/c3_embed_candidates_report.json
+
+# Bucket 2.6 external-control homology audit -- raw EMBOSS needleall
+# alignment text (~20MB, all 45,790 external-control x FR1-positive pairs
+# in full srspair format). Fully regeneratable from the frozen external
+# control + positive pool; the parsed, compact summary
+# (ext_control_homology_pairs.csv) is committed instead.
+data/interim/c2_pu/ext_control_homology/needleall_output.pair
+data/interim/c2_pu/ext_control_homology/external_control.fasta
+data/interim/c2_pu/ext_control_homology/positives.fasta

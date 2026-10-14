@@ -53,6 +53,7 @@ from plantaox.c2_pu.curation.distribution_audit import (
     compare_pools_ks,
     pool_descriptor_table,
 )
+from plantaox.c2_pu.curation.homology_alignment import parse_needleall_pairs, run_needleall
 from plantaox.c2_pu.curation.uniref import fetch_uniref50_candidates, UNIREF50_QUERY, UNIREF50_SORT
 from plantaox.c2_pu.curation.splits import (
     GRAPHPART_DENOMINATOR,
@@ -1593,6 +1594,196 @@ def run_fr2_distribution_audit() -> dict:
     return summary
 
 
+# Bucket 2.6 -- External Inactive-Control Preparation.
+FROZEN_BASELINE_DIR = PROCESSED_DIR / "frozen" / "pp1_baseline_v1"
+FROZEN_EXTERNAL_CONTROL_PATH = FROZEN_BASELINE_DIR / "anoxpepred_inactives_clean.csv"
+FROZEN_POSITIVE_POOL_PATH = FROZEN_BASELINE_DIR / "aop_positives_provisional.parquet"
+FROZEN_CONFLICT_LOG_PATH = FROZEN_BASELINE_DIR / "label_conflicts_anox_vs_multiaop.csv"
+
+EXT_CONTROL_HOMOLOGY_DIR = INTERIM_DIR / "ext_control_homology"
+EXT_CONTROL_NEEDLEALL_RAW_PATH = EXT_CONTROL_HOMOLOGY_DIR / "needleall_output.pair"  # gitignored, large
+
+EXT_CONTROL_VALIDATED_PATH = PROCESSED_DIR / "anoxpepred_external_control_validated.csv"
+EXT_CONTROL_HOMOLOGY_PAIRS_PATH = PROCESSED_DIR / "ext_control_homology_pairs.csv"
+EXT_CONTROL_REPORT_PATH = PROCESSED_DIR / "ext_control_validation_report.json"
+EXT_CONTROL_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr2_ext_control_provenance.jsonl"
+
+EXT_CONTROL_HOMOLOGY_IDENTITY_THRESHOLD = 40.0  # Planner's "proposed 40% boundary"
+EXT_CONTROL_HOMOLOGY_LENGTH_FLOOR = 15  # below this, % identity isn't biologically interpretable (Bucket 2.4)
+
+# The 2 external-control sequences independently found (Bucket 2.4 audit) to
+# also appear in BIOPEP-UWM's antioxidative reference set -- a genuine
+# cross-database annotation conflict, reconciled (not silently resolved)
+# below. Named constants, not re-derived automatically, so the reconciliation
+# logic is reviewable on its own terms.
+EXT_CONTROL_BIOPEP_CONFLICT_PEPTIDE_IDS = ["AOP-37BD4B4933", "AOP-DDCD54E4BA"]
+
+
+def run_fr2_external_control_build() -> dict:
+    """Bucket 2.6: validate the frozen FR1 baseline's 38-record AnOxPePred
+    external inactive-control set and run a dedicated homology audit
+    against the FR1 positive pool -- separate from, and more rigorous than,
+    Bucket 2.4's cross-pool CD-HIT scan (real EMBOSS needleall alignments,
+    not a percent-identity shortcut).
+
+    Read-only with respect to `pp1_baseline_v1` -- this never modifies the
+    frozen external-control file. Writes a new, separately versioned
+    `anoxpepred_external_control_validated.csv` that adds validation/
+    reconciliation columns to the same 38 records (no records added,
+    removed, or altered) -- no exclusion is applied without the project
+    owner's explicit approval (see the BIOPEP-UWM reconciliation below).
+    """
+    for p in (FROZEN_EXTERNAL_CONTROL_PATH, FROZEN_POSITIVE_POOL_PATH, FROZEN_CONFLICT_LOG_PATH, C1_CLEAN_FASTA_V3_PATH, C2_FASTA_V2_PATH, C3_FASTA_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found.")
+
+    ext_df = pd.read_csv(FROZEN_EXTERNAL_CONTROL_PATH)
+    positive_df = pd.read_parquet(FROZEN_POSITIVE_POOL_PATH)
+    conflict_df = pd.read_csv(FROZEN_CONFLICT_LOG_PATH)
+
+    # --- 1: identifiers, normalized sequences, lengths, alphabet ---
+    integrity = sequence_integrity_report("external_control", list(zip(ext_df["peptide_id"], ext_df["sequence"])))
+    if integrity["n_duplicate_ids"] or integrity["n_non_standard_alphabet"] or integrity["n_length_window_violations"]:
+        raise RuntimeError(f"External control failed basic integrity checks: {integrity}")
+    length_mismatches = int((ext_df["length"] != ext_df["sequence"].str.len()).sum())
+    if length_mismatches:
+        raise RuntimeError(f"{length_mismatches} external-control records have a stored length not matching their sequence.")
+
+    # --- 3: exact-sequence overlap vs positives/conflicts/C1 v3/C2 v2/C3 ---
+    ext_seqs = set(ext_df["sequence"])
+    c1_seqs = {s for _, s in read_fasta(C1_CLEAN_FASTA_V3_PATH)}
+    c2_seqs = {s for _, s in read_fasta(C2_FASTA_V2_PATH)}
+    c3_seqs = {s for _, s in read_fasta(C3_FASTA_PATH)}
+    exact_overlap = {
+        "positives": sorted(ext_seqs & set(positive_df["sequence"])),
+        "conflicts_179": sorted(ext_seqs & set(conflict_df["sequence"])),
+        "C1_v3": sorted(ext_seqs & c1_seqs),
+        "C2_v2": sorted(ext_seqs & c2_seqs),
+        "C3_union": sorted(ext_seqs & c3_seqs),
+    }
+    if any(exact_overlap.values()):
+        raise RuntimeError(f"External control has unexpected exact-sequence overlap: {exact_overlap}")
+
+    # --- 4/5/6: dedicated homology audit vs the FR1 positive pool, real
+    # alignments (not CD-HIT), with an explicit length floor for
+    # interpretability, and a fold-specific check for evaluation independence ---
+    EXT_CONTROL_HOMOLOGY_DIR.mkdir(parents=True, exist_ok=True)
+    ext_fasta = EXT_CONTROL_HOMOLOGY_DIR / "external_control.fasta"
+    pos_fasta = EXT_CONTROL_HOMOLOGY_DIR / "positives.fasta"
+    write_fasta(ext_fasta, list(zip(ext_df["peptide_id"], ext_df["sequence"])))
+    write_fasta(pos_fasta, list(zip(positive_df["peptide_id"], positive_df["sequence"])))
+
+    run_needleall(ext_fasta, pos_fasta, EXT_CONTROL_NEEDLEALL_RAW_PATH, timeout=1800)
+    pairs = parse_needleall_pairs(EXT_CONTROL_NEEDLEALL_RAW_PATH)
+    pairs_df = pd.DataFrame(pairs)
+    expected_pairs = len(ext_df) * len(positive_df)
+    if len(pairs_df) != expected_pairs:
+        raise RuntimeError(f"Expected {expected_pairs} needleall pairs, got {len(pairs_df)} -- some pairs were silently dropped.")
+    pairs_df = pairs_df.rename(columns={"seq1_id": "external_control_peptide_id", "seq2_id": "positive_peptide_id"})
+    pairs_df.to_csv(EXT_CONTROL_HOMOLOGY_PAIRS_PATH, index=False, lineterminator="\n")
+
+    long_enough = pairs_df[pairs_df["alignment_length"] >= EXT_CONTROL_HOMOLOGY_LENGTH_FLOOR]
+    real_homology_hits = long_enough[long_enough["identity_pct"] >= EXT_CONTROL_HOMOLOGY_IDENTITY_THRESHOLD]
+    short_fragment_hits = pairs_df[
+        (pairs_df["identity_pct"] >= EXT_CONTROL_HOMOLOGY_IDENTITY_THRESHOLD)
+        & (pairs_df["alignment_length"] < EXT_CONTROL_HOMOLOGY_LENGTH_FLOOR)
+    ]
+
+    # Fold-specific check: any real hit's positive partner's evaluation
+    # fold is reported explicitly (there are none in this run, but the
+    # check is structural, not inferred from the global null result alone).
+    fold_of = {}
+    if GRAPHPART_SPLITS_PATH.exists():
+        splits_df = pd.read_csv(GRAPHPART_SPLITS_PATH)
+        fold_of = dict(zip(splits_df["AC"], splits_df["cluster"].astype(int)))
+    real_homology_records = []
+    for _, row in real_homology_hits.iterrows():
+        real_homology_records.append(
+            {
+                **row.to_dict(),
+                "positive_evaluation_fold": fold_of.get(row["positive_peptide_id"], "not_in_graphpart_split"),
+            }
+        )
+
+    # --- 7: reconcile the 2 BIOPEP-UWM antioxidative-annotation conflicts ---
+    biopep_conflict_rows = ext_df[ext_df["peptide_id"].isin(EXT_CONTROL_BIOPEP_CONFLICT_PEPTIDE_IDS)]
+    biopep_reconciliation = {
+        "status": "DOCUMENTED, NOT EXCLUDED -- pending explicit policy confirmation",
+        "conflicted_peptide_ids": EXT_CONTROL_BIOPEP_CONFLICT_PEPTIDE_IDS,
+        "conflicted_records": biopep_conflict_rows.to_dict("records"),
+        "evidence": "AnOxPePred reports both FRS and Chelator assays as inactive for these 2 "
+        "sequences (the project's own primary, per-sequence experimental evidence); BIOPEP-UWM "
+        "independently lists both as 'Antioxidative peptide' (database annotation, no per-record "
+        "assay/reference metadata visible in the scraped table).",
+        "precedent": "Mirrors the already-approved FR1 conflict-resolution policy (Bucket 1): "
+        "assay-level evidence outranks an undocumented benchmark/database annotation when the two "
+        "disagree. Applying that same precedent here would argue for RETAINING both in the primary "
+        "external control, not excluding them.",
+        "recommendation": "Retain both in the primary external-control set per the existing "
+        "assay-outranks-annotation precedent; flag the contradiction explicitly rather than creating "
+        "a new sensitivity-only subset. NOT applied unilaterally -- awaiting explicit confirmation.",
+    }
+
+    # --- validated artifact: same 38 records, added validation columns, no exclusions applied ---
+    validated_df = ext_df.copy()
+    validated_df["has_biopep_antioxidative_conflict"] = validated_df["peptide_id"].isin(
+        EXT_CONTROL_BIOPEP_CONFLICT_PEPTIDE_IDS
+    )
+    validated_df["max_identity_pct_vs_positives_length_ge_15"] = validated_df["peptide_id"].map(
+        long_enough.groupby("external_control_peptide_id")["identity_pct"].max()
+    ).fillna(0.0)
+    validated_df.to_csv(EXT_CONTROL_VALIDATED_PATH, index=False, lineterminator="\n")
+
+    summary = {
+        "source_version": str(FROZEN_EXTERNAL_CONTROL_PATH),
+        "output_version": str(EXT_CONTROL_VALIDATED_PATH),
+        "n_records": len(ext_df),
+        "n_unique_sequences": integrity["n_unique_sequences"],
+        "integrity": integrity,
+        "exact_overlap": {k: len(v) for k, v in exact_overlap.items()},
+        "homology_audit": {
+            "method": "EMBOSS needleall (EBLOSUM62, gapopen=10, gapextend=0.5), global alignment, "
+            "every external-control sequence against every FR1 positive",
+            "n_pairs_total": len(pairs_df),
+            "n_pairs_expected": expected_pairs,
+            "identity_threshold_pct": EXT_CONTROL_HOMOLOGY_IDENTITY_THRESHOLD,
+            "length_floor_for_interpretation": EXT_CONTROL_HOMOLOGY_LENGTH_FLOOR,
+            "n_short_fragment_hits_not_interpretable": len(short_fragment_hits),
+            "n_real_homology_hits": len(real_homology_records),
+            "real_homology_hits": real_homology_records,
+            "max_identity_pct_at_length_ge_15": float(long_enough["identity_pct"].max()) if len(long_enough) else None,
+            "held_out_fold_violations": [r for r in real_homology_records if r["positive_evaluation_fold"] != "not_in_graphpart_split"],
+            "conclusion": "ZERO genuine homology hits (>=40% identity AND >=15 AA alignment length) "
+            "found between the external control and any FR1 positive -- the only hits at/above the "
+            "40% threshold are short-fragment (<15 AA) chance matches, the same artifact already "
+            "documented in Bucket 2.4. No fold-specific violation is possible given the global null "
+            "result (any fold's held-out positives are a subset of the full 1,205 screened here).",
+        },
+        "biopep_uwm_reconciliation": biopep_reconciliation,
+        "labeling_rule": "These 38 records are inactive under the AnOxPePred FRS/Chelator assay "
+        "definitions specifically -- NOT a universal claim of proven non-antioxidant activity. Kept "
+        "entirely separate from the C1/C2/C3 unlabeled training pools at all times.",
+    }
+    with open(EXT_CONTROL_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+
+    append_provenance_log(
+        EXT_CONTROL_PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr2_external_control_validation",
+            "source": str(FROZEN_EXTERNAL_CONTROL_PATH),
+            "screen_sources": [str(FROZEN_POSITIVE_POOL_PATH), str(FROZEN_CONFLICT_LOG_PATH), str(C1_CLEAN_FASTA_V3_PATH), str(C2_FASTA_V2_PATH), str(C3_FASTA_PATH)],
+            "summary": summary,
+            "outputs": {
+                "validated_csv": str(EXT_CONTROL_VALIDATED_PATH),
+                "homology_pairs": str(EXT_CONTROL_HOMOLOGY_PAIRS_PATH),
+                "report": str(EXT_CONTROL_REPORT_PATH),
+            },
+        },
+    )
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -1612,6 +1803,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr2-c1-cross-pool-fix", help="Decision A: remove C1/C2 exact overlap (Bucket 2.4 resolution)")
     sub.add_parser("fr2-c2-cross-pool-fix", help="Decision B: exclude C2 homolog of an E1 positive (Bucket 2.4 resolution)")
     sub.add_parser("fr2-distribution-audit", help="Biological distribution and shortcut-bias checks (Bucket 2.5)")
+    sub.add_parser("fr2-external-control-build", help="Validate AnOxPePred external control + homology audit (Bucket 2.6)")
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     args = parser.parse_args(argv)
 
@@ -1658,6 +1850,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr2-c2-cross-pool-fix":
         summary = run_fr2_c2_cross_pool_fix()
         print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-external-control-build":
+        summary = run_fr2_external_control_build()
+        print(json.dumps({k: v for k, v in summary.items() if k != "homology_audit"} | {
+            "homology_audit": {k: v for k, v in summary["homology_audit"].items() if k != "real_homology_hits"}
+        }, indent=2, default=str))
         return 0
     if args.stage == "fr2-distribution-audit":
         summary = run_fr2_distribution_audit()
