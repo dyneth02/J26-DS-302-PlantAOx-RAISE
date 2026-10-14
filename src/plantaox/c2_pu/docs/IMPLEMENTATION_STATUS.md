@@ -1404,6 +1404,154 @@
   al.'s original procedure) comparison is recommended before relying on nnPU results in Task 4.5/4.6 —
   proposed as a follow-up only, not implemented here.
 
+### Bucket 4, Task 4.4 — Additional PU Baselines (Two-Step PU, PU-Bagging)
+- **Status: technical acceptance passed (PASS).** Two more PU-learning baselines for Component 02,
+  reusing Task 4.2/4.3's deterministic E1+E2 positive selection and C1 train/validation partition
+  UNCHANGED, but trained on **scikit-learn/pulearn estimators, not `models.BinaryMlp`** -- a deliberate,
+  documented architecture departure from PN/nnPU (see decision log). New modules: `pu_sklearn_common.py`
+  (shared dataset assembly + sklearn-estimator checkpoint helper), `two_step_pu_baseline.py`,
+  `pu_bagging_baseline.py`. CLI stages: `python -m plantaox.c2_pu.run fr4-two-step-pu-baseline` /
+  `fr4-pu-bagging-baseline`.
+- **Scientific framing, never to be weakened (same invariant as PN/nnPU):** C1 is this project's
+  assumed-negative, PU-UNLABELED pool -- peptides with no reported antioxidant activity, never
+  experimentally confirmed inactive. Both algorithms' own FIRST internal stage trains a classifier
+  treating C1 rows AS IF negative (a label code of `y=0`, required by scikit-learn/pulearn's API, which
+  has no three-way positive/unlabeled/negative label type) -- a standard, well-documented step of
+  Two-Step PU (Elkan & Noto 2008) and PU-Bagging (Mordelet & Vert 2014) THEMSELVES, not a project-level
+  reclassification of C1's status. `PU_SKLEARN_LABEL_ENCODING_NOTE` states this explicitly in every
+  run's resolved config/summary.
+- **Dependencies installed and verified working, not merely declared:** `scikit-learn` was already
+  installed (1.9.0, confirmed via Task 4.1's dependency audit) but undeclared; now declared in
+  `requirements.txt`. `pulearn` (0.2.0) was NOT installed -- installed via
+  `.venv/Scripts/pip.exe install pulearn`, then verified end-to-end against a tiny synthetic P-vs-U
+  example (`ElkanotoPuClassifier`, `WeightedElkanotoPuClassifier`, `BaggingPuClassifier`) BEFORE being
+  used on real data, per the task brief's own gate. `pulearn` worked cleanly against the installed
+  scikit-learn 1.9.0 (its own declared constraint is `scikit-learn<2,>=1.4.2`) -- no fallback
+  hand-rolled implementation was needed. One API surprise caught during this verification:
+  `BaggingPuClassifier`'s constructor parameter is `estimator=`, not the `base_estimator=` name used in
+  pulearn's own prose documentation (a residual naming drift from upstream scikit-learn's own
+  `base_estimator`-to-`estimator` rename in sklearn >=1.2) -- confirmed via `inspect.signature`, not
+  assumed from the docstring.
+- **Base-estimator decision (the real methodological choice this task required), recorded in full in
+  `two_step_pu_baseline.BASE_ESTIMATOR_DECISION_NOTE` and reproduced in every run's summary:** no
+  pre-specified base classifier/architecture for either algorithm was found in
+  `PU_AOP_RESEARCH_CONTEXT.md`, the Planner doc, or the proposal (inspected directly before writing any
+  code, not assumed). Chose `sklearn.linear_model.LogisticRegression(max_iter=2000,
+  random_state=<train_seed>)` -- sklearn's own default L2/`C=1.0` -- for BOTH new baselines, over
+  `RandomForestClassifier`, because it is the more common choice in the original Two-Step PU and
+  PU-Bagging literature, is simpler to reason about and exactly reproduce, and keeps both new baselines
+  on the SAME base-estimator family for a cleaner later comparison between them (Task 4.5). Wrapping the
+  existing torch `BinaryMlp` as a scikit-learn estimator merely to force architectural uniformity with
+  PN/nnPU was explicitly considered and REJECTED as a disproportionate engineering detour for a
+  baseline-implementation task -- consistent with the task brief's own explicit instruction not to do
+  this; no conflicting mandate for a BinaryMlp-wrapped estimator was found anywhere in the docs, so this
+  is not flagged as an open conflict.
+- **Shared PU dataset assembly (`pu_sklearn_common.py::build_sklearn_pu_dataset`), reused by BOTH new
+  baselines, not duplicated:** E1+E2 labeled positives (same policy as nnPU, Task 4.3) vs. C1 partitioned
+  via `pn_baseline.split_c1_train_validation` UNCHANGED (same `config.validation_fraction`=0.15/
+  `config.eval_seed`=42 every prior Bucket-4 baseline uses). Verified against the real fold-0 cache: 331
+  E1 + 273 E2 = 604 training positives, 48 E1 + 58 E2 = 106 validation positives, 3,220 C1 train / 568 C1
+  validation -- matching Task 4.2/4.3's own documented totals exactly (re-derived directly, not
+  trusted). `assert_no_cross_subset_overlap` independently re-verified across all 8 relevant subsets
+  (same discipline as PN/nnPU); GraphPart's held-out fold (124 positives) confirmed disjoint from every
+  trained subset by a dedicated acceptance test, exactly as for PN/nnPU.
+- **A real, documented torch-import leak found and fixed before this module was called "torch-free":**
+  `nnpu_baseline.py` imports `nnpu_risk.py` at module level, which imports `torch` (for the risk math
+  itself) -- so a first draft of `pu_sklearn_common.py` that imported
+  `nnpu_baseline.select_e1_e2_positive_evidence` directly transitively pulled `torch` into this module's
+  import graph, contradicting this task's own "entirely scikit-learn/pulearn-based, no torch" framing.
+  Fixed by duplicating the small (10-line) E1/E2 selection-masking function directly in
+  `pu_sklearn_common.py` instead of importing it -- a deliberate, documented exception to this project's
+  usual "reuse, don't duplicate" discipline, verified NOT to silently diverge via a dedicated equivalence
+  test (`test_select_e1_e2_positive_evidence_matches_nnpu_baseline_implementation`) asserting identical
+  output against `nnpu_baseline`'s own function on the same input. `nnpu_baseline.py`/`nnpu_risk.py`
+  themselves were NOT modified (both are accepted, frozen Task 4.3 code).
+- **Two-Step PU (Elkan & Noto 2008-style, `two_step_pu_baseline.py`, via `pulearn.ElkanotoPuClassifier`):**
+  a single, non-iterative `.fit()` call -- hold out 10% of the combined P+C1 training array (pulearn's
+  own published default, not retuned), fit the base classifier on the remainder, estimate the correction
+  constant `c = P(s=1|y=1)` from the held-out positives. **Real fold-0 result:** `c ≈ 0.7085`. Validation
+  diagnostics (descriptive only, NOT MCC/AUPRC -- Task 4.5's scope): base-estimator (bounded `[0,1]`)
+  probability mean 0.728/median 0.920 for validation positives vs. mean 0.044/median 2.5e-6 for
+  validation C1 -- positives score visibly higher, a basic sanity signal, not a biological-validity
+  claim. **A real, load-bearing numerical property, reported not hidden:** the `1/c`-corrected estimate
+  (the quantity Elkan & Noto's own paper defines) exceeded 1.0 for 12.0% of validation rows overall
+  (`fraction_exceeding_one_overall`) -- expected and documented directly in pulearn's own
+  `predict_proba` docstring (citing the original paper), not a bug. Both the raw unclipped and a
+  clipped-to-`[0,1]` version are recorded in every summary, labeled as such.
+- **PU-Bagging (Mordelet & Vert 2014-style, `pu_bagging_baseline.py`, via `pulearn.BaggingPuClassifier`):**
+  `n_estimators=100` (a documented, literature-typical default -- NOT a tuned/selected value; no
+  hyperparameter sweep was run, per this task's explicit scope boundary), `max_samples=1.0`. **Confirmed
+  directly from pulearn's own source** (`bagging.py`: `unlabeled_count = count_nonzero(y == 0)`;
+  `max_samples` is scaled against that count), not assumed from its prose docstring: this bootstraps
+  ONLY the C1-unlabeled rows (to the full unlabeled-row count by default) while keeping EVERY labeled
+  positive fixed in EVERY bootstrap member -- exactly Mordelet & Vert's prescribed procedure, not
+  `pulearn`'s own simplification of it. **Real, documented consequence, verified on real fold-0 data:**
+  because positives are never excluded from any bootstrap, all 604 training-positive rows have EXACTLY
+  ZERO valid out-of-bag observations (`oob_decision_function_` is NaN for every one of them) -- this is
+  a structural property of the algorithm, not a bug, and is asserted directly in this task's acceptance
+  test (`test_all_training_positives_are_never_out_of_bag_on_real_data`). **Real fold-0 result:**
+  `oob_score_ ≈ 0.795` (informative only about the 3,220 C1-unlabeled training rows, per the property
+  above). Validation predict_proba (ordinary bounded-probability ensemble averaging -- NO `1/c`-style
+  correction exists in this algorithm, confirmed bounded `[0,1]` directly, unlike Two-Step PU): mean
+  0.766/median 0.909 for validation positives vs. mean 0.050/median 1.5e-5 for validation C1.
+- **No learning-curve SVG for either new baseline, documented rather than silently omitted:** both
+  algorithms' `.fit()` is a single, non-iterative procedure (Two-Step PU: one hold-out split, one
+  classifier fit, one scalar `c`; PU-Bagging: one call that internally trains `n_estimators` bootstrap
+  members) -- there is no per-epoch optimization trajectory to plot, unlike PN/nnPU's mini-batch
+  training loops. Each training result records a `no_learning_curve_reason` string explaining this
+  instead of a `learning_curve_path`. PU-Bagging's own internal validation signal (`oob_score_`) is
+  reported in place of a held-out loss curve.
+- **Checkpointing via `joblib`, not `torch.save`/`run_recorder.save_checkpoint`:** neither estimator is a
+  `torch.nn.Module`, so `pu_sklearn_common.py::save_sklearn_checkpoint`/`load_sklearn_checkpoint`
+  mirror `run_recorder`'s atomicity (temp file + `os.replace()`) and `checkpoint_best`/`checkpoint_last`
+  filename convention (`.joblib`, not `.pt`) rather than reusing `run_recorder.save_checkpoint` directly
+  (which is hardcoded to `torch.save`/`BinaryMlp`). Both baselines write IDENTICAL `checkpoint_best.joblib`/
+  `checkpoint_last.joblib` content (there is only one fit to checkpoint) -- verified by comparing the
+  reloaded estimators' own parameters/predictions directly, NOT by comparing raw file SHA-256 (each
+  payload embeds its own live `saved_at` timestamp, so the two files' hashes can legitimately differ even
+  though the underlying estimator is identical -- the exact same caveat already documented for PN/nnPU's
+  own torch checkpoints). `append_epoch_metrics`/`RunContext`/`create_run_dir`/`write_resolved_config`
+  (all torch-dependent at import time via `run_recorder.py`) ARE reused directly, lazily imported inside
+  each training function exactly like PN/nnPU already do.
+- **Checkpoints are NOT committed** (gitignored under `data/interim/c2_pu/fr4_two_step_pu_baseline_runs/`
+  and `data/interim/c2_pu/fr4_pu_bagging_baseline_runs/`, same pattern as every other Bucket-4 baseline)
+  -- the committed summaries record each checkpoint's SHA-256 instead.
+- **Reproducibility:** two independent same-seed reruns of each baseline on the real fold-0 dataset
+  produce identical scalar results (`estimated_c` / `oob_score_`) and identical validation-metric
+  dictionaries, and reloaded checkpoints from both runs produce identical predictions on a held-out
+  sample -- verified directly (not assumed), both in unit tests (synthetic data) and acceptance tests
+  (real fold-0 data).
+- **Tests:** 18 unit tests (`test_pu_sklearn_common.py` -- dataset assembly, E1/E2 selection equivalence
+  with `nnpu_baseline`'s own function, leakage-injection catches, label encoding, score-distribution
+  summary, sklearn-checkpoint round-trip, and a dedicated subprocess test confirming the module's import
+  graph is torch-free) + 9 unit tests each for `test_two_step_pu_baseline.py` and
+  `test_pu_bagging_baseline.py` (finite/bounded predictions, non-finite-feature rejection, checkpoint
+  round-trip, same-seed bit-identical reruns, the documented "positives never OOB" property for
+  PU-Bagging, the documented out-of-range corrected-probability property for Two-Step PU) + 14 full-file
+  acceptance tests each (`test_fr4_two_step_pu_baseline_acceptance.py` /
+  `test_fr4_pu_bagging_baseline_acceptance.py` -- real fold-0 counts matching Task 4.2/4.3 exactly,
+  GraphPart held-out isolation re-verified independently, checkpoint reload verification, bit-identical
+  reruns, every prior task's real artifacts (including PN's, nnPU's, and each other's own committed
+  summaries) confirmed byte-unchanged by SHA-256 before/after, and a clear `FileNotFoundError` for a
+  missing prerequisite) -- 66 new tests total. Full project suite re-run after this change -- see
+  decision log for the exact before/after counts.
+- **Research limitations, stated in full, not just referenced:** (A) C1 is an assumed-negative/
+  PU-unlabeled pool, NEVER experimentally confirmed antioxidant-inactive; both algorithms' first internal
+  stage trains a classifier treating C1 AS IF negative, a standard documented step of the algorithms
+  themselves, not a project-level reclassification. (B) E1+E2 positives are pooled, identical policy to
+  nnPU; E2 is not uniformly assay-confirmed. (C) Both baselines wrap `LogisticRegression`, NOT
+  `models.BinaryMlp` -- a deliberate, documented architecture departure from PN/nnPU; any numerical
+  comparison between these baselines and PN/nnPU must account for this, not just the label-assumption
+  difference. (D) No MCC/AUPRC computation or cross-baseline comparison table is performed here -- that
+  is Task 4.5's explicit scope. (E) FR2/Task 2.5's documented FR1-positive-vs-C1 distributional
+  differences apply here unchanged; neither algorithm automatically eliminates shortcut-bias risk. (F)
+  Fold-0-only initial baseline, not a five-fold validated conclusion. (G) Technical acceptance does not
+  imply supervisor or scientific sign-off on the chosen base estimator, hyperparameters, or any
+  scientific conclusion.
+- **No curriculum (C1→C2→C3), no RNIS, no hard-negative mining, no hyperparameter sweep, and no
+  multi-baseline comparison table were implemented here** -- all explicitly out of Task 4.4's scope
+  (Tasks 4.5/4.6, FR6).
+
 ## 🔄 Current work in progress
 
 *(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
@@ -1531,9 +1679,13 @@ tasks below.)*
    open item anymore.
 6g. **RESOLVED 2026-10-15. Bucket 4, Task 4.3 (plain nnPU baseline implementation) is complete (PASS)**
    — see Completed tasks above (`nnpu_risk.py`, `nnpu_baseline.py`, CLI stage `fr4-nnpu-baseline`). Kept
-   here for history; not an open item anymore. **Task 4.4 (Two-Step PU, PU-Bagging) is the next item, not
-   yet started** — per Task 4.3's own explicit scope boundary, no curriculum (C1→C2→C3), hard-negative
-   mining, RNIS, or full multi-baseline evaluation work has been started either (Tasks 4.5/4.6/FR6).
+   here for history; not an open item anymore.
+6h. **RESOLVED 2026-10-15. Bucket 4, Task 4.4 (Two-Step PU, PU-Bagging baselines) is complete (PASS)** —
+   see Completed tasks above (`pu_sklearn_common.py`, `two_step_pu_baseline.py`, `pu_bagging_baseline.py`,
+   CLI stages `fr4-two-step-pu-baseline`/`fr4-pu-bagging-baseline`). Kept here for history; not an open
+   item anymore. **Task 4.5 (reduced-data smoke tests across all four baselines, MCC/AUPRC, comparison
+   table) is the next item, not yet started** — per Task 4.4's own explicit scope boundary, no curriculum
+   (C1→C2→C3), RNIS, or hyperparameter tuning has been started either (Tasks 4.6/FR6).
 7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
@@ -1646,5 +1798,14 @@ tasks below.)*
 | 2026-10-15 | Task 4.3 post-acceptance diagnostic: investigated the accepted π=0.10 run's ≈98-100% negative-risk-clamping finding via a controlled π ∈ {0.05, 0.10, 0.20} sensitivity experiment (fold 0, all else held constant), WITHOUT modifying `nnpu_risk.py`/`nnpu_baseline.py` and WITHOUT implementing the beta/gamma corrective variant | Explicit post-acceptance-diagnostic brief: investigate, don't rebuild. Real finding: clamping is persistently near-universal across the whole declared grid (mean per-update clamped fraction 0.9825/0.9863/0.9915 for π=0.05/0.10/0.20) — classified "Persistently clamped," not resolved by retuning π. A genuinely prior-sensitive secondary finding (C1 median predicted score rises with π: 0.0063→0.0378→0.2977) is reported separately so it is not conflated with the clamping mechanism itself. See `FR4_NNPU_PRIOR_SENSITIVITY_DIAGNOSTIC.md` for the full report. |
 | 2026-10-15 | The accepted π=0.10 run's best checkpoint (gitignored but present on disk in this checkout, under `data/interim/c2_pu/fr4_nnpu_baseline_runs/fr4_nnpu_baseline_fold0__20261014T183214Z/`) was verified by SHA-256 against what the committed summary itself recorded, then loaded READ-ONLY to compute prediction-distribution diagnostics Task 4.3's own run never recorded — never retrained, never resaved | Per the diagnostic brief's explicit instruction: reuse the accepted reference wherever its records are sufficient, and verify rather than assume a gitignored artifact is still the one the committed summary describes. Confirmed matching both before this diagnostic's work began and after every new π=0.05/0.20 training run. |
 | 2026-10-15 | New diagnostic instrumentation (`nnpu_prior_diagnostics.py`'s `train_nnpu_with_diagnostics`) lives in a SEPARATE module from the accepted `nnpu_baseline.train_nnpu_baseline`, duplicating the training loop's structure rather than modifying the accepted function in place, with a regression test proving the two produce identical epoch-level aggregates at the same prior/seed | The accepted Task 4.3 training loop must remain byte-for-byte as accepted (AGENTS.md rule #4's spirit extended to accepted code, not just frozen data artifacts) — adding instrumentation via a parallel function, verified equivalent by test, avoids any risk of silently altering the accepted baseline's own reproducibility guarantee while still getting genuine per-update diagnostics. |
+
+| 2026-10-15 | Task 4.4's Two-Step PU and PU-Bagging baselines wrap `sklearn.linear_model.LogisticRegression` via `pulearn.ElkanotoPuClassifier`/`BaggingPuClassifier` respectively, NOT `models.BinaryMlp` | No pre-specified base classifier/architecture for either algorithm was found in `PU_AOP_RESEARCH_CONTEXT.md`, the Planner doc, or the proposal (inspected directly before writing any code). Per the task brief's own explicit instruction, wrapping the existing torch `BinaryMlp` as a scikit-learn estimator merely to force architectural uniformity with PN/nnPU was considered and rejected as a disproportionate engineering detour -- Two-Step PU/PU-Bagging are specific algorithms built around scikit-learn-compatible base estimators in both the originating literature and the only practical PU-learning library (`pulearn`). Logistic regression (over e.g. `RandomForestClassifier`) was chosen because it is the more common choice in the original Two-Step PU (Elkan & Noto 2008)/PU-Bagging (Mordelet & Vert 2014) papers, is simpler to reason about and exactly reproduce, and keeps both new baselines on the same base-estimator family for a cleaner Task 4.5 comparison between them. |
+| 2026-10-15 | `pulearn==0.2.0` installed and used directly (no hand-rolled fallback implementation) | Verified end-to-end against a tiny synthetic P-vs-U example (`ElkanotoPuClassifier`, `WeightedElkanotoPuClassifier`, `BaggingPuClassifier`) BEFORE use on real data, per the task brief's own gate. Works cleanly against the already-installed scikit-learn 1.9.0 (pulearn's own declared constraint: `scikit-learn<2,>=1.4.2`). One API-naming surprise caught during verification, not assumed from pulearn's prose docs: `BaggingPuClassifier`'s constructor parameter is `estimator=`, not the `base_estimator=` name used in its own docstring (residual drift from upstream scikit-learn's `base_estimator`→`estimator` rename in sklearn >=1.2) -- confirmed via `inspect.signature` before writing any training code against it. |
+| 2026-10-15 | `scikit-learn` and `pulearn` declared in `requirements.txt` only, not `pyproject.toml` | `pyproject.toml`'s `dependencies = []` is confirmed unused by this project's build (checked directly) -- `requirements.txt` is the established, already-used dependency declaration file (e.g. `torch` was added there, not `pyproject.toml`, at Task 4.1). Matching the existing convention rather than introducing a second one. |
+| 2026-10-15 | `pu_sklearn_common.py` duplicates (does NOT import) a function logically identical to `nnpu_baseline.select_e1_e2_positive_evidence`, verified equivalent by a dedicated regression test | `nnpu_baseline.py` imports `nnpu_risk.py` at module level, which itself imports `torch` (needed for the risk-estimator math) -- importing `select_e1_e2_positive_evidence` from `nnpu_baseline` would therefore transitively pull `torch` into `pu_sklearn_common.py`'s import graph, contradicting Two-Step PU/PU-Bagging's own "entirely scikit-learn/pulearn-based, no torch" framing. The selection logic itself is ~10 lines of boolean masking with no torch dependency of its own; duplicating just that small function (not the whole module) and proving equivalence by test was judged the more honest choice than either silently accepting the torch leak or modifying the accepted, frozen `nnpu_baseline.py`. |
+| 2026-10-15 | Two-Step PU's and PU-Bagging's fitted estimators are checkpointed via `joblib.dump`/`joblib.load` (`pu_sklearn_common.py::save_sklearn_checkpoint`/`load_sklearn_checkpoint`), a NEW, separate helper rather than reusing `run_recorder.save_checkpoint`/`load_checkpoint` | `run_recorder`'s existing checkpoint functions are hardcoded to `torch.save`/`BinaryMlp.state_dict()`/`BinaryMlp.load_compatible_state_dict()` -- neither new estimator is a `torch.nn.Module`, so calling them would fail outright. The new helper mirrors the SAME atomicity (temp file + `os.replace()`) and `checkpoint_best`/`checkpoint_last` filename convention (substituting `.joblib` for `.pt`) rather than inventing a different pattern; `run_recorder`'s other, estimator-agnostic helpers (`create_run_dir`, `write_resolved_config`, `append_epoch_metrics`, `RunContext`) ARE reused directly, unchanged. |
+| 2026-10-15 | Two-Step PU and PU-Bagging each write exactly ONE checkpoint-worthy fit (both `checkpoint_best.joblib` and `checkpoint_last.joblib` hold the SAME single estimator, verified by comparing reloaded predictions/parameters, not by comparing raw file SHA-256) and record NO per-epoch learning-curve SVG | Both algorithms' `.fit()` is a single, non-iterative procedure (Two-Step PU: one hold-out split, one classifier fit, one scalar `c`; PU-Bagging: one call that internally trains `n_estimators` bootstrap members) -- there is no epoch-wise optimization trajectory analogous to PN/nnPU's mini-batch training loops, so forcing an artificial best-vs-last distinction or a fabricated epoch axis would misrepresent how these algorithms actually work. Each training result instead records a `no_learning_curve_reason` string; PU-Bagging's own internal out-of-bag score is reported as its native internal-validation signal. Raw checkpoint-file SHA-256 is NOT asserted equal between best/last in tests (each `joblib` payload embeds its own live `saved_at` timestamp, so the two files' hashes can legitimately differ even though the underlying fitted estimator is identical -- the same caveat already documented for PN/nnPU's own torch checkpoints, which likewise don't assert raw-file-hash equality across reruns). |
+| 2026-10-15 | PU-Bagging uses `n_estimators=100` (documented literature-typical default) and `max_samples=1.0` (`pulearn`'s own default), neither tuned nor selected via any sweep | Explicit task-brief scope boundary: "hyperparameter tuning sweeps beyond reasonable, documented defaults" are out of scope for a baseline-implementation task (Task 4.5/future work, not 4.4). Confirmed directly from `pulearn`'s own source (`bagging.py`) that `max_samples=1.0` means bootstrapping the FULL C1-unlabeled row count (not the combined P+U row count) while keeping every labeled positive fixed in every bootstrap member -- i.e. this is Mordelet & Vert's actual prescribed procedure, not a looser adaptation, verified empirically on real fold-0 data: all 604 training positives have exactly zero valid out-of-bag observations as a direct, confirmed consequence. |
+| 2026-10-15 | No MCC/AUPRC, score-vs-label classification metric, or cross-baseline comparison table is computed anywhere in Task 4.4 -- only descriptive score-distribution diagnostics (mean/median/min/max/fraction-near-0/fraction-near-1), explicitly labeled as such | Task 4.5 ("Initial Model Evaluation and Testing") is the explicitly scoped owner of MCC/AUPRC computation and the comparison table (Planner doc, Bucket 4.5). Computing it here would duplicate/pre-empt that task's own acceptance criteria and risk a second, possibly-inconsistent implementation of the same metric later. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

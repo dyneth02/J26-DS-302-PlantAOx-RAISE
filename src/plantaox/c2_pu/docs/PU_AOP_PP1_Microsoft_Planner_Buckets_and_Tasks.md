@@ -313,11 +313,37 @@ Recommendation: a separately-scoped beta/gamma corrective-nnPU comparison (Varia
 proposed as a follow-up, not implemented here — Task 4.4 is not blocked on it.
 
 ## 4.4 — Additional PU Baselines
-- [ ] Install/test PULearn-compatible dependencies.
-- [ ] Implement Two-Step PU.
-- [ ] Implement PU-Bagging.
-- [ ] Use comparable partitions/features and document algorithm differences.
-- [ ] Save baseline artifacts and configs.
+- [x] Install/test PULearn-compatible dependencies. *(`pulearn==0.2.0` installed into `.venv` and
+  verified against a tiny synthetic P-vs-U example (`ElkanotoPuClassifier`, `WeightedElkanotoPuClassifier`,
+  `BaggingPuClassifier`) BEFORE use on real data; works cleanly against the already-installed
+  scikit-learn 1.9.0. Both now declared in `requirements.txt`.)*
+- [x] Implement Two-Step PU. *(`two_step_pu_baseline.py`, Elkan & Noto 2008-style, via
+  `pulearn.ElkanotoPuClassifier` wrapping `sklearn.linear_model.LogisticRegression`. Real fold-0 result:
+  estimated correction constant `c ≈ 0.7085`; the `1/c`-corrected estimate exceeds 1.0 for 12.0% of
+  validation rows, a documented property of the Elkan & Noto estimator itself, not a bug.)*
+- [x] Implement PU-Bagging. *(`pu_bagging_baseline.py`, Mordelet & Vert 2014-style, via
+  `pulearn.BaggingPuClassifier` wrapping the same `LogisticRegression` base estimator, `n_estimators=100`.
+  Real fold-0 result: `oob_score_ ≈ 0.795`; confirmed directly from pulearn's source that only C1 rows
+  are bootstrap-resampled (positives are fixed in every bootstrap member), so all 604 training positives
+  structurally have zero valid out-of-bag observations -- verified on real data, documented not hidden.)*
+- [x] Use comparable partitions/features and document algorithm differences. *(`pu_sklearn_common.py::
+  build_sklearn_pu_dataset` reuses Task 4.2/4.3's exact E1+E2 positive selection and
+  `split_c1_train_validation` C1 partition unchanged -- real fold-0 counts match Task 4.2/4.3 exactly
+  (604/106 positives, 3,220/568 C1). Algorithm-difference documentation lives in each baseline module's
+  own docstring and the `IMPLEMENTATION_STATUS.md` Task 4.4 entry: base-estimator family (sklearn
+  LogisticRegression, not `BinaryMlp`), training procedure (single non-iterative `.fit()`, no epoch loop,
+  no learning curve), no explicit prior/correction-constant equivalent for PU-Bagging, and no
+  BCE/nnPU-risk framework for either.)*
+- [x] Save baseline artifacts and configs. *(Committed summaries `fr4_two_step_pu_baseline_fold0_
+  summary.json` / `fr4_pu_bagging_baseline_fold0_summary.json` + provenance JSONL logs; `joblib`
+  checkpoints gitignored under `data/interim/c2_pu/fr4_two_step_pu_baseline_runs/` /
+  `fr4_pu_bagging_baseline_runs/`, SHA-256-recorded in each summary.)*
+
+**Technical acceptance passed (PASS)** — see IMPLEMENTATION_STATUS.md for the full account: real fold-0
+counts, the base-estimator decision and its rationale, the documented Two-Step PU out-of-range-probability
+and PU-Bagging never-out-of-bag-positives properties (both verified on real data, not assumed), checkpoint
+save/reload reproducibility, full research-limitations section, and the explicit statement that MCC/AUPRC
+and a cross-baseline comparison table are Task 4.5's scope, not performed here.
 
 ## 4.5 — Initial Model Evaluation and Testing
 - [ ] Run reduced-data one-fold PN smoke test.
