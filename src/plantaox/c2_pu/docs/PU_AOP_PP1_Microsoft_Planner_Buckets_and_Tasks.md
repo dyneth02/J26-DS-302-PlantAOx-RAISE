@@ -275,11 +275,16 @@ itself remains incomplete pending the four classification baselines and their ev
 **Technical acceptance passed** — see IMPLEMENTATION_STATUS.md for the full account, the one-command offline smoke test (`python -m plantaox.c2_pu.run fr4-infra-smoke-test`), and the explicit note that this is infrastructure only, not a trained PN/PU baseline (Task 4.2+).
 
 ## 4.2 — PN Baseline Implementation
-- [ ] Implement PN classifier using E1 positives and **C1 assumed negatives**.
-- [ ] Connect shared fused representation and frozen partitions.
-- [ ] Run monitored training and validation.
-- [ ] Confirm probability inference and checkpoint loadability.
-- [ ] Save initial results and learning curves.
+- [x] Implement PN classifier using E1 positives and **C1 assumed negatives**. *(`pn_baseline.py`: `select_positive_evidence_tier` filters to E1 only; `split_c1_train_validation` partitions C1 deterministically; `PnDataset` structurally excludes C2/C3/external control.)*
+- [x] Connect shared fused representation and frozen partitions. *(Reuses `BinaryMlp`/`build_experiment_data()` directly — 495-dim fused features, GraphPart fold-0 held-out positives untouched.)*
+- [x] Run monitored training and validation. *(`train_pn_baseline()`: BCE-with-logits, per-epoch train/val loss, non-finite feature/logit/loss/gradient checks, optional early stopping on validation loss only.)*
+- [x] Confirm probability inference and checkpoint loadability. *(Fresh `BinaryMlp` reloaded from `checkpoint_best.pt` via Task 4.1's compatibility-checked loader; `predict_proba()` verified bounded/finite on real validation rows.)*
+- [x] Save initial results and learning curves. *(`fr4_pn_baseline_fold0_summary.json` + hand-rolled SVG learning curve, both committed; real fold-0 result: best epoch 3, val loss 0.3138, 14 epochs before early stopping.)*
+
+**Technical acceptance passed (PASS)** — see IMPLEMENTATION_STATUS.md for the full account, real fold-0
+training/validation counts, the genuine (non-fabricated) overfitting result, bit-identical same-seed
+reproducibility evidence, and the explicit research-limitations section (assumed-negative labels,
+shortcut-bias risk, fold-0-only scope, no scientific sign-off implied).
 
 ## 4.3 — Plain nnPU Baseline Implementation
 - [ ] Implement non-negative PU risk estimator and unit tests.

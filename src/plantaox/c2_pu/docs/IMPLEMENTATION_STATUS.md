@@ -1045,6 +1045,112 @@
   `common/feature_cache.py::sha256_of` is reused), no duplicate C3 fold-selection logic (the existing
   `load_fold_challenges`/`get_c3_fold_challenge_rows` are called directly).
 
+### Bucket 4, Task 4.2 — PN (Positive-Negative) Baseline Implementation
+- **Status: technical acceptance passed (PASS).** The first conventional supervised classifier for
+  Component 02, trained entirely on Task 4.1's shared infrastructure — no second MLP, no second
+  checkpointing system, no second data loader. New module: `pn_baseline.py`. CLI stage:
+  `python -m plantaox.c2_pu.run fr4-pn-baseline`.
+- **Scientific framing (non-negotiable, stated in the module docstring, every log record, and the run
+  summary's `limitations` block):** C1 is this project's assumed-negative/PU-unlabeled pool — peptides
+  with no reported antioxidant activity, never experimentally confirmed inactive. PN is the field's
+  conventional-practice reference point this project's proposal explicitly critiques (§1.2.1: "no AOP
+  classifier has been trained without confirmed negative labels"), not a validated antioxidant
+  predictor.
+- **Two small, justified public renames in `experiment_data.py`** (pure renames, zero logic change,
+  verified by rerunning its own 18 existing tests unmodified): `_split_training_validation` →
+  `split_ids_train_validation`, `_assert_no_cross_subset_overlap` → `assert_no_cross_subset_overlap`.
+  Both are reused as-is by Task 4.2's C1 partition and its own independent leakage re-check, rather than
+  writing a second shuffle-split algorithm or a second overlap-detection routine.
+- **E1-only positive selection (§3.1):** `select_positive_evidence_tier()` filters an already
+  fold-partitioned positive pool (Task 4.1's `train_positive`/`validation_positive`) down to one
+  evidence tier, never relabeling or reweighting rows, never touching the underlying train/validation/
+  held-out partition boundary. Verified against the real fold-0 cache: 331 E1 of 604 total training
+  positives, 48 E1 of 106 validation positives (E2's 273/58 correctly excluded, available unchanged for
+  Task 4.3+).
+- **C1 train/validation partition (§4):** `split_c1_train_validation()` partitions C1's cache rows
+  (already deduplicated to one row per unique sequence by Task 3.1/3.4) using the SAME authoritative
+  `config.validation_fraction` (0.15) and `config.eval_seed` (42) Task 4.1 already uses for the positive
+  split — no new config field introduced, since the repository already defines this authoritative
+  fraction. Verified against real fold-0 C1 (3,788 unique sequences): 3,220 train / 568 validation
+  (85.0%/15.0%, exact). Asserts C1 has no duplicate peptide_id before partitioning (a project-wide
+  dedup invariant from Task 3.1, re-checked here rather than assumed) and reuses
+  `split_ids_train_validation` rather than a second shuffle-split implementation.
+- **`PnDataset` structurally prevents C2/C3/external-control leakage** — it has no field for them at
+  all, so a future caller cannot accidentally wire them into PN training even by mistake; a dedicated
+  test (`test_build_pn_dataset_only_draws_negatives_from_c1`) asserts the dataclass has no such
+  attribute. `build_pn_dataset()` additionally re-runs `assert_no_cross_subset_overlap` across all 8
+  relevant subsets (E1 train/validation, C1 train/validation, GraphPart held-out, C2, C3, external
+  control) — independently of Task 4.1's own `ExperimentData.leakage_report`, not trusting it blindly.
+- **A real bug found and fixed during test-writing, before any claim of acceptance:** the original
+  `build_pn_dataset()` called `split_c1_train_validation()` before checking whether C1 was non-empty, so
+  a zero-C1 scenario surfaced a generic `ValueError` from deep inside the shared split helper instead of
+  this module's own `InsufficientDataError`. Fixed by moving the zero-C1 check before the split call —
+  caught by `test_build_pn_dataset_raises_on_zero_c1_rows`, not assumed correct from a first green run.
+- **Class imbalance (§5):** `compute_pos_weight()` derives `BCEWithLogitsLoss(pos_weight=...)` from
+  TRAINING-set class counts only (verified: validation counts are structurally absent from the
+  computation, not merely unused) — real fold-0 value: `3220/331 ≈ 9.728`. `use_class_weight=False`
+  disables it entirely for future ablations, per explicit instruction, without any resampling,
+  oversampling, or prevalence change anywhere in the pipeline.
+- **Training loop (§6-§8):** manual seeded mini-batch iteration (a local `numpy.random.Generator`, not
+  `torch.utils.data.DataLoader`, for easier exact-reproducibility verification), `BCEWithLogitsLoss` on
+  raw logits (sigmoid is verified numerically equivalent to a separate `binary_cross_entropy` call, but
+  never applied before the loss), Adam (or SGD) via `config.optimizer`, explicit finite-value checks on
+  input features, logits (train AND validation), loss, and every parameter's gradient (raises
+  `RuntimeError` naming the exact offending epoch/tensor, never silently continuing past a NaN/Inf).
+  `save_checkpoint()` (Task 4.1) is called every epoch for `checkpoint_last.pt` and only on improvement
+  for `checkpoint_best.pt` — both filenames reused exactly as Task 4.1 defined them, no new
+  checkpoint-naming scheme. Optional early stopping (`patience=10`, `min_improvement=1e-4` by default)
+  monitors validation loss only; disabling it (`early_stopping_patience=None`) runs the full
+  `max_epochs` — both paths tested.
+- **Real fold-0 result (Stage C), not fabricated:** 14 epochs executed before early stopping triggered
+  (patience 10 after the last improvement), best epoch 3 (val loss 0.3138), final train loss 0.0723 vs.
+  final val loss 0.6250 at epoch 14 — a genuine, reported overfitting pattern (train loss keeps
+  dropping well past the point validation loss starts rising), consistent with §12.B's documented
+  shortcut-bias/limited-E1-positive-count risk rather than evidence of a bug. Reported as-is, not
+  cherry-picked or re-run until a "nicer" curve appeared.
+- **Learning curve:** `render_loss_curve_svg()` is a ~40-line hand-rolled SVG line chart (no matplotlib
+  — confirmed not installed, and this project already deliberately avoided adding it once before, for
+  Task 2.5's single exploratory chart; same reasoning applied here for this single plot). Committed at
+  `fr4_pn_baseline_fold0_learning_curve.svg` (text-based SVG, a few hundred bytes — not a "large binary
+  artifact" under any reading of the repository's existing policy).
+- **Checkpoint validation (§8):** after training, a FRESH `BinaryMlp` instance is constructed, loaded
+  from `checkpoint_best.pt` via Task 4.1's compatibility-checked `load_checkpoint()`, and run through
+  `predict_proba()` on real validation-fold feature rows — shape, finiteness, and `[0, 1]`-boundedness
+  all verified directly on the reloaded model's own output (not merely "the file exists").
+- **Reproducibility (§8):** two independent same-seed CPU training runs on the real fold-0 dataset
+  produce a **bit-identical** per-epoch loss history and an identical best epoch — verified directly,
+  not assumed from Task 4.1's forward-pass-only determinism check. This confirms training-loop
+  determinism (backward pass + optimizer step across many iterations) holds in addition to the
+  simpler forward-pass case Task 4.1 already verified.
+- **Checkpoints are NOT committed** (gitignored under `data/interim/c2_pu/fr4_pn_baseline_runs/`,
+  consistent with the project's established "don't commit large binary arrays" policy) — the committed
+  summary records each checkpoint's SHA-256 instead, so integrity is auditable and the run is exactly
+  regeneratable via `fr4-pn-baseline` without needing the binary file itself.
+- **Tests:** 27 unit tests (`test_pn_baseline.py` — E1/E2 selection, C1 partition determinism and
+  disjointness, two deliberately-injected cross-pool sequence-leakage scenarios correctly caught,
+  zero-E1/zero-C1 rejection, training-only class weight, BCE-with-logits numerical equivalence to
+  sigmoid-then-BCE, optimizer parameter updates, non-finite-feature rejection, best/last checkpoint
+  correctness, bit-identical same-seed reproducibility, early-stopping on/off, and the SVG curve writer)
+  + 16 full-file acceptance tests (`test_fr4_pn_baseline_acceptance.py` — real fold-0 Stage B smoke test
+  and Stage C full run, GraphPart held-out isolation re-verified independently, real class counts,
+  checkpoint reload verification, bit-identical full-run reruns, every prior task's real artifacts and
+  the frozen FR1/FR2 baselines confirmed byte-unchanged by SHA-256 before/after, and a clear
+  `FileNotFoundError` for a missing prerequisite). Full project suite confirmed green after this change
+  (see decision log for the exact before/after counts).
+- **Research limitations, stated in full (§12), not just referenced:** (A) C1's assumed-negative status
+  is unverified — PN is a conventional supervised control, not a scientifically validated negative-label
+  classifier. (B) FR2/Task 2.5 documented substantial FR1-positive-vs-C1 distributional differences
+  (length, charge, GRAVY, aromaticity, composition); this fold-0 run's validation performance may
+  reflect those shortcuts rather than genuine antioxidant-activity discrimination — not interpreted as
+  proof of robust prediction anywhere in this task's code or docs. (C) E1 only is used for the positive
+  class; E2 remains available, untouched, for Task 4.3+'s evidence-tiered experiments. (D) Full
+  C1/C2/C3 cross-pool comparison, calibration, and RNIS are explicitly out of Task 4.2's scope
+  (Task 4.5). (E) A successful fold-0 run is an initial implementation demonstration, not completed
+  five-fold validation. (F) Technical acceptance here does not imply supervisor or scientific sign-off
+  on PN as a methodology.
+- **No new dependencies** (matplotlib deliberately avoided, per above). Tasks 4.3 (nnPU), 4.4 (Two-Step
+  PU/PU-Bagging), 4.5 (cross-baseline evaluation), 4.6 (curriculum), and RNIS/FR6 are untouched.
+
 ## 🔄 Current work in progress
 
 *(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
@@ -1166,10 +1272,14 @@ tasks below.)*
 6e. **RESOLVED 2026-10-14. Bucket 4, Task 4.1 (shared experiment infrastructure) is complete** — see
    Completed tasks above (`experiment_config.py`, `models.py`, `experiment_data.py`,
    `common/seeding.py`, `run_recorder.py`, CLI stage `fr4-infra-smoke-test`). Kept here for history;
-   not an open item anymore. **Task 4.2 (PN baseline implementation) is the next item, not yet
-   started** — it should build on this task's `BinaryMlp` architecture and `build_experiment_data()`
-   output directly (never re-deriving scaled features or fold selection by hand), adding only the PN
-   training objective/loop Task 4.1 deliberately left out.
+   not an open item anymore.
+6f. **RESOLVED 2026-10-14. Bucket 4, Task 4.2 (PN baseline implementation) is complete (PASS)** — see
+   Completed tasks above (`pn_baseline.py`, CLI stage `fr4-pn-baseline`). Kept here for history; not an
+   open item anymore. **Task 4.3 (plain nnPU baseline) is the next item, not yet started** — it should
+   reuse `BinaryMlp`/`build_experiment_data()`/`run_recorder.py` exactly as Task 4.2 did, replacing only
+   the BCE-with-logits training objective with the nnPU non-negative risk estimator; the PN baseline's
+   E1-vs-C1 framing and leakage-check pattern (`select_positive_evidence_tier`,
+   `assert_no_cross_subset_overlap`) are directly reusable, not something to reimplement.
 7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
@@ -1267,5 +1377,11 @@ tasks below.)*
 | 2026-10-14 | Bucket 4.1's experiment-config validation is a hand-rolled `dataclass.__post_init__`, not pydantic (not an existing project dependency) | Consistent with this project's established preference for transparent, dependency-free validation over adding a schema library for range/membership checks this simple (same reasoning already applied to Task 3.3's hand-rolled z-score scaler over scikit-learn's `StandardScaler`). |
 | 2026-10-14 | `esm`/`descriptors` feature representations in `experiment_data.py` are column slices of the SAME jointly-scaled 495-dim fused matrix, not an independently-refit standardization over just those 480 or 15 columns | The fold's scaler (Task 3.3) was fit once, jointly, across all 495 dimensions, on that fold's training positives. Refitting a second, narrower scaler specifically for `esm`-only or `descriptors`-only experiments would be a genuinely different (and currently unrequested) preprocessing design, and would silently diverge from the single frozen `fusion_v1` scaling contract every other part of this project assumes. Documented here as a simplification, not silently decided: if `esm`/`descriptors`-only baselines are later found to need independently-refit scaling, that is a new, explicit decision for whoever implements Task 4.2+, not something this task should have pre-empted. |
 | 2026-10-14 | Bucket 4.1's validation-set carve-out uses a dedicated, local `random.Random(eval_seed)` instance (not the global Python/NumPy/PyTorch seed state `common.seeding.set_global_seed` configures) | Keeps the validation split's determinism independent of, and non-interfering with, whatever global seeding a training script does for model initialization/data shuffling/dropout elsewhere — the split should be reproducible from `eval_seed` alone, not incidentally depend on how many other random calls happened to run before it in a given training script. |
+| 2026-10-14 | Task 4.2's C1 train/validation partition reuses `config.validation_fraction` (0.15) and `config.eval_seed` (42) — the SAME authoritative values Task 4.1 already uses for the positive-pool split — rather than introducing a second, C1-specific config field | The task brief explicitly asked to check for and reuse an existing authoritative validation fraction before adding a new one; `ExperimentConfig` already defines exactly one, and there is no stated reason for C1's split to use a different fraction or seed. Reusing it also means the two private helpers Task 4.1 wrote (the shuffle-split and the cross-subset overlap check) could be exposed and reused verbatim instead of duplicated — see the next two entries. |
+| 2026-10-14 | `experiment_data.py`'s private `_split_training_validation`/`_assert_no_cross_subset_overlap` were renamed to public `split_ids_train_validation`/`assert_no_cross_subset_overlap` (pure rename, zero logic change) so Task 4.2 could reuse them directly for the C1 partition and its own leakage re-check | Avoids a second shuffle-split algorithm and a second overlap-detection routine for what is exactly the same operation applied to a different ID list. Verified the rename changed nothing: `experiment_data.py`'s own 18 existing tests pass unmodified after the rename. |
+| 2026-10-14 | A real bug found while writing `test_build_pn_dataset_raises_on_zero_c1_rows`: `build_pn_dataset()` called `split_c1_train_validation()` before checking whether C1 was non-empty, so a zero-C1 scenario surfaced a generic `ValueError` from inside the shared split helper instead of this module's own `InsufficientDataError` | Caught by the test, not assumed correct from a first green run elsewhere. Fixed by moving the explicit zero-C1 check before the split call, giving a specific, correctly-typed error naming the fold_id and the actual problem ("zero C1 rows -- nothing to partition") rather than a generic validation_fraction arithmetic complaint from a lower-level helper. |
+| 2026-10-14 | PN's learning curve is a ~40-line hand-rolled SVG line chart, not matplotlib | matplotlib is confirmed not installed and not declared as a project dependency; this project already deliberately avoided adding it once before for a single exploratory chart (Task 2.5's decision log, 2026-10-14: "matplotlib was not installed for this... one summary chart was rendered directly... instead of adding a new project dependency"). The same reasoning applies here: one simple train-vs-validation loss plot does not justify a new, fairly heavy dependency. |
+| 2026-10-14 | PN checkpoints are stored as `.pt` files under `data/interim/c2_pu/fr4_pn_baseline_runs/` (gitignored) rather than committed, with only their SHA-256 recorded in the committed summary | Consistent with this project's established "don't commit large binary arrays" policy (embedding caches, feature caches, scaled-feature caches are all handled the same way) — the run is exactly regeneratable via `fr4-pn-baseline` from already-committed small inputs, and the SHA-256 makes any future regeneration's checkpoint verifiably identical or flags a real divergence. |
+| 2026-10-14 | Two independent same-seed CPU training runs on the real fold-0 PN dataset were verified to produce a bit-identical per-epoch loss history (not just approximately close) | Task 4.1 had only verified forward-pass determinism (a single, non-iterative operation); training involves many sequential backward passes and optimizer steps, where floating-point non-associativity could in principle compound across iterations even under `torch.use_deterministic_algorithms(True)`. Verified directly rather than assumed: confirmed exact equality of the full `history` list (every epoch's train/validation loss) across two separately-constructed run directories. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
