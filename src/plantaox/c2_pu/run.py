@@ -50,6 +50,14 @@ from plantaox.c2_pu.curation.audit import (
 )
 from plantaox.c2_pu.curation.biopep import BIOPEP_CITATION, BIOPEP_SEARCH_URL, fetch_biopep_by_activity
 from plantaox.c2_pu.common.descriptors import DESCRIPTOR_NAMES, SCHEMA_VERSION as DESCRIPTOR_SCHEMA_VERSION
+from plantaox.c2_pu.common.feature_cache import (
+    CACHE_SCHEMA_VERSION,
+    build_fold_cache_arrays,
+    get_training_rows,
+    load_fold_feature_cache,
+    scaler_identity_sha256,
+    sha256_of,
+)
 from plantaox.c2_pu.curation.feature_fusion import (
     ESM2_DIM,
     FUSED_DIM,
@@ -2369,6 +2377,134 @@ def run_fr3_feature_fusion(n_folds: int = 5) -> dict:
     return summary
 
 
+# Bucket 3.4 -- fold-specific scaled feature cache. Reuses Task 3.3's raw
+# fused matrix and per-fold scalers exactly as frozen -- never refits,
+# never recomputes Tasks 3.1-3.3. See common/feature_cache.py's module
+# docstring for the loader contract (strict checksum/schema validation,
+# and why C3 fold membership still goes through load_fold_challenges).
+FR3_FEATURE_CACHE_PATH_TEMPLATE = str(INTERIM_DIR / "fr3_fold{fold_id}_scaled_features.npz")  # gitignored
+FR3_FEATURE_CACHE_MANIFEST_PATH = PROCESSED_DIR / "fr3_feature_cache_manifest.json"
+FR3_FEATURE_CACHE_VALIDATION_REPORT_PATH = PROCESSED_DIR / "fr3_feature_cache_validation_report.json"
+FR3_FEATURE_CACHE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr3_feature_cache_provenance.jsonl"
+
+
+def run_fr3_feature_cache(n_folds: int = 5) -> dict:
+    """Bucket 3.4: materialize one scaled (float32) feature cache per
+    GraphPart fold by applying that fold's EXISTING fitted scaler
+    (fr3_fusion_scalers.json, never refit) to the EXISTING raw fused
+    matrix (fr3_fused_raw.npz, never recomputed) -- plus a checksummed
+    manifest and a strict round-trip load of every cache as its own
+    validation step.
+    """
+    for p in (FR3_FUSED_RAW_CACHE_PATH, FR3_FUSION_SCALERS_PATH, FR3_FUSION_SCHEMA_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Task 3.3 (`fr3-feature-fusion`) first.")
+
+    with np.load(FR3_FUSED_RAW_CACHE_PATH, allow_pickle=False) as npz:
+        peptide_ids = npz["peptide_ids"]
+        pools = npz["pools"]
+        raw_matrix = npz["features"]
+        feature_names = npz["feature_names"]
+    with open(FR3_FUSION_SCALERS_PATH, encoding="utf-8") as handle:
+        fusion_scalers = json.load(handle)
+    with open(FR3_FUSION_SCHEMA_PATH, encoding="utf-8") as handle:
+        fusion_schema = json.load(handle)
+
+    if list(feature_names) != fusion_schema["feature_names"]:
+        raise RuntimeError("fr3_fused_raw.npz's feature_names do not match fr3_fusion_schema.json -- refusing to cache.")
+    if raw_matrix.shape != (len(peptide_ids), FUSED_DIM):
+        raise RuntimeError(f"Unexpected raw matrix shape {raw_matrix.shape}.")
+
+    external_control_ids = set(peptide_ids[pools == "external_control"].tolist())
+
+    cache_entries: dict[str, dict] = {}
+    for fold_id in range(n_folds):
+        scaler = fusion_scalers[str(fold_id)]
+        mean = np.array(scaler["mean"], dtype=np.float64)
+        std = np.array(scaler["std"], dtype=np.float64)
+        training_ids = scaler["training_peptide_ids"]
+        held_out_ids = scaler["held_out_peptide_ids"]
+
+        if external_control_ids & (set(training_ids) | set(held_out_ids)):
+            raise RuntimeError(f"Fold {fold_id}: external-control peptide_id(s) leaked into training/held-out sets.")
+
+        scaled = build_fold_cache_arrays(peptide_ids.tolist(), pools.tolist(), raw_matrix, mean, std)
+        cache_path = Path(FR3_FEATURE_CACHE_PATH_TEMPLATE.format(fold_id=fold_id))
+        np.savez_compressed(
+            cache_path,
+            peptide_ids=peptide_ids,
+            pools=pools,
+            features=scaled,
+            feature_names=feature_names,
+            scaler_mean=mean,
+            scaler_std=std,
+        )
+        cache_entries[str(fold_id)] = {
+            "cache_path": str(cache_path),
+            "cache_sha256": sha256_of(cache_path),
+            "fold_id": fold_id,
+            "graphpart_fold": fold_id,
+            "n_rows": int(scaled.shape[0]),
+            "shape": list(scaled.shape),
+            "dtype": str(scaled.dtype),
+            "feature_schema_version": CACHE_SCHEMA_VERSION,
+            "scaler_identity_sha256": scaler_identity_sha256(mean, std),
+            "n_training_samples": scaler["n_training_samples"],
+        }
+
+    input_file_hashes = {
+        "fused_raw_cache": sha256_of(FR3_FUSED_RAW_CACHE_PATH),
+        "fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fusion_schema": sha256_of(FR3_FUSION_SCHEMA_PATH),
+    }
+    manifest = {
+        "cache_schema_version": CACHE_SCHEMA_VERSION,
+        "fusion_schema_version": fusion_schema["schema_version"],
+        "n_folds": n_folds,
+        "peptide_id_order_sha256": peptide_id_order_sha256(peptide_ids.tolist()),
+        "input_file_hashes": input_file_hashes,
+        "folds": cache_entries,
+    }
+    with open(FR3_FEATURE_CACHE_MANIFEST_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(manifest, handle, indent=2)
+
+    # Validation: strictly round-trip-load every just-written cache (same
+    # checksum/schema verification a real training consumer would hit),
+    # and confirm each fold's own training rows standardize correctly.
+    per_fold_validation = {}
+    for fold_id_str, entry in cache_entries.items():
+        loaded = load_fold_feature_cache(Path(entry["cache_path"]), entry)
+        scaler = fusion_scalers[fold_id_str]
+        _, training_rows = get_training_rows(loaded, scaler["training_peptide_ids"])
+        per_fold_validation[fold_id_str] = {
+            "round_trip_load_ok": True,
+            "all_finite": bool(np.isfinite(loaded["features"]).all()),
+            "training_rows_mean_abs_max": float(np.abs(training_rows.astype(np.float64).mean(axis=0)).max()),
+            "training_rows_std_min_max": [
+                float(training_rows.astype(np.float64).std(axis=0, ddof=0).min()),
+                float(training_rows.astype(np.float64).std(axis=0, ddof=0).max()),
+            ],
+            "c3_union_row_count": int((loaded["pools"] == "C3").sum()),
+            "external_control_disjoint_from_training_and_held_out": bool(
+                not (external_control_ids & (set(scaler["training_peptide_ids"]) | set(scaler["held_out_peptide_ids"])))
+            ),
+        }
+    with open(FR3_FEATURE_CACHE_VALIDATION_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump({"per_fold": per_fold_validation}, handle, indent=2)
+
+    summary = {
+        "manifest": {k: v for k, v in manifest.items() if k != "folds"},
+        "fold_cache_paths": {k: v["cache_path"] for k, v in cache_entries.items()},
+        "validation": per_fold_validation,
+        "outputs": {
+            "manifest": str(FR3_FEATURE_CACHE_MANIFEST_PATH),
+            "validation_report": str(FR3_FEATURE_CACHE_VALIDATION_REPORT_PATH),
+        },
+    }
+    append_provenance_log(FR3_FEATURE_CACHE_PROVENANCE_LOG_PATH, {"stage": "fr3_feature_cache", "summary": summary})
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -2394,6 +2530,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr3-descriptors", help="15-descriptor physicochemical feature extraction over frozen FR1/FR2 pools (Bucket 3.1)")
     sub.add_parser("fr3-embeddings", help="Full ESM-2 embedding extraction over the Task 3.1 descriptor contract (Bucket 3.2)")
     sub.add_parser("fr3-feature-fusion", help="Fuse descriptors + embeddings into a 495-dim feature matrix with leakage-safe per-fold scalers (Bucket 3.3)")
+    sub.add_parser("fr3-feature-cache", help="Materialize 5 fold-specific scaled feature caches from the accepted raw fused matrix (Bucket 3.4)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -2473,6 +2610,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr3-feature-fusion":
         summary = run_fr3_feature_fusion()
         print(json.dumps({k: v for k, v in summary.items() if k != "validation"}, indent=2, default=str))
+        return 0
+    if args.stage == "fr3-feature-cache":
+        summary = run_fr3_feature_cache()
+        print(json.dumps(summary, indent=2, default=str))
         return 0
     return 1
 

@@ -267,6 +267,17 @@ data/interim/c2_pu/fr3_embed_report.json
 # fr3_fusion_validation_report.json.
 data/interim/c2_pu/fr3_fused_raw.npz
 
+# Bucket 3.4 -- 5 fold-specific scaled feature caches (~9MB each at
+# float32), same "don't commit large arrays" rule. Fully regeneratable
+# from fr3_fused_raw.npz + fr3_fusion_scalers.json (both already
+# accounted for above); checksums/shape/dtype recorded in
+# fr3_feature_cache_manifest.json instead.
+data/interim/c2_pu/fr3_fold0_scaled_features.npz
+data/interim/c2_pu/fr3_fold1_scaled_features.npz
+data/interim/c2_pu/fr3_fold2_scaled_features.npz
+data/interim/c2_pu/fr3_fold3_scaled_features.npz
+data/interim/c2_pu/fr3_fold4_scaled_features.npz
+
 # Scratch files written by test_fr3_embeddings_acceptance.py's live
 # WSL re-embed spot-checks -- regenerated every test run, not a pipeline
 # artifact.
