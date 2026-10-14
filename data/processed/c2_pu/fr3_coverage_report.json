@@ -1,0 +1,22 @@
+{
+  "FR1_positives": {
+    "unique_sequences_with_descriptors": 1205,
+    "source_records": 1205
+  },
+  "C1": {
+    "unique_sequences_with_descriptors": 3788,
+    "source_records": 5000
+  },
+  "C2": {
+    "unique_sequences_with_descriptors": 2000,
+    "source_records": 2000
+  },
+  "C3": {
+    "unique_sequences_with_descriptors": 2325,
+    "source_records": 2325
+  },
+  "external_control": {
+    "unique_sequences_with_descriptors": 38,
+    "source_records": 38
+  }
+}

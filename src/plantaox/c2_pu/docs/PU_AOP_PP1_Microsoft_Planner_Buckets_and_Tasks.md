@@ -214,11 +214,16 @@ IMPLEMENTATION_STATUS.md.)*
 **Definition of done:** Verified cached features aligned to peptide identifiers, with leakage-safe preprocessing and reproducible loading.
 
 ## 3.1 — Physicochemical Descriptor Extraction
-- [ ] Define the exact **15 descriptors** and their formulas/units.
-- [ ] Implement extraction for every relevant peptide.
-- [ ] Check ranges, missing/NaN values, and nonfinite values.
-- [ ] Test representative short/long/charged/hydrophobic sequences.
-- [ ] Save descriptor matrices with peptide-ID mappings.
+- [x] Define the exact **15 descriptors** and their formulas/units. (schema `descriptors_v1`,
+  `common/descriptors.py`; approved by project owner 2026-10-14, see IMPLEMENTATION_STATUS.md)
+- [x] Implement extraction for every relevant peptide. (FR1 positives, C1, C2, C3 union, external
+  control — via `curation/descriptor_extraction.py` + `run.py::run_fr3_descriptors()`, CLI `fr3-descriptors`)
+- [x] Check ranges, missing/NaN values, and nonfinite values. (`fr3_validation_report.json`: zero
+  missing/nonfinite across all 9,356 real rows; one diagnostic-only high-correlation pair flagged)
+- [x] Test representative short/long/charged/hydrophobic sequences. (29 unit tests in
+  `test_descriptors.py`, including aromatic/cysteine-rich/proline-rich cases)
+- [x] Save descriptor matrices with peptide-ID mappings. (`fr3_descriptor_table.parquet` +
+  `fr3_record_map.csv`)
 
 ## 3.2 — ESM-2 Embedding Pipeline
 - [x] Configure PyTorch/fair-esm and GPU/CPU fallback. *(torch 2.14.1+cpu + fair-esm 2.0.0 in the existing `pu_aop` env; CPU-only by confirmed decision despite a real GPU being present — see IMPLEMENTATION_STATUS.md. `resolve_device()` fallback tested both paths: forced-CPU and CUDA-reported-unavailable.)*
