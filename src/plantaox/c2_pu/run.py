@@ -7,6 +7,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -32,7 +33,7 @@ from plantaox.c2_pu.curation.dedup import (
     parse_cdhit_clusters,
     run_cdhit,
 )
-from plantaox.c2_pu.curation.freeze import freeze_baseline
+from plantaox.c2_pu.curation.freeze import freeze_baseline, verify_frozen_baseline
 from plantaox.c2_pu.curation.peptipedia import build_c2_pool, extract_c2_candidates, load_activity_names
 from plantaox.c2_pu.curation.c3 import (
     compute_fold_centroids,
@@ -1784,6 +1785,153 @@ def run_fr2_external_control_build() -> dict:
     return summary
 
 
+# Bucket 2.7 -- FR2 Final Acceptance and Freeze.
+FR2_BASELINE_VERSION = "pp2_baseline_v1"
+FR2_FROZEN_DIR = PROCESSED_DIR / "frozen" / FR2_BASELINE_VERSION
+
+
+def run_fr2_freeze() -> Path:
+    """Bucket 2.7: snapshot the validated FR2 artifacts (C1 v3, C2 v2, C3
+    union + fold ranking, the validated external control, and every audit/
+    distribution report) under ``pp2_baseline_v1`` with a checksummed
+    manifest -- same convention as `run_fr1_freeze`.
+
+    Does not re-validate anything -- run the full test suite and
+    `fr2-pool-audit`/`fr2-external-control-build` first; this only freezes
+    what already passed (`fr2_pool_audit_report.json`'s
+    `ready_for_technical_acceptance` must already be True). Never touches
+    `pp1_baseline_v1` -- confirmed via `verify_frozen_baseline` before and
+    after, not assumed.
+    """
+    audit_report_path_check = AUDIT_REPORT_PATH
+    if not audit_report_path_check.exists():
+        raise FileNotFoundError(f"{audit_report_path_check} not found -- run fr2-pool-audit first.")
+    with open(audit_report_path_check, encoding="utf-8") as handle:
+        audit_report = json.load(handle)
+    if not audit_report.get("ready_for_technical_acceptance"):
+        raise RuntimeError(
+            "fr2_pool_audit_report.json reports ready_for_technical_acceptance=False -- "
+            "resolve outstanding findings before freezing FR2."
+        )
+
+    pre_freeze_fr1_check = verify_frozen_baseline(FROZEN_DIR)
+    if not all(pre_freeze_fr1_check.values()):
+        raise RuntimeError(f"pp1_baseline_v1 integrity check failed BEFORE freezing FR2: {pre_freeze_fr1_check}")
+
+    required = {
+        # Canonical C1 v3
+        "stage_c1_decoys_v3.fasta": C1_CLEAN_FASTA_V3_PATH,
+        "c1_accession_map_v3.csv": C1_ACCESSION_MAP_V3_PATH,
+        "c1_cross_pool_exclusion_log.csv": C1_CROSS_POOL_EXCLUSION_LOG_PATH,
+        "c1_cross_pool_replacement_log.csv": C1_CROSS_POOL_REPLACEMENT_LOG_PATH,
+        "c1_cross_pool_fix_report.json": C1_CROSS_POOL_FIX_REPORT_PATH,
+        # Canonical C2 v2
+        "stage_c2_bioactive_unlabeled_v2.fasta": C2_FASTA_V2_PATH,
+        "c2_activity_map_v2.csv": C2_ACTIVITY_MAP_V2_PATH,
+        "c2_cross_pool_exclusion_log.csv": C2_CROSS_POOL_EXCLUSION_LOG_PATH,
+        "c2_cross_pool_replacement_log.csv": C2_CROSS_POOL_REPLACEMENT_LOG_PATH,
+        "c2_cross_pool_fix_report.json": C2_CROSS_POOL_FIX_REPORT_PATH,
+        # Canonical C3 union + fold-specific ranking
+        "stage_c3_esm2_hard_challenges.fasta": C3_FASTA_PATH,
+        "c3_similarity_ranking.csv": C3_RANKING_PATH,
+        "c3_build_report.json": C3_BUILD_REPORT_PATH,
+        # Validated external control
+        "anoxpepred_external_control_validated.csv": EXT_CONTROL_VALIDATED_PATH,
+        "ext_control_homology_pairs.csv": EXT_CONTROL_HOMOLOGY_PAIRS_PATH,
+        "ext_control_validation_report.json": EXT_CONTROL_REPORT_PATH,
+        # Leakage and contamination reports (Bucket 2.4)
+        "audit_integrity_report.json": AUDIT_INTEGRITY_REPORT_PATH,
+        "audit_exact_overlap_matrix.csv": AUDIT_OVERLAP_MATRIX_PATH,
+        "audit_exact_overlap_detail.csv": AUDIT_OVERLAP_DETAIL_PATH,
+        "audit_external_aop_screen.json": AUDIT_EXTERNAL_SCREEN_PATH,
+        "audit_cross_pool_homology_clusters.csv": AUDIT_HOMOLOGY_CLUSTERS_PATH,
+        "audit_cross_pool_homology_summary.json": AUDIT_HOMOLOGY_SUMMARY_PATH,
+        "audit_c3_fold_contract_report.json": AUDIT_C3_CONTRACT_REPORT_PATH,
+        "fr2_pool_audit_report.json": AUDIT_REPORT_PATH,
+        # Distribution and shortcut-bias reports (Bucket 2.5)
+        "distribution_descriptor_table.csv": DISTRIBUTION_DESCRIPTOR_TABLE_PATH,
+        "distribution_aa_composition.csv": DISTRIBUTION_AA_COMPOSITION_PATH,
+        "distribution_ks_comparison.csv": DISTRIBUTION_KS_COMPARISON_PATH,
+        "distribution_shortcut_report.json": DISTRIBUTION_SHORTCUT_REPORT_PATH,
+    }
+
+    c1_df = read_fasta(C1_CLEAN_FASTA_V3_PATH)
+    c2_df = read_fasta(C2_FASTA_V2_PATH)
+    c3_df = read_fasta(C3_FASTA_PATH)
+    ranking_df = pd.read_csv(C3_RANKING_PATH)
+    ext_df = pd.read_csv(EXT_CONTROL_VALIDATED_PATH)
+
+    # Raw external sources are too large / already gitignored to copy into
+    # the freeze -- recorded here by checksum and location instead (AGENTS.md:
+    # don't commit large raw datasets; record source + checksum).
+    raw_source_references = {
+        "peptipedia_v2_zenodo_dump": {
+            "path": str(C2_RAW_DUMP_PATH),
+            "doi": "10.5281/zenodo.21488992",
+            "sha256": hashlib.sha256(C2_RAW_DUMP_PATH.read_bytes()).hexdigest() if C2_RAW_DUMP_PATH.exists() else None,
+            "committed_to_git": False,
+        },
+        "uniref50_candidates_snapshot": {
+            "path": str(C3_RAW_CANDIDATES_PATH),
+            "sha256": hashlib.sha256(C3_RAW_CANDIDATES_PATH.read_bytes()).hexdigest() if C3_RAW_CANDIDATES_PATH.exists() else None,
+            "committed_to_git": True,
+        },
+        "biopep_uwm_antioxidative_scrape": {
+            "path": str(BIOPEP_RAW_PATH),
+            "citation": BIOPEP_CITATION,
+            "sha256": hashlib.sha256(BIOPEP_RAW_PATH.read_bytes()).hexdigest() if BIOPEP_RAW_PATH.exists() else None,
+            "committed_to_git": True,
+        },
+    }
+
+    metadata = {
+        "supersedes": None,
+        "fr1_baseline_dependency": FR1_BASELINE_VERSION,
+        "git_commit": _git_commit_hash(),
+        "tool_versions": TOOL_VERSIONS,
+        "counts": {
+            "c1_v3_records": len(c1_df),
+            "c1_v3_unique_sequences": len({s for _, s in c1_df}),
+            "c2_v2_records": len(c2_df),
+            "c3_union_records": len(c3_df),
+            "c3_ranking_rows": len(ranking_df),
+            "external_control_records": len(ext_df),
+        },
+        "raw_source_references": raw_source_references,
+        "known_limitations": [
+            "11 remaining C1<->C2 near-duplicate homology families -- project-owner-approved "
+            "documented limitation, conditional on (and re-verified as) zero FR1-positive "
+            "involvement in the real (>=15 AA) homology relationship.",
+            "AODB and DFBP remain unscreened for documented access reasons (HTTP 502 + expired "
+            "cert; no discoverable hosting URL), not as an unstarted task.",
+            "2 BIOPEP-UWM-vs-AnOxPePred external-control annotation conflicts flagged, retention "
+            "recommended, not yet explicitly confirmed by the project owner.",
+            "C1 retains natural record-level duplicates by design (5,000 records / 3,788 unique "
+            "sequences) -- any future train/val/test split MUST group identical sequences together.",
+            "C3's union FASTA is not a valid fold-specific challenge set on its own -- "
+            "FR3/FR4/FR6 MUST use curation.c3.load_fold_challenges(path, fold_id).",
+            "FR1-vs-C1/C2/C3 length/mass/charge/hydrophobicity/aromaticity distributions differ "
+            "significantly (quantified, Task 2.5) -- a measured shortcut-bias risk, NOT evidence of "
+            "a validated C1-to-C2-to-C3 difficulty ordering.",
+            "FR1 positives have no organism metadata available -- an unchecked, not assumed-absent, "
+            "shortcut-risk gap.",
+            "FR1's 4 pending supervisor approvals remain open (see fr1_acceptance_report.md §10); "
+            "FR2 technical acceptance does not constitute scientific sign-off.",
+            "No formal data_registry.csv covers FR2's own new external sources (Peptipedia dump, "
+            "UniRef50 snapshot, BIOPEP-UWM scrape) -- same gap already flagged for FR1, now also "
+            "applying to FR2; per-stage provenance JSONLs are a stopgap, not a substitute.",
+        ],
+    }
+
+    manifest_path = freeze_baseline(FR2_BASELINE_VERSION, FR2_FROZEN_DIR, required, metadata)
+
+    post_freeze_fr1_check = verify_frozen_baseline(FROZEN_DIR)
+    if not all(post_freeze_fr1_check.values()):
+        raise RuntimeError(f"pp1_baseline_v1 integrity check failed AFTER freezing FR2: {post_freeze_fr1_check}")
+
+    return manifest_path
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -1804,6 +1952,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr2-c2-cross-pool-fix", help="Decision B: exclude C2 homolog of an E1 positive (Bucket 2.4 resolution)")
     sub.add_parser("fr2-distribution-audit", help="Biological distribution and shortcut-bias checks (Bucket 2.5)")
     sub.add_parser("fr2-external-control-build", help="Validate AnOxPePred external control + homology audit (Bucket 2.6)")
+    sub.add_parser("fr2-freeze", help="Freeze the validated FR2 baseline as pp2_baseline_v1 (Bucket 2.7)")
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     args = parser.parse_args(argv)
 
@@ -1850,6 +1999,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr2-c2-cross-pool-fix":
         summary = run_fr2_c2_cross_pool_fix()
         print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-freeze":
+        manifest_path = run_fr2_freeze()
+        print(f"Frozen FR2 baseline written: {manifest_path}")
         return 0
     if args.stage == "fr2-external-control-build":
         summary = run_fr2_external_control_build()

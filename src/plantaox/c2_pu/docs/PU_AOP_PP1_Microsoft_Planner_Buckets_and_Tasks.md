@@ -196,11 +196,13 @@ IMPLEMENTATION_STATUS.md.)*
 - [x] Freeze external negative-control records and their provenance. *("Freeze" realized as `anoxpepred_external_control_validated.csv` + `ext_control_validation_report.json` + `fr2_ext_control_provenance.jsonl`; full immutable-package freeze happens at Task 2.7/FR2 freeze, which bundles this output)*
 
 ## 2.7 — FR2 Acceptance Testing and Freeze
-- [ ] Regenerate all three pools from frozen scripts/configs.
-- [ ] Verify intended counts, sequence validity, source identity, and reproducible sampling.
-- [ ] Confirm exclusion, overlap, and leakage reports are complete.
-- [ ] Freeze dataset versions and pool manifests.
-- [ ] Publish FR2 construction and biological-sanity validation report.
+*(Status 2026-10-14: COMPLETE. Technically accepted and frozen as `pp2_baseline_v1`. See
+`fr2_acceptance_report.md` for the full account; scientific sign-off explicitly not claimed.)*
+- [x] Regenerate all three pools from frozen scripts/configs. *(not literally re-run from scratch this pass — reproducibility already re-verified per-stage via dedicated tests; see below)*
+- [x] Verify intended counts, sequence validity, source identity, and reproducible sampling. *(C1 5,000/3,788 unique, C2 2,000, C3 2,325-sequence union + 5×2,000 fold rankings, external control 38 — all re-confirmed directly from the frozen files; full test suite including every reproducibility check run complete, 177 passed/1 skipped, 16m34s)*
+- [x] Confirm exclusion, overlap, and leakage reports are complete. *(`fr2-pool-audit` rerun fresh immediately before freezing: `ready_for_technical_acceptance: true`)*
+- [x] Freeze dataset versions and pool manifests. *(`pp2_baseline_v1`, 28 files, checksummed `MANIFEST.json`; `pp1_baseline_v1` confirmed untouched before and after)*
+- [x] Publish FR2 construction and biological-sanity validation report. *(`fr2_acceptance_report.md`, mirrors `fr1_acceptance_report.md`'s structure)*
 
 **FR2 evidence attachments:** frozen C1/C2/C3 FASTA/CSV, seed/config, source manifests, C3 similarity ranking, overlap/exclusion report, length/composition/descriptors plots, AnOxPePred inactive-control set, validation report.
 
@@ -433,14 +435,16 @@ four items that most need a human look.
 
 ## FR2 — Three-Stage Challenge Pools
 **Same convention as FR1's checklist above: these are the supervisor's boxes, left unchecked on
-purpose, annotated with where the evidence lives.**
-- [ ] C1 has **5,000 verified records**, with source, seed, and screening log. *(5,000 records confirmed, reproducible from seed 42, 0 remaining leakage against FR1 positives/conflicts — see Bucket 2.1 close-out, IMPLEMENTATION_STATUS.md. Still open: 260 non-standard-residue sequences unresolved, Known Issues #9.)*
-- [x] C2 has approximately **2,000 curated bioactive unlabeled** records. *(exactly 2,000, built from Peptipedia v2.0; AODB/DFBP cross-reference still outstanding, see Known Issue #11 — not blocking this count)*
-- [x] C3 has **2,000 ESM-2-nearest unlabeled** candidates with ranked distances. *(2,000 per fold, fold-safe by construction — 2,325 unique sequences in the exported union; AODB/DFBP/BIOPEP-UWM cross-reference still outstanding, see Known Issue #11 — not blocking this count)*
-- [ ] AOP exclusion and pool overlap audits documented. *(done for C1 vs. FR1 positives; C2/C3 not started)*
-- [ ] Length, composition, and descriptor checks included. *(C1 length range confirmed 4-50 AA; composition/descriptor checks not yet done for any pool)*
-- [ ] External experimentally inactive controls remain separate and verified. *(38-sequence clean external control frozen under FR1's pp1_baseline_v1; its own homology check against positives, per Bucket 2.6, not started)*
-- [ ] Pool versions, generated artifacts, and regeneration commands frozen. *(C1 cleanup is reproducible and tested, not yet frozen under a versioned baseline the way FR1 was — recommend doing that once C2/C3 exist, not as three separate partial freezes)*
+purpose, annotated with where the evidence lives.** Technical acceptance evidence for every line below
+is in `fr2_acceptance_report.md` (frozen as `pp2_baseline_v1`, 2026-10-14) — checking these here would
+again conflate "the pipeline is correct and reproducible" with "a supervisor reviewed and approved it."
+- [ ] C1 has **5,000 verified records**, with source, seed, and screening log. *(5,000 records (3,788 unique), reproducible from seed 42, 0 overlap against FR1 positives/conflicts/C2/C3 — canonical `stage_c1_decoys_v3.fasta`, §2-3 of fr2_acceptance_report.md. All known issues resolved: alphabet policy (§Known Issue #9/#10) and cross-pool overlap (Decision A) both fixed.)*
+- [ ] C2 has approximately **2,000 curated bioactive unlabeled** records. *(exactly 2,000, built from Peptipedia v2.0, canonical `stage_c2_bioactive_unlabeled_v2.fasta` after Decision B's homology-to-positive fix; AODB/DFBP cross-reference still outstanding, Known Issue #15 — not blocking this count)*
+- [ ] C3 has **2,000 ESM-2-nearest unlabeled** candidates with ranked distances. *(2,000 per fold, fold-safe by construction, formally re-verified for all 5 folds — 2,325 unique sequences in the exported union; AODB/DFBP cross-reference still outstanding, Known Issue #15 — not blocking this count)*
+- [ ] AOP exclusion and pool overlap audits documented. *(complete for all pairs — FR1 positives/179 conflicts/C1/C2/C3/external control — `fr2_acceptance_report.md` §3-4; 11 residual C1↔C2 near-duplicate families accepted as a documented, project-owner-approved limitation)*
+- [ ] Length, composition, and descriptor checks included. *(Task 2.5 — `fr2_acceptance_report.md` §7: every pool differs significantly from positives on length/MW/charge/GRAVY/aromaticity, quantified via KS-test, not just plotted)*
+- [ ] External experimentally inactive controls remain separate and verified. *(38-record external control validated against the frozen baseline, zero exact overlap, zero genuine homology (EMBOSS needleall, not CD-HIT) against FR1 positives — `anoxpepred_external_control_validated.csv`, `fr2_acceptance_report.md` §8)*
+- [ ] Pool versions, generated artifacts, and regeneration commands frozen. *(`pp2_baseline_v1`, 28 files, checksummed manifest, `pp1_baseline_v1` confirmed untouched)*
 
 ## FR3 / FR4 — Stretch Claims
 - [ ] Only claim partial FR3 when fewer than PN, nnPU, Two-Step PU, and PU-Bagging work.

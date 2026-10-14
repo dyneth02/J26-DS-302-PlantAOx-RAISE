@@ -1,0 +1,37 @@
+{
+  "fr1_positives": {
+    "organism_metadata_available": false,
+    "note": "Multi-AOP/AnOxPePred carry no per-record organism field -- cannot check organism-family shortcut risk for the positive pool itself with current source data. Documented as a limitation, not assumed absent."
+  },
+  "c1_v3": {
+    "n_unique_organisms": 1708,
+    "top_10_organisms_by_share": {
+      "Escherichia coli (strain K12)": 0.0206,
+      "Saccharomyces cerevisiae (strain ATCC 204508 / S288c)": 0.016,
+      "Homo sapiens": 0.0116,
+      "Bacillus subtilis (strain 168)": 0.0112,
+      "Pseudotsuga menziesii": 0.0078,
+      "Arabidopsis thaliana": 0.0072,
+      "Pisum sativum": 0.006,
+      "Spinacia oleracea": 0.0056,
+      "Dictyostelium discoideum": 0.0054,
+      "Treponema pallidum (strain DSM 117211 / Nichols)": 0.0048
+    },
+    "max_single_organism_share": 0.0206
+  },
+  "c2_v2": {
+    "n_unique_activity_tags": 123,
+    "top_10_tags_by_share": {
+      "Therapeutic": 0.1439,
+      "Antimicrobial": 0.1059,
+      "Antibacterial": 0.0704,
+      "Toxic": 0.0593,
+      "Anti gram (+)": 0.056,
+      "Signal peptide": 0.0559,
+      "Anti gram (-)": 0.0456,
+      "Anti fungal": 0.0335,
+      "Anticancer": 0.0317,
+      "Metabolic": 0.0303
+    }
+  }
+}

@@ -515,6 +515,43 @@
   `-minscore` fix) + 9 full-file acceptance tests (`test_fr2_external_control_acceptance.py`, including
   byte-identical reproducibility of a full re-run). Full suite: 166 passed, 1 skipped, zero regression.
 
+### Bucket 2, Task 2.7 — FR2 Final Acceptance Audit and Freeze
+- **Status: technical acceptance passed, frozen as `pp2_baseline_v1` (2026-10-14).** Full detail,
+  methodology, every number, and the acceptance-checklist mapping live in
+  **[`fr2_acceptance_report.md`](fr2_acceptance_report.md)** — mirrors `fr1_acceptance_report.md`'s
+  structure. This entry is a pointer + headline result, not a duplicate of that report.
+- **Independent, end-to-end re-verification performed, not a summary of prior logs.** `fr2-pool-audit`
+  was rerun fresh against the final canonical pools (not reused from an earlier run) immediately
+  before freezing, and the **complete** test suite — including every byte-identical-reproducibility
+  check (C1/C2 cross-pool fixes, the full C3 re-embed, the external-control homology re-run, the
+  full Peptipedia-dump C2 reproducibility test) — was run in full, not just the fast subset used
+  during iterative development: **177 passed, 1 skipped (torch, runs separately inside WSL), 0
+  failed, in 16m34s.**
+- **Headline numbers:** C1 5,000 records (3,788 unique) / C2 2,000 / C3 2,325-sequence union with
+  5×2,000 fold-specific rankings / 38-record validated external control — all re-confirmed directly
+  from the frozen files, not carried over from memory.
+- **`fr2_pool_audit_report.json` confirmed `ready_for_technical_acceptance: true`** (re-derived from
+  the live artifacts at report-generation time) before the freeze was attempted — `run_fr2_freeze()`
+  hard-fails if this flag is false, so the freeze cannot proceed past an unresolved finding by
+  mistake.
+- **Frozen baseline: `pp2_baseline_v1`** (`data/processed/c2_pu/frozen/pp2_baseline_v1/`, 28 files,
+  checksummed `MANIFEST.json`, 6.8MB). Bundles: canonical C1 v3/C2 v2/C3-union+ranking, the validated
+  external control, every Bucket 2.4 audit report, and every Bucket 2.5 distribution report. Declares
+  its `pp1_baseline_v1` dependency explicitly in the manifest rather than re-copying FR1's own files.
+  Large raw sources (Peptipedia dump, 281MB) are referenced by SHA-256 + DOI, not copied, per AGENTS.md's
+  "don't commit large raw datasets" rule — the smaller UniRef50 snapshot and BIOPEP-UWM scrape are
+  both already committed elsewhere in the repo and referenced the same way for completeness.
+- **`pp1_baseline_v1` confirmed untouched, both before and after the freeze** (`verify_frozen_baseline`
+  called at both points inside `run_fr2_freeze`, not just assumed from "we didn't write to that
+  path") — all 10 of its files still checksum-match.
+- **Scientific sign-off is explicitly NOT claimed.** Per AGENTS.md rule #3 and the same distinction
+  already drawn for FR1: passing every automated acceptance check is not the same as supervisor
+  approval. `fr2_acceptance_report.md` §10 lists every outstanding approval (FR1's 4 carried-over
+  items, plus the new BIOPEP-UWM external-control retention recommendation) separately from the
+  technical-acceptance result.
+- **Tests:** 6 new acceptance tests (`test_fr2_freeze_acceptance.py`) verifying manifest completeness,
+  checksum integrity, count consistency, and FR1-baseline non-interference.
+
 ### Bucket 3, Task 3.2 — ESM-2 Environment Setup and Smoke Test
 - **Status: environment configured, interface built and tested, smoke test passing.** This is
   explicitly NOT full feature generation — embedding the full positive pool and C1/C2/C3 (Bucket
@@ -654,6 +691,27 @@ tasks below.)*
     task: AODB's server returned HTTP 502 + an expired TLS certificate; DFBP has no discoverable
     hosting URL. BIOPEP-UWM **is** screened (zero hits in C1 v3/C2 v2/C3). Revisit if either resource
     comes back online or a hosting URL for DFBP is found.
+16. **AWAITING PROJECT-OWNER CONFIRMATION (non-blocking): the 2 BIOPEP-UWM-vs-AnOxPePred
+    external-control conflicts** (`AOP-37BD4B4933`/"FCM", `AOP-DDCD54E4BA`/"YPQLLPNE") are flagged
+    (`has_biopep_antioxidative_conflict`) and retained in the primary external-control set, per a
+    presented recommendation (assay-outranks-undocumented-annotation precedent) — not yet explicitly
+    confirmed. Does not block FR2 technical acceptance or the `pp2_baseline_v1` freeze (no dataset
+    change is pending on this one either way: the default state, retain-and-flag, is already applied).
+17. **CD-HIT's raw `.clstr` intermediate output is not perfectly run-to-run stable**, discovered while
+    independently re-verifying FR2 for the freeze (Task 2.7): re-running `fr2-pool-audit` a second time
+    on unchanged pool inputs produced a `audit_combined_pools_cdhit90.clstr` that differed from the
+    first run in a handful of cluster groupings/ID numbers (confirmed via `git diff`, not assumed).
+    Root cause: CD-HIT is invoked with `-T 0` ("use all available threads"), and multi-threaded
+    processing order can affect which representative/cluster a borderline sequence is assigned to.
+    **The DERIVED, audited conclusions were empirically confirmed unaffected** — `audit_cross_pool_
+    homology_clusters.csv`, `audit_cross_pool_homology_summary.json`, and `fr2_pool_audit_report.json`
+    were all byte-identical across the rerun (verified via `git diff`, zero changes) — so this does not
+    change any reported finding or the 11-vs-15 real-homology-candidate counts anywhere in this
+    document. Flagged here as a genuine, newly-discovered reproducibility nuance in a third-party tool
+    invocation, not swept under the "everything is byte-identical" claim made elsewhere for this
+    project's own code. Not fixed (would require forcing `-T 1`, a performance/determinism tradeoff
+    outside this task's scope) — noted for awareness if a future rerun's raw CD-HIT file is compared
+    byte-for-byte and appears to differ.
 
 ## ⏭️ Next tasks (in order)
 
@@ -669,34 +727,30 @@ tasks below.)*
    The ambiguous-residue policy blocker (former Known Issues #9/#10) is now resolved for C1; full
    embedding extraction (the remaining Bucket 3.2 checklist items: "extract embeddings for remaining
    positives and C1/C2/C3," "verify dimensions/ordering/dtype/completeness") can read
-   `stage_c1_decoys_v2.fasta` directly with `embed_sequences(..., validate_alphabet=True)` (the
+   `stage_c1_decoys_v3.fasta` directly with `embed_sequences(..., validate_alphabet=True)` (the
    default) and expect zero `AmbiguousResidueError`s from C1. Not yet attempted — still separate,
    deliberately out-of-scope work.
-4. **Task 2.2 (C2) and Task 2.3 (C3) core pools are both built** — see Completed tasks above.
-   Remaining for both: acquire and cross-reference AODB/DFBP/BIOPEP-UWM specifically (Known Issue
-   #11), low/medium priority depending on how much the PP1 report leans on that specific checklist
-   line versus the broader antioxidant-exclusion/leakage-screen arguments already satisfied.
-5. **Bucket 2.4 is resolved and technically accepted** (`ready_for_technical_acceptance: true` in
-   `fr2_pool_audit_report.json`, re-derived from the live artifacts). Canonical C1/C2 artifacts are
-   now `stage_c1_decoys_v3.fasta` / `stage_c2_bioactive_unlabeled_v2.fasta` — update any new code to
-   read these, not v2/the original C2. One open, non-blocking item: whether to act further on the
-   11 remaining C1↔C2 near-duplicate families (recommended to accept as documented limitation; see
-   Known Issue #14).
-6. **Task 2.5 is complete** — see Completed tasks above. Every challenge pool differs significantly
-   from FR1 positives on length/MW/charge/GRAVY/aromaticity (quantified via KS-test); this is a
-   known, measured shortcut-bias risk for FR3/FR4 modeling to be aware of, not a defect to fix in
-   FR2. UMAP/t-SNE and length-stratified resampling both deliberately deferred (see above).
-7. **Bucket 2.6 (External Inactive-Control Preparation)** is next per the Planner sequence — the
-   38-record AnOxPePred external control already exists (frozen in `pp1_baseline_v1`) but this
-   bucket's own homology-boundary check against the positive pool hasn't been run as a dedicated
-   stage yet. Not started.
-8. **Bucket 3.1 (15 physicochemical descriptors)** can start any time in parallel — not blocked on
-   anything above.
-9. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
+4. **FR2 (Buckets 2.1–2.7) is complete, technically accepted, and frozen as `pp2_baseline_v1`.** See
+   `fr2_acceptance_report.md` for the full account. Canonical artifacts for ALL future consumption:
+   `stage_c1_decoys_v3.fasta`, `stage_c2_bioactive_unlabeled_v2.fasta`, `stage_c3_esm2_hard_
+   challenges.fasta` + `c3_similarity_ranking.csv`, `anoxpepred_external_control_validated.csv`.
+   Scientific sign-off is explicitly NOT claimed — see Known Issues and `fr2_acceptance_report.md` §10
+   for every outstanding approval.
+5. **AODB/DFBP/BIOPEP-UWM cross-reference:** BIOPEP-UWM done (zero hits in C1/C2/C3/external
+   control). AODB/DFBP remain unscreened for documented access reasons (Known Issue #15), not an
+   unstarted task — revisit only if either resource becomes reachable or a DFBP hosting URL surfaces.
+6. **Bucket 3.1 (15 physicochemical descriptors)** is the next FR3-prerequisite item — can start any
+   time, not blocked on anything above. Note: this is a DIFFERENT, more complete descriptor set than
+   the 4-descriptor comparison Task 2.5 used internally (`curation/distribution_audit.py`) — don't
+   confuse the two or treat Task 2.5's narrower set as already satisfying Bucket 3.1.
+7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
    selection-leakage risk later.
-10. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
+8. **Outstanding, non-blocking approval:** the BIOPEP-UWM external-control retention recommendation
+   (Known Issue #16) — presented, not yet confirmed. Does not block FR3 work on `pp2_baseline_v1`.
+9. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`. FR3/FR4 classifier implementation was explicitly out of
+   scope for this session's work and has not been started.
 
 ## 📝 Experiment decisions log
 
@@ -761,5 +815,8 @@ tasks below.)*
 | 2026-10-14 | Bucket 2.6's external-control-vs-positive homology audit uses EMBOSS `needleall` (real global alignment, all 45,790 pairs) instead of CD-HIT percent identity | Explicit instruction: CD-HIT's shorter-sequence-normalized identity is already known (Bucket 2.4) to be unreliable for very short peptides. `needleall` reports identity, similarity, gaps, and alignment length directly per pair, batched in one call rather than one `needle` call per pair. |
 | 2026-10-14 | `needleall`'s default `-minscore 1.0` is overridden to a very low value (−10,000) in `curation/homology_alignment.py::run_needleall` | Found empirically: the default silently drops any pair scoring below it from the output entirely (a 38×1,205 run returned only 35,076 of the expected 45,790 pairs at the default). A completeness-audited homology scan must account for every pair, including irrelevant low/negative-score ones, so results can be trusted as complete rather than silently partial. |
 | 2026-10-14 | The 2 BIOPEP-UWM-vs-AnOxPePred external-control conflicts (`AOP-37BD4B4933`/"FCM", `AOP-DDCD54E4BA`/"YPQLLPNE") are flagged (`has_biopep_antioxidative_conflict`) but NOT excluded from the primary external-control set — a recommendation presented for approval, not yet confirmed by the project owner | Per explicit instruction to seek approval before a primary-vs-sensitivity-set policy change -- this row records the proposal and its rationale (AnOxPePred's FRS/Chelator assay results are per-sequence, DOI-traceable experimental evidence; BIOPEP-UWM's listing is a database annotation with no per-record assay/reference metadata visible in the scraped table; the project's own established precedent favors assay evidence), not a decision. Update this row once the project owner responds. |
+
+| 2026-10-14 | FR2 frozen as `pp2_baseline_v1` after an independent end-to-end re-verification (fresh `fr2-pool-audit` rerun + the COMPLETE test suite, 177 passed/1 skipped/16m34s, not just the fast development subset) | Per explicit instruction: do not rely only on previous acceptance-report summaries; re-run the full reproducibility-inclusive suite as the final gate. `run_fr2_freeze()` hard-fails if `fr2_pool_audit_report.json`'s `ready_for_technical_acceptance` is False, so the freeze cannot silently proceed past an unresolved finding. |
+| 2026-10-14 | `pp2_baseline_v1`'s manifest declares its `pp1_baseline_v1` dependency explicitly and references (rather than copies) the large Peptipedia raw dump by SHA-256 + DOI | Mirrors the project's established "don't commit large raw datasets" rule (already applied to ESM-2 weights and the Peptipedia dump itself); `verify_frozen_baseline` was run against `pp1_baseline_v1` both immediately before and immediately after the FR2 freeze, confirming zero interference rather than assuming it from "we didn't write to that path." |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
