@@ -319,3 +319,12 @@ data/interim/c2_pu/fr4_pn_baseline_runs/
 # committed summaries (fr4_nnpu_baseline_fold*_summary.json) and the
 # checkpoint SHA-256 they record are the durable, auditable artifacts.
 data/interim/c2_pu/fr4_nnpu_baseline_runs/
+
+# Task 4.3 POST-ACCEPTANCE DIAGNOSTIC -- pi-sensitivity run directories
+# (resolved configs, epoch logs, PyTorch checkpoints). Same reasoning as
+# the accepted-baseline runs dir above; committed summaries
+# (fr4_nnpu_prior_sensitivity_pi*_fold*_summary.json) and the checkpoint
+# SHA-256 they record are the durable, auditable artifacts. Entirely
+# separate from fr4_nnpu_baseline_runs/ so the diagnostic can never
+# collide with or overwrite the accepted pi=0.10 baseline's own run dirs.
+data/interim/c2_pu/fr4_nnpu_prior_sensitivity_runs/

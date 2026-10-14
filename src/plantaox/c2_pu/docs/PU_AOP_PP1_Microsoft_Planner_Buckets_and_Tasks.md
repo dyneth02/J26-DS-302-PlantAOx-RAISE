@@ -301,6 +301,17 @@ weights), the explicit nnPU-variant identification (direct-clamped, not the beta
 procedure), and the full research-limitations section (provisional prior, E2 provenance, positive-
 selection bias, nnPU-vs-PN loss incomparability, fold-0-only scope, no scientific sign-off implied).
 
+**POST-ACCEPTANCE DIAGNOSTIC (2026-10-15), not a reopening of Task 4.3's PASS status:** the ≈98-100%
+negative-risk-clamping finding above was investigated via a controlled π ∈ {0.05, 0.10, 0.20}
+sensitivity experiment (fold 0, all else held constant — same E1+E2/C1 partition, architecture, seeds).
+Result: clamping is **persistently near-universal across all three priors** (mean per-update clamped
+fraction 0.982–0.992), i.e. NOT resolved by retuning π within this grid, though C1 prediction scores
+do shift materially with π (median C1 score ≈0.006 at π=0.05 vs ≈0.298 at π=0.20). See
+`FR4_NNPU_PRIOR_SENSITIVITY_DIAGNOSTIC.md` for the full report, figures, and recommendation. The
+accepted π=0.10 baseline and all frozen upstream artifacts were verified byte-unchanged throughout.
+Recommendation: a separately-scoped beta/gamma corrective-nnPU comparison (Variant A vs Variant B) is
+proposed as a follow-up, not implemented here — Task 4.4 is not blocked on it.
+
 ## 4.4 — Additional PU Baselines
 - [ ] Install/test PULearn-compatible dependencies.
 - [ ] Implement Two-Step PU.

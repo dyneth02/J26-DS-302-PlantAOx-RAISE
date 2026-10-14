@@ -3130,6 +3130,370 @@ def run_fr4_nnpu_baseline(
     return summary
 
 
+# ---------------------------------------------------------------------------
+# Task 4.3 POST-ACCEPTANCE DIAGNOSTIC -- pi in {0.05, 0.10, 0.20} positive-
+# prior sensitivity / negative-risk-clamping investigation.
+#
+# Diagnostic-only: does NOT modify, retrain, or overwrite the accepted
+# pi=0.10 Task 4.3 baseline (`fr4_nnpu_baseline_fold*` files/run dirs
+# above) in any way. Writes to a completely separate run-directory tree
+# and separate committed-summary/provenance filenames so the two can
+# never collide. See docs/FR4_NNPU_PRIOR_SENSITIVITY_DIAGNOSTIC.md.
+# ---------------------------------------------------------------------------
+FR4_NNPU_PRIOR_SENSITIVITY_RUNS_DIR = INTERIM_DIR / "fr4_nnpu_prior_sensitivity_runs"  # gitignored, scratch
+FR4_NNPU_PRIOR_SENSITIVITY_SUMMARY_PATH_TEMPLATE = str(
+    PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_pi{prior_tag}_fold{fold_id}_summary.json"
+)
+FR4_NNPU_PRIOR_SENSITIVITY_LEARNING_CURVE_PATH_TEMPLATE = str(
+    PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_pi{prior_tag}_fold{fold_id}_learning_curve.svg"
+)
+FR4_NNPU_PRIOR_SENSITIVITY_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_provenance.jsonl"
+FR4_NNPU_PRIOR_SENSITIVITY_COMPARISON_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_comparison.json"
+FR4_NNPU_PRIOR_SENSITIVITY_PLOT_A_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_plotA_clamped_fraction.svg"
+FR4_NNPU_PRIOR_SENSITIVITY_PLOT_B_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_plotB_mean_unclamped_negative_risk.svg"
+FR4_NNPU_PRIOR_SENSITIVITY_PLOT_C_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_plotC_risk_components.svg"
+FR4_NNPU_PRIOR_SENSITIVITY_PLOT_D_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_plotD_score_distributions.svg"
+
+
+def _prior_tag(prior: float) -> str:
+    return f"{prior:.2f}".replace(".", "p")
+
+
+def run_fr4_nnpu_prior_sensitivity(
+    prior: float,
+    fold_id: int = 0,
+    max_epochs: int | None = None,
+    early_stopping_patience: int | None = 10,
+) -> dict:
+    """Task 4.3 POST-ACCEPTANCE DIAGNOSTIC: trains ONE pi-sensitivity
+    condition.
+
+    Identical data/model/optimizer/seed setup to the accepted
+    ``run_fr4_nnpu_baseline`` (same ``build_experiment_data``/
+    ``build_nnpu_dataset`` calls, same fold, same E1+E2/C1 partition,
+    same architecture/optimizer/seeds) -- ONLY ``prior`` varies, per the
+    diagnostic brief's controlled-variable requirement. Uses
+    ``nnpu_prior_diagnostics.train_nnpu_with_diagnostics`` (adds
+    per-update instrumentation; does not change the accepted training
+    math -- see that module's own docstring/regression test) instead of
+    ``nnpu_baseline.train_nnpu_baseline``, and writes to a run-directory
+    tree and committed-summary filename that can never collide with the
+    accepted pi=0.10 baseline's own files.
+    """
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.nnpu_baseline import PRIOR_PROVENANCE_NOTE, PRIOR_SENSITIVITY_GRID, build_nnpu_dataset
+    from plantaox.c2_pu.nnpu_prior_diagnostics import compute_group_score_distributions, train_nnpu_with_diagnostics
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, load_checkpoint, write_resolved_config
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    if prior not in PRIOR_SENSITIVITY_GRID:
+        raise ValueError(f"prior={prior} is not in the declared sensitivity grid {PRIOR_SENSITIVITY_GRID}.")
+
+    prior_tag = _prior_tag(prior)
+    config_kwargs = {
+        "experiment_id": f"fr4_nnpu_prior_sensitivity_pi{prior_tag}_fold{fold_id}",
+        "baseline": "nnPU",
+        "fold_id": fold_id,
+        "checkpoint_dir": str(FR4_NNPU_PRIOR_SENSITIVITY_RUNS_DIR),
+    }
+    if max_epochs is not None:
+        config_kwargs["max_epochs"] = max_epochs
+    config = ExperimentConfig(**config_kwargs)
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_nnpu_dataset(data, config, prior=prior)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["diagnostic_scope"] = (
+        "Task 4.3 POST-ACCEPTANCE DIAGNOSTIC (pi-sensitivity investigation), not a new baseline. "
+        "Does not modify, retrain, or supersede the accepted pi=0.10 Task 4.3 baseline."
+    )
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["nnpu_dataset_provenance"] = {
+        "e1_train_count": dataset.e1_train_count,
+        "e2_train_count": dataset.e2_train_count,
+        "e1_validation_count": dataset.e1_validation_count,
+        "e2_validation_count": dataset.e2_validation_count,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "n_c1_unlabeled_train": int(dataset.train_unlabeled_features.shape[0]),
+        "n_c1_unlabeled_validation": int(dataset.validation_unlabeled_features.shape[0]),
+    }
+    resolved_config["nnpu_prior"] = {
+        "value": dataset.prior,
+        "sensitivity_grid": list(PRIOR_SENSITIVITY_GRID),
+        "provenance_note": PRIOR_PROVENANCE_NOTE,
+    }
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_nnpu_with_diagnostics(
+            config, dataset, run_dir, early_stopping_patience=early_stopping_patience
+        )
+
+        best_checkpoint_path = run_dir / "checkpoint_best.pt"
+        last_checkpoint_path = run_dir / "checkpoint_last.pt"
+        reload_model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(best_checkpoint_path, reload_model)
+
+        score_distributions = compute_group_score_distributions(reload_model, dataset)
+
+        learning_curve_committed_path = Path(
+            FR4_NNPU_PRIOR_SENSITIVITY_LEARNING_CURVE_PATH_TEMPLATE.format(prior_tag=prior_tag, fold_id=fold_id)
+        )
+        learning_curve_committed_path.write_text(
+            Path(training_summary["learning_curve_path"]).read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+        )
+
+        diag_history = training_summary["diagnostic_history"]
+        sensitivity = training_summary["prior_sensitivity_stability"]
+
+        summary = {
+            "diagnostic_scope": resolved_config["diagnostic_scope"],
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "prior": {"value": dataset.prior, "sensitivity_grid": list(PRIOR_SENSITIVITY_GRID)},
+            "class_counts": {
+                "train_positive": dataset.e1_train_count + dataset.e2_train_count,
+                "train_unlabeled": int(dataset.train_unlabeled_features.shape[0]),
+                "validation_positive": dataset.e1_validation_count + dataset.e2_validation_count,
+                "validation_unlabeled": int(dataset.validation_unlabeled_features.shape[0]),
+                "e1_train": dataset.e1_train_count,
+                "e2_train": dataset.e2_train_count,
+                "e1_validation": dataset.e1_validation_count,
+                "e2_validation": dataset.e2_validation_count,
+            },
+            "c1_partition": {"validation_fraction": dataset.c1_validation_fraction, "seed": dataset.c1_partition_seed},
+            "nnpu_variant": training_summary["nnpu_variant"],
+            "training": {
+                k: v for k, v in training_summary.items() if k not in ("learning_curve_path", "history", "diagnostic_history")
+            },
+            "epoch_level_history": training_summary["history"],
+            "per_update_diagnostic_history": diag_history,
+            "prior_sensitivity_stability": sensitivity,
+            "best_checkpoint_score_distributions": score_distributions,
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+                "best_checkpoint_epoch": checkpoint_info["epoch"],
+            },
+            "outputs": {"learning_curve": str(learning_curve_committed_path)},
+            "limitations": {
+                "diagnostic_not_baseline": "This is a Task 4.3 post-acceptance diagnostic replicate, not a new "
+                "accepted baseline -- it does not supersede, retrain, or invalidate the accepted pi=0.10 result.",
+                "assumed_unlabeled_c1": "C1 remains the assumed-negative/PU-unlabeled pool, never a confirmed "
+                "antioxidant-inactive label, in every condition of this sensitivity grid.",
+                "do_not_rank_by_raw_risk": "The nnPU objective itself changes with pi -- a lower numeric nnPU risk "
+                "under one assumed prior is NOT evidence of biological superiority over another prior.",
+                "single_fold_only": "Fold-0 only, matching the accepted baseline's own scope.",
+            },
+        }
+    summary_path = Path(FR4_NNPU_PRIOR_SENSITIVITY_SUMMARY_PATH_TEMPLATE.format(prior_tag=prior_tag, fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(
+        FR4_NNPU_PRIOR_SENSITIVITY_PROVENANCE_LOG_PATH,
+        {"stage": "fr4_nnpu_prior_sensitivity", "prior": prior, "summary": summary},
+    )
+    return summary
+
+
+def run_fr4_nnpu_prior_sensitivity_report(fold_id: int = 0) -> dict:
+    """Assembles the pi-sensitivity comparison table + Plots A-D across
+    all three conditions (pi=0.05/0.10/0.20). Reuses the accepted pi=0.10
+    Task 4.3 summary and its still-present best checkpoint (verified
+    read-only, by SHA-256, against what that summary itself recorded) for
+    the pi=0.10 reference row -- never retrains pi=0.10, never writes to
+    its run directory. Raises a clear ``FileNotFoundError`` naming the
+    missing stage if the pi=0.05/0.20 diagnostic runs have not been
+    produced yet.
+    """
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.nnpu_baseline import build_nnpu_dataset
+    from plantaox.c2_pu.nnpu_prior_diagnostics import compute_group_score_distributions
+    from plantaox.c2_pu.nnpu_prior_sensitivity_report import (
+        build_comparison_table,
+        classify_prior_sensitivity,
+        render_dual_component_svg,
+        render_multi_series_line_svg,
+        render_score_distribution_svg,
+    )
+    from plantaox.c2_pu.run_recorder import load_checkpoint
+
+    accepted_summary_path = Path(FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    if not accepted_summary_path.exists():
+        raise FileNotFoundError(
+            f"{accepted_summary_path} not found -- the accepted Task 4.3 pi=0.10 baseline must exist first."
+        )
+    accepted_summary = json.loads(accepted_summary_path.read_text(encoding="utf-8"))
+
+    prior_rows: dict[str, dict] = {}
+    clamped_fraction_series: dict[str, list] = {}
+    mean_unclamped_rn_series: dict[str, list] = {}
+    positive_contribution_series: dict[str, list] = {}
+    negative_unclamped_series: dict[str, list] = {}
+    score_distributions_by_prior: dict[str, dict] = {}
+    mean_clamped_fraction_by_prior: dict[str, float] = {}
+
+    # --- pi = 0.10: accepted baseline, read-only reference ---
+    label_010 = "0.10"
+    history_010 = accepted_summary["training"]["history"]
+    clamped_fraction_series[label_010] = [(h["epoch"], h["train_clamped_update_fraction"]) for h in history_010]
+    mean_unclamped_rn_series[label_010] = [(h["epoch"], h["train_negative_risk_unclamped"]) for h in history_010]
+    positive_contribution_series[label_010] = [(h["epoch"], h["train_positive_risk_contribution"]) for h in history_010]
+    negative_unclamped_series[label_010] = [(h["epoch"], h["train_negative_risk_unclamped"]) for h in history_010]
+    mean_clamped_fraction_010 = float(np.mean([h["train_clamped_update_fraction"] for h in history_010]))
+    mean_clamped_fraction_by_prior[label_010] = mean_clamped_fraction_010
+
+    accepted_run_dir = Path(accepted_summary["run_dir"])
+    accepted_best_checkpoint = accepted_run_dir / "checkpoint_best.pt"
+    checkpoint_note = "accepted checkpoint missing or hash mismatch -- NOT re-measured"
+    empty_groups = {g: "NOT MEASURED" for g in ("train_e1", "train_e2", "train_c1", "val_e1", "val_e2", "val_c1")}
+    score_distributions_by_prior[label_010] = empty_groups
+    if accepted_best_checkpoint.exists() and sha256_of(accepted_best_checkpoint) == accepted_summary["checkpoint"]["best_path_sha256"]:
+        config_010 = ExperimentConfig(experiment_id="prior_sensitivity_reference_pi010", baseline="nnPU", fold_id=fold_id)
+        cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+        fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+        record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+        cache_entry = cache_manifest["folds"][str(fold_id)]
+        data_010 = build_experiment_data(
+            config_010, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+        )
+        dataset_010 = build_nnpu_dataset(data_010, config_010, prior=0.10)
+        reload_model_010 = BinaryMlp(MlpArchitecture(input_dim=config_010.feature_dim, hidden_dims=config_010.hidden_dims))
+        load_checkpoint(accepted_best_checkpoint, reload_model_010)  # read-only load; never saved back
+        score_distributions_by_prior[label_010] = compute_group_score_distributions(reload_model_010, dataset_010)
+        checkpoint_note = "measured_from_accepted_checkpoint (verified SHA-256 match, read-only)"
+
+    stability_010 = accepted_summary["training"]["stability_diagnostics"]
+
+    def _median_or_na(group_stats, group: str):
+        g = group_stats.get(group)
+        return g["median"] if isinstance(g, dict) and "median" in g else "NOT MEASURED"
+
+    prior_rows[label_010] = {
+        "executed_epochs": accepted_summary["training"]["executed_epochs"],
+        "best_epoch": accepted_summary["training"]["best_epoch"],
+        "best_val_nnpu_risk": accepted_summary["training"]["best_val_nnpu_risk"],
+        "mean_clamped_update_fraction": mean_clamped_fraction_010,
+        "final_five_epoch_clamped_fraction": stability_010["mean_train_clamped_fraction_last_5_epochs"],
+        "mean_train_negative_risk": float(np.mean([h["train_negative_risk_unclamped"] for h in history_010])),
+        "mean_val_negative_risk": float(np.mean([h["val_negative_risk_unclamped"] for h in history_010])),
+        "e1_median_score": _median_or_na(score_distributions_by_prior[label_010], "val_e1"),
+        "e2_median_score": _median_or_na(score_distributions_by_prior[label_010], "val_e2"),
+        "c1_median_score": _median_or_na(score_distributions_by_prior[label_010], "val_c1"),
+        "score_saturation_note": checkpoint_note,
+    }
+
+    # --- pi = 0.05 / 0.20: new diagnostic runs, must already exist ---
+    for prior_value in (0.05, 0.20):
+        prior_tag = _prior_tag(prior_value)
+        label = f"{prior_value:.2f}"
+        summary_path = Path(FR4_NNPU_PRIOR_SENSITIVITY_SUMMARY_PATH_TEMPLATE.format(prior_tag=prior_tag, fold_id=fold_id))
+        if not summary_path.exists():
+            raise FileNotFoundError(
+                f"{summary_path} not found -- run `fr4-nnpu-prior-sensitivity --prior {prior_value} "
+                f"--fold-id {fold_id}` first."
+            )
+        s = json.loads(summary_path.read_text(encoding="utf-8"))
+        history = s["epoch_level_history"]
+        clamped_fraction_series[label] = [(h["epoch"], h["train_clamped_update_fraction"]) for h in history]
+        mean_unclamped_rn_series[label] = [(h["epoch"], h["train_negative_risk_unclamped"]) for h in history]
+        positive_contribution_series[label] = [(h["epoch"], h["train_positive_risk_contribution"]) for h in history]
+        negative_unclamped_series[label] = [(h["epoch"], h["train_negative_risk_unclamped"]) for h in history]
+        mean_cf = float(np.mean([h["train_clamped_update_fraction"] for h in history]))
+        mean_clamped_fraction_by_prior[label] = mean_cf
+        score_distributions_by_prior[label] = s["best_checkpoint_score_distributions"]
+        stability = s["training"]["stability_diagnostics"]
+        prior_rows[label] = {
+            "executed_epochs": s["training"]["executed_epochs"],
+            "best_epoch": s["training"]["best_epoch"],
+            "best_val_nnpu_risk": s["training"]["best_val_nnpu_risk"],
+            "mean_clamped_update_fraction": mean_cf,
+            "final_five_epoch_clamped_fraction": stability["mean_train_clamped_fraction_last_5_epochs"],
+            "mean_train_negative_risk": float(np.mean([h["train_negative_risk_unclamped"] for h in history])),
+            "mean_val_negative_risk": float(np.mean([h["val_negative_risk_unclamped"] for h in history])),
+            "e1_median_score": _median_or_na(s["best_checkpoint_score_distributions"], "val_e1"),
+            "e2_median_score": _median_or_na(s["best_checkpoint_score_distributions"], "val_e2"),
+            "c1_median_score": _median_or_na(s["best_checkpoint_score_distributions"], "val_c1"),
+            "score_saturation_note": "measured_from_diagnostic_run",
+        }
+
+    comparison_table = build_comparison_table(prior_rows)
+    classification = classify_prior_sensitivity(mean_clamped_fraction_by_prior)
+
+    plot_a = render_multi_series_line_svg(
+        clamped_fraction_series,
+        FR4_NNPU_PRIOR_SENSITIVITY_PLOT_A_PATH,
+        title="Plot A: clamped-update fraction vs epoch (per prior)",
+        y_label="clamped fraction",
+    )
+    plot_b = render_multi_series_line_svg(
+        mean_unclamped_rn_series,
+        FR4_NNPU_PRIOR_SENSITIVITY_PLOT_B_PATH,
+        title="Plot B: mean unclamped R_n vs epoch (per prior)",
+        y_label="R_n",
+        zero_reference_line=True,
+    )
+    plot_c = render_dual_component_svg(
+        positive_contribution_series,
+        negative_unclamped_series,
+        FR4_NNPU_PRIOR_SENSITIVITY_PLOT_C_PATH,
+        title="Plot C: positive-risk contribution vs unclamped negative risk (per prior)",
+    )
+    plot_d = render_score_distribution_svg(score_distributions_by_prior, FR4_NNPU_PRIOR_SENSITIVITY_PLOT_D_PATH)
+
+    report = {
+        "fold_id": fold_id,
+        "priors_compared": sorted(mean_clamped_fraction_by_prior.keys()),
+        "comparison_table": comparison_table,
+        "mean_clamped_update_fraction_by_prior": mean_clamped_fraction_by_prior,
+        "classification": classification,
+        "plots": {
+            "plot_a_clamped_fraction": str(plot_a),
+            "plot_b_mean_unclamped_negative_risk": str(plot_b),
+            "plot_c_risk_components": str(plot_c),
+            "plot_d_score_distributions": str(plot_d),
+        },
+        "best_checkpoint_score_distributions_by_prior": score_distributions_by_prior,
+        "accepted_baseline_reference": {
+            "summary_path": str(accepted_summary_path),
+            "run_dir": accepted_summary["run_dir"],
+            "checkpoint_verified": checkpoint_note.startswith("measured_from_accepted_checkpoint"),
+        },
+        "limitations": {
+            "do_not_rank_by_raw_risk": "The nnPU objective changes with pi -- do not interpret a lower raw nnPU "
+            "validation risk under one prior as evidence that prior is biologically correct.",
+            "single_fold_only": "Fold-0 only; not a five-fold validated conclusion.",
+            "diagnostic_not_baseline": "This report compares diagnostic replicates against the accepted pi=0.10 "
+            "baseline; it does not alter Task 4.3's PASS status.",
+        },
+    }
+    with open(FR4_NNPU_PRIOR_SENSITIVITY_COMPARISON_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(report, handle, indent=2, default=str)
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -3160,6 +3524,17 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr4-infra-smoke-test", help="Shared experiment infrastructure smoke test: config, data, model, seeding, checkpoint round-trip (Bucket 4.1)")
     sub.add_parser("fr4-pn-baseline", help="PN supervised baseline: E1 positives vs. C1 assumed negatives, BCE-with-logits (Bucket 4.2)")
     sub.add_parser("fr4-nnpu-baseline", help="Plain nnPU baseline: E1+E2 positives vs. C1 as unlabeled, non-negative PU risk (Bucket 4.3)")
+    p_sensitivity = sub.add_parser(
+        "fr4-nnpu-prior-sensitivity",
+        help="Task 4.3 POST-ACCEPTANCE DIAGNOSTIC: one pi-sensitivity training condition (pi in {0.05, 0.10, 0.20})",
+    )
+    p_sensitivity.add_argument("--prior", type=float, required=True, help="Positive-class prior pi to train with")
+    p_sensitivity.add_argument("--fold-id", type=int, default=0)
+    p_sensitivity.add_argument("--max-epochs", type=int, default=None)
+    sub.add_parser(
+        "fr4-nnpu-prior-sensitivity-report",
+        help="Task 4.3 POST-ACCEPTANCE DIAGNOSTIC: comparison table + Plots A-D across pi=0.05/0.10/0.20",
+    )
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -3263,6 +3638,20 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({k: v for k, v in summary.items() if k != "training"} | {
             "training": {k: v for k, v in summary["training"].items() if k != "history"}
         }, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-nnpu-prior-sensitivity":
+        summary = run_fr4_nnpu_prior_sensitivity(prior=args.prior, fold_id=args.fold_id, max_epochs=args.max_epochs)
+        print(json.dumps(
+            {k: v for k, v in summary.items() if k not in ("epoch_level_history", "per_update_diagnostic_history")},
+            indent=2, default=str,
+        ))
+        return 0
+    if args.stage == "fr4-nnpu-prior-sensitivity-report":
+        report = run_fr4_nnpu_prior_sensitivity_report()
+        print(json.dumps(
+            {k: v for k, v in report.items() if k != "best_checkpoint_score_distributions_by_prior"},
+            indent=2, default=str,
+        ))
         return 0
     return 1
 

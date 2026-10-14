@@ -1338,6 +1338,72 @@
 - **No new dependencies.** Tasks 4.4 (Two-Step PU/PU-Bagging), 4.5 (cross-baseline evaluation), 4.6
   (curriculum), and RNIS/FR6 remain untouched and unstarted, per this task's explicit scope boundary.
 
+### Bucket 4, Task 4.3 — POST-ACCEPTANCE DIAGNOSTIC: π-sensitivity and negative-risk-clamping investigation
+- **Status: diagnostic complete, PASS status of Task 4.3 itself unchanged.** The accepted π=0.10
+  fold-0 run's own reported stability observation (≈98–100% of optimizer updates had their negative-risk
+  term clamped to zero, logged in `stability_diagnostics` and the decision-log entry above) was
+  investigated via a controlled π ∈ {0.05, 0.10, 0.20} sensitivity experiment, per explicit
+  post-acceptance-diagnostic instructions. **This is an additional investigation, not a rebuild**: the
+  direct-clamped nnPU estimator (`nnpu_risk.py`) and the accepted training loop
+  (`nnpu_baseline.py::train_nnpu_baseline`) were NOT modified, and the beta/gamma corrective algorithm
+  was NOT implemented (proposed as a follow-up only). Full report:
+  **[`FR4_NNPU_PRIOR_SENSITIVITY_DIAGNOSTIC.md`](FR4_NNPU_PRIOR_SENSITIVITY_DIAGNOSTIC.md)**.
+- **New modules, diagnostic-only, reusing the accepted estimator unchanged:** `nnpu_prior_diagnostics.py`
+  (per-update risk-component instrumentation layered onto a training loop verified, by regression test,
+  to reproduce `train_nnpu_baseline`'s own epoch aggregates exactly at the same prior/seed — i.e. the
+  instrumentation changes nothing about what is trained) and `nnpu_prior_sensitivity_report.py`
+  (comparison-table assembly + hand-rolled SVG plots, no new dependency, same precedent as
+  `pn_baseline.render_loss_curve_svg`). New CLI stages: `fr4-nnpu-prior-sensitivity --prior <value>`
+  and `fr4-nnpu-prior-sensitivity-report`.
+- **Accepted π=0.10 baseline reused as the reference condition, not retrained.** Its committed summary's
+  own recorded epoch history supplies every π=0.10 risk-trajectory comparison; its still-present best
+  checkpoint (gitignored but present on disk in this checkout) was verified by SHA-256 against what the
+  committed summary itself recorded, then loaded READ-ONLY (never resaved) to compute the
+  prediction-distribution diagnostics Task 4.3's own run never recorded. Genuine new fold-0 training
+  runs were performed only for π=0.05 (39 epochs, best epoch 28, best val nnPU risk ≈8.284e-4) and
+  π=0.20 (21 epochs, best epoch 10, best val nnPU risk ≈1.726e-4) — all else held constant (same E1+E2/
+  C1 partition, architecture, optimizer, seeds; verified identical membership across conditions by a
+  dedicated test, not assumed from the shared code path).
+- **Real finding: clamping is persistently near-universal across the entire declared sensitivity grid,
+  not prior-dependent.** Mean per-update clamped-update fraction: 0.9825 (π=0.05), 0.9863 (π=0.10),
+  0.9915 (π=0.20) — under 1 percentage point of spread across a 4x change in π. The epoch-aggregate
+  unclamped negative risk R_n was negative in literally every epoch of every condition (39/39, 26/26,
+  21/21). Clamping is present from epoch 1 (≈80% at the first epoch of the π=0.10 run) and intensifies
+  toward ≈100% by the final epochs in all three conditions. **Classified as "Persistently clamped"**
+  (see the diagnostic doc's §G for the full classification rationale) — not resolved by retuning π
+  within this grid.
+- **A genuinely prior-SENSITIVE secondary finding, reported separately so it is not conflated with the
+  (prior-insensitive) clamping mechanism itself:** C1's own median predicted score (best checkpoint,
+  validation-side) rises materially and monotonically with π — 0.0063 (π=0.05) → 0.0378 (π=0.10) →
+  0.2977 (π=0.20). Labeled positives (E1/E2) remain confidently scored near 1.0 at every tested π (no
+  all-positive/all-negative collapse detected in any condition, `diverging_risk_detected: false`
+  throughout).
+- **Accepted baseline and every frozen upstream artifact verified byte-unchanged throughout**, by
+  SHA-256, both before this diagnostic's work began and after every new training run performed: the
+  accepted π=0.10 summary JSON, its learning-curve SVG, its best/last checkpoint weights,
+  `pp1_baseline_v1`/`pp2_baseline_v1` manifests, the FR3 feature-cache manifest/fusion scalers/record
+  map, `c3_similarity_ranking.csv`, and the Task 4.2 PN baseline summary. Every new diagnostic artifact
+  uses a `fr4_nnpu_prior_sensitivity_*` naming/path convention structurally distinct from
+  `fr4_nnpu_baseline_*`, so it cannot collide with or overwrite the accepted baseline's own files.
+- **Tests:** 18 unit tests (`test_nnpu_prior_diagnostics.py`) + 13 unit tests
+  (`test_nnpu_prior_sensitivity_report.py`), both torch-free and always run, plus 14 gated acceptance
+  tests (`test_fr4_nnpu_prior_sensitivity_acceptance.py`) covering real reduced-epoch smoke runs,
+  same-seed reproducibility (epoch history AND underlying checkpoint weights bit-identical), the
+  regression guard confirming zero change to the accepted training loop's own math, identical C1/
+  positive-pool membership across all three prior conditions, missing-prerequisite error handling for
+  the comparison-report stage, and full baseline/frozen-artifact preservation. **Full repository suite
+  re-run after this change: 576 passed, 1 skipped, 0 failed** (`pytest tests/ -q`, 1171.16s) — up from
+  the pre-diagnostic 531 passed/1 skipped, i.e. all 45 new tests pass and zero regression. See the
+  diagnostic doc's §F for the full account of how the pre-existing Task 4.2/4.3 acceptance tests'
+  own re-run side effects (timestamps/run-dir fields, provenance-log appends) were confirmed benign
+  and restored to their committed state.
+- **Recommendation (not unilaterally acted on): proceed to Task 4.4** — this diagnostic found no
+  evidence of an implementation defect, only a documented, now-quantified, prior-insensitive stability
+  characteristic of the direct-clamped objective under this fold/feature/data combination. A
+  separately-scoped Variant A (direct-clamped, accepted) vs. Variant B (beta/gamma corrective, Kiryo et
+  al.'s original procedure) comparison is recommended before relying on nnPU results in Task 4.5/4.6 —
+  proposed as a follow-up only, not implemented here.
+
 ## 🔄 Current work in progress
 
 *(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
@@ -1576,5 +1642,9 @@ tasks below.)*
 | 2026-10-15 | Task 4.3 pools E1+E2 as the labeled-positive population (unlike PN's E1-only), per the task brief's explicit "agreed E1/E2 labeled-positive population" instruction, while keeping each row's evidence tier separately recorded (`e1_train_count`/`e2_train_count`/etc., never pooled into an anonymous count) | This is a genuine, documented difference from PN's own positive-evidence policy (Task 4.2), not an inconsistency — the task brief requires it explicitly so later PN-vs-nnPU comparisons do not conflate the loss-function change with a simultaneous positive-data change without that difference being visible in both runs' own recorded counts. |
 | 2026-10-15 | `pn_baseline.render_loss_curve_svg` was generalized with optional `train_key`/`val_key`/`title` parameters (defaulting to the original hardcoded PN values) instead of writing a second, nearly-identical SVG line-chart function in `nnpu_baseline.py` | Reuses the existing hand-rolled SVG writer (no matplotlib dependency added) for nnPU's own `train_nnpu_risk`/`val_nnpu_risk` history keys. Verified zero behavior change for existing PN callers: all 27 pre-existing `test_pn_baseline.py` tests pass unmodified after the change, since the new parameters' defaults reproduce the exact original hardcoded strings. |
 | 2026-10-15 | A genuine, reported (not hidden) stability finding from the real fold-0 nnPU run: the negative-risk term `R_u^- - pi*R_p^-` was clamped to zero in ≈98–100% of optimizer updates in every epoch of the run, not just late epochs, at `pi=0.10` | Section 10.4 requires monitoring and documenting (never silently hiding) persistent zero-clamped negative risk. For most updates under this configuration, the direct-clamped objective's gradient reduces to the positive-risk term alone (the unlabeled-group gradient is exactly zero when clamped — verified unit-test property, `test_gradient_is_zero_for_unlabeled_group_when_clamped`). Reported as-is in `stability_diagnostics` and this file rather than re-running with a different prior to produce a more favorable-looking clamping profile (explicitly prohibited by the task brief's §18 closing instruction). Flagged for supervisor/scientific review before any claim that this configuration is "working as intended" in the PU-learning sense. |
+
+| 2026-10-15 | Task 4.3 post-acceptance diagnostic: investigated the accepted π=0.10 run's ≈98-100% negative-risk-clamping finding via a controlled π ∈ {0.05, 0.10, 0.20} sensitivity experiment (fold 0, all else held constant), WITHOUT modifying `nnpu_risk.py`/`nnpu_baseline.py` and WITHOUT implementing the beta/gamma corrective variant | Explicit post-acceptance-diagnostic brief: investigate, don't rebuild. Real finding: clamping is persistently near-universal across the whole declared grid (mean per-update clamped fraction 0.9825/0.9863/0.9915 for π=0.05/0.10/0.20) — classified "Persistently clamped," not resolved by retuning π. A genuinely prior-sensitive secondary finding (C1 median predicted score rises with π: 0.0063→0.0378→0.2977) is reported separately so it is not conflated with the clamping mechanism itself. See `FR4_NNPU_PRIOR_SENSITIVITY_DIAGNOSTIC.md` for the full report. |
+| 2026-10-15 | The accepted π=0.10 run's best checkpoint (gitignored but present on disk in this checkout, under `data/interim/c2_pu/fr4_nnpu_baseline_runs/fr4_nnpu_baseline_fold0__20261014T183214Z/`) was verified by SHA-256 against what the committed summary itself recorded, then loaded READ-ONLY to compute prediction-distribution diagnostics Task 4.3's own run never recorded — never retrained, never resaved | Per the diagnostic brief's explicit instruction: reuse the accepted reference wherever its records are sufficient, and verify rather than assume a gitignored artifact is still the one the committed summary describes. Confirmed matching both before this diagnostic's work began and after every new π=0.05/0.20 training run. |
+| 2026-10-15 | New diagnostic instrumentation (`nnpu_prior_diagnostics.py`'s `train_nnpu_with_diagnostics`) lives in a SEPARATE module from the accepted `nnpu_baseline.train_nnpu_baseline`, duplicating the training loop's structure rather than modifying the accepted function in place, with a regression test proving the two produce identical epoch-level aggregates at the same prior/seed | The accepted Task 4.3 training loop must remain byte-for-byte as accepted (AGENTS.md rule #4's spirit extended to accepted code, not just frozen data artifacts) — adding instrumentation via a parallel function, verified equivalent by test, avoids any risk of silently altering the accepted baseline's own reproducibility guarantee while still getting genuine per-update diagnostics. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
