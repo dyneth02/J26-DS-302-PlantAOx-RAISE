@@ -307,3 +307,9 @@ data/interim/c2_pu/ext_control_homology/positives.fasta
 # are large binary PyTorch state -- same "don't commit large arrays" rule
 # as model weights and embedding caches elsewhere in this project.
 data/interim/c2_pu/fr4_infra_smoke_test_runs/
+
+# Bucket 4.2 -- PN baseline run directories (resolved configs, epoch
+# logs, PyTorch checkpoints). Same reasoning as the smoke-test runs dir
+# above; committed summaries (fr4_pn_baseline_fold*_summary.json) and the
+# checkpoint SHA-256 they record are the durable, auditable artifacts.
+data/interim/c2_pu/fr4_pn_baseline_runs/

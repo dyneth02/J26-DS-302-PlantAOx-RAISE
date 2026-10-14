@@ -109,27 +109,30 @@ def _evidence_tier_lookup(record_map_df: pd.DataFrame) -> dict[str, str]:
     return dict(zip(fr1["peptide_id"], fr1["evidence_tier"]))
 
 
-def _split_training_validation(
-    training_peptide_ids: list[str], validation_fraction: float, seed: int
+def split_ids_train_validation(
+    ids: list[str], validation_fraction: float, seed: int
 ) -> tuple[list[str], list[str]]:
-    """Deterministic shuffle-and-split of the TRAINING-side positive IDs
-    only -- GraphPart's held-out fold is never touched here, and this
-    uses its own local ``random.Random`` instance so it doesn't consume
+    """Deterministic shuffle-and-split of a flat ID list into (remaining,
+    validation) -- used here for the TRAINING-side positive IDs only
+    (GraphPart's held-out fold is never passed in), and reused as-is by
+    Task 4.2's C1 train/validation partition (same algorithm, same
+    determinism guarantee, no second shuffle-split implementation).
+    Uses its own local ``random.Random`` instance so it doesn't consume
     from (or get perturbed by) any global seed state.
     """
-    ids = sorted(training_peptide_ids)
+    sorted_ids = sorted(ids)
     rng = random.Random(seed)
-    rng.shuffle(ids)
-    n_val = max(1, round(len(ids) * validation_fraction))
-    if n_val >= len(ids):
+    rng.shuffle(sorted_ids)
+    n_val = max(1, round(len(sorted_ids) * validation_fraction))
+    if n_val >= len(sorted_ids):
         raise ValueError(
-            f"validation_fraction={validation_fraction} leaves zero training rows "
-            f"({len(ids)} training IDs, {n_val} requested for validation)."
+            f"validation_fraction={validation_fraction} leaves zero remaining rows "
+            f"({len(sorted_ids)} IDs, {n_val} requested for validation)."
         )
-    return ids[n_val:], ids[:n_val]
+    return sorted_ids[n_val:], sorted_ids[:n_val]
 
 
-def _assert_no_cross_subset_overlap(subsets: dict[str, PoolData]) -> dict:
+def assert_no_cross_subset_overlap(subsets: dict[str, PoolData]) -> dict:
     """Pairwise peptide_id AND sequence overlap check across every
     returned subset -- raises DataLeakageError with full detail on the
     first violation found, and otherwise returns a small report
@@ -191,7 +194,7 @@ def build_experiment_data(
 
     training_ids = fusion_scaler_entry["training_peptide_ids"]
     held_out_ids = fusion_scaler_entry["held_out_peptide_ids"]
-    train_only_ids, validation_ids = _split_training_validation(training_ids, config.validation_fraction, config.eval_seed)
+    train_only_ids, validation_ids = split_ids_train_validation(training_ids, config.validation_fraction, config.eval_seed)
 
     _, train_rows = get_training_rows(cache, train_only_ids)
     _, val_rows = get_training_rows(cache, validation_ids)  # same pool, just a different ID subset
@@ -221,7 +224,7 @@ def build_experiment_data(
         "c3_fold_challenges": c3_fold_challenges,
         "external_control": external_control,
     }
-    leakage_report = _assert_no_cross_subset_overlap(subsets)
+    leakage_report = assert_no_cross_subset_overlap(subsets)
 
     return ExperimentData(
         fold_id=config.fold_id,
