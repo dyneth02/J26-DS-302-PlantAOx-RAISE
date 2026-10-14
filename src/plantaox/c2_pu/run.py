@@ -61,7 +61,13 @@ from plantaox.c2_pu.curation.splits import (
 )
 from plantaox.c2_pu.curation.tiers import build_positive_pool
 from plantaox.c2_pu.common.sequence import is_valid_peptide, make_peptide_id
-from plantaox.c2_pu.pools import apply_secondary_blocklist, clean_c1_alphabet, clean_c1_pool, parse_uniprot_header
+from plantaox.c2_pu.pools import (
+    apply_secondary_blocklist,
+    clean_c1_alphabet,
+    clean_c1_cross_pool_overlap,
+    clean_c1_pool,
+    parse_uniprot_header,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RAW_DIR = REPO_ROOT / "data" / "raw" / "c2_pu"
@@ -965,6 +971,262 @@ def run_fr2_c3_build(force_cpu: bool = False) -> dict:
     return summary
 
 
+# Bucket 2.4 resolution (Decisions A & B, approved 2026-10-14) -- versioned
+# fixes for the two findings the audit surfaced. Neither overwrites the
+# artifact it supersedes; both are new, separately versioned outputs.
+C1_CLEAN_FASTA_V3_PATH = PROCESSED_DIR / "stage_c1_decoys_v3.fasta"
+C1_ACCESSION_MAP_V3_PATH = PROCESSED_DIR / "c1_accession_map_v3.csv"
+C1_CROSS_POOL_EXCLUSION_LOG_PATH = PROCESSED_DIR / "c1_cross_pool_exclusion_log.csv"
+C1_CROSS_POOL_REPLACEMENT_LOG_PATH = PROCESSED_DIR / "c1_cross_pool_replacement_log.csv"
+C1_CROSS_POOL_FIX_REPORT_PATH = PROCESSED_DIR / "c1_cross_pool_fix_report.json"
+
+C2_FASTA_V2_PATH = PROCESSED_DIR / "stage_c2_bioactive_unlabeled_v2.fasta"
+C2_ACTIVITY_MAP_V2_PATH = PROCESSED_DIR / "c2_activity_map_v2.csv"
+C2_CROSS_POOL_EXCLUSION_LOG_PATH = PROCESSED_DIR / "c2_cross_pool_exclusion_log.csv"
+C2_CROSS_POOL_REPLACEMENT_LOG_PATH = PROCESSED_DIR / "c2_cross_pool_replacement_log.csv"
+C2_CROSS_POOL_FIX_REPORT_PATH = PROCESSED_DIR / "c2_cross_pool_fix_report.json"
+
+# The one C2 sequence Decision B names explicitly -- a manually-reviewed,
+# alignment-confirmed near-duplicate of an E1 FR1 positive (see
+# IMPLEMENTATION_STATUS.md for the full EMBOSS needle alignment evidence).
+# Deliberately NOT derived automatically from the CD-HIT cluster scan here:
+# the instruction is explicit that cluster membership alone must not drive
+# exclusion, so this is a named, reviewed constant, not a computed set.
+C2_FLAGGED_HOMOLOGY_SEQUENCE = "LYQEPVLGPVRGPFP"
+
+
+def run_fr2_c1_cross_pool_fix(seed: int = 42) -> dict:
+    """Bucket 2.4 Decision A: remove the 8 sequences found to exactly
+    overlap C2 from C1, replacing them 1:1 from the same UniProtKB
+    candidate universe used by every prior C1 fix -- screened against FR1
+    positives, the 179 conflicts, C2, AND C3 (the new requirement this
+    fix exists to satisfy), so C3 never needs to be rebuilt as a side
+    effect of this change.
+    """
+    if not C1_CLEAN_FASTA_V2_PATH.exists():
+        raise FileNotFoundError(f"{C1_CLEAN_FASTA_V2_PATH} not found -- run fr2-c1-alphabet-fix first.")
+    for p in (C1_RAW_CANDIDATES_PATH, POSITIVE_POOL_PATH, C2_FASTA_PATH, C3_FASTA_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found.")
+
+    c1_records = read_fasta(C1_CLEAN_FASTA_V2_PATH)
+    c2_records = read_fasta(C2_FASTA_PATH)
+    c3_records = read_fasta(C3_FASTA_PATH)
+    candidate_pool_records = read_fasta(C1_RAW_CANDIDATES_PATH)
+    positive_df = pd.read_parquet(POSITIVE_POOL_PATH)
+    conflict_df = pd.read_csv(CONFLICT_LOG_PATH)
+
+    c1_seqs = {s for _, s in c1_records}
+    c2_seqs = {s for _, s in c2_records}
+    c3_seqs = {s for _, s in c3_records}
+    exclude_sequences = c1_seqs & c2_seqs
+    if not exclude_sequences:
+        raise RuntimeError(
+            "No C1/C2 exact overlap found -- this fix is a no-op on the current artifacts. "
+            "Re-check whether Decision A still applies before running it."
+        )
+
+    screen_sequences = set(positive_df["sequence"]) | set(conflict_df["sequence"]) | c2_seqs | c3_seqs
+
+    clean_records, exclusion_log, replacement_log, summary = clean_c1_cross_pool_overlap(
+        c1_records, candidate_pool_records, exclude_sequences, screen_sequences, seed=seed
+    )
+    if summary["shortfall"] > 0:
+        raise RuntimeError(
+            f"Eligible replacement pool exhausted: needed {summary['n_replacements_needed']}, only "
+            f"{summary['n_replacements_available']} available. Stopping rather than silently "
+            "shipping a short pool -- see the project owner before changing source/criteria."
+        )
+
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    write_fasta(C1_CLEAN_FASTA_V3_PATH, clean_records)
+
+    accession_map = pd.DataFrame(
+        [
+            {"peptide_header": h, "sequence": s, "length": len(s), **parse_uniprot_header(h)}
+            for h, s in clean_records
+        ]
+    )
+    accession_map.to_csv(C1_ACCESSION_MAP_V3_PATH, index=False, lineterminator="\n")
+    pd.DataFrame(exclusion_log).to_csv(C1_CROSS_POOL_EXCLUSION_LOG_PATH, index=False, lineterminator="\n")
+    pd.DataFrame(replacement_log).to_csv(C1_CROSS_POOL_REPLACEMENT_LOG_PATH, index=False, lineterminator="\n")
+
+    unique_seqs = {s for _, s in clean_records}
+    summary.update(
+        {
+            "seed": seed,
+            "n_unique_sequences": len(unique_seqs),
+            "source_version": str(C1_CLEAN_FASTA_V2_PATH),
+            "output_version": str(C1_CLEAN_FASTA_V3_PATH),
+            "screened_against": ["FR1_positives", "conflicts_179", "C2", "C3_union"],
+        }
+    )
+    with open(C1_CROSS_POOL_FIX_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2)
+
+    append_provenance_log(
+        C1_PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr2_c1_cross_pool_overlap_fix",
+            "source_version": str(C1_CLEAN_FASTA_V2_PATH),
+            "raw_candidates": str(C1_RAW_CANDIDATES_PATH),
+            "screen_sources": [str(POSITIVE_POOL_PATH), str(CONFLICT_LOG_PATH), str(C2_FASTA_PATH), str(C3_FASTA_PATH)],
+            "seed": seed,
+            "summary": summary,
+            "outputs": {
+                "clean_fasta_v3": str(C1_CLEAN_FASTA_V3_PATH),
+                "accession_map_v3": str(C1_ACCESSION_MAP_V3_PATH),
+                "exclusion_log": str(C1_CROSS_POOL_EXCLUSION_LOG_PATH),
+                "replacement_log": str(C1_CROSS_POOL_REPLACEMENT_LOG_PATH),
+                "report": str(C1_CROSS_POOL_FIX_REPORT_PATH),
+            },
+        },
+    )
+    return summary
+
+
+def run_fr2_c2_cross_pool_fix(seed: int = 42) -> dict:
+    """Bucket 2.4 Decision B: exclude the one C2 peptide manually confirmed
+    (EMBOSS needle alignment, see IMPLEMENTATION_STATUS.md) to be a
+    near-duplicate of an E1 FR1 positive, and replace it 1:1 from the same
+    experimentally-reported Peptipedia tier Task 2.2 drew from -- screened
+    against FR1 positives, the 179 conflicts, the remaining 1,999 C2
+    sequences, the now-fixed C1 v3, AND C3.
+
+    Must run AFTER ``run_fr2_c1_cross_pool_fix`` -- it screens against
+    C1 v3, not v2, so this fix's replacement can never collide with
+    Decision A's replacements either.
+    """
+    if not C2_FASTA_PATH.exists():
+        raise FileNotFoundError(f"{C2_FASTA_PATH} not found -- run fr2-c2-build first.")
+    if not C1_CLEAN_FASTA_V3_PATH.exists():
+        raise FileNotFoundError(f"{C1_CLEAN_FASTA_V3_PATH} not found -- run fr2-c1-cross-pool-fix first.")
+    for p in (C2_RAW_DUMP_PATH, POSITIVE_POOL_PATH, C3_FASTA_PATH, C2_ACTIVITY_MAP_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found.")
+
+    c2_records = read_fasta(C2_FASTA_PATH)
+    c2_seqs_current = {s for _, s in c2_records}
+    if C2_FLAGGED_HOMOLOGY_SEQUENCE not in c2_seqs_current:
+        raise RuntimeError(
+            f"{C2_FLAGGED_HOMOLOGY_SEQUENCE!r} is not in the current C2 pool -- this fix is a "
+            "no-op on the current artifacts. Re-check whether Decision B still applies."
+        )
+
+    activity_map_df = pd.read_csv(C2_ACTIVITY_MAP_PATH)
+    flagged_row = activity_map_df[activity_map_df["sequence"] == C2_FLAGGED_HOMOLOGY_SEQUENCE].iloc[0]
+
+    c1_v3_seqs = {s for _, s in read_fasta(C1_CLEAN_FASTA_V3_PATH)}
+    c3_seqs = {s for _, s in read_fasta(C3_FASTA_PATH)}
+    positive_df = pd.read_parquet(POSITIVE_POOL_PATH)
+    conflict_df = pd.read_csv(CONFLICT_LOG_PATH)
+    remaining_c2_seqs = c2_seqs_current - {C2_FLAGGED_HOMOLOGY_SEQUENCE}
+
+    screen_sequences = (
+        set(positive_df["sequence"])
+        | set(conflict_df["sequence"])
+        | remaining_c2_seqs
+        | c1_v3_seqs
+        | c3_seqs
+    )
+
+    activity_names = load_activity_names(C2_RAW_DUMP_PATH)
+    sequences, activities = extract_c2_candidates(C2_RAW_DUMP_PATH)
+    replacement_records, replacement_summary = build_c2_pool(
+        sequences, activities, screen_sequences, n=1, seed=seed
+    )
+    if replacement_summary["shortfall"] > 0:
+        raise RuntimeError(
+            "No eligible replacement found for the excluded C2 sequence in the experimentally-"
+            "reported Peptipedia tier under the expanded cross-pool screen. Stopping rather than "
+            "silently shipping a short pool -- see the project owner before changing source/criteria."
+        )
+
+    new_record = replacement_records[0]
+    new_peptide_id = make_peptide_id(new_record["sequence"], prefix="C2")
+
+    clean_records = [(h, s) for h, s in c2_records if s != C2_FLAGGED_HOMOLOGY_SEQUENCE]
+    clean_records.append((new_peptide_id, new_record["sequence"]))
+
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    write_fasta(C2_FASTA_V2_PATH, clean_records)
+
+    new_activity_row = {
+        "peptide_id": new_peptide_id,
+        "id_peptide_peptipedia": new_record["id_peptide"],
+        "sequence": new_record["sequence"],
+        "length": new_record["length"],
+        "activity_ids": ";".join(str(a) for a in new_record["activity_ids"]),
+        "activity_names": ";".join(
+            activity_names.get(a, f"unknown_activity_{a}") for a in new_record["activity_ids"]
+        ),
+        "has_experimental_evidence": new_record["has_experimental_evidence"],
+    }
+    updated_activity_map = pd.concat(
+        [
+            activity_map_df[activity_map_df["sequence"] != C2_FLAGGED_HOMOLOGY_SEQUENCE],
+            pd.DataFrame([new_activity_row]),
+        ],
+        ignore_index=True,
+    )
+    updated_activity_map.to_csv(C2_ACTIVITY_MAP_V2_PATH, index=False, lineterminator="\n")
+
+    exclusion_log = [
+        {
+            "peptide_id": flagged_row["peptide_id"],
+            "sequence": C2_FLAGGED_HOMOLOGY_SEQUENCE,
+            "reason": "homology_leakage_risk_to_fr1_e1_positive",
+            "homologous_to_peptide_id": "AOP-032318CCA7",
+            "homologous_to_sequence": "YQEPVLGPVRGPFPIIV",
+            "homologous_to_evidence_tier": "E1",
+            "alignment_tool": "EMBOSS needle (EBLOSUM62, gapopen=10, gapextend=0.5)",
+            "alignment_identity_full_length_pct": 77.8,
+            "alignment_identity_cdhit_shorter_seq_pct": 93.33,
+            "alignment_gaps_pct": 22.2,
+            "original_activity_names": flagged_row["activity_names"],
+            "note": "Excluded as a conservative leakage-risk decision -- NOT claimed to be "
+            "experimentally antioxidant-active. Original Peptipedia evidence preserved above.",
+        }
+    ]
+    pd.DataFrame(exclusion_log).to_csv(C2_CROSS_POOL_EXCLUSION_LOG_PATH, index=False, lineterminator="\n")
+    pd.DataFrame([new_activity_row]).to_csv(C2_CROSS_POOL_REPLACEMENT_LOG_PATH, index=False, lineterminator="\n")
+
+    summary = {
+        "source_version": str(C2_FASTA_PATH),
+        "output_version": str(C2_FASTA_V2_PATH),
+        "n_excluded": 1,
+        "n_replaced": 1,
+        "n_output_records": len(clean_records),
+        "n_unique_sequences": len({s for _, s in clean_records}),
+        "seed": seed,
+        "screened_against": ["FR1_positives", "conflicts_179", "C2_remaining", "C1_v3", "C3_union"],
+        "replacement_tier_summary": replacement_summary,
+    }
+    with open(C2_CROSS_POOL_FIX_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2)
+
+    append_provenance_log(
+        C2_PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr2_c2_cross_pool_homology_fix",
+            "source_version": str(C2_FASTA_PATH),
+            "screen_sources": [
+                str(POSITIVE_POOL_PATH), str(CONFLICT_LOG_PATH), str(C1_CLEAN_FASTA_V3_PATH), str(C3_FASTA_PATH),
+            ],
+            "seed": seed,
+            "summary": summary,
+            "outputs": {
+                "clean_fasta_v2": str(C2_FASTA_V2_PATH),
+                "activity_map_v2": str(C2_ACTIVITY_MAP_V2_PATH),
+                "exclusion_log": str(C2_CROSS_POOL_EXCLUSION_LOG_PATH),
+                "replacement_log": str(C2_CROSS_POOL_REPLACEMENT_LOG_PATH),
+                "report": str(C2_CROSS_POOL_FIX_REPORT_PATH),
+            },
+        },
+    )
+    return summary
+
+
 # Bucket 2.4 -- Pool Contamination and Leakage Audit.
 BIOPEP_RAW_PATH = RAW_DIR / "BIOPEP-UWM" / "biopep_antioxidative.json"
 BIOPEP_RAW_PROVENANCE_PATH = RAW_DIR / "BIOPEP-UWM" / "biopep_provenance.txt"
@@ -991,7 +1253,13 @@ def run_fr2_pool_audit() -> dict:
     """
     if not POSITIVE_POOL_PATH.exists():
         raise FileNotFoundError(f"{POSITIVE_POOL_PATH} not found -- run fr1-positives first.")
-    for p in (C1_CLEAN_FASTA_V2_PATH, C2_FASTA_PATH, C3_FASTA_PATH):
+    # Canonical C1/C2 sources as of the Bucket 2.4 Decision A/B resolution
+    # (2026-10-14): v3/v2, not v2/v1 -- falls back to the pre-resolution
+    # versions only if the fixes haven't been run yet in this checkout, so
+    # this function stays usable mid-resolution, not just after it.
+    c1_canonical_path = C1_CLEAN_FASTA_V3_PATH if C1_CLEAN_FASTA_V3_PATH.exists() else C1_CLEAN_FASTA_V2_PATH
+    c2_canonical_path = C2_FASTA_V2_PATH if C2_FASTA_V2_PATH.exists() else C2_FASTA_PATH
+    for p in (c1_canonical_path, c2_canonical_path, C3_FASTA_PATH):
         if not p.exists():
             raise FileNotFoundError(f"{p} not found -- build C1/C2/C3 first.")
 
@@ -1001,16 +1269,16 @@ def run_fr2_pool_audit() -> dict:
     pos_records = list(zip(positive_df["peptide_id"], positive_df["sequence"]))
     conf_records = list(zip(conflict_df["peptide_id"], conflict_df["sequence"]))
     ext_records = list(zip(external_control_df["peptide_id"], external_control_df["sequence"]))
-    c1_records = read_fasta(C1_CLEAN_FASTA_V2_PATH)
-    c2_records = read_fasta(C2_FASTA_PATH)
+    c1_records = read_fasta(c1_canonical_path)
+    c2_records = read_fasta(c2_canonical_path)
     c3_records = read_fasta(C3_FASTA_PATH)
 
     pool_records = {
         "FR1_positives": pos_records,
         "conflicts_179": conf_records,
         "external_control": ext_records,
-        "C1_v2": c1_records,
-        "C2": c2_records,
+        "C1_v3": c1_records,
+        "C2_v2": c2_records,
         "C3_union": c3_records,
     }
     pool_seqs = {name: {s for _, s in recs} for name, recs in pool_records.items()}
@@ -1030,7 +1298,9 @@ def run_fr2_pool_audit() -> dict:
             shared = overlap_detail(pool_seqs, a, b)
             for seq in shared:
                 detail_rows.append({"pool_a": a, "pool_b": b, "sequence": seq, "length": len(seq)})
-    pd.DataFrame(detail_rows).to_csv(AUDIT_OVERLAP_DETAIL_PATH, index=False, lineterminator="\n")
+    pd.DataFrame(detail_rows, columns=["pool_a", "pool_b", "sequence", "length"]).to_csv(
+        AUDIT_OVERLAP_DETAIL_PATH, index=False, lineterminator="\n"
+    )
 
     # --- Step 3: external known-AOP screening ---
     RAW_DIR.joinpath("BIOPEP-UWM").mkdir(parents=True, exist_ok=True)
@@ -1110,45 +1380,62 @@ def run_fr2_pool_audit() -> dict:
         json.dump(c3_contract_report, handle, indent=2)
 
     # --- assemble top-level summary ---
-    c1_c2_overlap = overlap_detail(pool_seqs, "C1_v2", "C2")
+    c1_c2_overlap = overlap_detail(pool_seqs, "C1_v3", "C2_v2")
+    decision_a_resolved = len(c1_c2_overlap) == 0 and C1_CLEAN_FASTA_V3_PATH.exists()
+    decision_b_resolved = C2_FLAGGED_HOMOLOGY_SEQUENCE not in pool_seqs["C2_v2"] and C2_FASTA_V2_PATH.exists()
+
+    findings: dict = {}
+    if not decision_a_resolved:
+        findings["c1_c2_exact_overlap"] = {
+            "status": "PENDING",
+            "n_sequences": len(c1_c2_overlap),
+            "sequences": c1_c2_overlap,
+            "proposed_correction": "Pending project-owner decision -- NOT applied.",
+        }
+    if not decision_b_resolved:
+        findings["c2_homology_to_fr1_positive"] = {
+            "status": "PENDING",
+            "example_sequence": C2_FLAGGED_HOMOLOGY_SEQUENCE,
+            "proposed_correction": "Pending project-owner decision -- NOT applied.",
+        }
+    resolution_notes = {
+        "decision_a_c1_c2_exact_overlap": "RESOLVED 2026-10-14 (see c1_cross_pool_fix_report.json) -- "
+        "8 sequences removed from C1 (kept in C2, per approved 'preserve C2's biological-annotation "
+        "precedence'), replaced 1:1 from the UniProtKB candidate universe, screened against FR1 "
+        "positives, 179 conflicts, C2, and C3. Canonical C1 artifact is now stage_c1_decoys_v3.fasta."
+        if decision_a_resolved
+        else "NOT YET RESOLVED -- run fr2-c1-cross-pool-fix.",
+        "decision_b_c2_homology_to_e1_positive": "RESOLVED 2026-10-14 (see c2_cross_pool_fix_report.json) "
+        "-- C2-EFDBC5460B ('LYQEPVLGPVRGPFP') excluded as a conservative leakage-risk decision (NOT "
+        "claimed experimentally inactive), replaced 1:1 from the experimentally-reported Peptipedia "
+        "tier, screened against FR1 positives, 179 conflicts, remaining C2, C1 v3, and C3. Canonical "
+        "C2 artifact is now stage_c2_bioactive_unlabeled_v2.fasta."
+        if decision_b_resolved
+        else "NOT YET RESOLVED -- run fr2-c2-cross-pool-fix.",
+        "additional_homology_candidates": "Of the 14 other candidates found alongside the "
+        "project-owner-flagged C2/FR1-positive pair, reviewed individually (not auto-excluded by "
+        "cluster membership): 3 were fully resolved as a side effect of Decision A (their shared "
+        "member was one of the 8 exact C1/C2 duplicates, now removed from C1); "
+        f"{homology_summary['n_cross_pool_clusters_real_homology_candidates']} remain as near-"
+        "duplicate (not exact) C1<->C2 pairs post-fix. All are C1<->C2 only (no FR1-positive "
+        "involvement) and from peptide families with no plausible antioxidant mechanism "
+        "(ribosomal/zinc-ribbon proteins, protamine-like and homeodomain cell-penetrating peptides, "
+        "actin/gliadin fragments, cysteine-rich defensin-like peptides) -- assessed as redundant "
+        "construction overlap between two unlabeled pools, not a label-leakage risk, since neither "
+        "pool carries ground truth. Recommendation: accept and document as a known, bounded "
+        "limitation (same treatment as C1's intentional record-level duplicates) rather than a "
+        "further exclude-and-replace cycle. See audit_cross_pool_homology_clusters.csv for the full "
+        "per-cluster evidence; revisit if the project owner wants a stricter policy.",
+    }
+
     summary = {
         "integrity_reports": integrity_reports,
         "exact_overlap_nonzero_pairs": [
             {"pool_a": r["pool_a"], "pool_b": r["pool_b"], "sequence": r["sequence"]}
             for r in detail_rows
         ],
-        "contamination_requiring_decision": {
-            "c1_c2_exact_overlap": {
-                "n_sequences": len(c1_c2_overlap),
-                "sequences": c1_c2_overlap,
-                "likely_impact": "Both pools independently sample from overlapping underlying "
-                "biological sequence space (C1: UniProtKB SwissProt reviewed:true; C2: Peptipedia, "
-                "which itself ingests much of SwissProt). Neither pool's construction checked "
-                "against the other. Not a labeled-positive leak (none of these are antioxidant-"
-                "tagged), but a correctness issue for treating C1 and C2 as independent unlabeled "
-                "populations.",
-                "proposed_correction": "Pending project-owner decision -- NOT applied. Candidate "
-                "options: (a) exclude these 8 sequences from C2 only (C1 is the more established/"
-                "primary pool), re-filling from C2's existing eligible-candidate tier; (b) exclude "
-                "from both and document; (c) accept and document as a known, bounded overlap.",
-            },
-            "c2_homology_to_fr1_positive": {
-                "example_sequence": "LYQEPVLGPVRGPFP",
-                "peptide_id": "C2-EFDBC5460B",
-                "evidence": "90%+ CD-HIT identity (length >=15 AA, not a short-fragment artifact) "
-                "to 4 FR1 positives in the same cluster, including YQEPVLGPVRGPFPIIV (AOP-032318CCA7, "
-                "evidence_tier=E1, assay-confirmed). C2's own tag for this sequence is "
-                "Therapeutic/Metabolic/Anti-diabetic, not antioxidative.",
-                "likely_impact": "A near-duplicate of an assay-confirmed antioxidant positive sits "
-                "in the 'assumed non-antioxidant' C2 pool -- a homology-based (not exact-match) "
-                "leakage risk the construction-time exact-sequence screen could not catch.",
-                "proposed_correction": "Pending project-owner decision -- NOT applied. See "
-                f"audit_cross_pool_homology_clusters.csv for the full list of "
-                f"{homology_summary['n_cross_pool_clusters_real_homology_candidates']} real "
-                "(length>=15 AA) cross-pool homology candidates, several more C1<->C2, to review as "
-                "a batch.",
-            },
-        },
+        "contamination_requiring_decision": findings,
+        "bucket_2_4_resolution_status": resolution_notes,
         "external_screen": {k: v for k, v in external_screen_report.items()},
         "homology_summary": homology_summary,
         "c3_fold_contract": c3_contract_report,
@@ -1167,8 +1454,12 @@ def run_fr2_pool_audit() -> dict:
             "C3's 25,000-candidate UniRef50 universe is a deterministic ID-sorted slice of the "
             "870,941-cluster population in its length window, not a random sample -- a potential "
             "coverage bias to examine under Task 2.5, not evidence the pool is invalid.",
+            "2 external-control ('experimentally inactive') peptides independently hit BIOPEP-UWM's "
+            "antioxidative reference set -- the same cross-database annotation conflict phenomenon "
+            "already documented for the 179 FR1 conflicts; preserved as a documented uncertainty, not "
+            "acted on.",
         ],
-        "ready_for_technical_acceptance": False,
+        "ready_for_technical_acceptance": decision_a_resolved and decision_b_resolved,
     }
     with open(AUDIT_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
         json.dump(summary, handle, indent=2, default=str)
@@ -1209,6 +1500,8 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr2-c3-fetch-candidates", help="Fetch the UniRef50 candidate universe (Bucket 2.3 step 1)")
     sub.add_parser("fr2-c3-build", help="Fold-safe ESM-2 hard-challenge selection (Bucket 2.3 step 2)")
     sub.add_parser("fr2-pool-audit", help="Pool contamination and leakage audit (Bucket 2.4)")
+    sub.add_parser("fr2-c1-cross-pool-fix", help="Decision A: remove C1/C2 exact overlap (Bucket 2.4 resolution)")
+    sub.add_parser("fr2-c2-cross-pool-fix", help="Decision B: exclude C2 homolog of an E1 positive (Bucket 2.4 resolution)")
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     args = parser.parse_args(argv)
 
@@ -1246,6 +1539,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr2-c3-build":
         summary = run_fr2_c3_build()
+        print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-c1-cross-pool-fix":
+        summary = run_fr2_c1_cross_pool_fix()
+        print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-c2-cross-pool-fix":
+        summary = run_fr2_c2_cross_pool_fix()
         print(json.dumps(summary, indent=2))
         return 0
     if args.stage == "fr2-pool-audit":

@@ -30,17 +30,17 @@
     "n_length_window_violations": 0
   },
   {
-    "pool": "C1_v2",
+    "pool": "C1_v3",
     "n_records": 5000,
     "n_unique_ids": 5000,
     "n_duplicate_ids": 0,
-    "n_unique_sequences": 3785,
-    "n_duplicate_sequences": 1215,
+    "n_unique_sequences": 3788,
+    "n_duplicate_sequences": 1212,
     "n_non_standard_alphabet": 0,
     "n_length_window_violations": 0
   },
   {
-    "pool": "C2",
+    "pool": "C2_v2",
     "n_records": 2000,
     "n_unique_ids": 2000,
     "n_duplicate_ids": 0,

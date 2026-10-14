@@ -6,6 +6,7 @@ from plantaox.c2_pu.pools import (
     BIOACTIVITY_KEYWORDS,
     apply_secondary_blocklist,
     clean_c1_alphabet,
+    clean_c1_cross_pool_overlap,
     clean_c1_pool,
     find_contamination,
     find_non_standard_alphabet,
@@ -186,5 +187,53 @@ def test_clean_c1_alphabet_reports_shortfall_without_crashing():
     assert summary["n_replacements_made"] == 0
     assert summary["shortfall"] == 1
     assert summary["n_output_records"] == 0
+    assert clean == []
+    assert replacement_log == []
+
+
+def test_clean_c1_cross_pool_overlap_removes_and_replaces_flagged_sequences():
+    c1 = [
+        ("sp|KEEP1|X desc1", "ACDEFG"),  # not flagged, kept as-is
+        ("sp|DUP|X desc2", "GHIKLM"),  # flagged as overlapping C2
+        ("sp|KEEP2|X desc3", "MNPQRS"),  # not flagged, kept as-is
+    ]
+    candidate_pool = [
+        ("sp|KEEP1|X desc1", "ACDEFG"),  # already in c1, not eligible
+        ("sp|BAD|X some toxin peptide", "TOXINSE"),  # blocklisted, not eligible
+        ("sp|SCREENED|X desc", "INSCREEN"),  # in screen set (e.g. also in C3), not eligible
+        ("sp|REPL|X fresh candidate", "FRESHSEQ"),  # the only eligible replacement
+    ]
+    screen = {"INSCREEN"}
+
+    clean, exclusion_log, replacement_log, summary = clean_c1_cross_pool_overlap(
+        c1, candidate_pool, exclude_sequences={"GHIKLM"}, screen_sequences=screen, seed=42
+    )
+
+    assert summary["n_input_records"] == 3
+    assert summary["n_cross_pool_overlap_removed"] == 1
+    assert summary["n_replacements_made"] == 1
+    assert summary["shortfall"] == 0
+    assert summary["n_output_records"] == 3
+
+    clean_seqs = {s for _, s in clean}
+    assert "GHIKLM" not in clean_seqs
+    assert "ACDEFG" in clean_seqs and "MNPQRS" in clean_seqs
+    assert "FRESHSEQ" in clean_seqs
+
+    assert len(exclusion_log) == 1
+    assert exclusion_log[0]["sequence"] == "GHIKLM"
+    assert exclusion_log[0]["reason"] == "exact_sequence_overlap_with_c2_found_in_bucket_2_4_audit"
+    assert len(replacement_log) == 1
+    assert replacement_log[0]["sequence"] == "FRESHSEQ"
+
+
+def test_clean_c1_cross_pool_overlap_reports_shortfall_without_crashing():
+    c1 = [("sp|DUP|X", "GHIKLM")]
+    clean, exclusion_log, replacement_log, summary = clean_c1_cross_pool_overlap(
+        c1, [], exclude_sequences={"GHIKLM"}, screen_sequences=set(), seed=42
+    )
+    assert summary["n_cross_pool_overlap_removed"] == 1
+    assert summary["n_replacements_made"] == 0
+    assert summary["shortfall"] == 1
     assert clean == []
     assert replacement_log == []

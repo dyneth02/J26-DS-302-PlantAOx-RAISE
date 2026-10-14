@@ -31,17 +31,17 @@
       "n_length_window_violations": 0
     },
     {
-      "pool": "C1_v2",
+      "pool": "C1_v3",
       "n_records": 5000,
       "n_unique_ids": 5000,
       "n_duplicate_ids": 0,
-      "n_unique_sequences": 3785,
-      "n_duplicate_sequences": 1215,
+      "n_unique_sequences": 3788,
+      "n_duplicate_sequences": 1212,
       "n_non_standard_alphabet": 0,
       "n_length_window_violations": 0
     },
     {
-      "pool": "C2",
+      "pool": "C2_v2",
       "n_records": 2000,
       "n_unique_ids": 2000,
       "n_duplicate_ids": 0,
@@ -61,71 +61,12 @@
       "n_length_window_violations": 0
     }
   ],
-  "exact_overlap_nonzero_pairs": [
-    {
-      "pool_a": "C1_v2",
-      "pool_b": "C2",
-      "sequence": "EGGGNRGDPSGVC"
-    },
-    {
-      "pool_a": "C1_v2",
-      "pool_b": "C2",
-      "sequence": "ENFAVGCTPGYQRTADGRCKPTF"
-    },
-    {
-      "pool_a": "C1_v2",
-      "pool_b": "C2",
-      "sequence": "FIYHSYK"
-    },
-    {
-      "pool_a": "C1_v2",
-      "pool_b": "C2",
-      "sequence": "GCKKRKARKRPKCKKARKRPKCKRRKVAKKKC"
-    },
-    {
-      "pool_a": "C1_v2",
-      "pool_b": "C2",
-      "sequence": "MKIRASVRKICEKCRLIRRRGRIIVICPNPRHKQRQG"
-    },
-    {
-      "pool_a": "C1_v2",
-      "pool_b": "C2",
-      "sequence": "MKVKPSVKKICDKCKVIRRHGRVMVICDNLRHKQRQG"
-    },
-    {
-      "pool_a": "C1_v2",
-      "pool_b": "C2",
-      "sequence": "MRAKWRKKRTRRLKRKRRKVRARSK"
-    },
-    {
-      "pool_a": "C1_v2",
-      "pool_b": "C2",
-      "sequence": "YRRRRRRGRRGRRRRGRRRRSRGRRRAHGG"
-    }
-  ],
-  "contamination_requiring_decision": {
-    "c1_c2_exact_overlap": {
-      "n_sequences": 8,
-      "sequences": [
-        "EGGGNRGDPSGVC",
-        "ENFAVGCTPGYQRTADGRCKPTF",
-        "FIYHSYK",
-        "GCKKRKARKRPKCKKARKRPKCKRRKVAKKKC",
-        "MKIRASVRKICEKCRLIRRRGRIIVICPNPRHKQRQG",
-        "MKVKPSVKKICDKCKVIRRHGRVMVICDNLRHKQRQG",
-        "MRAKWRKKRTRRLKRKRRKVRARSK",
-        "YRRRRRRGRRGRRRRGRRRRSRGRRRAHGG"
-      ],
-      "likely_impact": "Both pools independently sample from overlapping underlying biological sequence space (C1: UniProtKB SwissProt reviewed:true; C2: Peptipedia, which itself ingests much of SwissProt). Neither pool's construction checked against the other. Not a labeled-positive leak (none of these are antioxidant-tagged), but a correctness issue for treating C1 and C2 as independent unlabeled populations.",
-      "proposed_correction": "Pending project-owner decision -- NOT applied. Candidate options: (a) exclude these 8 sequences from C2 only (C1 is the more established/primary pool), re-filling from C2's existing eligible-candidate tier; (b) exclude from both and document; (c) accept and document as a known, bounded overlap."
-    },
-    "c2_homology_to_fr1_positive": {
-      "example_sequence": "LYQEPVLGPVRGPFP",
-      "peptide_id": "C2-EFDBC5460B",
-      "evidence": "90%+ CD-HIT identity (length >=15 AA, not a short-fragment artifact) to 4 FR1 positives in the same cluster, including YQEPVLGPVRGPFPIIV (AOP-032318CCA7, evidence_tier=E1, assay-confirmed). C2's own tag for this sequence is Therapeutic/Metabolic/Anti-diabetic, not antioxidative.",
-      "likely_impact": "A near-duplicate of an assay-confirmed antioxidant positive sits in the 'assumed non-antioxidant' C2 pool -- a homology-based (not exact-match) leakage risk the construction-time exact-sequence screen could not catch.",
-      "proposed_correction": "Pending project-owner decision -- NOT applied. See audit_cross_pool_homology_clusters.csv for the full list of 15 real (length>=15 AA) cross-pool homology candidates, several more C1<->C2, to review as a batch."
-    }
+  "exact_overlap_nonzero_pairs": [],
+  "contamination_requiring_decision": {},
+  "bucket_2_4_resolution_status": {
+    "decision_a_c1_c2_exact_overlap": "RESOLVED 2026-10-14 (see c1_cross_pool_fix_report.json) -- 8 sequences removed from C1 (kept in C2, per approved 'preserve C2's biological-annotation precedence'), replaced 1:1 from the UniProtKB candidate universe, screened against FR1 positives, 179 conflicts, C2, and C3. Canonical C1 artifact is now stage_c1_decoys_v3.fasta.",
+    "decision_b_c2_homology_to_e1_positive": "RESOLVED 2026-10-14 (see c2_cross_pool_fix_report.json) -- C2-EFDBC5460B ('LYQEPVLGPVRGPFP') excluded as a conservative leakage-risk decision (NOT claimed experimentally inactive), replaced 1:1 from the experimentally-reported Peptipedia tier, screened against FR1 positives, 179 conflicts, remaining C2, C1 v3, and C3. Canonical C2 artifact is now stage_c2_bioactive_unlabeled_v2.fasta.",
+    "additional_homology_candidates": "Of the 14 other candidates found alongside the project-owner-flagged C2/FR1-positive pair, reviewed individually (not auto-excluded by cluster membership): 3 were fully resolved as a side effect of Decision A (their shared member was one of the 8 exact C1/C2 duplicates, now removed from C1); 11 remain as near-duplicate (not exact) C1<->C2 pairs post-fix. All are C1<->C2 only (no FR1-positive involvement) and from peptide families with no plausible antioxidant mechanism (ribosomal/zinc-ribbon proteins, protamine-like and homeodomain cell-penetrating peptides, actin/gliadin fragments, cysteine-rich defensin-like peptides) -- assessed as redundant construction overlap between two unlabeled pools, not a label-leakage risk, since neither pool carries ground truth. Recommendation: accept and document as a known, bounded limitation (same treatment as C1's intentional record-level duplicates) rather than a further exclude-and-replace cycle. See audit_cross_pool_homology_clusters.csv for the full per-cluster evidence; revisit if the project owner wants a stricter policy."
   },
   "external_screen": {
     "biopep_uwm": {
@@ -136,8 +77,8 @@
         "FR1_positives": 700,
         "conflicts_179": 22,
         "external_control": 2,
-        "C1_v2": 0,
-        "C2": 0,
+        "C1_v3": 0,
+        "C2_v2": 0,
         "C3_union": 0
       },
       "hit_sequences_by_pool": {
@@ -871,8 +812,8 @@
           "FCM",
           "YPQLLPNE"
         ],
-        "C1_v2": [],
-        "C2": [],
+        "C1_v3": [],
+        "C2_v2": [],
         "C3_union": []
       }
     },
@@ -888,26 +829,22 @@
   "homology_summary": {
     "identity_threshold": 0.9,
     "length_floor_for_interpretation": 15,
-    "n_total_clusters": 7811,
-    "n_cross_pool_clusters_raw": 470,
-    "n_cross_pool_clusters_short_fragment_only_not_interpretable": 455,
-    "n_cross_pool_clusters_real_homology_candidates": 15,
+    "n_total_clusters": 7819,
+    "n_cross_pool_clusters_raw": 464,
+    "n_cross_pool_clusters_short_fragment_only_not_interpretable": 453,
+    "n_cross_pool_clusters_real_homology_candidates": 11,
     "real_homology_cluster_ids": [
       91,
       173,
       759,
-      1075,
-      1560,
-      1818,
-      1827,
-      2351,
-      2591,
-      2952,
-      2963,
-      3677,
-      3988,
-      4006,
-      5170
+      1076,
+      1562,
+      1823,
+      1832,
+      2356,
+      2958,
+      3997,
+      4014
     ]
   },
   "c3_fold_contract": {
@@ -924,7 +861,8 @@
   "accepted_methodological_limitations": [
     "CD-HIT percent-identity is not biologically interpretable for pairs where the shorter sequence is <15 AA (chance substring matches dominate at this length); such clusters are reported for transparency but excluded from the 'real homology candidate' count.",
     "C1 retains natural duplicate sequences by design (record-vs-unique-sequence distinction, confirmed 2026-10-14) -- any future train/val/test split MUST group identical sequences together to avoid sequence-level leakage; this is a loader-design requirement, not something this audit can enforce by itself.",
-    "C3's 25,000-candidate UniRef50 universe is a deterministic ID-sorted slice of the 870,941-cluster population in its length window, not a random sample -- a potential coverage bias to examine under Task 2.5, not evidence the pool is invalid."
+    "C3's 25,000-candidate UniRef50 universe is a deterministic ID-sorted slice of the 870,941-cluster population in its length window, not a random sample -- a potential coverage bias to examine under Task 2.5, not evidence the pool is invalid.",
+    "2 external-control ('experimentally inactive') peptides independently hit BIOPEP-UWM's antioxidative reference set -- the same cross-database annotation conflict phenomenon already documented for the 179 FR1 conflicts; preserved as a documented uncertainty, not acted on."
   ],
-  "ready_for_technical_acceptance": false
+  "ready_for_technical_acceptance": true
 }

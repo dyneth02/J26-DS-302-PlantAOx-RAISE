@@ -317,3 +317,81 @@ def clean_c1_alphabet(
         "n_unique_sequences_output": len(set(s for _, s in clean_records)),
     }
     return clean_records, exclusion_log, replacement_log, summary
+
+
+def clean_c1_cross_pool_overlap(
+    c1_records: list[tuple[str, str]],
+    candidate_pool_records: list[tuple[str, str]],
+    exclude_sequences: set[str],
+    screen_sequences: set[str],
+    seed: int = C1_SEED,
+) -> tuple[list[tuple[str, str]], list[dict], list[dict], dict]:
+    """Bucket 2.4 audit resolution (Decision A): remove every C1 record whose
+    sequence is in ``exclude_sequences`` (sequences found, during the pool
+    contamination audit, to exactly overlap another pool -- here, C2) and
+    replace 1:1 from the candidate universe. Same swap-not-resample pattern
+    as ``clean_c1_pool``/``clean_c1_alphabet``.
+
+    ``screen_sequences`` should include everything a replacement must stay
+    disjoint from: FR1's positives, the 179 conflicts, AND this time also
+    C2 and C3 -- proactively, so this fix can never reintroduce the exact
+    overlap it exists to resolve, and so C3 (built by screening against the
+    pre-fix C1/C2) never needs to be rebuilt as a consequence of this fix.
+    """
+    contaminated = [(h, s) for h, s in c1_records if s in exclude_sequences]
+    contaminated_seqs = {s for _, s in contaminated}
+    clean_records = [(h, s) for h, s in c1_records if s not in contaminated_seqs]
+
+    kept_candidates, _ = apply_secondary_blocklist(candidate_pool_records)
+    current_seqs = {s for _, s in c1_records}
+    eligible_replacements = [
+        (h, s)
+        for h, s in kept_candidates
+        if s not in current_seqs
+        and s not in screen_sequences
+        and is_standard_alphabet(s)
+    ]
+
+    n_needed = len(c1_records) - len(clean_records)
+    n_available = len(eligible_replacements)
+    n_selected = min(n_needed, n_available)
+    replacements = (
+        select_replacements(eligible_replacements, n_selected, seed=seed)
+        if n_selected > 0
+        else []
+    )
+    clean_records = clean_records + replacements
+
+    exclusion_log = [
+        {
+            "header": h,
+            "sequence": s,
+            "length": len(s),
+            "reason": "exact_sequence_overlap_with_c2_found_in_bucket_2_4_audit",
+            **parse_uniprot_header(h),
+        }
+        for h, s in contaminated
+    ]
+    replacement_log = [
+        {
+            "header": h,
+            "sequence": s,
+            "length": len(s),
+            "source": "uniprotkb_candidates.fasta (post-secondary-blocklist, standard-alphabet, "
+            "not in original sample, not a screened positive/conflict/C2/C3 sequence)",
+            **parse_uniprot_header(h),
+        }
+        for h, s in replacements
+    ]
+
+    summary = {
+        "n_input_records": len(c1_records),
+        "n_cross_pool_overlap_removed": len(contaminated),
+        "n_replacements_needed": n_needed,
+        "n_replacements_available": n_available,
+        "n_replacements_made": n_selected,
+        "n_output_records": len(clean_records),
+        "shortfall": n_needed - n_selected,
+        "n_unique_sequences_output": len(set(s for _, s in clean_records)),
+    }
+    return clean_records, exclusion_log, replacement_log, summary

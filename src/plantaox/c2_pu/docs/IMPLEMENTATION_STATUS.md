@@ -332,6 +332,88 @@
   to either finding above — both are reported with proposed options and await your decision per the
   explicit "pause before a material dataset change" instruction.
 
+### Bucket 2, Task 2.4 — Contamination and Leakage Audit Resolution (Decisions A & B)
+- **Status: both approved findings resolved; audit rerun against the corrected canonical pools;
+  `ready_for_technical_acceptance: true`.** Canonical artifacts for all future consumption are now
+  **`stage_c1_decoys_v3.fasta`** and **`stage_c2_bioactive_unlabeled_v2.fasta`** — v1/v2 C1 and the
+  original C2 remain on disk, untouched, as historical evidence (confirmed via `git status` and a
+  dedicated preservation test).
+- **Decision A (C1/C2 exact overlap) — resolved via `clean_c1_cross_pool_overlap` /
+  `run_fr2_c1_cross_pool_fix`.** The 8 unique overlapping sequences corresponded to **11 actual C1
+  FASTA records** (one sequence appeared 3× and one 2× among C1's intentional natural duplicates) —
+  confirmed empirically, not assumed, exactly matching the explicit warning that unique-sequence and
+  record counts can differ. All 11 removed from C1 (C2 keeps every one, per the approved "preserve
+  C2's biological-annotation precedence" policy) and replaced 1:1 from the same
+  `uniprotkb_candidates.fasta` universe used by every prior C1 fix, now screened against FR1
+  positives, the 179 conflicts, C2, **and C3** (the new requirement). 1,799 eligible replacements were
+  available against 11 needed — no shortfall. Result: still exactly 5,000 records; unique-sequence
+  count shifted from v2's 3,785 to **3,788** (removing 8 unique duplicate-bearing sequences, adding 11
+  new unique replacements), standard alphabet, 3–50 AA, zero exact overlap with
+  positives/conflicts/C2/C3 (all re-verified directly against the output file, not inferred from the
+  fix logic alone).
+- **Decision B (C2 homologous to an E1 positive) — resolved via `run_fr2_c2_cross_pool_fix`.**
+  **Alignment evidence obtained before deciding anything**, per instruction: EMBOSS `needle`
+  (EBLOSUM62, gapopen=10, gapextend=0.5) global alignment of `C2-EFDBC5460B` ("LYQEPVLGPVRGPFP", 15
+  AA) against `AOP-032318CCA7` ("YQEPVLGPVRGPFPIIV", 17 AA, evidence_tier **E1**, assay-confirmed)
+  gives **14/18 identical aligned positions = 77.8% full-length identity, 22.2% gaps** (a 1-residue
+  N-terminal offset and a 3-residue C-terminal truncation around a 14-residue identical core) — a
+  materially different number from CD-HIT's own 93.33% (computed over the shorter sequence only),
+  both reported rather than picking one. This is not a borderline call: 14 contiguous identical
+  residues is overwhelming evidence of the same underlying biological peptide, not chance. Excluded
+  **as a conservative leakage-risk decision only** — the exclusion log explicitly states this is NOT
+  a claim that the peptide is experimentally antioxidant-active, and preserves the original Peptipedia
+  evidence (activity tags, predicted/experimental flag) in full. Replaced 1:1, deterministically (seed
+  42), from the same experimentally-reported Peptipedia tier Task 2.2 drew from (64,122 eligible after
+  the expanded screen — still comfortably sufficient), screened against FR1 positives, 179 conflicts,
+  the remaining 1,999 C2 sequences, **C1 v3** (run after Decision A, specifically so this replacement
+  could never collide with Decision A's own replacements), and C3. Result: still exactly 2,000 unique
+  records, standard alphabet, 3–50 AA, zero exact overlap with positives/conflicts/C1 v3/C3.
+- **The remaining 14 "other" homology candidates were reviewed individually, not bulk-excluded by CD-HIT
+  cluster membership** (per explicit instruction). **3 resolved automatically as a side effect of
+  Decision A** (their shared member was one of the 8 exact duplicates, now gone from C1); **11 remain**
+  as genuine (≥15 AA, not short-fragment-artifact) near-duplicate C1↔C2 pairs. All 11 are C1↔C2 only —
+  **none involve FR1 positives**, so there is no label-leakage mechanism, unlike Decision B. Inspected
+  each family: ribosomal bL36-type zinc-ribbon proteins, protamine-like cationic peptides, an
+  Antennapedia-homeodomain-type cell-penetrating peptide, a β-actin fragment, a proline-rich
+  gliadin/gluten-like repeat, and cysteine-rich defensin-like peptides — none are antioxidant-
+  mechanism peptide families (no Trp/Tyr/His/Cys free-radical-scavenging motif pattern consistent with
+  the FR1 positive pool's own composition). **Recommendation (not unilaterally acted on): accept and
+  document as a known, bounded limitation**, the same treatment already given to C1's intentional
+  record-level duplicates — excluding near-duplicate *families* (not just exact matches) from two
+  mutually-unlabeled pools has no established precedent in this project and risks an unbounded,
+  ever-tightening exclusion spiral (AGENTS.md's "don't keep iterating indefinitely" principle).
+  Flagged for the project owner to override if a stricter policy is wanted; not applied unilaterally.
+- **Audit fully rerun against the corrected pools** (`fr2-pool-audit`), canonical pool labels updated
+  to `C1_v3`/`C2_v2` throughout every output file — not a hand-edited flag flip.
+  `bucket_2_4_resolution_status` in `fr2_pool_audit_report.json` records both decisions as RESOLVED
+  with pointers to the fix reports; `contamination_requiring_decision` is now `{}`.
+  `ready_for_technical_acceptance` is computed from the live artifacts (both decisions' post-conditions
+  checked directly), not a stored boolean someone could forget to flip back.
+- **A real bug caught by the post-fix test run, fixed before being called "acceptance-tested":**
+  with zero overlaps left to report, `pd.DataFrame([])` wrote a column-less, unreadable
+  `audit_exact_overlap_detail.csv` — caught immediately by the acceptance test suite (not manually),
+  fixed by passing explicit column names so the empty-case CSV still has a valid header.
+- **AODB/DFBP remain recorded as inaccessible** (unchanged from the first audit pass — re-confirmed,
+  not re-attempted, since nothing about their availability would have changed); **BIOPEP-UWM remains
+  screened** against the same 990-sequence reference, zero hits in C1 v3/C2 v2/C3; the **2
+  BIOPEP-UWM-vs-AnOxPePred-inactive-control annotation conflicts are preserved as documented
+  uncertainties**, not resolved or acted on, per instruction.
+- **C3 was NOT rebuilt.** Decided and verified, not assumed: both fixes proactively screened their
+  replacement candidates against C3's existing 2,325-sequence union before writing anything, so C3's
+  own membership, ranking, and fold-safety guarantees needed no changes — confirmed directly (zero
+  exact overlap between C3 and both new canonical C1 v3/C2 v2) rather than inferred. `load_fold_
+  challenges(path, fold_id)` is unchanged and remains the only sanctioned downstream accessor.
+- **Tests:** 10 new/updated audit-acceptance tests (now asserting the resolved, zero-contamination
+  state) + 10 new cross-pool-fix acceptance tests (2 unit in `test_pools.py`, 8 full-file, including
+  byte-identical reproducibility for both fixes — the C2 fix's reproducibility test re-parses the full
+  Peptipedia dump, ~86s). Full suite: 142 passed, 1 skipped (torch), zero regression.
+- **Evidence-based recommendation: Task 2.4 is ready for technical acceptance.** Both project-owner-
+  approved findings are resolved and independently re-verified against the output artifacts (not
+  trusted from the fix logic alone); the one open methodological judgment call (the 11 remaining
+  C1↔C2 near-duplicate families) is surfaced with full evidence and a clear recommendation, not
+  silently decided or hidden. AODB/DFBP remain the only incomplete external checks, both for
+  documented access reasons outside this project's control.
+
 ### Bucket 3, Task 3.2 — ESM-2 Environment Setup and Smoke Test
 - **Status: environment configured, interface built and tested, smoke test passing.** This is
   explicitly NOT full feature generation — embedding the full positive pool and C1/C2/C3 (Bucket
@@ -453,18 +535,21 @@ tasks below.)*
     design's practical effect on final C3 membership is small even though the leakage channel it
     closes is real and structural. Worth noting in the FR2/FR6 report as a measured effect size, not
     just a methodological footnote.
-13. **AWAITING PROJECT-OWNER DECISION: C1 and C2 share 8 exact-sequence duplicates** (Bucket 2.4 audit).
-    Full list and proposed options in `fr2_pool_audit_report.json`'s `contamination_requiring_decision.
-    c1_c2_exact_overlap`. Not fixed. FR2 cannot be marked complete until this is resolved or explicitly
-    accepted as a documented limitation.
-14. **AWAITING PROJECT-OWNER DECISION: a C2 peptide (`C2-EFDBC5460B`, "LYQEPVLGPVRGPFP") is a
-    near-duplicate (90%+ identity, ≥15 AA) of an assay-confirmed E1 FR1 positive** (Bucket 2.4 audit;
-    14 other C1↔C2 candidate homology pairs also found, see `audit_cross_pool_homology_clusters.csv`).
-    Not fixed. Same blocking status as #13.
-15. **AODB and DFBP remain unscreened**, now for a documented access reason rather than an unstarted
+13. **RESOLVED 2026-10-14 (Decision A).** C1 and C2's 8 exact-sequence duplicates (11 actual C1
+    records) were removed from C1 and replaced, screened against FR1 positives/179 conflicts/C2/C3.
+    Canonical C1 artifact is now `stage_c1_decoys_v3.fasta`. See Bucket 2.4 resolution section above.
+14. **RESOLVED 2026-10-14 (Decision B).** `C2-EFDBC5460B` ("LYQEPVLGPVRGPFP") excluded as a
+    conservative leakage-risk decision (needle-alignment-confirmed 77.8% full-length identity to an
+    E1 positive) and replaced. Canonical C2 artifact is now `stage_c2_bioactive_unlabeled_v2.fasta`.
+    **11 of the 14 other candidate C1↔C2 homology pairs remain** (3 resolved as a side effect of
+    Decision A) — reviewed individually, recommended to accept as a documented limitation (no
+    FR1-positive involvement, no plausible antioxidant mechanism in any of the peptide families
+    involved); not unilaterally acted on, open to project-owner override. See Bucket 2.4 resolution
+    section above.
+15. **AODB and DFBP remain unscreened**, for a documented access reason rather than an unstarted
     task: AODB's server returned HTTP 502 + an expired TLS certificate; DFBP has no discoverable
-    hosting URL. BIOPEP-UWM **is** screened (zero hits in C1/C2/C3). Revisit if either resource comes
-    back online or a hosting URL for DFBP is found.
+    hosting URL. BIOPEP-UWM **is** screened (zero hits in C1 v3/C2 v2/C3). Revisit if either resource
+    comes back online or a hosting URL for DFBP is found.
 
 ## ⏭️ Next tasks (in order)
 
@@ -487,19 +572,23 @@ tasks below.)*
    Remaining for both: acquire and cross-reference AODB/DFBP/BIOPEP-UWM specifically (Known Issue
    #11), low/medium priority depending on how much the PP1 report leans on that specific checklist
    line versus the broader antioxidant-exclusion/leakage-screen arguments already satisfied.
-5. **Bucket 2.4 audit is run and documented, but FR2 is NOT technically accepted — two findings
-   (#13, #14 above) need your decision first**, per the explicit "pause before a material dataset
-   change" instruction: were C1/C2 wrong to overlap, and if so, which pool yields the 8 sequences; and
-   what to do about the C2 peptide homologous to an E1 positive (exclude it alone, review all 15
-   candidate homology pairs as a batch, or accept and document). Until then, `ready_for_technical_
-   acceptance: false` stands in `fr2_pool_audit_report.json`.
-6. **Bucket 3.1 (15 physicochemical descriptors)** can start any time in parallel — not blocked on
+5. **Bucket 2.4 is resolved and technically accepted** (`ready_for_technical_acceptance: true` in
+   `fr2_pool_audit_report.json`, re-derived from the live artifacts). Canonical C1/C2 artifacts are
+   now `stage_c1_decoys_v3.fasta` / `stage_c2_bioactive_unlabeled_v2.fasta` — update any new code to
+   read these, not v2/the original C2. One open, non-blocking item: whether to act further on the
+   11 remaining C1↔C2 near-duplicate families (recommended to accept as documented limitation; see
+   Known Issue #14).
+6. **Task 2.5 (Biological Distribution and Shortcut-Bias Checks)** is next per the Planner sequence:
+   length/composition/descriptor distribution comparisons across positives vs. C1/C2/C3, optional
+   exploratory UMAP/t-SNE (not a separation proof), and recording family/organism/source shortcut
+   risks. Not started.
+7. **Bucket 3.1 (15 physicochemical descriptors)** can start any time in parallel — not blocked on
    anything above.
-7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
+8. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
    selection-leakage risk later.
-8. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
+9. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
 
 ## 📝 Experiment decisions log
 
@@ -551,5 +640,10 @@ tasks below.)*
 | 2026-10-14 | AODB and DFBP are documented as genuinely inaccessible rather than silently skipped or substituted with an unrelated database | AODB: confirmed via direct `curl` (with and without TLS verification) that its server returns HTTP 502 from its own nginx, plus an expired TLS certificate — a hard access failure, not a missed search. DFBP: no hosting URL discoverable via web search or its own PubMed record (itself blocked by a cookie wall to automated access). Per explicit instruction, not substituted with a different database without approval. |
 | 2026-10-14 | Two findings (C1∩C2 8-sequence exact overlap; a C2 peptide's homology to an E1 FR1 positive) are reported with proposed options but NOT acted on, and FR2/Bucket 2.4 is marked `ready_for_technical_acceptance: false` in the audit report itself | Explicit instruction: request approval before a material dataset change, and a discovered issue must not be hidden merely to preserve an accepted record count. Both findings are real (independently verified, not probabilistic false positives) but resolving them changes accepted artifact counts, so the decision belongs to the project owner, not this audit. |
 | 2026-10-14 | `curation/c3.py::load_fold_challenges(ranking_path, fold_id)` is the only sanctioned way to read C3 for FR3/FR4/FR6 training code; no function anywhere in the module returns the cross-fold union, and a test guards against one being added later under a confusable name | Explicit "mandatory" Step 5 instruction: prevent accidental misuse of the fold-safe construction by a future helper that "conveniently" loads the whole union as one fold's challenge set, which would silently reintroduce the exact selection-leakage the fold-specific centroids exist to prevent. |
+
+| 2026-10-14 | Decision A: C1/C2's 8 exact-overlap sequences removed from C1 only (C2 keeps them), replaced 1:1 from the UniProtKB candidate universe, screened against FR1 positives/179 conflicts/C2/C3; canonical C1 is now `stage_c1_decoys_v3.fasta` | Project-owner-approved: "preserve C2's biological-annotation precedence." Confirmed the 8 unique sequences corresponded to 11 actual C1 FASTA records (some were among C1's intentional natural duplicates) before removing anything -- record-vs-unique counts verified empirically, not assumed equal. |
+| 2026-10-14 | Decision B: `C2-EFDBC5460B` ("LYQEPVLGPVRGPFP") excluded from C2 as a conservative leakage-risk decision (not claimed inactive), replaced 1:1 from the experimentally-reported Peptipedia tier, screened against FR1 positives/179 conflicts/remaining C2/C1 v3/C3; canonical C2 is now `stage_c2_bioactive_unlabeled_v2.fasta` | Project-owner-approved, backed by a real EMBOSS needle alignment (77.8% full-length identity, 14/18 identical aligned positions, 22.2% gaps) against the E1-confirmed positive YQEPVLGPVRGPFPIIV -- not a borderline call. C1 v3 (not v2) was used as the cross-screen specifically so Decision B's replacement could never collide with Decision A's. |
+| 2026-10-14 | The 14 other candidate C1<->C2 homology pairs found by the audit are NOT bulk-excluded by CD-HIT cluster membership; 3 resolved as a side effect of Decision A, 11 reviewed individually and recommended as an accepted, documented limitation rather than further exclusion | Explicit instruction: distinguish genuinely concerning biological similarity from short-sequence chance matches, and do not auto-exclude whole clusters. All 11 are C1<->C2 only (no FR1-positive involvement, so no label-leakage mechanism) and from peptide families (ribosomal/zinc-ribbon, protamine-like, homeodomain CPP, actin/gliadin fragments, defensin-like) with no plausible antioxidant mechanism. Presented with full evidence for project-owner override rather than silently decided either way. |
+| 2026-10-14 | C3 was not rebuilt in response to Decisions A/B -- both fixes proactively screened their replacement candidates against C3's existing union before writing anything, confirmed by re-verifying zero exact overlap between C3 and the new C1 v3/C2 v2 | Avoids the cascading C3 rebuild the instructions flagged as a possible consequence, by preventing the problem at its source (the replacement-candidate screen) rather than reactively detecting and fixing it after the fact. `load_fold_challenges(path, fold_id)` needed no changes. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

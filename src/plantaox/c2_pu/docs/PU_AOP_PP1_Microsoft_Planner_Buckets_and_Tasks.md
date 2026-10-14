@@ -163,16 +163,17 @@ Task 2.3 section for the full leakage rationale and empirical verification.)*
 - [x] Export C3 FASTA/CSV, similarity ranking, provenance, and screening manifest. *(`stage_c3_esm2_hard_challenges.fasta`, `c3_similarity_ranking.csv`, `c3_build_report.json`, `fr2_c3_provenance.jsonl`)*
 
 ## 2.4 — Pool Contamination and Leakage Audit
-*(Status 2026-10-14: audit run and documented; NOT technically accepted. Two findings below require
-a project-owner decision before this bucket can close — see IMPLEMENTATION_STATUS.md Known Issues
-#13/#14. `fr2_pool_audit_report.json` records `ready_for_technical_acceptance: false` directly.)*
+*(Status 2026-10-14: RESOLVED and technically accepted. Both findings fixed per project-owner-approved
+Decisions A/B; audit rerun against the corrected canonical pools. `fr2_pool_audit_report.json` records
+`ready_for_technical_acceptance: true`, re-derived from the live artifacts, not hand-edited. Canonical
+C1/C2 are now `stage_c1_decoys_v3.fasta` / `stage_c2_bioactive_unlabeled_v2.fasta`.)*
 - [x] Remove within-pool duplicates for C1/C2/C3. *(C1 intentionally retains natural record-level duplicates by design, confirmed decision — see IMPLEMENTATION_STATUS.md; C2 and C3 have zero duplicate sequences, confirmed by `sequence_integrity_report`)*
-- [ ] Find and resolve overlap among challenge pools and curated positives. *(found, not yet resolved — FR1 positives have zero exact overlap with C1/C2/C3 (re-verified); **C1 and C2 share 8 exact-sequence duplicates with each other**, pending your decision)*
-- [x] Document conflicts with known antioxidant annotations and exclusion outcomes. *(`audit_external_aop_screen.json`: BIOPEP-UWM screened, zero hits in C1/C2/C3; 700/1,205 positives and 22/179 conflicts independently corroborated; AODB/DFBP documented as inaccessible, not silently skipped)*
-- [ ] Verify required homology boundaries for held-out evaluation and training partitions. *(partially done — GraphPart's own zero-residual-violation guarantee covers positive-pool-internal fold homology; this audit's own CD-HIT scan additionally found **1 C2 peptide homologous to an E1 FR1 positive** plus 14 other C1↔C2 candidate pairs, pending your decision; see `audit_cross_pool_homology_clusters.csv`)*
-- [x] Record contamination and exclusion counts by database and stage. *(`audit_integrity_report.json`, `audit_exact_overlap_matrix.csv`/`_detail.csv`, `audit_external_aop_screen.json`, `audit_cross_pool_homology_summary.json`/`_clusters.csv`)*
+- [x] Find and resolve overlap among challenge pools and curated positives. *(found AND resolved — the 8 C1/C2 exact-sequence duplicates (11 actual records) were removed from C1 and replaced, screened against FR1 positives/179 conflicts/C2/C3; re-verified zero overlap in `stage_c1_decoys_v3.fasta`)*
+- [x] Document conflicts with known antioxidant annotations and exclusion outcomes. *(`audit_external_aop_screen.json`: BIOPEP-UWM screened, zero hits in C1 v3/C2 v2/C3; 700/1,205 positives and 22/179 conflicts independently corroborated; AODB/DFBP documented as inaccessible, not silently skipped; the 2 BIOPEP-UWM-vs-AnOxPePred-inactive-control conflicts preserved as documented uncertainties)*
+- [x] Verify required homology boundaries for held-out evaluation and training partitions. *(the C2 peptide homologous to an E1 FR1 positive was excluded and replaced, confirmed via EMBOSS needle alignment (77.8% full-length identity) before deciding; the 11 remaining C1↔C2-only near-duplicate candidates (3 of the original 14 resolved as a side effect) were reviewed individually — recommended as an accepted, documented limitation since none involve FR1 positives or a plausible antioxidant mechanism; see `audit_cross_pool_homology_clusters.csv`)*
+- [x] Record contamination and exclusion counts by database and stage. *(`audit_integrity_report.json`, `audit_exact_overlap_matrix.csv`/`_detail.csv`, `audit_external_aop_screen.json`, `audit_cross_pool_homology_summary.json`/`_clusters.csv`, plus `c1_cross_pool_fix_report.json`/`c2_cross_pool_fix_report.json` for the two resolutions)*
 - [x] State explicitly that unknown antioxidant activity can remain undetected. *(AODB/DFBP unscreened — documented as access failures, not coverage claims; BIOPEP-UWM/Multi-AOP/AnOxPePred screening narrows but never eliminates this risk, stated plainly in IMPLEMENTATION_STATUS.md)*
-- [x] Save automated integrity report and rerunnable checks. *(`python -m plantaox.c2_pu.run fr2-pool-audit`; 13 unit + 9 full-file acceptance tests, all passing)*
+- [x] Save automated integrity report and rerunnable checks. *(`python -m plantaox.c2_pu.run fr2-pool-audit`, `fr2-c1-cross-pool-fix`, `fr2-c2-cross-pool-fix`; 55 tests across audit/biopep/C3-contract/pools-fix/acceptance files, all passing, including byte-identical reproducibility for both fixes)*
 
 ## 2.5 — Biological Distribution and Shortcut-Bias Checks
 - [ ] Plot positive-versus-C1/C2/C3 peptide-length distributions.

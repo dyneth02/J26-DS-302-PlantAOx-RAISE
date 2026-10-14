@@ -7,8 +7,8 @@
       "FR1_positives": 700,
       "conflicts_179": 22,
       "external_control": 2,
-      "C1_v2": 0,
-      "C2": 0,
+      "C1_v3": 0,
+      "C2_v2": 0,
       "C3_union": 0
     },
     "hit_sequences_by_pool": {
@@ -742,8 +742,8 @@
         "FCM",
         "YPQLLPNE"
       ],
-      "C1_v2": [],
-      "C2": [],
+      "C1_v3": [],
+      "C2_v2": [],
       "C3_union": []
     }
   },
