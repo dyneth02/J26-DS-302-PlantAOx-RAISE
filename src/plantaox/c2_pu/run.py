@@ -2703,6 +2703,119 @@ def run_fr3_demo(fold_id: int = FR3_DEMO_FOLD_ID) -> dict:
     return summary
 
 
+# Bucket 4.1 -- Shared Experiment Infrastructure (config, model, fold-aware
+# data interface, seeding, run recorder). Every torch-dependent Bucket-4
+# module is imported LAZILY inside this function only, so every other CLI
+# stage above keeps its existing torch-free import graph unchanged.
+FR4_SMOKE_TEST_RUNS_DIR = INTERIM_DIR / "fr4_infra_smoke_test_runs"  # gitignored, scratch
+
+
+def run_fr4_infra_smoke_test(fold_id: int = 0) -> dict:
+    """Bucket 4.1 acceptance smoke test: config validation, fold-aware
+    data loading (real fold-``fold_id`` cache), model construction, a
+    forward pass, seeding, and a full checkpoint save/load round-trip --
+    all against real artifacts, entirely offline. This is explicitly an
+    INFRASTRUCTURE check, not a trained PN/PU baseline: no training loop,
+    no loss function, and no fabricated performance metric is produced or
+    recorded anywhere in this function.
+    """
+    import torch
+
+    from plantaox.c2_pu.common.seeding import resolve_device, set_global_seed
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.run_recorder import (
+        RunContext,
+        append_epoch_metrics,
+        create_run_dir,
+        load_checkpoint,
+        save_checkpoint,
+        write_resolved_config,
+    )
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    config = ExperimentConfig(
+        experiment_id="fr4_infra_smoke_test", baseline="PN", fold_id=fold_id, checkpoint_dir=str(FR4_SMOKE_TEST_RUNS_DIR)
+    )
+    seed_context = set_global_seed(config.train_seed)
+    device = resolve_device(config.device)
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+
+    model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims)).to(device)
+    sample = torch.from_numpy(data.train_positive.features[: min(8, len(data.train_positive.features))]).to(device)
+    with torch.no_grad():
+        logits = model(sample)
+        proba = model.predict_proba(sample)
+
+    resolved_config = config.to_dict()
+    resolved_config["seed_context"] = seed_context
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        append_epoch_metrics(
+            run_dir,
+            epoch=0,
+            metrics={
+                "diagnostic_note": "infra smoke test only -- NOT a trained PN/PU baseline",
+                "forward_pass_logit_mean": float(logits.mean().item()),
+                "forward_pass_proba_mean": float(proba.mean().item()),
+            },
+        )
+        checkpoint_path = save_checkpoint(
+            run_dir, model, epoch=0, metrics={"note": "infra smoke test, untrained model"},
+            is_best=True, extra={"infra_smoke_test": True},
+        )
+        save_checkpoint(
+            run_dir, model, epoch=0, metrics={"note": "infra smoke test, untrained model"},
+            is_best=False, extra={"infra_smoke_test": True},
+        )
+        reload_model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(checkpoint_path, reload_model)
+
+        summary = {
+            "run_dir": str(run_dir),
+            "device": str(device),
+            "data_pool_sizes": {
+                "train_positive": len(data.train_positive.peptide_ids),
+                "validation_positive": len(data.validation_positive.peptide_ids),
+                "held_out_positive": len(data.held_out_positive.peptide_ids),
+                "c1": len(data.c1.peptide_ids),
+                "c2": len(data.c2.peptide_ids),
+                "c3_fold_challenges": len(data.c3_fold_challenges.peptide_ids),
+                "external_control": len(data.external_control.peptide_ids),
+            },
+            "leakage_report": data.leakage_report,
+            "forward_pass": {
+                "logits_shape": list(logits.shape),
+                "logits_finite": bool(torch.isfinite(logits).all().item()),
+                "proba_bounded": bool(((proba >= 0) & (proba <= 1)).all().item()),
+            },
+            "checkpoint_round_trip_ok": True,
+            "checkpoint_epoch": checkpoint_info["epoch"],
+            "note": "INFRASTRUCTURE SMOKE TEST ONLY -- not a trained PN/PU baseline (no training loop, no loss, no real metrics).",
+        }
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -2730,6 +2843,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr3-feature-fusion", help="Fuse descriptors + embeddings into a 495-dim feature matrix with leakage-safe per-fold scalers (Bucket 3.3)")
     sub.add_parser("fr3-feature-cache", help="Materialize 5 fold-specific scaled feature caches from the accepted raw fused matrix (Bucket 3.4)")
     sub.add_parser("fr3-demo", help="Offline feature-pipeline demonstration: validate, extract, load, select (Bucket 3.5)")
+    sub.add_parser("fr4-infra-smoke-test", help="Shared experiment infrastructure smoke test: config, data, model, seeding, checkpoint round-trip (Bucket 4.1)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -2816,6 +2930,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr3-demo":
         summary = run_fr3_demo()
+        print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-infra-smoke-test":
+        summary = run_fr4_infra_smoke_test()
         print(json.dumps(summary, indent=2, default=str))
         return 0
     return 1
