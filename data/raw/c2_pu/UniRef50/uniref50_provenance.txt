@@ -1,0 +1,8 @@
+Stage C3 UniRef50 Candidate Universe - Provenance Log
+Generated: 2026-10-14T08:09:11.902850
+Source: UniProt REST API /uniref/search
+Query: identity:0.5 AND length:[3 TO 50]
+Sort: id asc
+Target size: 25000
+Actual fetched: 25000
+Fetch elapsed seconds: 214.3

@@ -148,18 +148,19 @@ Issue #10, resolved for C2.)*
 - [x] Export C2 FASTA/CSV and inclusion/exclusion summary. *(`stage_c2_bioactive_unlabeled.fasta`, `c2_activity_map.csv`, `c2_build_report.json`, `fr2_c2_provenance.jsonl`)*
 
 ## 2.3 — C3 ESM-2 Hard-Challenge Construction
-*(Standard-20-amino-acid-alphabet policy, approved 2026-10-14: filter the UniRef50 candidate
-universe to standard-alphabet sequences at initial curation — see IMPLEMENTATION_STATUS.md Known
-Issue #10. `embed_sequences()` will reject any non-standard sequence at the embedding step regardless,
-but filtering earlier avoids building a candidate pool that can't be embedded.)*
-- [ ] Prepare an appropriately sized, versioned UniRef50 candidate fragment universe.
-- [ ] Install/test **esm2_t12_35M_UR50D** for consistent sequence embedding.
-- [ ] Cache positive-pool embeddings and define fold-safe centroid construction.
-- [ ] Generate candidate embeddings with the same layer and pooling strategy.
-- [ ] Compute and rank candidate-to-positive-centroid distances/similarities.
-- [ ] Screen known-AOP matches against AODB, DFBP, BIOPEP-UWM, and Multi-AOP.
-- [ ] Select the **top 2,000 eligible** hard-challenge fragments.
-- [ ] Export C3 FASTA/CSV, similarity ranking, provenance, and screening manifest.
+*(Standard-20-amino-acid-alphabet policy, approved 2026-10-14: applied `is_standard_alphabet()` at
+candidate curation — see IMPLEMENTATION_STATUS.md Known Issue #10, resolved for C3. **Fold-safety
+requirement, confirmed with the project owner 2026-10-14: candidate selection uses training-fold-only
+positive centroids, never a centroid computed from held-out positives** — see IMPLEMENTATION_STATUS.md
+Task 2.3 section for the full leakage rationale and empirical verification.)*
+- [x] Prepare an appropriately sized, versioned UniRef50 candidate fragment universe. *(25,000 sequences via UniProt's `/uniref/search` REST API, `identity:0.5 AND length:[3 TO 50]`, sorted `id asc`; versioned raw snapshot at `data/raw/c2_pu/UniRef50/uniref50_candidates.fasta` — not the ~13GB bulk FASTA)*
+- [x] Install/test **esm2_t12_35M_UR50D** for consistent sequence embedding. *(done in Bucket 3.2 — reused directly, no changes)*
+- [x] Cache positive-pool embeddings and define fold-safe centroid construction. *(834 training positives embedded and cached; 5 separate fold-specific centroids — see IMPLEMENTATION_STATUS.md — not 1 global centroid)*
+- [x] Generate candidate embeddings with the same layer and pooling strategy. *(24,732 eligible candidates, same frozen `common/embeddings.py` spec as the positives)*
+- [x] Compute and rank candidate-to-positive-centroid distances/similarities. *(cosine similarity, ranked separately per fold against that fold's own training-only centroid — `c3_similarity_ranking.csv`)*
+- [ ] Screen known-AOP matches against AODB, DFBP, BIOPEP-UWM, and Multi-AOP. *(**not done** — same gap as C2; Multi-AOP itself IS screened via the FR1 positive pool/conflict log, but AODB/DFBP/BIOPEP-UWM remain unintegrated, see IMPLEMENTATION_STATUS.md Known Issue #11)*
+- [x] Select the **top 2,000 eligible** hard-challenge fragments. *(reinterpreted as top-2,000 PER FOLD, not one global top-2,000, to preserve fold-safety — flagged explicitly in IMPLEMENTATION_STATUS.md; union across folds is 2,325 unique sequences)*
+- [x] Export C3 FASTA/CSV, similarity ranking, provenance, and screening manifest. *(`stage_c3_esm2_hard_challenges.fasta`, `c3_similarity_ranking.csv`, `c3_build_report.json`, `fr2_c3_provenance.jsonl`)*
 
 ## 2.4 — Pool Contamination and Leakage Audit
 - [ ] Remove within-pool duplicates for C1/C2/C3.
@@ -426,7 +427,7 @@ four items that most need a human look.
 purpose, annotated with where the evidence lives.**
 - [ ] C1 has **5,000 verified records**, with source, seed, and screening log. *(5,000 records confirmed, reproducible from seed 42, 0 remaining leakage against FR1 positives/conflicts — see Bucket 2.1 close-out, IMPLEMENTATION_STATUS.md. Still open: 260 non-standard-residue sequences unresolved, Known Issues #9.)*
 - [x] C2 has approximately **2,000 curated bioactive unlabeled** records. *(exactly 2,000, built from Peptipedia v2.0; AODB/DFBP cross-reference still outstanding, see Known Issue #11 — not blocking this count)*
-- [ ] C3 has **2,000 ESM-2-nearest unlabeled** candidates with ranked distances. *(not started; ESM-2 env/interface setup is now done (Bucket 3.2), so this is unblocked but still not begun)*
+- [x] C3 has **2,000 ESM-2-nearest unlabeled** candidates with ranked distances. *(2,000 per fold, fold-safe by construction — 2,325 unique sequences in the exported union; AODB/DFBP/BIOPEP-UWM cross-reference still outstanding, see Known Issue #11 — not blocking this count)*
 - [ ] AOP exclusion and pool overlap audits documented. *(done for C1 vs. FR1 positives; C2/C3 not started)*
 - [ ] Length, composition, and descriptor checks included. *(C1 length range confirmed 4-50 AA; composition/descriptor checks not yet done for any pool)*
 - [ ] External experimentally inactive controls remain separate and verified. *(38-sequence clean external control frozen under FR1's pp1_baseline_v1; its own homology check against positives, per Bucket 2.6, not started)*

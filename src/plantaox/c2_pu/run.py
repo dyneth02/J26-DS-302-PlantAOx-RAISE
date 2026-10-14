@@ -12,6 +12,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from plantaox.c2_pu.common.io import append_provenance_log, read_fasta, write_fasta
@@ -33,6 +34,8 @@ from plantaox.c2_pu.curation.dedup import (
 )
 from plantaox.c2_pu.curation.freeze import freeze_baseline
 from plantaox.c2_pu.curation.peptipedia import build_c2_pool, extract_c2_candidates, load_activity_names
+from plantaox.c2_pu.curation.c3 import compute_fold_centroids, rank_candidates_for_fold, select_top_n_per_fold
+from plantaox.c2_pu.curation.uniref import fetch_uniref50_candidates, UNIREF50_QUERY, UNIREF50_SORT
 from plantaox.c2_pu.curation.splits import (
     GRAPHPART_DENOMINATOR,
     GRAPHPART_IDENTITY_THRESHOLD,
@@ -44,8 +47,8 @@ from plantaox.c2_pu.curation.splits import (
     write_stratified_fasta,
 )
 from plantaox.c2_pu.curation.tiers import build_positive_pool
-from plantaox.c2_pu.common.sequence import make_peptide_id
-from plantaox.c2_pu.pools import clean_c1_alphabet, clean_c1_pool, parse_uniprot_header
+from plantaox.c2_pu.common.sequence import is_valid_peptide, make_peptide_id
+from plantaox.c2_pu.pools import apply_secondary_blocklist, clean_c1_alphabet, clean_c1_pool, parse_uniprot_header
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RAW_DIR = REPO_ROOT / "data" / "raw" / "c2_pu"
@@ -739,6 +742,216 @@ def run_esm2_smoke_test(force_cpu: bool = False) -> dict:
     return report
 
 
+# Bucket 2.3 — C3 ESM-2 hard-challenge pool, fold-safe by construction (see
+# curation/c3.py's module docstring for the full leakage rationale).
+C3_RAW_CANDIDATES_PATH = RAW_DIR / "UniRef50" / "uniref50_candidates.fasta"
+C3_RAW_PROVENANCE_PATH = RAW_DIR / "UniRef50" / "uniref50_provenance.txt"
+C3_TARGET_CANDIDATE_SIZE = 25_000
+C3_TOP_N_PER_FOLD = 2_000
+
+C3_POSITIVE_EMBEDDINGS_CACHE = INTERIM_DIR / "c3_positive_embeddings.npz"  # gitignored, regeneratable
+C3_CANDIDATE_EMBEDDINGS_CACHE = INTERIM_DIR / "c3_candidate_embeddings.npz"  # gitignored, regeneratable
+C3_EMBED_INPUT_PATH = INTERIM_DIR / "c3_embed_input.json"
+
+C3_FASTA_PATH = PROCESSED_DIR / "stage_c3_esm2_hard_challenges.fasta"  # canonical registry name
+C3_RANKING_PATH = PROCESSED_DIR / "c3_similarity_ranking.csv"
+C3_BUILD_REPORT_PATH = PROCESSED_DIR / "c3_build_report.json"
+C3_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr2_c3_provenance.jsonl"
+
+
+def run_fr2_c3_fetch_candidates(target_size: int = C3_TARGET_CANDIDATE_SIZE) -> dict:
+    """Bucket 2.3 step 1: acquire the UniRef50 candidate-fragment universe
+    via a filtered REST query (not the ~13GB bulk FASTA, same reasoning
+    already applied to C1 -- see curation/uniref.py). Writes a versioned raw
+    snapshot; this is the frozen historical-evidence file all downstream C3
+    code reads from -- it is not re-queried live on every pipeline run.
+    """
+    import datetime
+
+    (RAW_DIR / "UniRef50").mkdir(parents=True, exist_ok=True)
+    import time as _time
+
+    start = _time.time()
+    records = fetch_uniref50_candidates(target_size=target_size)
+    elapsed = _time.time() - start
+
+    write_fasta(C3_RAW_CANDIDATES_PATH, records)
+    with open(C3_RAW_PROVENANCE_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write("Stage C3 UniRef50 Candidate Universe - Provenance Log\n")
+        handle.write(f"Generated: {datetime.datetime.now().isoformat()}\n")
+        handle.write("Source: UniProt REST API /uniref/search\n")
+        handle.write(f"Query: {UNIREF50_QUERY}\n")
+        handle.write(f"Sort: {UNIREF50_SORT}\n")
+        handle.write(f"Target size: {target_size}\n")
+        handle.write(f"Actual fetched: {len(records)}\n")
+        handle.write(f"Fetch elapsed seconds: {elapsed:.1f}\n")
+
+    return {"n_fetched": len(records), "target_size": target_size, "elapsed_seconds": elapsed}
+
+
+def _embed_via_wsl(
+    peptide_ids: list[str], sequences: list[str], cache_path: Path, label: str, force_cpu: bool = False
+) -> dict[str, np.ndarray]:
+    """Shell out to esm2_cli.py (inside the WSL pu_aop env) to embed a batch
+    of sequences, caching the raw vectors at ``cache_path`` (gitignored --
+    never committed, same "don't commit large embedding arrays" rule as
+    model weights). Returns peptide_id -> float32 480-dim vector.
+    """
+    INTERIM_DIR.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "peptide_ids": peptide_ids,
+        "sequences": sequences,
+        "force_cpu": force_cpu,
+        "validate_alphabet": True,
+        "batch_size": 64,
+        "save_embeddings_path": to_wsl_path(cache_path),
+    }
+    with open(C3_EMBED_INPUT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(payload, handle, indent=2)
+
+    summary_report_path = INTERIM_DIR / f"c3_embed_{label}_report.json"
+    result = run_in_conda_env(
+        [
+            "python",
+            to_wsl_path(ESM2_CLI_SCRIPT_PATH),
+            to_wsl_path(C3_EMBED_INPUT_PATH),
+            to_wsl_path(summary_report_path),
+        ],
+        timeout=1800,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"ESM-2 embedding of {label} failed (exit {result.returncode}):\n{result.stdout}\n{result.stderr}")
+    if not cache_path.exists():
+        raise RuntimeError(f"esm2_cli.py reported success but no embedding cache was written for {label}:\n{result.stdout}")
+
+    with np.load(cache_path, allow_pickle=False) as npz:
+        ids = npz["peptide_ids"]
+        matrix = npz["embeddings"]
+    return {pid: matrix[i] for i, pid in enumerate(ids)}
+
+
+def run_fr2_c3_build(force_cpu: bool = False) -> dict:
+    """Bucket 2.3 step 2: fold-safe ESM-2 hard-challenge selection.
+
+    For each of GraphPart's 5 training folds, fits a positive-pool centroid
+    using ONLY that fold's training partition (the other 4 folds' 834
+    frozen positives -- see curation/c3.py's docstring for why this must
+    never include the held-out fold's own positives), ranks the shared
+    UniRef50 candidate universe by cosine similarity to that fold-specific
+    centroid, and selects each fold's own top-2,000 hardest candidates.
+    The exported FASTA is the union of all 5 folds' selections (deduplicated
+    by sequence); ``c3_similarity_ranking.csv`` records per-fold membership
+    and rank/similarity explicitly, so a downstream consumer training on
+    fold k can (and must) filter to that fold's own rows only -- using a
+    different fold's selection would silently reintroduce the exact
+    selection-leakage this construction exists to prevent.
+
+    Known, explicitly-flagged gap (not done in this pass): the Planner's
+    "screen known-AOP matches against AODB, DFBP, BIOPEP-UWM" item. Only
+    Multi-AOP/AnOxPePred-derived FR1 positives + 179 conflicts are screened
+    (same exact-sequence leakage check used for C1/C2); AODB/DFBP/BIOPEP-UWM
+    remain unintegrated project-wide (see IMPLEMENTATION_STATUS.md).
+    """
+    if not C3_RAW_CANDIDATES_PATH.exists():
+        raise FileNotFoundError(f"{C3_RAW_CANDIDATES_PATH} not found -- run fr2-c3-fetch-candidates first.")
+    if not GRAPHPART_SPLITS_PATH.exists():
+        raise FileNotFoundError(f"{GRAPHPART_SPLITS_PATH} not found -- run fr1-split first.")
+    if not POSITIVE_POOL_CDHIT_PATH.exists():
+        raise FileNotFoundError(f"{POSITIVE_POOL_CDHIT_PATH} not found -- run fr1-cluster first.")
+
+    splits_df = pd.read_csv(GRAPHPART_SPLITS_PATH)
+    positives_df = pd.read_parquet(POSITIVE_POOL_CDHIT_PATH)
+    training_df = splits_df.merge(positives_df, left_on="AC", right_on="peptide_id", how="inner")
+    if len(training_df) != len(splits_df):
+        raise RuntimeError("Some GraphPart-split peptide IDs are missing a sequence in the CD-HIT pool.")
+    fold_of = dict(zip(training_df["peptide_id"], training_df["cluster"].astype(int)))
+    n_folds = int(training_df["cluster"].max()) + 1
+
+    raw_candidates = read_fasta(C3_RAW_CANDIDATES_PATH)
+    positive_df_full = pd.read_parquet(POSITIVE_POOL_PATH)
+    conflict_df = pd.read_csv(CONFLICT_LOG_PATH)
+    c1_seqs = {s for _, s in read_fasta(C1_CLEAN_FASTA_V2_PATH)} if C1_CLEAN_FASTA_V2_PATH.exists() else set()
+    c2_seqs = {s for _, s in read_fasta(C2_FASTA_PATH)} if C2_FASTA_PATH.exists() else set()
+    screen_sequences = (
+        set(positive_df_full["sequence"]) | set(conflict_df["sequence"]) | c1_seqs | c2_seqs
+    )
+
+    kept_candidates, _ = apply_secondary_blocklist(raw_candidates)
+    seen_seqs: set[str] = set()
+    candidate_records: list[tuple[str, str]] = []
+    for header, sequence in kept_candidates:
+        if sequence in screen_sequences or sequence in seen_seqs:
+            continue
+        if not is_valid_peptide(sequence, min_len=3, max_len=50):
+            continue
+        seen_seqs.add(sequence)
+        candidate_records.append((header, sequence))
+
+    candidate_id_map = {make_peptide_id(seq, prefix="C3"): seq for _, seq in candidate_records}
+
+    positive_embeddings = _embed_via_wsl(
+        training_df["peptide_id"].tolist(), training_df["sequence"].tolist(),
+        C3_POSITIVE_EMBEDDINGS_CACHE, label="positives", force_cpu=force_cpu,
+    )
+    candidate_embeddings = _embed_via_wsl(
+        list(candidate_id_map.keys()), list(candidate_id_map.values()),
+        C3_CANDIDATE_EMBEDDINGS_CACHE, label="candidates", force_cpu=force_cpu,
+    )
+
+    centroids = compute_fold_centroids(positive_embeddings, fold_of, n_folds=n_folds)
+    rankings = [rank_candidates_for_fold(candidate_embeddings, centroids[k], fold_id=k) for k in range(n_folds)]
+    selections = select_top_n_per_fold(rankings, n=C3_TOP_N_PER_FOLD)
+
+    ranking_rows = [
+        {"fold_id": fold_id, "peptide_id": pid, "sequence": candidate_id_map[pid], "rank": rank, "cosine_similarity": sim}
+        for fold_id, rows in selections.items()
+        for pid, sim, rank in rows
+    ]
+    ranking_df = pd.DataFrame(ranking_rows)
+    ranking_df.to_csv(C3_RANKING_PATH, index=False, lineterminator="\n")
+
+    union_pids = sorted({row["peptide_id"] for row in ranking_rows})
+    seen_union_seqs: set[str] = set()
+    fasta_records = []
+    for pid in union_pids:
+        seq = candidate_id_map[pid]
+        if seq not in seen_union_seqs:
+            seen_union_seqs.add(seq)
+            fasta_records.append((pid, seq))
+    write_fasta(C3_FASTA_PATH, fasta_records)
+
+    summary = {
+        "n_candidate_universe_raw": len(raw_candidates),
+        "n_candidate_universe_eligible": len(candidate_records),
+        "n_folds": n_folds,
+        "n_training_positives": len(positive_embeddings),
+        "top_n_per_fold": C3_TOP_N_PER_FOLD,
+        "n_union_records": len(fasta_records),
+        "per_fold_n_selected": {k: len(v) for k, v in selections.items()},
+        "screen_set_size": len(screen_sequences),
+        "aodb_dfbp_biopep_screen": "NOT DONE -- AODB/DFBP/BIOPEP-UWM remain unintegrated project-wide; "
+        "see IMPLEMENTATION_STATUS.md Known Issues.",
+    }
+    with open(C3_BUILD_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2)
+
+    append_provenance_log(
+        C3_PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr2_c3_hard_challenge_build",
+            "raw_candidates": str(C3_RAW_CANDIDATES_PATH),
+            "screen_sources": [str(POSITIVE_POOL_PATH), str(CONFLICT_LOG_PATH), str(C1_CLEAN_FASTA_V2_PATH), str(C2_FASTA_PATH)],
+            "summary": summary,
+            "outputs": {
+                "clean_fasta": str(C3_FASTA_PATH),
+                "ranking": str(C3_RANKING_PATH),
+                "report": str(C3_BUILD_REPORT_PATH),
+            },
+        },
+    )
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -752,6 +965,8 @@ def main(argv: list[str] | None = None) -> int:
         help="Enforce standard-20-AA-alphabet policy on C1, versioned as v2 (Bucket 2.1 follow-up)",
     )
     sub.add_parser("fr2-c2-build", help="Build the C2 bioactive-unlabeled pool from Peptipedia (Bucket 2.2)")
+    sub.add_parser("fr2-c3-fetch-candidates", help="Fetch the UniRef50 candidate universe (Bucket 2.3 step 1)")
+    sub.add_parser("fr2-c3-build", help="Fold-safe ESM-2 hard-challenge selection (Bucket 2.3 step 2)")
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     args = parser.parse_args(argv)
 
@@ -781,6 +996,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr2-c2-build":
         summary = run_fr2_c2_build()
+        print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-c3-fetch-candidates":
+        summary = run_fr2_c3_fetch_candidates()
+        print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-c3-build":
+        summary = run_fr2_c3_build()
         print(json.dumps(summary, indent=2))
         return 0
     if args.stage == "esm2-smoketest":

@@ -231,3 +231,19 @@ needleall.error
 # in c2_build_report.json and fr2_c2_provenance.jsonl so anyone can
 # re-download the byte-identical file and reproduce C2 deterministically.
 data/raw/c2_pu/Peptipedia/*.sql.gz
+
+# Bucket 2.3 (C3) ESM-2 embedding caches -- raw vectors for ~26k sequences,
+# same "don't commit large embedding arrays" rule as model weights. Fully
+# regeneratable from stage_c3's cached raw inputs + the frozen embedding
+# spec (common/embeddings.py); SHA-256/shape recorded in c3_build_report.json
+# and fr2_c3_provenance.jsonl instead.
+data/interim/c2_pu/c3_positive_embeddings.npz
+data/interim/c2_pu/c3_candidate_embeddings.npz
+
+# Scratch I/O for the WSL esm2_cli.py subprocess call above -- overwritten
+# every run, and the candidates variant balloons to several MB of
+# per-peptide scalar fingerprints with no information not already captured
+# (more usefully) in c3_build_report.json and fr2_c3_provenance.jsonl.
+data/interim/c2_pu/c3_embed_input.json
+data/interim/c2_pu/c3_embed_positives_report.json
+data/interim/c2_pu/c3_embed_candidates_report.json

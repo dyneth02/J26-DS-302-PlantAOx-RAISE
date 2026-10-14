@@ -181,6 +181,70 @@
   skip cleanly when the (gitignored) raw dump or built pool isn't present locally. Full suite: 100
   passed, 1 skipped (torch).
 
+### Bucket 2, Task 2.3 — C3 ESM-2 Hard-Challenge Pool (fold-safe construction)
+- **Status: core pool built and acceptance-tested; AODB/DFBP/BIOPEP-UWM screen explicitly not done
+  (same gap as C2).** 2,325 unique hard-challenge sequences (the deduplicated union of 5 fold-specific
+  top-2,000 selections), standard alphabet, 3–50 AA, zero exact-sequence overlap with FR1's 1,205
+  positives, the 179 conflicts, C1, or C2.
+- **Fold-safety is the methodological core of this task, confirmed explicitly with the project owner
+  before implementation began.** A naive single global centroid (mean of all 834 training positives)
+  would let fold *k*'s own held-out positives influence which candidates get selected as fold *k*'s
+  "hard challenges" — a selection-leakage channel that survives even when no C3 sequence exactly or
+  near-exactly matches a held-out positive, because the *choice* of which candidates look hard was
+  itself informed by the thing being held out. Fixed by computing **5 separate centroids**
+  (`curation/c3.py::compute_fold_centroids`), each the mean of only the 4 *other* training folds'
+  positives, and ranking/selecting the shared candidate universe separately per fold. Verified
+  empirically on the real cached embeddings (not just the synthetic unit tests): fold 0's centroid
+  used exactly 710 of 834 positives (excluding fold 0's own 124), matched `compute_fold_centroids`'s
+  output exactly, and differs measurably (cosine distance ≈4.15e-05 — small in magnitude here, but a
+  real, non-zero leakage channel that the fold-safe design eliminates by construction rather than by
+  hoping it's negligible) from the naive all-positives centroid.
+- **Candidate universe: UniRef50 via UniProt's REST API**, not the ~13GB bulk FASTA (same reasoning
+  already rejected for C1 — see `PU_AOP_RESEARCH_CONTEXT.md` §4). Query `identity:0.5 AND length:[3 TO
+  50]`, sorted `id asc` for deterministic pagination, paginated via UniProt's cursor-based `Link`
+  header. 25,000 candidates fetched (confirmed via `X-Total-Results`: 870,941 total clusters exist in
+  this length window, so 25,000 is a bounded, documented sample, not the full space). **UniRef50's
+  search index has no `keyword:` field** (confirmed empirically — the API returns "'keyword' is not a
+  valid search field" for this endpoint) — unlike C1's UniProtKB query, so the bioactivity exclusion
+  relies entirely on the secondary free-text blocklist already used for C1/C3, applied to UniRef
+  cluster names. Expected to catch fewer matches here (most UniRef50 representatives are
+  unreviewed/generically-named TrEMBL entries), not a bug.
+- **Network resilience, learned from this session's own failures:** the first fetch attempt hit an SSL
+  handshake timeout partway through pagination (this connection has now truncated two different
+  large downloads this session — see Bucket 2.2's Zenodo dump). Added retry/backoff
+  (`curation/uniref.py::fetch_uniref50_page`) before re-running rather than hoping it wouldn't
+  recur; the retried fetch completed successfully (214s, absorbing at least one transient failure).
+- **Embedding architecture reuses Bucket 3.2's WSL-subprocess pattern, extended (not replaced) to
+  cache raw vectors.** `esm2_cli.py` gained an optional `save_embeddings_path` field (unused by the
+  existing smoke test, which still writes summary-only output) that writes a compressed `.npz` of the
+  raw embedding matrix — needed here because centroid construction and ranking genuinely require the
+  vectors, not just summary statistics. These caches
+  (`data/interim/c2_pu/c3_{positive,candidate}_embeddings.npz`) are gitignored, same "don't commit
+  large embedding arrays" rule as model weights; shapes/counts are recorded in `c3_build_report.json`
+  instead.
+- **A real bug caught by code review before it ran:** `run_fr2_c3_build(force_cpu=...)` initially
+  accepted the parameter but never passed it through to the embedding helper, which hardcoded
+  `force_cpu=False` — silently making the parameter a no-op. Fixed before the first real run, not
+  after.
+- **Export design reinterprets the Planner's "export C3 FASTA/CSV" as fold-aware, not a single
+  unlabeled pool** — flagging this explicitly as a deliberate reinterpretation, not a silent
+  deviation: `stage_c3_esm2_hard_challenges.fasta` is the deduplicated union of all 5 folds'
+  selections (2,325 records from 5×2,000=10,000 selection-rows — substantial overlap across folds,
+  expected since removing 1/5 of 834 positives barely moves an 834-point mean), while
+  `c3_similarity_ranking.csv` records every (fold, peptide, rank, cosine similarity) row explicitly.
+  **Any future FR3/FR4/FR6 training code must filter this ranking file to its own fold's rows before
+  using C3 as that fold's hard-challenge set** — using a different fold's selection, or the union
+  FASTA without the per-fold filter, would silently reintroduce the exact leakage this construction
+  exists to prevent. Flagging this contract clearly here since it's easy to get wrong later.
+- **Tests:** 11 unit tests (`test_c3.py` for fold-centroid/ranking logic including the fold-exclusion
+  property itself; `test_uniref.py` for the paginated fetch against a mocked API) plus 7 full-file
+  acceptance tests (`test_fr2_c3_build_acceptance.py`, including byte-identical reproducibility and a
+  per-fold rank/sort-order check), all gated to skip cleanly when the (gitignored) raw candidates or
+  built pool aren't present locally.
+- **Known gap, explicitly not done:** same as C2 — the Planner's "screen against AODB, DFBP,
+  BIOPEP-UWM" item. Only the FR1 positive pool, 179 conflicts, C1, and C2 are screened for exact-
+  sequence overlap (Known Issue #11, now also covering C3).
+
 ### Bucket 3, Task 3.2 — ESM-2 Environment Setup and Smoke Test
 - **Status: environment configured, interface built and tested, smoke test passing.** This is
   explicitly NOT full feature generation — embedding the full positive pool and C1/C2/C3 (Bucket
@@ -289,11 +353,19 @@ tasks below.)*
     construction (`build_c2_pool`), not as a post-hoc patch. **C3 does not exist yet** (Task 2.3) — when
     built, its curation code must apply `is_standard_alphabet()` the same way. `embed_sequences()`'s
     `AmbiguousResidueError` default remains the structural backstop against ever skipping this silently.
-11. **C2 is not cross-referenced against AODB or DFBP** (Planner Bucket 2.2 checklist item). Peptipedia
-    v2.0 integrates 76 named source databases, confirmed by direct inspection of its `source` table —
-    neither AODB nor DFBP is among them. C2's only antioxidant screen is Peptipedia's own internal
-    "Anti oxidative" activity tag plus the FR1 positive-pool/conflict exact-sequence screen. Acquiring
-    and cross-referencing AODB/DFBP specifically is unstarted, separate follow-up work.
+11. **C2 and C3 are not cross-referenced against AODB, DFBP, or BIOPEP-UWM** (Planner Bucket 2.2/2.3
+    checklist items). Peptipedia v2.0 integrates 76 named source databases, confirmed by direct
+    inspection of its `source` table — neither AODB nor DFBP is among them. C2's only antioxidant
+    screen is Peptipedia's own internal "Anti oxidative" activity tag; C3's only screen is exact-
+    sequence overlap against FR1 positives/179 conflicts/C1/C2. Acquiring and cross-referencing
+    AODB/DFBP/BIOPEP-UWM specifically is unstarted, separate follow-up work for both pools.
+12. **C3's fold-specific selections overlap heavily (2,325 unique sequences from 5×2,000=10,000
+    selection-rows)**, because removing 1/5 of 834 training positives barely shifts the centroid
+    (empirically measured cosine distance ≈4e-5 between a fold-safe and the naive all-positives
+    centroid). This is expected given the pool's size, not a bug — but it does mean the fold-safe
+    design's practical effect on final C3 membership is small even though the leakage channel it
+    closes is real and structural. Worth noting in the FR2/FR6 report as a measured effect size, not
+    just a methodological footnote.
 
 ## ⏭️ Next tasks (in order)
 
@@ -312,15 +384,20 @@ tasks below.)*
    `stage_c1_decoys_v2.fasta` directly with `embed_sequences(..., validate_alphabet=True)` (the
    default) and expect zero `AmbiguousResidueError`s from C1. Not yet attempted — still separate,
    deliberately out-of-scope work.
-4. **Task 2.2 (C2) core pool is built** — see Completed tasks above. Remaining: acquire and
-   cross-reference AODB/DFBP specifically (Known Issue #11), low/medium priority depending on how much
-   the PP1 report leans on that specific checklist line versus the broader antioxidant-exclusion
-   argument already satisfied.
-5. **Task 2.3 (C3 — ESM-2 hard challenges)** can start any time; not blocked on anything above. Must
-   apply the standard-alphabet filter at initial curation (Known Issue #10), not as a later patch.
-6. **Bucket 3.1 (15 physicochemical descriptors)** can also start any time in parallel with C3 —
-   not blocked on the ESM-2 work.
-7. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
+4. **Task 2.2 (C2) and Task 2.3 (C3) core pools are both built** — see Completed tasks above.
+   Remaining for both: acquire and cross-reference AODB/DFBP/BIOPEP-UWM specifically (Known Issue
+   #11), low/medium priority depending on how much the PP1 report leans on that specific checklist
+   line versus the broader antioxidant-exclusion/leakage-screen arguments already satisfied.
+5. **Bucket 2.4 (Pool Contamination and Leakage Audit)** can start any time — C1/C2/C3 already screen
+   pairwise against each other and against FR1 positives/conflicts at construction time, so this
+   bucket is now mostly a formal verification pass over already-disjoint pools, not a fix pass.
+6. **Bucket 3.1 (15 physicochemical descriptors)** can start any time in parallel — not blocked on
+   anything above.
+7. **FR3/FR4 training code consuming C3 must filter `c3_similarity_ranking.csv` to its own fold's
+   rows** before using it as that fold's hard-challenge set (see Task 2.3 above) — flagging this
+   contract here since it's the single easiest way to silently reintroduce C3's selection-leakage
+   risk later.
+8. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
 
 ## 📝 Experiment decisions log
 
@@ -360,5 +437,11 @@ tasks below.)*
 | 2026-10-14 | C2 excludes any peptide carrying Peptipedia's antioxidant activity tag (id 41, "Anti oxidative") regardless of whether that tag itself is predicted or experimentally reported | Mirrors C1's conservative leakage rule: a tag that might indicate real antioxidant activity is excluded outright rather than risk including a true positive in the "unlabeled, assumed non-antioxidant" pool, which would be a correctness violation of AGENTS.md rule 1, not just noise. |
 | 2026-10-14 | C2's 2,000-record sample was drawn entirely from Peptipedia peptides with at least one *experimentally-reported* (non-predicted) non-antioxidant activity tag, not the much larger ML-predicted-only tier | Mirrors the project's existing E1>E2 evidence-tier precedence (real/primary evidence preferred over inferred). The experimental tier (66,506 eligible) comfortably supplied the full 2,000 without needing to fall back to the 2.66M predicted-only tier; documented as a deliberate tier choice, not a default. |
 | 2026-10-14 | C2 is not yet cross-referenced against AODB or DFBP specifically (Planner Bucket 2.2 checklist item left open) | Peptipedia integrates 76 named source databases (confirmed by inspecting its `source` table directly) and neither AODB nor DFBP is among them. Acquiring and cross-checking those two resources is separate, unstarted follow-up work -- flagged rather than silently treated as covered by Peptipedia's internal antioxidant tag alone. |
+
+| 2026-10-14 | C3 candidate-to-positive-centroid ranking uses 5 separate fold-specific centroids (one per GraphPart training fold, each excluding that fold's own held-out positives), not one global centroid over all 834 positives | Explicit project-owner instruction, confirmed before implementation: a global centroid would let a fold's own held-out positives influence which candidates get selected as that fold's "hard challenges," a selection-leakage channel distinct from ordinary sequence-identity leakage (survives even with zero exact/near-exact sequence overlap). Verified empirically on the real cached embeddings that the fold-safe and naive centroids measurably differ (cosine distance ≈4e-5), confirming the leakage channel is real, not merely theoretical. |
+| 2026-10-14 | C3's exported FASTA is the deduplicated union of 5 independent fold-specific top-2,000 selections, with per-fold membership/rank/similarity recorded in a separate `c3_similarity_ranking.csv`, rather than a single unlabeled top-2,000 pool | Direct consequence of the fold-safety requirement above -- a single global "top 2,000" would have to be ranked by some single centroid, reintroducing the leakage the fold-specific design exists to prevent. Reinterprets the Planner's literal "select the top 2,000" wording as "top 2,000 per fold," flagged explicitly rather than silently narrowed. Downstream FR3/FR4/FR6 code must filter to its own fold's rows. |
+| 2026-10-14 | C3's candidate universe is a 25,000-sequence UniRef50 REST query snapshot (`identity:0.5 AND length:[3 TO 50]`, sorted `id asc`), not UniRef50's ~13GB bulk FASTA or the full 870,941-cluster result set | Same reasoning already applied to C1 (AGENTS.md rule 6) -- a filtered, paginated REST query avoids an unnecessary multi-gigabyte download. 25,000 is a documented, bounded sample sufficient to supply 5×2,000 fold-specific selections (24,732 survived alphabet/length/blocklist/screen filtering) without needing the full space. |
+| 2026-10-14 | `esm2_cli.py` gained an optional `save_embeddings_path` field that writes raw embedding vectors to a gitignored `.npz` cache, used only by C3 -- the existing smoke-test call path is unchanged (still summary-only) | C3's centroid/ranking logic genuinely needs the vectors themselves, unlike the smoke test which only needed to confirm shape/finiteness/determinism. Keeping it an opt-in field (rather than always saving vectors) preserves Bucket 3.2's explicit "never commit large embedding arrays" guarantee for the default path. |
+| 2026-10-14 | The UniRef50 fetch and the full embed-and-select C3 build both needed a mid-run retry after a transient network failure (SSL handshake timeout; this is the second large download this session to hit this connection's instability, after Bucket 2.2's Zenodo dump) | Added explicit retry/backoff to `curation/uniref.py::fetch_uniref50_page` (5 attempts, exponential backoff) before re-running, rather than re-attempting the exact same fragile call and hoping. Both the candidate fetch and the embedding build subsequently completed successfully. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

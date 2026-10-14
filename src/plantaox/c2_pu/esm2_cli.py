@@ -8,10 +8,18 @@ Usage (from inside the pu_aop env):
     python esm2_cli.py <input.json> <output.json>
 
 input.json: {"peptide_ids": [...], "sequences": [...], "force_cpu": bool,
-             "validate_alphabet": bool, "batch_size": int}
+             "validate_alphabet": bool, "batch_size": int,
+             "save_embeddings_path": <optional str>}
 output.json: a SUMMARY report only (shape/dtype/finiteness/norm per
-peptide) -- raw embedding vectors are never written here, so nothing from
-this script risks committing large embedding arrays to git.
+peptide) -- raw embedding vectors are never written there, so nothing from
+this script risks committing large embedding arrays to git via output.json.
+
+If ``save_embeddings_path`` is given, the raw embedding matrix is ALSO
+written there as a compressed ``.npz`` (``peptide_ids``, ``embeddings``) for
+callers that genuinely need the vectors (e.g. Bucket 2.3's C3 fold-safe
+centroid construction) -- that path must itself be gitignored by the
+caller (see IMPLEMENTATION_STATUS.md: embedding caches are a reproducible,
+regeneratable local artifact, same as model weights, never committed).
 """
 
 from __future__ import annotations
@@ -44,6 +52,12 @@ def main(argv: list[str]) -> int:
         validate_alphabet=payload.get("validate_alphabet", True),
     )
     elapsed = time.perf_counter() - start
+
+    save_embeddings_path = payload.get("save_embeddings_path")
+    if save_embeddings_path:
+        ordered_ids = list(embeddings.keys())
+        matrix = np.stack([embeddings[pid] for pid in ordered_ids])
+        np.savez_compressed(save_embeddings_path, peptide_ids=np.array(ordered_ids), embeddings=matrix)
 
     report = {
         "model_name": "esm2_t12_35M_UR50D",
