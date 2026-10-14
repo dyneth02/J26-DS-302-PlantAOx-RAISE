@@ -7,12 +7,15 @@ methodological crux here and gets its own dedicated test.
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from plantaox.c2_pu.curation.c3 import (
     compute_fold_centroids,
+    load_fold_challenges,
     rank_candidates_for_fold,
     select_top_n_per_fold,
+    validate_c3_fold_contract,
 )
 
 
@@ -88,3 +91,93 @@ def test_different_folds_produce_different_rankings_when_centroids_differ():
     ranking_fold0 = rank_candidates_for_fold(candidates, centroids[0], fold_id=0)
     ranking_fold1 = rank_candidates_for_fold(candidates, centroids[1], fold_id=1)
     assert ranking_fold0.peptide_ids != ranking_fold1.peptide_ids
+
+
+def _write_ranking_csv(path, rows):
+    pd.DataFrame(rows, columns=["fold_id", "peptide_id", "sequence", "rank", "cosine_similarity"]).to_csv(
+        path, index=False
+    )
+
+
+def test_load_fold_challenges_returns_only_that_folds_rows_sorted_by_rank(tmp_path):
+    ranking_path = tmp_path / "ranking.csv"
+    _write_ranking_csv(
+        ranking_path,
+        [
+            (0, "p2", "AAA", 2, 0.5),
+            (0, "p1", "BBB", 1, 0.9),
+            (1, "p3", "CCC", 1, 0.8),
+        ],
+    )
+    fold0 = load_fold_challenges(ranking_path, fold_id=0)
+    assert list(fold0["peptide_id"]) == ["p1", "p2"]  # sorted by rank, not file order
+    assert set(fold0["fold_id"]) == {0}
+
+    fold1 = load_fold_challenges(ranking_path, fold_id=1)
+    assert list(fold1["peptide_id"]) == ["p3"]
+
+
+def test_load_fold_challenges_raises_on_unknown_fold_rather_than_returning_empty(tmp_path):
+    ranking_path = tmp_path / "ranking.csv"
+    _write_ranking_csv(ranking_path, [(0, "p1", "AAA", 1, 0.9)])
+    with pytest.raises(ValueError, match="fold_id=99"):
+        load_fold_challenges(ranking_path, fold_id=99)
+
+
+def test_there_is_no_function_in_this_module_that_returns_all_folds_at_once():
+    # Structural guard against the exact misuse Step 5 warns about: a
+    # future helper that "conveniently" loads the whole union as one
+    # fold's challenge set. If someone adds one, this test forces them to
+    # consciously name it something that can't be mistaken for
+    # load_fold_challenges and to update this test, rather than silently
+    # letting a leakage-reintroducing shortcut slip in.
+    import plantaox.c2_pu.curation.c3 as c3_module
+
+    public_names = [n for n in dir(c3_module) if not n.startswith("_")]
+    suspicious = [n for n in public_names if "all_fold" in n.lower() or "union" in n.lower()]
+    assert suspicious == []
+
+
+def _valid_fixture(n_folds=3, top_n=2):
+    embeddings = {f"p{i}": np.array([float(i), float(i) * 2]) for i in range(9)}
+    fold_of = {f"p{i}": i % n_folds for i in range(9)}
+    ranking_rows = []
+    fasta_ids = set()
+    for fold_id in range(n_folds):
+        for rank in range(1, top_n + 1):
+            pid = f"cand_{fold_id}_{rank}"
+            ranking_rows.append({"fold_id": fold_id, "peptide_id": pid, "rank": rank, "cosine_similarity": 1.0 / rank})
+            fasta_ids.add(pid)
+    return embeddings, fold_of, pd.DataFrame(ranking_rows), fasta_ids
+
+
+def test_validate_c3_fold_contract_passes_on_a_well_formed_build():
+    embeddings, fold_of, ranking_df, fasta_ids = _valid_fixture()
+    result = validate_c3_fold_contract(embeddings, fold_of, ranking_df, fasta_ids, top_n_per_fold=2)
+    assert result["fold_safety_verified"] is True
+    assert result["n_folds"] == 3
+
+
+def test_validate_c3_fold_contract_catches_wrong_row_count_per_fold():
+    embeddings, fold_of, ranking_df, fasta_ids = _valid_fixture()
+    ranking_df = ranking_df[~((ranking_df["fold_id"] == 0) & (ranking_df["rank"] == 2))]
+    with pytest.raises(AssertionError, match="expected 2"):
+        validate_c3_fold_contract(embeddings, fold_of, ranking_df, fasta_ids, top_n_per_fold=2)
+
+
+def test_validate_c3_fold_contract_catches_fasta_ranking_mismatch():
+    embeddings, fold_of, ranking_df, fasta_ids = _valid_fixture()
+    fasta_ids = fasta_ids | {"phantom_sequence_not_in_ranking"}
+    with pytest.raises(AssertionError, match="do not exactly match"):
+        validate_c3_fold_contract(embeddings, fold_of, ranking_df, fasta_ids, top_n_per_fold=2)
+
+
+def test_validate_c3_fold_contract_catches_duplicate_ranks():
+    embeddings, fold_of, ranking_df, fasta_ids = _valid_fixture(top_n=3)
+    # Fold 0's 3 rows get ranks [1, 1, 3] -- still spans 1..3 (so the
+    # contiguity check alone wouldn't catch it), but rank 1 is duplicated
+    # and rank 2 is missing.
+    fold0_idx = ranking_df[ranking_df["fold_id"] == 0].index
+    ranking_df.loc[fold0_idx, "rank"] = [1, 1, 3]
+    with pytest.raises(AssertionError, match="duplicate ranks"):
+        validate_c3_fold_contract(embeddings, fold_of, ranking_df, fasta_ids, top_n_per_fold=3)

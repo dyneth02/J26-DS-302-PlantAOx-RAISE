@@ -34,7 +34,20 @@ from plantaox.c2_pu.curation.dedup import (
 )
 from plantaox.c2_pu.curation.freeze import freeze_baseline
 from plantaox.c2_pu.curation.peptipedia import build_c2_pool, extract_c2_candidates, load_activity_names
-from plantaox.c2_pu.curation.c3 import compute_fold_centroids, rank_candidates_for_fold, select_top_n_per_fold
+from plantaox.c2_pu.curation.c3 import (
+    compute_fold_centroids,
+    rank_candidates_for_fold,
+    select_top_n_per_fold,
+    validate_c3_fold_contract,
+)
+from plantaox.c2_pu.curation.audit import (
+    cross_pool_homology_clusters,
+    external_reference_screen,
+    overlap_detail,
+    pairwise_exact_overlap,
+    sequence_integrity_report,
+)
+from plantaox.c2_pu.curation.biopep import BIOPEP_CITATION, BIOPEP_SEARCH_URL, fetch_biopep_by_activity
 from plantaox.c2_pu.curation.uniref import fetch_uniref50_candidates, UNIREF50_QUERY, UNIREF50_SORT
 from plantaox.c2_pu.curation.splits import (
     GRAPHPART_DENOMINATOR,
@@ -952,6 +965,234 @@ def run_fr2_c3_build(force_cpu: bool = False) -> dict:
     return summary
 
 
+# Bucket 2.4 -- Pool Contamination and Leakage Audit.
+BIOPEP_RAW_PATH = RAW_DIR / "BIOPEP-UWM" / "biopep_antioxidative.json"
+BIOPEP_RAW_PROVENANCE_PATH = RAW_DIR / "BIOPEP-UWM" / "biopep_provenance.txt"
+
+AUDIT_INTEGRITY_REPORT_PATH = PROCESSED_DIR / "audit_integrity_report.json"
+AUDIT_OVERLAP_MATRIX_PATH = PROCESSED_DIR / "audit_exact_overlap_matrix.csv"
+AUDIT_OVERLAP_DETAIL_PATH = PROCESSED_DIR / "audit_exact_overlap_detail.csv"
+AUDIT_EXTERNAL_SCREEN_PATH = PROCESSED_DIR / "audit_external_aop_screen.json"
+AUDIT_HOMOLOGY_CLUSTERS_PATH = PROCESSED_DIR / "audit_cross_pool_homology_clusters.csv"
+AUDIT_HOMOLOGY_SUMMARY_PATH = PROCESSED_DIR / "audit_cross_pool_homology_summary.json"
+AUDIT_C3_CONTRACT_REPORT_PATH = PROCESSED_DIR / "audit_c3_fold_contract_report.json"
+AUDIT_REPORT_PATH = PROCESSED_DIR / "fr2_pool_audit_report.json"
+AUDIT_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr2_pool_audit_provenance.jsonl"
+AUDIT_CDHIT_OUTPUT_PREFIX = INTERIM_DIR / "audit_combined_pools_cdhit90"
+
+
+def run_fr2_pool_audit() -> dict:
+    """Bucket 2.4: formal, re-runnable contamination/leakage audit across
+    FR1's positives, the 179 conflicts, and C1/C2/C3. Read-only with
+    respect to every existing accepted artifact -- this stage never
+    modifies pp1_baseline_v1 or any accepted C1/C2/C3 file; it only
+    reports. See IMPLEMENTATION_STATUS.md for the full account of every
+    finding and which ones are pending the project owner's decision.
+    """
+    if not POSITIVE_POOL_PATH.exists():
+        raise FileNotFoundError(f"{POSITIVE_POOL_PATH} not found -- run fr1-positives first.")
+    for p in (C1_CLEAN_FASTA_V2_PATH, C2_FASTA_PATH, C3_FASTA_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- build C1/C2/C3 first.")
+
+    positive_df = pd.read_parquet(POSITIVE_POOL_PATH)
+    conflict_df = pd.read_csv(CONFLICT_LOG_PATH)
+    external_control_df = pd.read_csv(PROCESSED_DIR / "anoxpepred_inactives_clean.csv")
+    pos_records = list(zip(positive_df["peptide_id"], positive_df["sequence"]))
+    conf_records = list(zip(conflict_df["peptide_id"], conflict_df["sequence"]))
+    ext_records = list(zip(external_control_df["peptide_id"], external_control_df["sequence"]))
+    c1_records = read_fasta(C1_CLEAN_FASTA_V2_PATH)
+    c2_records = read_fasta(C2_FASTA_PATH)
+    c3_records = read_fasta(C3_FASTA_PATH)
+
+    pool_records = {
+        "FR1_positives": pos_records,
+        "conflicts_179": conf_records,
+        "external_control": ext_records,
+        "C1_v2": c1_records,
+        "C2": c2_records,
+        "C3_union": c3_records,
+    }
+    pool_seqs = {name: {s for _, s in recs} for name, recs in pool_records.items()}
+
+    # --- Step 2: full sequence-integrity audit ---
+    integrity_reports = [sequence_integrity_report(name, recs) for name, recs in pool_records.items()]
+    with open(AUDIT_INTEGRITY_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(integrity_reports, handle, indent=2)
+
+    overlap_matrix = pairwise_exact_overlap(pool_seqs)
+    overlap_matrix.to_csv(AUDIT_OVERLAP_MATRIX_PATH, lineterminator="\n")
+
+    names = list(pool_seqs.keys())
+    detail_rows = []
+    for i, a in enumerate(names):
+        for b in names[i + 1 :]:
+            shared = overlap_detail(pool_seqs, a, b)
+            for seq in shared:
+                detail_rows.append({"pool_a": a, "pool_b": b, "sequence": seq, "length": len(seq)})
+    pd.DataFrame(detail_rows).to_csv(AUDIT_OVERLAP_DETAIL_PATH, index=False, lineterminator="\n")
+
+    # --- Step 3: external known-AOP screening ---
+    RAW_DIR.joinpath("BIOPEP-UWM").mkdir(parents=True, exist_ok=True)
+    if BIOPEP_RAW_PATH.exists():
+        with open(BIOPEP_RAW_PATH, encoding="utf-8") as handle:
+            biopep_records = json.load(handle)
+    else:
+        biopep_records = fetch_biopep_by_activity("antioxidative")
+        with open(BIOPEP_RAW_PATH, "w", encoding="utf-8", newline="\n") as handle:
+            json.dump(biopep_records, handle, indent=2)
+        with open(BIOPEP_RAW_PROVENANCE_PATH, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write("BIOPEP-UWM Antioxidative Reference Set - Provenance Log\n")
+            handle.write(f"Source: {BIOPEP_SEARCH_URL}?txt_search=antioxidative&menu_search=activity\n")
+            handle.write("Access: open, no registration required\n")
+            handle.write(f"Citation: {BIOPEP_CITATION}\n")
+            handle.write(f"Records fetched: {len(biopep_records)}\n")
+
+    biopep_seqs = {r["sequence"] for r in biopep_records if is_valid_peptide(r["sequence"], min_len=1, max_len=10_000)}
+    external_hits = external_reference_screen(pool_seqs, biopep_seqs)
+    external_screen_report = {
+        "biopep_uwm": {
+            "source": BIOPEP_SEARCH_URL,
+            "citation": BIOPEP_CITATION,
+            "n_reference_sequences_standard_alphabet": len(biopep_seqs),
+            "hits_by_pool": {k: len(v) for k, v in external_hits.items()},
+            "hit_sequences_by_pool": external_hits,
+        },
+        "aodb": {
+            "status": "INACCESSIBLE",
+            "evidence": "https://aodb.idruglab.cn returned HTTP 502 (Bad Gateway) from its own "
+            "nginx and an expired TLS certificate, confirmed via direct curl with and without "
+            "certificate verification. Not screened -- not a skipped check, a documented access "
+            "failure at the time of this audit.",
+        },
+        "dfbp": {
+            "status": "INACCESSIBLE",
+            "evidence": "No working hosting URL could be found for DFBP (Qin et al. 2022, PubMed "
+            "35552640) via web search or the PubMed record itself (blocked by a cookie wall in "
+            "automated access). Not substituted with an unrelated database per instruction. Not "
+            "screened -- a documented access failure, not a skipped check.",
+        },
+    }
+    with open(AUDIT_EXTERNAL_SCREEN_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(external_screen_report, handle, indent=2)
+
+    # --- Step 4: homology/leakage analysis beyond exact match ---
+    homology_df, homology_summary = cross_pool_homology_clusters(
+        pool_records, AUDIT_CDHIT_OUTPUT_PREFIX, identity=0.90, length_floor_for_interpretation=15
+    )
+    homology_df.to_csv(AUDIT_HOMOLOGY_CLUSTERS_PATH, index=False, lineterminator="\n")
+    with open(AUDIT_HOMOLOGY_SUMMARY_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(homology_summary, handle, indent=2)
+
+    # --- Step 5: validate the C3 fold-specific contract ---
+    c3_contract_report: dict
+    try:
+        splits_df = pd.read_csv(GRAPHPART_SPLITS_PATH)
+        fold_of = dict(zip(splits_df["AC"], splits_df["cluster"].astype(int)))
+        ranking_df = pd.read_csv(C3_RANKING_PATH)
+        fasta_ids = {h for h, _ in c3_records}
+        if C3_POSITIVE_EMBEDDINGS_CACHE.exists():
+            npz = np.load(C3_POSITIVE_EMBEDDINGS_CACHE, allow_pickle=False)
+            positive_embeddings = {pid: npz["embeddings"][i] for i, pid in enumerate(npz["peptide_ids"])}
+            c3_contract_report = validate_c3_fold_contract(
+                positive_embeddings, fold_of, ranking_df, fasta_ids, top_n_per_fold=C3_TOP_N_PER_FOLD
+            )
+        else:
+            c3_contract_report = {
+                "fold_safety_verified": None,
+                "reason": f"{C3_POSITIVE_EMBEDDINGS_CACHE} not present locally (gitignored cache) -- "
+                "re-run fr2-c3-build to regenerate it before this check can re-verify fold-safety "
+                "against the real embeddings.",
+            }
+    except AssertionError as exc:
+        c3_contract_report = {"fold_safety_verified": False, "violation": str(exc)}
+    with open(AUDIT_C3_CONTRACT_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(c3_contract_report, handle, indent=2)
+
+    # --- assemble top-level summary ---
+    c1_c2_overlap = overlap_detail(pool_seqs, "C1_v2", "C2")
+    summary = {
+        "integrity_reports": integrity_reports,
+        "exact_overlap_nonzero_pairs": [
+            {"pool_a": r["pool_a"], "pool_b": r["pool_b"], "sequence": r["sequence"]}
+            for r in detail_rows
+        ],
+        "contamination_requiring_decision": {
+            "c1_c2_exact_overlap": {
+                "n_sequences": len(c1_c2_overlap),
+                "sequences": c1_c2_overlap,
+                "likely_impact": "Both pools independently sample from overlapping underlying "
+                "biological sequence space (C1: UniProtKB SwissProt reviewed:true; C2: Peptipedia, "
+                "which itself ingests much of SwissProt). Neither pool's construction checked "
+                "against the other. Not a labeled-positive leak (none of these are antioxidant-"
+                "tagged), but a correctness issue for treating C1 and C2 as independent unlabeled "
+                "populations.",
+                "proposed_correction": "Pending project-owner decision -- NOT applied. Candidate "
+                "options: (a) exclude these 8 sequences from C2 only (C1 is the more established/"
+                "primary pool), re-filling from C2's existing eligible-candidate tier; (b) exclude "
+                "from both and document; (c) accept and document as a known, bounded overlap.",
+            },
+            "c2_homology_to_fr1_positive": {
+                "example_sequence": "LYQEPVLGPVRGPFP",
+                "peptide_id": "C2-EFDBC5460B",
+                "evidence": "90%+ CD-HIT identity (length >=15 AA, not a short-fragment artifact) "
+                "to 4 FR1 positives in the same cluster, including YQEPVLGPVRGPFPIIV (AOP-032318CCA7, "
+                "evidence_tier=E1, assay-confirmed). C2's own tag for this sequence is "
+                "Therapeutic/Metabolic/Anti-diabetic, not antioxidative.",
+                "likely_impact": "A near-duplicate of an assay-confirmed antioxidant positive sits "
+                "in the 'assumed non-antioxidant' C2 pool -- a homology-based (not exact-match) "
+                "leakage risk the construction-time exact-sequence screen could not catch.",
+                "proposed_correction": "Pending project-owner decision -- NOT applied. See "
+                f"audit_cross_pool_homology_clusters.csv for the full list of "
+                f"{homology_summary['n_cross_pool_clusters_real_homology_candidates']} real "
+                "(length>=15 AA) cross-pool homology candidates, several more C1<->C2, to review as "
+                "a batch.",
+            },
+        },
+        "external_screen": {k: v for k, v in external_screen_report.items()},
+        "homology_summary": homology_summary,
+        "c3_fold_contract": c3_contract_report,
+        "known_incomplete_checks": [
+            "AODB screening -- server inaccessible (HTTP 502 + expired TLS cert) at audit time.",
+            "DFBP screening -- no discoverable hosting URL.",
+        ],
+        "accepted_methodological_limitations": [
+            "CD-HIT percent-identity is not biologically interpretable for pairs where the shorter "
+            "sequence is <15 AA (chance substring matches dominate at this length); such clusters "
+            "are reported for transparency but excluded from the 'real homology candidate' count.",
+            "C1 retains natural duplicate sequences by design (record-vs-unique-sequence distinction, "
+            "confirmed 2026-10-14) -- any future train/val/test split MUST group identical sequences "
+            "together to avoid sequence-level leakage; this is a loader-design requirement, not "
+            "something this audit can enforce by itself.",
+            "C3's 25,000-candidate UniRef50 universe is a deterministic ID-sorted slice of the "
+            "870,941-cluster population in its length window, not a random sample -- a potential "
+            "coverage bias to examine under Task 2.5, not evidence the pool is invalid.",
+        ],
+        "ready_for_technical_acceptance": False,
+    }
+    with open(AUDIT_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+
+    append_provenance_log(
+        AUDIT_PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr2_pool_contamination_leakage_audit",
+            "pools_audited": list(pool_records.keys()),
+            "outputs": {
+                "integrity": str(AUDIT_INTEGRITY_REPORT_PATH),
+                "overlap_matrix": str(AUDIT_OVERLAP_MATRIX_PATH),
+                "overlap_detail": str(AUDIT_OVERLAP_DETAIL_PATH),
+                "external_screen": str(AUDIT_EXTERNAL_SCREEN_PATH),
+                "homology_clusters": str(AUDIT_HOMOLOGY_CLUSTERS_PATH),
+                "homology_summary": str(AUDIT_HOMOLOGY_SUMMARY_PATH),
+                "c3_contract": str(AUDIT_C3_CONTRACT_REPORT_PATH),
+                "report": str(AUDIT_REPORT_PATH),
+            },
+        },
+    )
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -967,6 +1208,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr2-c2-build", help="Build the C2 bioactive-unlabeled pool from Peptipedia (Bucket 2.2)")
     sub.add_parser("fr2-c3-fetch-candidates", help="Fetch the UniRef50 candidate universe (Bucket 2.3 step 1)")
     sub.add_parser("fr2-c3-build", help="Fold-safe ESM-2 hard-challenge selection (Bucket 2.3 step 2)")
+    sub.add_parser("fr2-pool-audit", help="Pool contamination and leakage audit (Bucket 2.4)")
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     args = parser.parse_args(argv)
 
@@ -1005,6 +1247,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr2-c3-build":
         summary = run_fr2_c3_build()
         print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-pool-audit":
+        summary = run_fr2_pool_audit()
+        print(json.dumps({k: v for k, v in summary.items() if k != "integrity_reports"}, indent=2, default=str))
         return 0
     if args.stage == "esm2-smoketest":
         report = run_esm2_smoke_test()

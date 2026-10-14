@@ -245,6 +245,93 @@
   BIOPEP-UWM" item. Only the FR1 positive pool, 179 conflicts, C1, and C2 are screened for exact-
   sequence overlap (Known Issue #11, now also covering C3).
 
+### Bucket 2, Task 2.4 — Pool Contamination and Leakage Audit
+- **Status: audit complete and re-runnable; NOT technically accepted — two findings require a
+  project-owner decision before FR2 can be marked complete (see below). `ready_for_technical_acceptance:
+  false` is written directly into `fr2_pool_audit_report.json` so this can't be silently glossed over
+  in a later summary.**
+- **Authoritative sources used (verified, not assumed):** `pp1_baseline_v1`'s own checksummed copies
+  of `aop_positives_provisional.parquet` (1,205), `label_conflicts_anox_vs_multiaop.csv` (179), and
+  `anoxpepred_inactives_clean.csv` (38) — `verify_frozen_baseline()` re-confirmed all 10 frozen files
+  match their recorded SHA-256 before anything else ran. `stage_c1_decoys_v2.fasta` (not v1),
+  `stage_c2_bioactive_unlabeled.fasta`, and `stage_c3_esm2_hard_challenges.fasta` (the union, plus
+  `c3_similarity_ranking.csv` for fold-level detail).
+- **Full sequence-integrity audit (`curation/audit.py::sequence_integrity_report`), all 6 pools:**
+  zero duplicate IDs and zero non-standard-alphabet sequences everywhere. **C1 confirmed to retain
+  1,215 record-level duplicates by design** (5,000 records / 3,785 unique sequences) — this was
+  already a confirmed decision, re-verified here, not a new finding. **4 of the 179 conflict records
+  are 2 AA long** (KP, IR, PP, LK), outside the project's own 3–50 AA window — a benign inconsistency
+  (the conflict log was built before the length window was applied to the positive pool; these 4 were
+  never valid positive-pool candidates regardless of their conflict status) rather than a bug with
+  consequences, since conflicts are only ever used as an exclusion/screen set, not a training source.
+- **Full pairwise exact-sequence overlap matrix, all 6 pools** (`audit_exact_overlap_matrix.csv` +
+  `audit_exact_overlap_detail.csv`): **FR1 positives have zero exact overlap with C1, C2, or C3** (the
+  one invariant that must never fail — independently re-verified, not just trusted from construction
+  time). **Finding requiring a decision: C1 and C2 share 8 exact-sequence duplicates** — neither pool's
+  construction ever checked against the other (C1 screened against FR1 positives/conflicts only; C2
+  likewise). None of the 8 are antioxidant-tagged in C2 (tags are Therapeutic/Metabolic/Hormone/
+  Molecular binding/Antimicrobial/Other) and none are themselves FR1 positives or conflicts — so this
+  is not a labeled-positive leak, but it is a correctness issue for treating C1 and C2 as independent
+  "challenge" populations. **Not fixed — pending your decision** (see proposed options in the report).
+- **External known-AOP screening:** **BIOPEP-UWM: done, 990 standard-alphabet antioxidative reference
+  peptides, scraped from its open-access "search by activity" page (no API exists; citation:
+  Minkiewicz et al. 2019, Int J Mol Sci 20(23):5978) — zero hits in C1, C2, or C3.** 700/1,205 FR1
+  positives and 22/179 conflicts independently corroborated as antioxidative by BIOPEP-UWM (a positive
+  validation signal for FR1, not a problem). 2 external-control ("experimentally inactive") peptides
+  also hit BIOPEP-UWM's antioxidative set — the same "contradictory labels across databases"
+  phenomenon already documented for the 179 conflicts, worth noting not acting on. **AODB: genuinely
+  inaccessible** — `https://aodb.idruglab.cn` returned HTTP 502 from its own nginx plus an expired TLS
+  certificate, confirmed via direct `curl` with and without certificate verification. **DFBP: no
+  working hosting URL discoverable** (paper found, PubMed 35552640, but neither the paper's page nor
+  web search surfaced an access link; its own PubMed page is itself blocked by a cookie wall to
+  automated access). Neither substituted with an unrelated database, per explicit instruction.
+- **Homology/leakage analysis beyond exact match — the single most important methodological finding
+  of this audit.** A first CD-HIT pass at 40% identity (GraphPart's own threshold) produced 685
+  "cross-pool" clusters — but inspection showed this is dominated by a known artifact: CD-HIT's
+  percent-identity for a short/long pair is computed over the SHORTER sequence's length, so a random
+  3-AA fragment (only 8,000 possible tripeptides exist) will, by chance, be a 100%-identical substring
+  of *some* unrelated 50-mer across a ~9,500-sequence pool almost every time. Confirmed concretely: the
+  single largest 40%-identity cluster (351 members) bundled "CQC" (3 AA) together with clearly
+  unrelated 37–41 AA ribosomal-protein-family sequences via chained greedy matching — not biological
+  homology. **Re-ran at 90% identity with an explicit length floor (≥15 AA on both sides) for anything
+  to count as an interpretable homology candidate** (`cross_pool_homology_clusters`,
+  `length_floor_for_interpretation` parameter) — of 470 raw cross-pool clusters, 455 are short-fragment
+  artifacts (reported, not hidden) and **15 are genuine candidate homology pairs**, saved in full in
+  `audit_cross_pool_homology_clusters.csv`. **Finding requiring a decision: one of these 15 is a
+  near-duplicate of an assay-confirmed FR1 positive sitting in C2.** `C2-EFDBC5460B`
+  ("LYQEPVLGPVRGPFP", tagged Therapeutic/Metabolic/Anti-diabetic) is 90–100% identical (≥15 AA) to four
+  FR1 positives including `AOP-032318CCA7` ("YQEPVLGPVRGPFPIIV", evidence_tier **E1**,
+  assay-confirmed) — a casein/whey-derived antioxidant peptide family. This is a homology-based
+  leakage risk that the construction-time exact-sequence screens could not catch by design. The other
+  14 candidates are mostly C1↔C2 (cysteine-rich/protamine-like and zinc-finger-like peptide families
+  independently drawn from overlapping UniProtKB/Peptipedia source material) — see the CSV for the
+  full list, not reproduced here. **Not fixed — pending your decision.**
+- **Cross-fold positive homology:** GraphPart's own zero-residual-violation guarantee (already
+  established in Bucket 1.6/1.7) covers homology *within* the positive pool across folds — this audit
+  does **not** re-derive that, and explicitly does not treat it as proof that C1/C2/C3 are
+  homology-independent *from* the positive pool (that's the separate check immediately above, which
+  found the one real hit).
+- **C3 fold-specific contract: formally re-verified against the real, full artifacts (not re-trusted
+  from Bucket 2.3), via `curation/c3.py::validate_c3_fold_contract`.** All 5 folds confirmed to have
+  exactly 2,000 ranking rows each, ranks forming a contiguous unique 1–2,000 sequence per fold, every
+  one of the 5 centroids reconstructed from exactly that fold's OTHER 4 folds' positives (fold sizes:
+  124/134/137/173/266 held out, 710/700/697/661/568 used for training — all 5, not just fold 0 as
+  spot-checked in Bucket 2.3), and the union FASTA's peptide IDs set-equal to the ranking CSV's unique
+  peptide IDs in both directions. **A new safe accessor, `curation/c3.py::load_fold_challenges(path,
+  fold_id)`, is now the only sanctioned way to read C3 for training** — `fold_id` has no "give me
+  everything" default, and there is deliberately no function anywhere in the module that returns the
+  cross-fold union; a test (`test_there_is_no_function_in_this_module_that_returns_all_folds_at_once`)
+  guards against one being added later without deliberate renaming.
+- **Tests:** 13 unit tests for `curation/audit.py` + `curation/biopep.py` combined, 9 new C3-contract/
+  accessor tests, 9 full-file acceptance tests (`test_fr2_pool_audit_acceptance.py`), all gated to skip
+  cleanly when inputs aren't present. Full suite: 131 passed, 1 skipped, zero regression.
+  `pp1_baseline_v1` and all accepted C1/C2/C3 artifacts confirmed untouched via `git status` — this
+  audit stage is read-only by construction (never writes to any pool file, only to new `audit_*`
+  report files).
+- **Not yet done, explicitly out of this pass's scope:** no dataset change has been made in response
+  to either finding above — both are reported with proposed options and await your decision per the
+  explicit "pause before a material dataset change" instruction.
+
 ### Bucket 3, Task 3.2 — ESM-2 Environment Setup and Smoke Test
 - **Status: environment configured, interface built and tested, smoke test passing.** This is
   explicitly NOT full feature generation — embedding the full positive pool and C1/C2/C3 (Bucket
@@ -366,6 +453,18 @@ tasks below.)*
     design's practical effect on final C3 membership is small even though the leakage channel it
     closes is real and structural. Worth noting in the FR2/FR6 report as a measured effect size, not
     just a methodological footnote.
+13. **AWAITING PROJECT-OWNER DECISION: C1 and C2 share 8 exact-sequence duplicates** (Bucket 2.4 audit).
+    Full list and proposed options in `fr2_pool_audit_report.json`'s `contamination_requiring_decision.
+    c1_c2_exact_overlap`. Not fixed. FR2 cannot be marked complete until this is resolved or explicitly
+    accepted as a documented limitation.
+14. **AWAITING PROJECT-OWNER DECISION: a C2 peptide (`C2-EFDBC5460B`, "LYQEPVLGPVRGPFP") is a
+    near-duplicate (90%+ identity, ≥15 AA) of an assay-confirmed E1 FR1 positive** (Bucket 2.4 audit;
+    14 other C1↔C2 candidate homology pairs also found, see `audit_cross_pool_homology_clusters.csv`).
+    Not fixed. Same blocking status as #13.
+15. **AODB and DFBP remain unscreened**, now for a documented access reason rather than an unstarted
+    task: AODB's server returned HTTP 502 + an expired TLS certificate; DFBP has no discoverable
+    hosting URL. BIOPEP-UWM **is** screened (zero hits in C1/C2/C3). Revisit if either resource comes
+    back online or a hosting URL for DFBP is found.
 
 ## ⏭️ Next tasks (in order)
 
@@ -388,15 +487,18 @@ tasks below.)*
    Remaining for both: acquire and cross-reference AODB/DFBP/BIOPEP-UWM specifically (Known Issue
    #11), low/medium priority depending on how much the PP1 report leans on that specific checklist
    line versus the broader antioxidant-exclusion/leakage-screen arguments already satisfied.
-5. **Bucket 2.4 (Pool Contamination and Leakage Audit)** can start any time — C1/C2/C3 already screen
-   pairwise against each other and against FR1 positives/conflicts at construction time, so this
-   bucket is now mostly a formal verification pass over already-disjoint pools, not a fix pass.
+5. **Bucket 2.4 audit is run and documented, but FR2 is NOT technically accepted — two findings
+   (#13, #14 above) need your decision first**, per the explicit "pause before a material dataset
+   change" instruction: were C1/C2 wrong to overlap, and if so, which pool yields the 8 sequences; and
+   what to do about the C2 peptide homologous to an E1 positive (exclude it alone, review all 15
+   candidate homology pairs as a batch, or accept and document). Until then, `ready_for_technical_
+   acceptance: false` stands in `fr2_pool_audit_report.json`.
 6. **Bucket 3.1 (15 physicochemical descriptors)** can start any time in parallel — not blocked on
    anything above.
-7. **FR3/FR4 training code consuming C3 must filter `c3_similarity_ranking.csv` to its own fold's
-   rows** before using it as that fold's hard-challenge set (see Task 2.3 above) — flagging this
-   contract here since it's the single easiest way to silently reintroduce C3's selection-leakage
-   risk later.
+7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
+   (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
+   flagging this contract here since it's the single easiest way to silently reintroduce C3's
+   selection-leakage risk later.
 8. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
 
 ## 📝 Experiment decisions log
@@ -443,5 +545,11 @@ tasks below.)*
 | 2026-10-14 | C3's candidate universe is a 25,000-sequence UniRef50 REST query snapshot (`identity:0.5 AND length:[3 TO 50]`, sorted `id asc`), not UniRef50's ~13GB bulk FASTA or the full 870,941-cluster result set | Same reasoning already applied to C1 (AGENTS.md rule 6) -- a filtered, paginated REST query avoids an unnecessary multi-gigabyte download. 25,000 is a documented, bounded sample sufficient to supply 5×2,000 fold-specific selections (24,732 survived alphabet/length/blocklist/screen filtering) without needing the full space. |
 | 2026-10-14 | `esm2_cli.py` gained an optional `save_embeddings_path` field that writes raw embedding vectors to a gitignored `.npz` cache, used only by C3 -- the existing smoke-test call path is unchanged (still summary-only) | C3's centroid/ranking logic genuinely needs the vectors themselves, unlike the smoke test which only needed to confirm shape/finiteness/determinism. Keeping it an opt-in field (rather than always saving vectors) preserves Bucket 3.2's explicit "never commit large embedding arrays" guarantee for the default path. |
 | 2026-10-14 | The UniRef50 fetch and the full embed-and-select C3 build both needed a mid-run retry after a transient network failure (SSL handshake timeout; this is the second large download this session to hit this connection's instability, after Bucket 2.2's Zenodo dump) | Added explicit retry/backoff to `curation/uniref.py::fetch_uniref50_page` (5 attempts, exponential backoff) before re-running, rather than re-attempting the exact same fragile call and hoping. Both the candidate fetch and the embedding build subsequently completed successfully. |
+
+| 2026-10-14 | Bucket 2.4's cross-pool homology scan uses CD-HIT at 90% identity with an explicit ≥15 AA length floor for a cluster to count as an interpretable "real" homology candidate, rather than a single global threshold applied uniformly | A first attempt at 40% identity (GraphPart's own threshold) produced 685 cross-pool clusters, confirmed on inspection to be dominated by a short-peptide artifact: CD-HIT's percent-identity for a short/long pair is computed over the shorter sequence, so random tripeptides (only 8,000 possible) trivially match as "100% identical" substrings of unrelated 50-mers by chance. The 90%+/≥15AA combination reduced 470 raw cross-pool clusters to 15 defensible candidates, confirmed by direct inspection to include real biological signal (e.g. a casein-derived antioxidant peptide family) rather than noise. |
+| 2026-10-14 | BIOPEP-UWM's antioxidative reference set was acquired by scraping its own "search by activity" result page (990 standard-alphabet sequences), not via an API (none exists) or a bulk download (none offered) | Confirmed open-access, no registration required; the site's single-page search-result table for the "antioxidative" activity code (1,039 rows) is the only practical access path. Citation recorded (Minkiewicz et al. 2019) per the site's own request, not a formal redistribution license (none was found published). |
+| 2026-10-14 | AODB and DFBP are documented as genuinely inaccessible rather than silently skipped or substituted with an unrelated database | AODB: confirmed via direct `curl` (with and without TLS verification) that its server returns HTTP 502 from its own nginx, plus an expired TLS certificate — a hard access failure, not a missed search. DFBP: no hosting URL discoverable via web search or its own PubMed record (itself blocked by a cookie wall to automated access). Per explicit instruction, not substituted with a different database without approval. |
+| 2026-10-14 | Two findings (C1∩C2 8-sequence exact overlap; a C2 peptide's homology to an E1 FR1 positive) are reported with proposed options but NOT acted on, and FR2/Bucket 2.4 is marked `ready_for_technical_acceptance: false` in the audit report itself | Explicit instruction: request approval before a material dataset change, and a discovered issue must not be hidden merely to preserve an accepted record count. Both findings are real (independently verified, not probabilistic false positives) but resolving them changes accepted artifact counts, so the decision belongs to the project owner, not this audit. |
+| 2026-10-14 | `curation/c3.py::load_fold_challenges(ranking_path, fold_id)` is the only sanctioned way to read C3 for FR3/FR4/FR6 training code; no function anywhere in the module returns the cross-fold union, and a test guards against one being added later under a confusable name | Explicit "mandatory" Step 5 instruction: prevent accidental misuse of the fold-safe construction by a future helper that "conveniently" loads the whole union as one fold's challenge set, which would silently reintroduce the exact selection-leakage the fold-specific centroids exist to prevent. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

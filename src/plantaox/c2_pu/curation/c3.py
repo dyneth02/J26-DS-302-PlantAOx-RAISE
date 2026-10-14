@@ -22,8 +22,10 @@ fold k's ranking only ever used positives from the other 4 folds.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 
 def compute_fold_centroids(
@@ -75,6 +77,84 @@ def rank_candidates_for_fold(
         peptide_ids=[peptide_ids[i] for i in order],
         similarities=[float(similarities[i]) for i in order],
     )
+
+
+def validate_c3_fold_contract(
+    positive_embeddings: dict[str, np.ndarray],
+    fold_of: dict[str, int],
+    ranking_df: pd.DataFrame,
+    fasta_peptide_ids: set[str],
+    top_n_per_fold: int,
+) -> dict:
+    """Formal re-verification of every property Bucket 2.4's audit requires
+    of the C3 construction (not a re-derivation from scratch -- this checks
+    the ALREADY-BUILT artifacts are internally consistent and fold-safe,
+    the same way test_fr1_reproducibility.py re-verifies FR1 rather than
+    trusting its own prior run). Raises AssertionError with a specific
+    message on the first violation found, rather than returning a
+    best-effort partial pass.
+    """
+    n_folds = int(max(fold_of.values())) + 1
+    centroids = compute_fold_centroids(positive_embeddings, fold_of, n_folds=n_folds)
+
+    for fold_id in range(n_folds):
+        train_ids = {pid for pid in positive_embeddings if fold_of[pid] != fold_id}
+        held_out_ids = {pid for pid in positive_embeddings if fold_of[pid] == fold_id}
+        assert train_ids, f"Fold {fold_id} has no training positives."
+        assert held_out_ids, f"Fold {fold_id} has no held-out positives to validate against."
+        manual_centroid = np.mean(np.stack([positive_embeddings[pid] for pid in train_ids]), axis=0)
+        if not np.allclose(manual_centroid, centroids[fold_id]):
+            raise AssertionError(f"Fold {fold_id}'s centroid does not match training-fold-only reconstruction.")
+
+        fold_rows = ranking_df[ranking_df["fold_id"] == fold_id]
+        if len(fold_rows) != top_n_per_fold:
+            raise AssertionError(f"Fold {fold_id} has {len(fold_rows)} ranking rows, expected {top_n_per_fold}.")
+        if fold_rows["rank"].min() != 1 or fold_rows["rank"].max() != top_n_per_fold:
+            raise AssertionError(f"Fold {fold_id}'s ranks are not a contiguous 1..{top_n_per_fold} sequence.")
+        if not fold_rows["rank"].is_unique:
+            raise AssertionError(f"Fold {fold_id} has duplicate ranks.")
+
+    union_from_ranking = set(ranking_df["peptide_id"])
+    if union_from_ranking != fasta_peptide_ids:
+        raise AssertionError(
+            "Union FASTA peptide IDs do not exactly match the ranking CSV's unique peptide IDs "
+            f"(FASTA-only: {fasta_peptide_ids - union_from_ranking}; "
+            f"ranking-only: {union_from_ranking - fasta_peptide_ids})."
+        )
+
+    return {
+        "n_folds": n_folds,
+        "fold_safety_verified": True,
+        "all_folds_have_exact_top_n": True,
+        "union_fasta_matches_ranking": True,
+        "top_n_per_fold": top_n_per_fold,
+    }
+
+
+def load_fold_challenges(ranking_path: str | Path, fold_id: int) -> pd.DataFrame:
+    """The ONLY sanctioned way for FR3/FR4/FR6 training code to read C3 as
+    a given fold's hard-challenge set. ``fold_id`` is a required positional
+    argument with no "give me everything" default -- there is deliberately
+    no function in this module that returns the union across folds, and no
+    way to call this one without choosing a fold.
+
+    Reading ``stage_c3_esm2_hard_challenges.fasta`` directly (the union
+    FASTA) instead of going through this function, or filtering
+    ``c3_similarity_ranking.csv`` by hand without restricting to one
+    ``fold_id``, silently reintroduces the exact selection-leakage this
+    module's fold-specific centroid construction exists to prevent -- see
+    the module docstring. Raises if ``fold_id`` has no rows at all (a typo
+    or an out-of-range fold is a bug to surface immediately, not silently
+    return an empty, "technically valid" DataFrame for).
+    """
+    ranking_df = pd.read_csv(ranking_path)
+    fold_df = ranking_df[ranking_df["fold_id"] == fold_id]
+    if fold_df.empty:
+        raise ValueError(
+            f"No C3 ranking rows found for fold_id={fold_id} in {ranking_path} -- "
+            f"available folds: {sorted(ranking_df['fold_id'].unique())}"
+        )
+    return fold_df.sort_values("rank").reset_index(drop=True)
 
 
 def select_top_n_per_fold(rankings: list[FoldRanking], n: int) -> dict[int, list[tuple[str, float, int]]]:
