@@ -287,12 +287,19 @@ reproducibility evidence, and the explicit research-limitations section (assumed
 shortcut-bias risk, fold-0-only scope, no scientific sign-off implied).
 
 ## 4.3 — Plain nnPU Baseline Implementation
-- [ ] Implement non-negative PU risk estimator and unit tests.
-- [ ] Prepare labeled E1/E2 positives and unlabeled samples correctly.
-- [ ] Choose/document initial positive-class prior π and its limitations.
-- [ ] Train C1-only nnPU with no curriculum.
-- [ ] Validate loss stability and inference output.
-- [ ] Save trained model, logs, and configuration.
+- [x] Implement non-negative PU risk estimator and unit tests. *(`nnpu_risk.py::compute_nnpu_risk` — direct-clamped `R_nnPU = pi*R_p^+ + max(0, R_u^- - pi*R_p^-)`, stable `softplus`-based logistic loss; 32 unit tests in `test_nnpu_risk.py` verifying manual reference values, the positive/negative-risk-clamp branches, a deliberately-constructed zero-boundary case, gradient sign/zero-at-clamp, prior validation, numerical stability, per-group-mean semantics, and empty-batch rejection.)*
+- [x] Prepare labeled E1/E2 positives and unlabeled samples correctly. *(`nnpu_baseline.py`: `select_e1_e2_positive_evidence` pools E1+E2 (excludes any E3) while preserving per-row tier provenance; C1 reused as UNLABELED via `pn_baseline.split_c1_train_validation` unchanged — never relabeled negative. Real fold-0 counts: 331 E1 + 273 E2 = 604 train, 48 E1 + 58 E2 = 106 validation, 3,220 C1 train / 568 C1 validation.)*
+- [x] Choose/document initial positive-class prior π and its limitations. *(`DEFAULT_PRIOR=0.10`, explicitly PROVISIONAL — no pre-specified prior found anywhere in the project docs (verified directly); `PRIOR_SENSITIVITY_GRID=(0.05,0.10,0.20)` defined, full sensitivity training deferred; `PRIOR_PROVENANCE_NOTE` recorded in every run's resolved config/summary.)*
+- [x] Train C1-only nnPU with no curriculum. *(`train_nnpu_baseline()`: paired positive/C1-unlabeled mini-batches via a cycling sampler, direct-clamped nnPU risk, non-finite feature/logit/risk/gradient checks, early stopping on validation nnPU risk only — no C2/C3/curriculum staging anywhere.)*
+- [x] Validate loss stability and inference output. *(Per-epoch risk-component + clamped-fraction logging; `stability_diagnostics` reports clamping frequency, prediction saturation, and divergence — a genuine, reported finding: ≈98-100% of updates were clamped in every epoch of the real fold-0 run, documented not hidden. Fresh `BinaryMlp` reloaded from `checkpoint_best.pt`; `predict_proba()` verified bounded/finite on real validation rows.)*
+- [x] Save trained model, logs, and configuration. *(`fr4_nnpu_baseline_fold0_summary.json` + hand-rolled SVG learning curve (reusing PN's generalized plotting routine), both committed; real fold-0 result: best epoch 15, val nnPU risk ≈1.843e-4, 26 epochs before early stopping.)*
+
+**Technical acceptance passed (PASS)** — see IMPLEMENTATION_STATUS.md for the full account, real fold-0
+E1/E2/C1 counts and training/validation results, the genuine (non-fabricated) persistent-clamping
+stability finding, bit-identical same-seed reproducibility evidence (history and underlying checkpoint
+weights), the explicit nnPU-variant identification (direct-clamped, not the beta/gamma corrective
+procedure), and the full research-limitations section (provisional prior, E2 provenance, positive-
+selection bias, nnPU-vs-PN loss incomparability, fold-0-only scope, no scientific sign-off implied).
 
 ## 4.4 — Additional PU Baselines
 - [ ] Install/test PULearn-compatible dependencies.

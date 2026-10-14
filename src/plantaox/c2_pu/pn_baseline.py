@@ -230,19 +230,31 @@ def compute_pos_weight(class_counts: dict, use_class_weight: bool) -> float | No
     return n_neg / n_pos
 
 
-def render_loss_curve_svg(history: list[dict], path: Path) -> Path:
-    """A minimal, dependency-free SVG line chart of train/validation BCE
-    loss per epoch -- matplotlib is not an existing project dependency
+def render_loss_curve_svg(
+    history: list[dict],
+    path: Path,
+    train_key: str = "train_bce_loss",
+    val_key: str = "val_bce_loss",
+    title: str = "PN baseline: train (blue) vs validation (red) BCE loss",
+) -> Path:
+    """A minimal, dependency-free SVG line chart of train/validation loss
+    per epoch -- matplotlib is not an existing project dependency
     (confirmed: not installed, not in requirements.txt) and this project
     has already deliberately avoided adding it for a single chart once
     before (see IMPLEMENTATION_STATUS.md, Task 2.5's decision log); a
     hand-rolled SVG keeps that precedent rather than adding a new
     dependency for this one plot.
+
+    ``train_key``/``val_key``/``title`` are overridable (default to the
+    original PN-specific BCE keys/title, so every existing PN caller is
+    unaffected) so Task 4.3's nnPU baseline can reuse this exact plotting
+    routine for its own ``train_nnpu_risk``/``val_nnpu_risk`` history
+    keys instead of a second, duplicated SVG writer.
     """
     width, height, pad = 640, 360, 48
     epochs = [h["epoch"] for h in history]
-    train_losses = [h["train_bce_loss"] for h in history]
-    val_losses = [h["val_bce_loss"] for h in history]
+    train_losses = [h[train_key] for h in history]
+    val_losses = [h[val_key] for h in history]
     all_losses = train_losses + val_losses
     min_loss, max_loss = min(all_losses), max(all_losses)
     loss_range = max(max_loss - min_loss, 1e-9)
@@ -266,7 +278,7 @@ def render_loss_curve_svg(history: list[dict], path: Path) -> Path:
         f'<line x1="{pad}" y1="{pad}" x2="{pad}" y2="{height - pad}" stroke="black"/>',
         _polyline(train_losses, "#1f77b4"),
         _polyline(val_losses, "#d62728"),
-        f'<text x="{pad}" y="20" font-size="14">PN baseline: train (blue) vs validation (red) BCE loss</text>',
+        f'<text x="{pad}" y="20" font-size="14">{title}</text>',
         f'<text x="{pad}" y="{height - 10}" font-size="11">epoch</text>',
         f'<text x="4" y="{pad}" font-size="11">loss</text>',
         "</svg>",

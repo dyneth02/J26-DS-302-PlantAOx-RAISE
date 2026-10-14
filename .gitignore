@@ -313,3 +313,9 @@ data/interim/c2_pu/fr4_infra_smoke_test_runs/
 # above; committed summaries (fr4_pn_baseline_fold*_summary.json) and the
 # checkpoint SHA-256 they record are the durable, auditable artifacts.
 data/interim/c2_pu/fr4_pn_baseline_runs/
+
+# Bucket 4.3 -- nnPU baseline run directories (resolved configs, epoch
+# logs, PyTorch checkpoints). Same reasoning as the PN runs dir above;
+# committed summaries (fr4_nnpu_baseline_fold*_summary.json) and the
+# checkpoint SHA-256 they record are the durable, auditable artifacts.
+data/interim/c2_pu/fr4_nnpu_baseline_runs/

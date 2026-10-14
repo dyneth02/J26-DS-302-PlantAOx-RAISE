@@ -1,6 +1,6 @@
 # Implementation Status — Component 02 (PU-AOP)
 
-**Last updated:** 14 October 2026
+**Last updated:** 15 October 2026
 **Update rule:** Any agent (Claude Code, Codex) or person completing, starting, or blocking on a task MUST update this file in the same session the change happens. Do not let this file go stale — it is the single source of truth for "what's actually done" versus the aspirational task list in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`.
 
 **Target dates (unofficial, confirm against actual schedule):** PP1 presentation 26 Oct 2026, checklist submission 30 Oct 2026.
@@ -1151,6 +1151,193 @@
 - **No new dependencies** (matplotlib deliberately avoided, per above). Tasks 4.3 (nnPU), 4.4 (Two-Step
   PU/PU-Bagging), 4.5 (cross-baseline evaluation), 4.6 (curriculum), and RNIS/FR6 are untouched.
 
+### Bucket 4, Task 4.3 — Plain nnPU (Non-Negative Positive-Unlabeled) Baseline Implementation
+- **Status: technical acceptance passed (PASS).** The first PU-learning classifier for Component 02,
+  trained entirely on Task 4.1's shared infrastructure and reusing Task 4.2's deterministic C1
+  train/validation partition unchanged — no second MLP, no second checkpointing system, no second data
+  loader, no second C1-splitter. New modules: `nnpu_risk.py` (pure risk-estimator math, zero training
+  loop), `nnpu_baseline.py` (dataset assembly + training loop). CLI stage:
+  `python -m plantaox.c2_pu.run fr4-nnpu-baseline`.
+- **Scientific framing (non-negotiable, stated in every module docstring, every log record, and the run
+  summary's `limitations` block):** C1 is never assigned a binary negative label anywhere in this
+  module — it is passed to the non-negative PU risk estimator as the UNLABELED group U. Unlike PN
+  (Task 4.2), which trains E1-vs-C1-as-negative BCE, this baseline trains E1+E2-vs-C1-as-unlabeled
+  under the non-negative PU risk. These are different estimators under different label assumptions;
+  Section 16.F of the task brief (and this entry) explicitly forbid comparing their raw loss numbers as
+  evidence one baseline "outperforms" the other.
+- **Mathematical formulation implemented exactly as specified** (`nnpu_risk.py`):
+  `R_nnPU = pi*R_p^+ + max(0, R_u^- - pi*R_p^-)`, with `l(f,+1)=softplus(-f)`/`l(f,-1)=softplus(f)`
+  (sigmoid never applied before the loss), each of `R_p^+`/`R_p^-`/`R_u^-` a SEPARATE per-group mean
+  (never a combined positive+unlabeled mean) so the pi/|P|/|U| weighting holds regardless of the
+  positive/unlabeled mini-batch size ratio drawn by the training loop.
+- **nnPU variant explicitly identified and scope-decided before implementation, not silently picked:**
+  the ORIGINAL nnPU paper (Kiryo et al. 2017) also specifies a corrective training PROCEDURE (gradient
+  ASCENT on the negative-risk estimate below a `-beta` threshold, scaled by `gamma`) that is related to
+  but NOT the same algorithm as the displayed clamped risk's own gradient (which is exactly zero when
+  clamped). `docs/PU_AOP_RESEARCH_CONTEXT.md`, `docs/PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`
+  (Sections 4.3/4.6), the proposal's FR3/FR4 table, and every existing decision-log entry were inspected
+  directly before writing any code — **none specifies the beta/gamma corrective procedure, nor a
+  beta/gamma value.** Per the task brief's own explicit fallback instruction, this implementation uses
+  ONLY the **direct-clamped objective** — backpropagating through `max(0, R_n)` itself — recorded as
+  `nnpu_variant: "direct_clamped"` in every run's resolved config/manifest/summary. The beta/gamma
+  corrective variant is NOT implemented anywhere in this component as of Task 4.3; this is a logged
+  scope decision (see decision log below), not an oversight, and there is accordingly no "Test J" in
+  `test_nnpu_risk.py` (that test is explicitly N/A per its own trailing comment).
+- **Mandatory risk-estimator unit tests (Stage A, run and passing BEFORE any real training per the task
+  brief's own gate): 32 tests in `test_nnpu_risk.py`** — known manual risk values cross-checked against
+  an independent high-precision Python reference (not `torch.nn.functional.softplus` itself), the
+  positive-negative-risk-positive case equaling the unbiased PU risk exactly, the negative case clamping
+  to zero exactly, a DELIBERATELY algebraically-constructed (not accidental) zero-boundary case, gradient
+  sign/zero-at-clamp verification, prior rejection (0/1/negative/>1/NaN/Inf/bool), numerical stability at
+  logits up to 1e8, per-group-mean (not raw-count-weighted) semantics verified by a doubled-unlabeled-
+  group invariance test, empty-positive/empty-unlabeled/both-empty rejection, non-finite-logit rejection,
+  and (batch, 1)-shaped logit acceptance (matching `BinaryMlp.forward`'s own output shape).
+- **E1+E2 positive selection (§6.1), preserving per-row evidence-tier provenance:**
+  `select_e1_e2_positive_evidence()` filters an already fold-partitioned positive pool down to E1+E2
+  ONLY (any other tier, including a hypothetical future E3 row, is excluded via an explicit
+  tier-membership mask — never an "everything that isn't E1" catch-all). Verified against the real
+  fold-0 cache: **331 E1 + 273 E2 = 604 training positives; 48 E1 + 58 E2 = 106 validation positives** —
+  matching Task 4.2's own documented pre-tier-selection totals exactly (re-derived directly from the
+  real cache, not trusted from the report). `NnPuDataset.train_positive_tiers`/
+  `validation_positive_tiers` keep E1-vs-E2 provenance separately auditable; `e1_train_count`/
+  `e2_train_count`/`e1_validation_count`/`e2_validation_count` are recorded in every run summary and
+  resolved config. No evidence-tier weighting, soft labels, or confidence-driven curricula are applied
+  (Section 6.2's explicit prohibition).
+- **C1 unlabeled-group partition (§7): reuses `pn_baseline.split_c1_train_validation` UNCHANGED** — the
+  IDENTICAL deterministic split (same `config.validation_fraction`=0.15/`config.eval_seed`=42 Task 4.1
+  already defines) Task 4.2 uses for its own C1 partition, not a second C1-splitter. Verified against the
+  real fold-0 C1 (3,788 unique sequences): **3,220 train / 568 validation**, byte-identical membership to
+  PN's own C1 partition (re-derived and compared directly in `test_build_nnpu_dataset_c1_partition_matches_pn_shared_splitter`
+  and the real-cache acceptance test). C1 is never joined into a single labeled array with the positive
+  group anywhere in `NnPuDataset` — there is structurally no label field for it (a dedicated test asserts
+  `NnPuDataset` has no `train_unlabeled_labels` attribute). C2, C3, and the external control are
+  structurally absent from `NnPuDataset` (same discipline as `PnDataset`), so they cannot leak into an
+  nnPU run even by accident. `build_nnpu_dataset()` independently re-runs
+  `experiment_data.assert_no_cross_subset_overlap` across all 8 relevant subsets (E1+E2 train/validation,
+  C1 train/validation, GraphPart held-out, C2, C3, external control) — not trusting Task 4.1's own
+  `data.leakage_report` blindly.
+- **Positive-class prior pi (§8): no pre-specified prior or estimation method exists anywhere in this
+  project's documentation** — `docs/PU_AOP_RESEARCH_CONTEXT.md`, the Planner doc's FR3/FR4 rows and
+  Sections 4.3/4.6, the proposal's abridged requirement table, and the full `IMPLEMENTATION_STATUS.md`
+  decision log were inspected directly (not assumed) before choosing a default. Per the task brief's own
+  explicit fallback instruction, `DEFAULT_PRIOR = 0.10` is used as a clearly-labeled **PROVISIONAL
+  modeling/sensitivity-analysis anchor** — `PRIOR_PROVENANCE_NOTE` (recorded verbatim in every run's
+  resolved config and summary `limitations` block) states this explicitly and states that the naive
+  sampling ratio `n_labeled_positive / (n_labeled_positive + n_C1)` is deliberately NOT used as pi
+  (Section 8.1's own prohibition — C1 was built from a structurally different source distribution than
+  the positive pool, so that ratio is not a valid biological-prevalence substitute either).
+  `PRIOR_SENSITIVITY_GRID = (0.05, 0.10, 0.20)` is defined and the risk estimator/dataset builder/
+  training loop are verified to accept any value in `(0, 1)` (unit-tested directly); **full sensitivity
+  TRAINING across all three values is explicitly deferred** (Section 8.3 permits this) — only the
+  `pi=0.10` fold-0 run is this task's genuine baseline result. `pi` is validated (`InvalidPriorError` on
+  `<=0`, `>=1`, `NaN`, `Inf`, or `bool`) before any data is touched.
+- **Model architecture and feature compatibility (§9): reuses `BinaryMlp`/`MlpArchitecture`/
+  `ExperimentConfig`/`build_experiment_data()`/`run_recorder.py` exactly as PN did** — same
+  `495 → 128 ReLU → 64 ReLU → 1 logit` architecture, same accepted fold-0 495-dim scaled features (no
+  scaler refitting, no embedding/descriptor recomputation, no column rearrangement). The model is
+  initialized FRESH and seeded (`set_global_seed(config.train_seed)`) for every nnPU run — **never
+  initialized from the trained PN checkpoint**, confirmed by direct code inspection (no checkpoint-load
+  call anywhere before `train_nnpu_baseline`'s own fresh `BinaryMlp(...)` construction).
+- **Training loop (§10), paired positive/unlabeled mini-batches:** `_CyclingIndexSampler` gives the
+  smaller E1+E2 positive pool (604 train rows) a full-size, independently-shuffled mini-batch for EVERY
+  larger C1-unlabeled (3,220 train rows) mini-batch step across one full unlabeled-pool pass per epoch —
+  documented explicitly as the "full unlabeled pass with cycling positive batches" design named in the
+  task brief's own menu of acceptable paired-batch strategies (Section 10.1), using an independent,
+  seeded RNG stream (`config.train_seed + 1_000_003`) so same-seed reruns stay bit-identical. The risk
+  objective itself (per-group means in `compute_nnpu_risk`) is agnostic to whatever batch-size ratio this
+  particular loop happens to draw — verified directly in `test_nnpu_risk.py`'s batch-size-semantics
+  tests, independent of this training-loop design choice. Every epoch logs every component Section 10.3
+  requires (train/validation nnPU risk, positive-risk contribution, positive-as-negative risk,
+  unlabeled-as-negative risk, unclamped and clamped negative-risk, clamped-update fraction, learning
+  rate, prior, E1+E2/C1 counts, optimizer-update count, and `is_best`) to `epoch_metrics.jsonl` via the
+  UNCHANGED `run_recorder.append_epoch_metrics`. Non-finite inputs/logits/risk/gradients all raise
+  `RuntimeError` naming the exact offending epoch/tensor (Section 10.4), mirroring PN's own
+  fail-loudly discipline exactly.
+- **Checkpoint/validation/reload (§11-§12): reuses `run_recorder.save_checkpoint`/`load_checkpoint`
+  unchanged** — `checkpoint_best.pt`/`checkpoint_last.pt`, best-checkpoint selection by MINIMUM
+  validation nnPU risk only (never GraphPart held-out, C2, C3, or external control), early stopping
+  (`patience=10` default) monitoring validation nnPU risk only. Validation nnPU risk is computed once per
+  epoch over the FULL validation E1+E2 (106 rows) + validation C1 (568 rows) sets (no mini-batching
+  needed at this scale) and is explicitly labeled, in the module docstring and the run summary's
+  `limitations.validation_risk_is_a_surrogate`, as "a surrogate under the assumed prior and the C1
+  sampling model, not an independently measured biological classification error." After training, a
+  FRESH `BinaryMlp` is constructed, loaded from `checkpoint_best.pt` via the compatibility-checked
+  `load_checkpoint()`, and run through `predict_proba()` on real validation-fold rows — shape,
+  finiteness, and `[0,1]`-boundedness all verified directly on the reloaded model's own output.
+- **Real fold-0 result (Stage D), not fabricated:** 26 epochs executed before early stopping triggered
+  (patience 10 after the last improvement at epoch 15), best validation nnPU risk **≈1.843e-4** at epoch
+  15, final train risk ≈8.45e-4, final validation risk ≈1.60e-3. **A genuine, reported stability
+  observation (Section 10.4/16, not hidden):** the negative-risk term was clamped to zero in roughly
+  98–100% of optimizer updates in EVERY epoch of this run (not just late epochs) — `mean_train_clamped_
+  update_fraction` over the last 5 epochs ≈0.994, recorded per-epoch in `stability_diagnostics` and
+  `epoch_metrics.jsonl`. This means `R_u^- - pi*R_p^-` was negative for nearly every mini-batch
+  throughout training at `pi=0.10` on this fold/feature representation — for most updates, the direct-
+  clamped objective's gradient reduces to the positive-risk term alone (the unlabeled-group gradient is
+  exactly zero when clamped, per `test_gradient_is_zero_for_unlabeled_group_when_clamped`). This is
+  reported as-is, not re-run with a different prior to produce a "nicer" clamping profile — see the Task
+  4.3 research-limitations note below and `fr4_nnpu_baseline_fold0_summary.json`'s own
+  `stability_diagnostics` field for the full per-run numbers. No divergence was detected
+  (`diverging_risk_detected: false`) and validation predictions were not fully saturated (≈47% of
+  validation rows scored <0.01, ≈18% scored >0.99 at the final epoch).
+- **Learning curve:** reuses `pn_baseline.render_loss_curve_svg` (generalized with optional
+  `train_key`/`val_key`/`title` parameters, defaulting to PN's original hardcoded BCE keys/title so every
+  existing PN caller/test is byte-for-byte unaffected — re-verified: all 27 pre-existing `test_pn_
+  baseline.py` tests pass unchanged after this change) rather than a second hand-rolled SVG writer.
+  Committed at `fr4_nnpu_baseline_fold0_learning_curve.svg`.
+- **Checkpoint validation and same-seed reproducibility (Stage E):** two independent same-seed CPU
+  training runs on the real fold-0 dataset produce a **bit-identical** per-epoch risk history and
+  identical best epoch (verified directly: `history == history`, `best_epoch == best_epoch`,
+  `class_counts == class_counts`). The saved checkpoint FILES' SHA-256 differ between reruns (the
+  `run_recorder.save_checkpoint` payload embeds a live `saved_at` timestamp — the same, pre-existing
+  mechanism PN's own checkpoints already have), but the underlying model STATE_DICT tensors are
+  confirmed bit-identical by direct tensor comparison across two independent reruns' best checkpoints
+  (`test_reruns_produce_bit_identical_checkpoint_weights`) — this is the actual reproducibility claim,
+  not the incidental file hash.
+- **Checkpoints are NOT committed** (gitignored under `data/interim/c2_pu/fr4_nnpu_baseline_runs/`,
+  same pattern as `fr4_pn_baseline_runs/`) — the committed summary records each checkpoint's SHA-256
+  instead, so integrity is auditable and the run is exactly regeneratable via `fr4-nnpu-baseline` without
+  needing the binary file itself.
+- **Tests:** 32 unit tests for the risk estimator (`test_nnpu_risk.py` — Tests A-I of the task brief's
+  mandatory list, all mathematically verified against independent reference computations, not merely
+  "ran without crashing"; Test J is N/A, see above) + 33 unit tests for dataset assembly/training
+  (`test_nnpu_baseline.py` — E1+E2 selection, E3 exclusion, C1-only unlabeled selection matching PN's own
+  splitter, two deliberately-injected cross-pool sequence-leakage scenarios correctly caught, zero-E1E2/
+  zero-C1 rejection, prior validation, the cycling positive sampler's determinism/wraparound/reshuffle
+  behavior, optimizer parameter updates, non-finite-feature rejection, every required risk component
+  present in the epoch log, best/last checkpoint correctness, checkpoint reload + bounded/finite
+  inference, bit-identical same-seed reproducibility, early stopping on/off and monitoring validation
+  risk only, and stability-diagnostics presence) + 21 full-file acceptance tests
+  (`test_fr4_nnpu_baseline_acceptance.py` — real fold-0 Stage C smoke test, GraphPart held-out isolation
+  re-verified independently, real E1/E2/C1 counts matching Task 4.2's documented totals exactly, prior
+  configuration/validity, every required risk component present over a REAL run's full history,
+  checkpoint reload verification, bit-identical full-run reruns (history AND underlying checkpoint
+  weights), every prior task's real artifacts and the frozen FR1/FR2 baselines confirmed byte-unchanged
+  by SHA-256 before/after, PN's own summary file confirmed at a genuinely separate path, and a clear
+  `FileNotFoundError` for a missing prerequisite). Full project suite run after this change — see
+  decision log for the exact before/after counts.
+- **Research limitations, stated in full (§16), not just referenced:** (A) `pi=0.10` is an explicitly
+  PROVISIONAL modeling assumption, not an independently estimated biological prevalence — see
+  `PRIOR_PROVENANCE_NOTE`. (B) E2 positives are benchmark-annotated, provisional, not uniformly
+  assay-confirmed; pooling E1+E2 (Task 4.3's baseline policy, unlike PN's E1-only) trades a larger
+  labeled-positive count for a less uniformly verified one. (C) The labeled-positive population
+  (literature/benchmark-derived) may not represent the true positive subpopulation present within C1 —
+  nnPU does not automatically resolve this source-distribution bias. (D) C1 was not necessarily sampled
+  from the same biological population as the labeled positives (FR2/Task 2.5's own KS-test distributional
+  findings apply here unchanged — see that section above); standard PU mixture assumptions may be
+  imperfect. (E) nnPU risk is NOT directly interchangeable with PN's BCE loss — the ≈1e-3-to-1e-4-scale
+  nnPU risk numbers in this run must never be read as "nnPU outperforms PN" (PN's own BCE loss, Task 4.2,
+  bottomed out at ≈0.31); they are different estimators of different targets under different label
+  assumptions. (F) This is a working fold-0 baseline using the direct-clamped nnPU variant only, not a
+  statistically validated five-fold comparison, and not an implementation of the original paper's
+  beta/gamma corrective training procedure. (G) Technical acceptance does not imply supervisor approval
+  of the chosen prior, the E1+E2 pooling policy, the direct-clamped-variant choice, or any scientific
+  conclusion. (H) The persistent negative-risk clamping observed in this run (≈98–100% of updates per
+  epoch) is reported as a genuine modeling observation requiring supervisor/scientific review before any
+  claim that this nnPU configuration is "working as intended" in the PU-learning sense, rather than
+  behaving close to positive-risk-only training for most of the run.
+- **No new dependencies.** Tasks 4.4 (Two-Step PU/PU-Bagging), 4.5 (cross-baseline evaluation), 4.6
+  (curriculum), and RNIS/FR6 remain untouched and unstarted, per this task's explicit scope boundary.
+
 ## 🔄 Current work in progress
 
 *(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
@@ -1275,11 +1462,12 @@ tasks below.)*
    not an open item anymore.
 6f. **RESOLVED 2026-10-14. Bucket 4, Task 4.2 (PN baseline implementation) is complete (PASS)** — see
    Completed tasks above (`pn_baseline.py`, CLI stage `fr4-pn-baseline`). Kept here for history; not an
-   open item anymore. **Task 4.3 (plain nnPU baseline) is the next item, not yet started** — it should
-   reuse `BinaryMlp`/`build_experiment_data()`/`run_recorder.py` exactly as Task 4.2 did, replacing only
-   the BCE-with-logits training objective with the nnPU non-negative risk estimator; the PN baseline's
-   E1-vs-C1 framing and leakage-check pattern (`select_positive_evidence_tier`,
-   `assert_no_cross_subset_overlap`) are directly reusable, not something to reimplement.
+   open item anymore.
+6g. **RESOLVED 2026-10-15. Bucket 4, Task 4.3 (plain nnPU baseline implementation) is complete (PASS)**
+   — see Completed tasks above (`nnpu_risk.py`, `nnpu_baseline.py`, CLI stage `fr4-nnpu-baseline`). Kept
+   here for history; not an open item anymore. **Task 4.4 (Two-Step PU, PU-Bagging) is the next item, not
+   yet started** — per Task 4.3's own explicit scope boundary, no curriculum (C1→C2→C3), hard-negative
+   mining, RNIS, or full multi-baseline evaluation work has been started either (Tasks 4.5/4.6/FR6).
 7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
@@ -1383,5 +1571,10 @@ tasks below.)*
 | 2026-10-14 | PN's learning curve is a ~40-line hand-rolled SVG line chart, not matplotlib | matplotlib is confirmed not installed and not declared as a project dependency; this project already deliberately avoided adding it once before for a single exploratory chart (Task 2.5's decision log, 2026-10-14: "matplotlib was not installed for this... one summary chart was rendered directly... instead of adding a new project dependency"). The same reasoning applies here: one simple train-vs-validation loss plot does not justify a new, fairly heavy dependency. |
 | 2026-10-14 | PN checkpoints are stored as `.pt` files under `data/interim/c2_pu/fr4_pn_baseline_runs/` (gitignored) rather than committed, with only their SHA-256 recorded in the committed summary | Consistent with this project's established "don't commit large binary arrays" policy (embedding caches, feature caches, scaled-feature caches are all handled the same way) — the run is exactly regeneratable via `fr4-pn-baseline` from already-committed small inputs, and the SHA-256 makes any future regeneration's checkpoint verifiably identical or flags a real divergence. |
 | 2026-10-14 | Two independent same-seed CPU training runs on the real fold-0 PN dataset were verified to produce a bit-identical per-epoch loss history (not just approximately close) | Task 4.1 had only verified forward-pass determinism (a single, non-iterative operation); training involves many sequential backward passes and optimizer steps, where floating-point non-associativity could in principle compound across iterations even under `torch.use_deterministic_algorithms(True)`. Verified directly rather than assumed: confirmed exact equality of the full `history` list (every epoch's train/validation loss) across two separately-constructed run directories. |
+| 2026-10-15 | Task 4.3's nnPU implements ONLY the direct-clamped objective (`R_nnPU = pi*R_p^+ + max(0, R_n)`, backpropagated through directly), not the original Kiryo et al. (2017) paper's beta/gamma corrective training procedure (gradient ascent on the negative-risk estimate below a `-beta` threshold) | Inspected `PU_AOP_RESEARCH_CONTEXT.md`, `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md` (Sections 4.3/4.6), the proposal's FR3/FR4 requirement table, and every prior decision-log entry directly before writing any code — none specifies the corrective procedure or a beta/gamma value. Per the task brief's own explicit fallback instruction ("if neither is specified, use the direct clamped objective as the explicitly named initial baseline"), implemented and recorded this choice as `nnpu_variant: "direct_clamped"` in every run's resolved config/manifest/summary rather than silently conflating the two algorithms. The beta/gamma variant is unimplemented scope, not a gap discovered later. |
+| 2026-10-15 | Task 4.3's positive-class prior is `pi=0.10` (`DEFAULT_PRIOR` in `nnpu_baseline.py`), a clearly-labeled PROVISIONAL modeling/sensitivity-analysis anchor, not a literature-established or measured biological prevalence | No pre-specified prior or estimation method was found anywhere in this project's documentation (same inspection as the row above). Per Section 8.2's explicit fallback instruction, `pi=0.10` was adopted with `PRIOR_SENSITIVITY_GRID = (0.05, 0.10, 0.20)` defined for future sensitivity analysis (full sensitivity training deferred, Section 8.3). The naive sampling ratio `n_labeled_positive/(n_labeled_positive+n_C1)` was deliberately NOT used as pi, per Section 8.1's explicit prohibition — C1 is a structurally different source distribution than the positive pool (Task 2.5's own KS-test findings), so that ratio is not a valid prevalence substitute either. |
+| 2026-10-15 | Task 4.3 pools E1+E2 as the labeled-positive population (unlike PN's E1-only), per the task brief's explicit "agreed E1/E2 labeled-positive population" instruction, while keeping each row's evidence tier separately recorded (`e1_train_count`/`e2_train_count`/etc., never pooled into an anonymous count) | This is a genuine, documented difference from PN's own positive-evidence policy (Task 4.2), not an inconsistency — the task brief requires it explicitly so later PN-vs-nnPU comparisons do not conflate the loss-function change with a simultaneous positive-data change without that difference being visible in both runs' own recorded counts. |
+| 2026-10-15 | `pn_baseline.render_loss_curve_svg` was generalized with optional `train_key`/`val_key`/`title` parameters (defaulting to the original hardcoded PN values) instead of writing a second, nearly-identical SVG line-chart function in `nnpu_baseline.py` | Reuses the existing hand-rolled SVG writer (no matplotlib dependency added) for nnPU's own `train_nnpu_risk`/`val_nnpu_risk` history keys. Verified zero behavior change for existing PN callers: all 27 pre-existing `test_pn_baseline.py` tests pass unmodified after the change, since the new parameters' defaults reproduce the exact original hardcoded strings. |
+| 2026-10-15 | A genuine, reported (not hidden) stability finding from the real fold-0 nnPU run: the negative-risk term `R_u^- - pi*R_p^-` was clamped to zero in ≈98–100% of optimizer updates in every epoch of the run, not just late epochs, at `pi=0.10` | Section 10.4 requires monitoring and documenting (never silently hiding) persistent zero-clamped negative risk. For most updates under this configuration, the direct-clamped objective's gradient reduces to the positive-risk term alone (the unlabeled-group gradient is exactly zero when clamped — verified unit-test property, `test_gradient_is_zero_for_unlabeled_group_when_clamped`). Reported as-is in `stability_diagnostics` and this file rather than re-running with a different prior to produce a more favorable-looking clamping profile (explicitly prohibited by the task brief's §18 closing instruction). Flagged for supervisor/scientific review before any claim that this configuration is "working as intended" in the PU-learning sense. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

@@ -2954,6 +2954,182 @@ def run_fr4_pn_baseline(
     return summary
 
 
+# Bucket 4.3 -- plain non-negative PU (nnPU) baseline: E1+E2 labeled
+# positives vs. C1 treated as UNLABELED (never a confirmed negative),
+# the non-negative PU risk estimator (direct-clamped variant), on the
+# accepted Task 4.1 infrastructure. Every torch-dependent module is
+# imported LAZILY inside this function, mirroring Bucket 4.2 -- run.py's
+# module-level import graph stays torch-free.
+FR4_NNPU_BASELINE_RUNS_DIR = INTERIM_DIR / "fr4_nnpu_baseline_runs"  # gitignored, scratch
+FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_nnpu_baseline_fold{fold_id}_summary.json")
+FR4_NNPU_BASELINE_LEARNING_CURVE_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_nnpu_baseline_fold{fold_id}_learning_curve.svg")
+FR4_NNPU_BASELINE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_nnpu_baseline_provenance.jsonl"
+
+
+def run_fr4_nnpu_baseline(
+    fold_id: int = 0,
+    max_epochs: int | None = None,
+    prior: float | None = None,
+    early_stopping_patience: int | None = 10,
+) -> dict:
+    """Bucket 4.3: train the plain nnPU baseline for GraphPart fold
+    ``fold_id`` -- E1+E2 labeled positives vs. C1 treated as UNLABELED --
+    using Task 4.1's BinaryMlp/build_experiment_data/run_recorder/seeding
+    exactly as accepted, and Task 4.2's deterministic C1 partition
+    (``pn_baseline.split_c1_train_validation``) reused unchanged. C1 is
+    never assigned a confirmed-negative label anywhere in this function;
+    it is passed to the non-negative PU risk estimator
+    (``nnpu_risk.compute_nnpu_risk``) as the unlabeled group U.
+    """
+    import torch
+
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.nnpu_baseline import DEFAULT_PRIOR, PRIOR_PROVENANCE_NOTE, PRIOR_SENSITIVITY_GRID, build_nnpu_dataset, train_nnpu_baseline
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, load_checkpoint, write_resolved_config
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    resolved_prior = prior if prior is not None else DEFAULT_PRIOR
+
+    config_kwargs = {
+        "experiment_id": f"fr4_nnpu_baseline_fold{fold_id}",
+        "baseline": "nnPU",
+        "fold_id": fold_id,
+        "checkpoint_dir": str(FR4_NNPU_BASELINE_RUNS_DIR),
+    }
+    if max_epochs is not None:
+        config_kwargs["max_epochs"] = max_epochs
+    config = ExperimentConfig(**config_kwargs)
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_nnpu_dataset(data, config, prior=resolved_prior)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["nnpu_dataset_provenance"] = {
+        "e1_train_count": dataset.e1_train_count,
+        "e2_train_count": dataset.e2_train_count,
+        "e1_validation_count": dataset.e1_validation_count,
+        "e2_validation_count": dataset.e2_validation_count,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "n_c1_unlabeled_train": int(dataset.train_unlabeled_features.shape[0]),
+        "n_c1_unlabeled_validation": int(dataset.validation_unlabeled_features.shape[0]),
+    }
+    resolved_config["nnpu_prior"] = {
+        "value": dataset.prior,
+        "sensitivity_grid": list(PRIOR_SENSITIVITY_GRID),
+        "provenance_note": PRIOR_PROVENANCE_NOTE,
+    }
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_nnpu_baseline(config, dataset, run_dir, early_stopping_patience=early_stopping_patience)
+
+        best_checkpoint_path = run_dir / "checkpoint_best.pt"
+        last_checkpoint_path = run_dir / "checkpoint_last.pt"
+        reload_model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(best_checkpoint_path, reload_model)
+
+        sample_n = min(16, len(dataset.validation_positive_features))
+        sample_x = torch.from_numpy(dataset.validation_positive_features[:sample_n])
+        proba = reload_model.predict_proba(sample_x)
+
+        learning_curve_committed_path = Path(FR4_NNPU_BASELINE_LEARNING_CURVE_PATH_TEMPLATE.format(fold_id=fold_id))
+        learning_curve_committed_path.write_text(
+            Path(training_summary["learning_curve_path"]).read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+        )
+
+        summary = {
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "class_counts": {
+                "train_positive": dataset.e1_train_count + dataset.e2_train_count,
+                "train_unlabeled": int(dataset.train_unlabeled_features.shape[0]),
+                "validation_positive": dataset.e1_validation_count + dataset.e2_validation_count,
+                "validation_unlabeled": int(dataset.validation_unlabeled_features.shape[0]),
+                "e1_train": dataset.e1_train_count,
+                "e2_train": dataset.e2_train_count,
+                "e1_validation": dataset.e1_validation_count,
+                "e2_validation": dataset.e2_validation_count,
+            },
+            "c1_partition": {
+                "validation_fraction": dataset.c1_validation_fraction,
+                "seed": dataset.c1_partition_seed,
+            },
+            "prior": {
+                "value": dataset.prior,
+                "sensitivity_grid": list(PRIOR_SENSITIVITY_GRID),
+                "provenance_note": PRIOR_PROVENANCE_NOTE,
+            },
+            "nnpu_variant": training_summary["nnpu_variant"],
+            "training": {k: v for k, v in training_summary.items() if k != "learning_curve_path"},
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+                "best_checkpoint_epoch": checkpoint_info["epoch"],
+            },
+            "checkpoint_reload_verification": {
+                "proba_shape": list(proba.shape),
+                "proba_bounded": bool(((proba >= 0) & (proba <= 1)).all().item()),
+                "proba_finite": bool(torch.isfinite(proba).all().item()),
+            },
+            "outputs": {
+                "learning_curve": str(learning_curve_committed_path),
+            },
+            "limitations": {
+                "assumed_unlabeled_c1": "C1 is an assumed-negative/PU-unlabeled pool, NEVER experimentally "
+                "confirmed antioxidant-inactive, and is never assigned a binary negative label anywhere in this "
+                "pipeline -- it is the unlabeled group U of the non-negative PU risk estimator.",
+                "prior_is_provisional": PRIOR_PROVENANCE_NOTE,
+                "evidence_tiers": "E1 (assay-confirmed) and E2 (provisional benchmark-annotated) positives are "
+                "POOLED as labeled positives per Task 4.3's baseline policy, but their provenance/counts remain "
+                "separately auditable (class_counts.e1_train/e2_train/...). E2 is not uniformly assay-confirmed; "
+                "no evidence-tier weighting or soft labels are applied.",
+                "positive_selection_bias": "The labeled-positive population (literature/benchmark-derived) may not "
+                "represent the true positive subpopulation present within C1 -- nnPU does not automatically "
+                "resolve this source-distribution bias.",
+                "nnpu_vs_pn_loss_comparability": "nnPU risk and PN's BCE loss are different estimators of different "
+                "targets under different label assumptions and must NEVER be compared numerically as evidence that "
+                "one baseline 'outperforms' the other.",
+                "shortcut_bias_risk": "FR2 (Task 2.5) documented substantial FR1-positive-vs-C1 distributional "
+                "differences (length, charge, GRAVY, aromaticity, composition); nnPU does not automatically "
+                "eliminate those differences.",
+                "evaluation_scope": "Fold-0-only initial baseline, single prior value (pi sensitivity grid "
+                "documented but full sensitivity TRAINING deferred). Full C1/C2/C3 cross-pool comparison, "
+                "calibration, RNIS, and five-fold validation are out of Task 4.3's scope.",
+                "cross_fold_results": "A successful fold-0 run is an initial implementation demonstration, not "
+                "completed five-fold experimental validation.",
+                "validation_risk_is_a_surrogate": "Validation nnPU risk is a surrogate under the assumed prior and "
+                "the C1 sampling model, not an independently measured biological classification error.",
+                "scientific_sign_off": "Technical acceptance only -- no supervisor or scientific sign-off is "
+                "implied for the chosen prior, evidence-pooling policy, or any scientific conclusion.",
+            },
+        }
+    summary_path = Path(FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_NNPU_BASELINE_PROVENANCE_LOG_PATH, {"stage": "fr4_nnpu_baseline", "summary": summary})
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -2983,6 +3159,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr3-demo", help="Offline feature-pipeline demonstration: validate, extract, load, select (Bucket 3.5)")
     sub.add_parser("fr4-infra-smoke-test", help="Shared experiment infrastructure smoke test: config, data, model, seeding, checkpoint round-trip (Bucket 4.1)")
     sub.add_parser("fr4-pn-baseline", help="PN supervised baseline: E1 positives vs. C1 assumed negatives, BCE-with-logits (Bucket 4.2)")
+    sub.add_parser("fr4-nnpu-baseline", help="Plain nnPU baseline: E1+E2 positives vs. C1 as unlabeled, non-negative PU risk (Bucket 4.3)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -3077,6 +3254,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr4-pn-baseline":
         summary = run_fr4_pn_baseline()
+        print(json.dumps({k: v for k, v in summary.items() if k != "training"} | {
+            "training": {k: v for k, v in summary["training"].items() if k != "history"}
+        }, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-nnpu-baseline":
+        summary = run_fr4_nnpu_baseline()
         print(json.dumps({k: v for k, v in summary.items() if k != "training"} | {
             "training": {k: v for k, v in summary["training"].items() if k != "history"}
         }, indent=2, default=str))
