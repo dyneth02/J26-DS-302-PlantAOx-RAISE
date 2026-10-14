@@ -1,0 +1,148 @@
+{
+  "n_rows": 9356,
+  "per_descriptor": {
+    "length": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 3.0,
+      "max": 50.0,
+      "mean": 25.122595126122274,
+      "std": 13.803687310503323,
+      "near_constant": false
+    },
+    "molecular_weight": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 261.2346,
+      "max": 6854.2062,
+      "mean": 2858.389545126122,
+      "std": 1580.832693491903,
+      "near_constant": false
+    },
+    "net_charge_ph7": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": -16.882886142516575,
+      "max": 30.566056886237007,
+      "mean": 1.7783206708866959,
+      "std": 4.597304422124018,
+      "near_constant": false
+    },
+    "isoelectric_point": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 2.491352081298828,
+      "max": 13.841785430908203,
+      "mean": 8.072791423691598,
+      "std": 3.0666749503298094,
+      "near_constant": false
+    },
+    "gravy": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": -4.3,
+      "max": 3.8,
+      "mean": -0.1736395543949951,
+      "std": 0.9576421597106328,
+      "near_constant": false
+    },
+    "aromaticity": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.1013685143253304,
+      "std": 0.10173353464081876,
+      "near_constant": false
+    },
+    "instability_index": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": -74.83333333333333,
+      "max": 482.06111111111096,
+      "mean": 42.78647205327218,
+      "std": 38.66039404531284,
+      "near_constant": false
+    },
+    "aliphatic_index": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 0.0,
+      "max": 390.0,
+      "mean": 84.6744357697497,
+      "std": 43.996679947482626,
+      "near_constant": false
+    },
+    "hydrophobic_moment": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 7.401486830834377e-17,
+      "max": 1.4515587926859674,
+      "mean": 0.22304352744910982,
+      "std": 0.16505430963059833,
+      "near_constant": false
+    },
+    "frac_charged": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.21266880319157525,
+      "std": 0.13194425913966218,
+      "near_constant": false
+    },
+    "frac_polar": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.2466938174296567,
+      "std": 0.13157001503891552,
+      "near_constant": false
+    },
+    "frac_hydrophobic": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.3862786019651432,
+      "std": 0.15194709265062978,
+      "near_constant": false
+    },
+    "frac_positive": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.16083355202829333,
+      "std": 0.13110447116733184,
+      "near_constant": false
+    },
+    "frac_negative": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.07927296867840396,
+      "std": 0.08342961292329454,
+      "near_constant": false
+    },
+    "frac_proline": {
+      "missing": 0,
+      "nonfinite": 0,
+      "min": 0.0,
+      "max": 0.8,
+      "mean": 0.057127827123888836,
+      "std": 0.07570779654605392,
+      "near_constant": false
+    }
+  },
+  "high_correlation_pairs_abs_ge_0.9": [
+    {
+      "a": "length",
+      "b": "molecular_weight",
+      "pearson_r": 0.9925
+    }
+  ],
+  "schema_version": "descriptors_v1"
+}
