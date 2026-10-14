@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from plantaox.c2_pu.common.io import append_provenance_log, write_fasta
+from plantaox.c2_pu.common.io import append_provenance_log, read_fasta, write_fasta
 from plantaox.c2_pu.common.schemas import (
     CONFLICT_LOG_COLUMNS,
     EXTERNAL_CONTROL_COLUMNS,
@@ -42,6 +42,7 @@ from plantaox.c2_pu.curation.splits import (
     write_stratified_fasta,
 )
 from plantaox.c2_pu.curation.tiers import build_positive_pool
+from plantaox.c2_pu.pools import clean_c1_pool, parse_uniprot_header
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RAW_DIR = REPO_ROOT / "data" / "raw" / "c2_pu"
@@ -81,6 +82,18 @@ TOOL_VERSIONS = {
     "python_pipeline": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
     "pandas": pd.__version__,
 }
+
+# Bucket 2.1 — C1 random-decoy leakage cleanup. Raw inputs stay untouched
+# (historical evidence, per the project owner's explicit instruction); the
+# cleaned pool is a new PROCESSED artifact under the same canonical name.
+C1_RAW_DECOYS_PATH = RAW_DIR / "UniProt_decoys" / "stage_c1_decoys.fasta"
+C1_RAW_CANDIDATES_PATH = RAW_DIR / "UniProt_decoys" / "uniprotkb_candidates.fasta"
+C1_CLEAN_FASTA_PATH = PROCESSED_DIR / "stage_c1_decoys.fasta"  # canonical name, processed tier
+C1_EXCLUSION_LOG_PATH = PROCESSED_DIR / "c1_leakage_exclusion_log.csv"
+C1_REPLACEMENT_LOG_PATH = PROCESSED_DIR / "c1_leakage_replacement_log.csv"
+C1_ACCESSION_MAP_PATH = PROCESSED_DIR / "c1_accession_map.csv"
+C1_CLEAN_REPORT_PATH = PROCESSED_DIR / "c1_clean_report.json"
+C1_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr2_c1_provenance.jsonl"
 
 
 def run_fr1_positives(seed: int = 42) -> dict:
@@ -340,6 +353,93 @@ def run_fr1_freeze() -> Path:
     return manifest_path
 
 
+def run_fr2_c1_clean(seed: int = 42) -> dict:
+    """Bucket 2.1 close-out: resolve C1/positive-pool leakage without a wholesale
+    resample.
+
+    Reads the RAW stage_c1_decoys.fasta and uniprotkb_candidates.fasta --
+    does not modify either (historical evidence). Screens the existing 5,000
+    C1 records against the full 1,205 FR1 positive pool AND the 179
+    cross-source conflicts (conservative), removes any exact-sequence
+    matches, and deterministically fills the gap from the untouched portion
+    of the already-saved candidate pool (no live UniProt query needed).
+    Writes the cleaned pool to the PROCESSED tier under the same canonical
+    filename; the raw tier keeps the original, contaminated-but-historical
+    file untouched.
+    """
+    if not (C1_RAW_DECOYS_PATH.exists() and C1_RAW_CANDIDATES_PATH.exists()):
+        raise FileNotFoundError(f"{C1_RAW_DECOYS_PATH} / {C1_RAW_CANDIDATES_PATH} not found.")
+    if not POSITIVE_POOL_PATH.exists():
+        raise FileNotFoundError(f"{POSITIVE_POOL_PATH} not found -- run fr1-positives first.")
+
+    c1_records = read_fasta(C1_RAW_DECOYS_PATH)
+    candidate_pool_records = read_fasta(C1_RAW_CANDIDATES_PATH)
+    positive_df = pd.read_parquet(POSITIVE_POOL_PATH)
+    conflict_df = pd.read_csv(CONFLICT_LOG_PATH)
+    screen_sequences = set(positive_df["sequence"]) | set(conflict_df["sequence"])
+
+    clean_records, exclusion_log, replacement_log, summary = clean_c1_pool(
+        c1_records, candidate_pool_records, screen_sequences, seed=seed
+    )
+    if summary["shortfall"] > 0:
+        raise RuntimeError(
+            f"Eligible replacement pool exhausted: needed {summary['n_replacements_needed']}, "
+            f"only {summary['n_replacements_available']} available. Stopping rather than "
+            "silently shipping a short pool -- see the project owner before changing source/criteria."
+        )
+
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    write_fasta(C1_CLEAN_FASTA_PATH, clean_records)
+
+    accession_map = pd.DataFrame(
+        [
+            {"peptide_header": h, "sequence": s, "length": len(s), **parse_uniprot_header(h)}
+            for h, s in clean_records
+        ]
+    )
+    accession_map.to_csv(C1_ACCESSION_MAP_PATH, index=False, lineterminator="\n")
+
+    exclusion_df = pd.DataFrame(exclusion_log)
+    exclusion_df.to_csv(C1_EXCLUSION_LOG_PATH, index=False, lineterminator="\n")
+
+    replacement_df = pd.DataFrame(replacement_log)
+    replacement_df.to_csv(C1_REPLACEMENT_LOG_PATH, index=False, lineterminator="\n")
+
+    unique_seqs = set(s for _, s in clean_records)
+    lengths = [len(s) for s in unique_seqs]
+    summary.update(
+        {
+            "seed": seed,
+            "n_unique_sequences": len(unique_seqs),
+            "min_length": min(lengths) if lengths else None,
+            "max_length": max(lengths) if lengths else None,
+            "screen_set_size": len(screen_sequences),
+        }
+    )
+    with open(C1_CLEAN_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2)
+
+    append_provenance_log(
+        C1_PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr2_c1_leakage_cleanup",
+            "raw_decoys": str(C1_RAW_DECOYS_PATH),
+            "raw_candidates": str(C1_RAW_CANDIDATES_PATH),
+            "screen_sources": [str(POSITIVE_POOL_PATH), str(CONFLICT_LOG_PATH)],
+            "seed": seed,
+            "summary": summary,
+            "outputs": {
+                "clean_fasta": str(C1_CLEAN_FASTA_PATH),
+                "accession_map": str(C1_ACCESSION_MAP_PATH),
+                "exclusion_log": str(C1_EXCLUSION_LOG_PATH),
+                "replacement_log": str(C1_REPLACEMENT_LOG_PATH),
+                "report": str(C1_CLEAN_REPORT_PATH),
+            },
+        },
+    )
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -347,6 +447,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr1-cluster", help="CD-HIT 90% identity clustering (Bucket 1.5)")
     sub.add_parser("fr1-split", help="GraphPart 40% identity 5-fold split (Bucket 1.6)")
     sub.add_parser("fr1-freeze", help="Snapshot validated FR1 artifacts as a versioned baseline (Bucket 1.7)")
+    sub.add_parser("fr2-c1-clean", help="Resolve C1/positive-pool leakage (Bucket 2.1 close-out)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -364,6 +465,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr1-freeze":
         manifest_path = run_fr1_freeze()
         print(f"Frozen baseline written: {manifest_path}")
+        return 0
+    if args.stage == "fr2-c1-clean":
+        summary = run_fr2_c1_clean()
+        print(json.dumps(summary, indent=2))
         return 0
     return 1
 

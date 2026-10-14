@@ -125,13 +125,13 @@ decision log (2026-10-14). Recommend scheduling separately — it does not block
 **Definition of done:** Reproducibly generated and frozen C1, C2, and C3 unlabeled pools, with a known-AOP overlap audit, distribution checks, and leakage validation.
 
 ## 2.1 — C1 Random Decoy Construction
-- [ ] Confirm SwissProt versus UniRef50 sampling specification with supervisor.
-- [ ] Register source release, local reference files, and extraction provenance.
-- [ ] Implement reproducible **3–50 AA** fragment sampling with a fixed seed.
-- [ ] Construct and verify the **5,000-record** decoy dataset.
-- [ ] Screen available annotations for known bioactivities; record limitations of annotation coverage.
-- [ ] Remove known AOP matches, malformed sequences, and duplicates.
-- [ ] Save C1 FASTA/CSV plus accession/fragment-coordinate mapping and exclusion log.
+- [ ] Confirm SwissProt versus UniRef50 sampling specification with supervisor. *(still pending — see IMPLEMENTATION_STATUS.md Known Issues #1)*
+- [ ] Register source release, local reference files, and extraction provenance. *(provenance logs exist — `stage_c1_provenance.txt`, `fr2_c1_provenance.jsonl` — but no formal registry file, same gap as Bucket 1.2's `data_registry.csv`)*
+- [x] Implement reproducible **3–50 AA** fragment sampling with a fixed seed. *(ported into tested code, `pools.py`; reproduces the saved file exactly from the saved candidate pool — `test_original_construction_is_reproducible_from_scratch`)*
+- [x] Construct and verify the **5,000-record** decoy dataset. *(confirmed 5,000 records / 3,786 unique sequences; record-level interpretation confirmed with the project owner, 2026-10-14)*
+- [x] Screen available annotations for known bioactivities; record limitations of annotation coverage. *(secondary blocklist verified to reproduce 8,233 kept / 597 excluded exactly; residual coverage gaps documented in `PU_AOP_RESEARCH_CONTEXT.md` §7)*
+- [ ] Remove known AOP matches, malformed sequences, and duplicates. *(AOP matches: done — 1 found via conservative screening against 1,205 positives + 179 conflicts, swapped out. Malformed sequences: **not done** — 260/5,000 contain non-standard residue codes (X/B/Z/U), found but not yet resolved, see Known Issues #9. Duplicates: **not removed** — kept intentionally, per the record-vs-unique decision above.)*
+- [x] Save C1 FASTA/CSV plus accession/fragment-coordinate mapping and exclusion log. *(`c1_accession_map.csv`, `c1_leakage_exclusion_log.csv`, `c1_leakage_replacement_log.csv` — no literal fragment coordinates exist to map, since C1 decoys are whole short UniProt entries, not fragments cut by this pipeline; documented in IMPLEMENTATION_STATUS.md)*
 
 ## 2.2 — C2 Bioactive Unlabeled Pool Construction
 - [ ] Acquire Peptipedia records and their bioactivity annotations.
@@ -413,13 +413,15 @@ four items that most need a human look.
 - [ ] Validated files, summary report, and runnable commands attached. *(§1 commands, §8 frozen files)*
 
 ## FR2 — Three-Stage Challenge Pools
-- [ ] C1 has **5,000 verified records**, with source, seed, and screening log.
-- [ ] C2 has approximately **2,000 curated bioactive unlabeled** records.
-- [ ] C3 has **2,000 ESM-2-nearest unlabeled** candidates with ranked distances.
-- [ ] AOP exclusion and pool overlap audits documented.
-- [ ] Length, composition, and descriptor checks included.
-- [ ] External experimentally inactive controls remain separate and verified.
-- [ ] Pool versions, generated artifacts, and regeneration commands frozen.
+**Same convention as FR1's checklist above: these are the supervisor's boxes, left unchecked on
+purpose, annotated with where the evidence lives.**
+- [ ] C1 has **5,000 verified records**, with source, seed, and screening log. *(5,000 records confirmed, reproducible from seed 42, 0 remaining leakage against FR1 positives/conflicts — see Bucket 2.1 close-out, IMPLEMENTATION_STATUS.md. Still open: 260 non-standard-residue sequences unresolved, Known Issues #9.)*
+- [ ] C2 has approximately **2,000 curated bioactive unlabeled** records. *(not started)*
+- [ ] C3 has **2,000 ESM-2-nearest unlabeled** candidates with ranked distances. *(not started, blocked on ESM-2 env setup)*
+- [ ] AOP exclusion and pool overlap audits documented. *(done for C1 vs. FR1 positives; C2/C3 not started)*
+- [ ] Length, composition, and descriptor checks included. *(C1 length range confirmed 4-50 AA; composition/descriptor checks not yet done for any pool)*
+- [ ] External experimentally inactive controls remain separate and verified. *(38-sequence clean external control frozen under FR1's pp1_baseline_v1; its own homology check against positives, per Bucket 2.6, not started)*
+- [ ] Pool versions, generated artifacts, and regeneration commands frozen. *(C1 cleanup is reproducible and tested, not yet frozen under a versioned baseline the way FR1 was — recommend doing that once C2/C3 exist, not as three separate partial freezes)*
 
 ## FR3 / FR4 — Stretch Claims
 - [ ] Only claim partial FR3 when fewer than PN, nnPU, Two-Step PU, and PU-Bagging work.

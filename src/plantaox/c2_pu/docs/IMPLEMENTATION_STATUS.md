@@ -36,18 +36,54 @@
   mutate this directory in place — a genuine future change gets a new version ID (`pp1_baseline_v2`),
   logged with a reason for superseding this one.
 
+### Bucket 2, Task 2.1 — C1 Random Decoy Construction (close-out)
+- **Status: closed out.** The original Colab-run pipeline (query + secondary blocklist + seed-42
+  sample) was ported into tested, reproducible repo code (`pools.py`), not just re-described —
+  verified to reproduce the documented 8,830 → 8,233 blocklist result and the saved
+  `stage_c1_decoys.fasta` exactly before any cleanup logic was written
+  (`test_original_construction_is_reproducible_from_scratch`).
+- **"5,000 records" interpretation (confirmed with the project owner):** satisfied at the FASTA-entry
+  level (5,000 records, 3,786 unique sequences) — not resampled for uniqueness. Duplication among
+  short 4–50 AA fragments across species is retained and explicitly documented, not hidden; flag the
+  unique-vs-record distinction if this dataset's size is cited in the FR2 report or presentation.
+- **Leakage resolved, screened conservatively:** every C1 sequence was checked against all 1,205 FR1
+  positives *and* the 179 cross-source conflicts (not just the 834-sequence frozen split), per
+  explicit instruction. Found exactly one contaminated entry: `DRVYIHPF` (an Angiotensin-like peptide
+  fragment, UniProt `Q10582`) — an assay-confirmed E1 positive that happened not to be CD-HIT's chosen
+  representative for its cluster, so it was absent from the frozen `pp1_baseline_v1` split but still
+  sitting in the raw "unlabeled" C1 pool, which AGENTS.md's leakage rules don't allow regardless.
+- **Resolution: swap, not resample.** Removed the 1 contaminated entry and deterministically selected
+  1 replacement (seed 42) from the untouched portion of the already-saved `uniprotkb_candidates.fasta`
+  candidate universe (2,246 eligible candidates available after excluding anything blocklisted,
+  already-sampled, or itself contaminated) — no live UniProt query needed. Final pool: still 5,000
+  records, 3,786 unique sequences (coincidentally unchanged), 0 remaining contamination.
+- **Raw data preserved as historical evidence, per instruction:** `data/raw/c2_pu/UniProt_decoys/*`
+  (including the still-contaminated original `stage_c1_decoys.fasta`) is untouched. The corrected pool
+  is a new artifact under the same canonical filename at the **processed** tier:
+  `data/processed/c2_pu/stage_c1_decoys.fasta`. `pp1_baseline_v1` (FR1) was not touched.
+- **New artifacts:** `c1_accession_map.csv` (all 5,000 records, UniProt accession/entry/organism/
+  fragment-flag parsed from each header — addresses the Planner's "accession/fragment-coordinate
+  mapping" item; see note below on why there are no literal fragment coordinates),
+  `c1_leakage_exclusion_log.csv` (1 row), `c1_leakage_replacement_log.csv` (1 row),
+  `c1_clean_report.json`, `fr2_c1_provenance.jsonl`.
+- **"Fragment-coordinate mapping" note:** C1 decoys are naturally short, complete UniProt entries
+  (`length:[3 TO 50]` selects whole short reviewed proteins), not fragments cut by us from longer
+  ones — a few are independently flagged `(Fragment)` by UniProt itself (parsed into
+  `is_fragment`), but there are no fragment start/end coordinates to map because none were generated
+  by this pipeline. Documenting this explicitly rather than inventing coordinates that don't exist.
+- **Manual spot-check status:** the six historical rounds of 25-record manual review (documented in
+  `PU_AOP_RESEARCH_CONTEXT.md` §6) still cover 4,999 of these 5,000 records unchanged; the one new
+  replacement (`RL34_XANVE`, a bacterial large-ribosomal-subunit protein) was read by this agent as
+  part of generating the replacement log and shows no bioactivity-adjacent signal, but has not had an
+  independent fresh-sample human/agent review of its own — noting this rather than silently claiming
+  AGENTS.md validation rule #2 is fully satisfied for the one new record.
+- **Reproducibility:** `test_rerunning_c1_clean_is_reproducible` re-invokes the live cleanup and diffs
+  SHA-256 hashes of every output file — byte-identical. 13 new tests total (`test_pools.py`,
+  `test_fr2_c1_clean_acceptance.py`), all passing alongside the full existing suite (73 total).
+
 ## 🔄 Current work in progress
 
-### Bucket 2, Task 2.1 — C1 Random Decoy Construction
-- **Status:** Pipeline built and functioning; full-file validation **not yet done**.
-- **What exists:** A Colab/Python script that queries UniProtKB REST (`reviewed:true AND length:[3 TO 50]` plus keyword exclusions), applies a secondary Python keyword blocklist, randomly samples 5,000 records (seed 42), and writes a provenance log.
-- **Latest run stats:** 8,830 candidates after query filter → 8,233 after secondary filter → 5,000 sampled.
-- **What's NOT done:**
-  - The full 5,000-record `stage_c1_decoys.fasta` has never been directly inspected — only six rounds of 25-record random previews.
-  - No automated test yet exists to re-check the *entire* final file against the blocklist (as opposed to a random slice).
-  - Reproducibility hasn't been formally re-verified (re-running from scratch and diffing against the saved file).
-  - Task 2.1's remaining checklist items (accession/fragment-coordinate mapping, exclusion log formatting) per the Planner breakdown are not yet done.
-- **Next action:** see Next Tasks below — full-file validation script, then formal close-out of 2.1.
+*(Bucket 2, Task 2.1 moved to Completed below — see that section for the close-out evidence.)*
 
 ## ⚠️ Known issues / open risks
 
@@ -56,8 +92,10 @@
 3. **Full-file validation gap** (see Current Work above) — this is the one open item that *does* need closing before C1/FR2 can be marked complete, as distinct from #2 which is an accepted limitation.
 4. **A real case-sensitivity bug occurred once already** (keyword added with a capital letter never matched because `.lower()` was only applied to the description, not the keyword). Fixed via the list-comprehension lowercasing pattern in `PU_AOP_RESEARCH_CONTEXT.md` §5. Any agent editing the blocklist should be aware this class of bug is easy to reintroduce.
 5. **179 of 1,384 candidate positives (Multi-AOP ∩ AnOxPePred-inactive) are cross-source contradicted — resolved, but needs supervisor visibility.** See Bucket 1 section above. Excluded from both the positive pool and the external control pending manual review; logged in full in `label_conflicts_anox_vs_multiaop.csv`. This is the exact "contradictory labels across databases" phenomenon the proposal's own lit review (p.14, citing Isaac et al.) names as a field-wide problem — worth citing directly in the FR1 report as in-practice confirmation of the research motivation, not just a data-cleaning footnote.
-6. **C1 decoy pool has only 3,786 unique sequences across its 5,000 FASTA records** (checked directly against the full file, not a sample). Short 3–50 AA fragments repeat across species for biologically ordinary reasons (conserved motifs), so this isn't necessarily a defect, but it means the "5,000 records" acceptance criterion (Bucket 2.7, FR2 checklist) is satisfied at the record level, not the unique-sequence level — needs an explicit decision on which one the acceptance checklist actually means before FR2 sign-off.
-7. **One known AOP positive sequence (`DRVYIHPF`) was found inside the existing C1 decoy FASTA** — direct sequence-identity leakage between Stage C1 and the positive pool. Expected: C1 was built (2026-10-07) before the FR1 positive pool existed, so its only contamination screen was the generic bioactivity keyword blocklist, not a direct identity check. This is exactly what Bucket 2.4 ("Find and resolve overlap among challenge pools and curated positives") is for — flagging here so it isn't missed, not proposing a new policy.
+6. **RESOLVED 2026-10-14.** C1's "5,000 records / 3,786 unique sequences" question was confirmed with the project owner as satisfied at the record level — see Bucket 2, Task 2.1 (close-out) above. Kept here for history; not an open item anymore.
+7. **RESOLVED 2026-10-14.** The `DRVYIHPF` leakage was found, screened conservatively (against all 1,205 positives + 179 conflicts, not just the frozen 834), and fixed by a 1-for-1 deterministic swap — see Bucket 2, Task 2.1 (close-out) above. `pp1_baseline_v1` was unaffected (the sequence was never in the frozen split).
+8. **The one new C1 replacement record (`RL34_XANVE`) has not had an independent manual spot-check**, distinct from the six historical rounds covering the other 4,999 unchanged records. Noted in the Task 2.1 close-out rather than silently assumed covered by the prior rounds.
+9. **NEW: 260 of 5,000 C1 decoys (5.2%) contain non-standard residue codes** — X (251, "unknown residue"), B (7, Asx ambiguity), Z (3, Glx ambiguity), U (3, selenocysteine — a genuine 21st proteinogenic amino acid, not an error). `common/sequence.py`'s `is_standard_alphabet()` (enforced throughout FR1's positive pool) would reject all of these. Found while verifying the Planner's "remove malformed sequences" checklist item for Bucket 2.1 — **not fixed**, since resolving it means either another leakage-style swap (small, same pattern as the `DRVYIHPF` fix) or a documented decision to keep them (relevant: U is biologically real, X/B/Z are genuinely ambiguous/unknown). Out of scope for the leakage-only close-out just completed; flagged for the project owner before Bucket 2.1's "malformed sequences" checkbox can be marked done, and before ESM-2/descriptor feature extraction (Bucket 3) hits these residues downstream.
 
 ## ⏭️ Next tasks (in order)
 
@@ -65,14 +103,8 @@
    the conflict-resolution policy, the E2 provisional-tier default, the C1 source ambiguity, and the
    missing formal `data_registry.csv`. None block continued FR2/FR3 work on `pp1_baseline_v1`, but
    FR1 isn't *scientifically* closed until these are addressed.
-2. **Close out 2.1 (C1) properly**, now with two new concrete findings to fold in:
-   - Decide whether "5,000 records" (Bucket 2.7 acceptance criterion) means 5,000 FASTA entries or
-     5,000 unique sequences — currently 3,786 unique (see Known Issues #6).
-   - Run Bucket 2.4's positive-vs-C1 identity check now that the FR1 positive pool exists; at least
-     one known positive (`DRVYIHPF`) is currently sitting inside the C1 decoy file (Known Issues #7).
-   - Confirm record count, length range 3–50 AA, re-run reproducibility, and finish the
-     accession/fragment-coordinate mapping and exclusion log artifacts still outstanding from the 2.1
-     checklist.
+2. **Bucket 2.1 (C1) is closed out** — see Completed tasks above. Optional follow-up: an independent
+   spot-check of the one new replacement record (`RL34_XANVE`), low priority.
 3. **In parallel: begin ESM-2 environment setup** (Bucket 3, task 3.2) — the `pu_aop` WSL conda env
    built for CD-HIT/GraphPart is a natural place to add PyTorch/fair-esm too, since it already solves
    the "no root access" problem this environment has.
@@ -100,5 +132,8 @@
 | 2026-10-14 | FR1 declared technically accepted and frozen as `pp1_baseline_v1`, with scientific/supervisor sign-off tracked as a separate, still-open item rather than bundled into the same status | AGENTS.md rule #3 requires acceptance evidence before marking a task complete, and that evidence (reproducibility, provenance chain, leakage checks, full-file tests) is now in hand — see `fr1_acceptance_report.md`. But conflating "the pipeline is correct and reproducible" with "the conclusions are supervisor-approved" would overclaim; the four pending-approval items (fr1_acceptance_report.md §10) are listed separately so neither status gets confused for the other. |
 | 2026-10-14 | `data_registry.csv` (Bucket 1.1/1.2) is explicitly logged as NOT done, rather than fabricating one or quietly treating the per-stage provenance logs as a substitute | No formal source registry (IDs, license, access date, release/commit hash) was ever built; `fr1_positive_pool_provenance.jsonl` and this file capture run-level provenance, which is not the same artifact. Inventing placeholder registry content (e.g. a guessed access date) would be worse than naming the gap. Flagged in `fr1_acceptance_report.md` §4/§9 for separate follow-up, out of Bucket 1.7's scope. |
 | 2026-10-14 | Fixed a real cross-platform reproducibility bug found while starting FR2: every CSV/JSON write in run.py/freeze.py now pins `lineterminator="\n"`/`newline="\n"` explicitly, and a new `.gitattributes` (`data/** -text`) stops git from re-expanding line endings on checkout. `pp1_baseline_v1` was regenerated in place (not re-versioned) to pick up the fix | pandas' `to_csv` and Python's default text-mode `open()` both translate `\n` to `os.linesep` on write, which is CRLF on Windows — so every checksummed artifact's SHA-256 depended on which OS happened to run the pipeline, silently breaking the freeze/reproducibility guarantee `curation/freeze.py` and `test_fr1_reproducibility.py` exist to provide. Caught via a routine fresh re-run on a new branch (`feat/challenge-pools-setup`), which failed `test_fr1_freeze_acceptance.py` and `test_fr1_reproducibility.py` — i.e., the acceptance tests built in Bucket 1.7 did their job. Regenerating `pp1_baseline_v1` in place (rather than minting `pp1_baseline_v2`) was judged correct per AGENTS.md rule #4's spirit: nothing had consumed v1 yet (it was one session old, pre-FR2), so there was no prior work to protect by versioning a bug fix — all file *contents* are unchanged, only their byte-level line-ending encoding was corrected. |
+| 2026-10-14 | C1's "5,000 records" acceptance criterion is satisfied at the FASTA-entry level (3,786 unique sequences retained, not resampled for uniqueness) | Confirmed with the project owner. Short 4–50 AA fragments legitimately repeat across species; forcing uniqueness would mean a live UniProt resample, more work for a result the Planner doc doesn't clearly demand. Documented explicitly so the record-vs-unique distinction isn't silently glossed over if this dataset's size is cited later. |
+| 2026-10-14 | C1 leakage (`DRVYIHPF`) resolved by a 1-for-1 deterministic swap from the already-saved candidate pool, screened against all 1,205 FR1 positives *and* the 179 conflicts (not just the 834-sequence frozen split) | Conservative screening confirmed with the project owner — a conflicted sequence might still be a real positive under a different reading of the evidence, so it's excluded from the "safe to use as a decoy" set too. No live UniProt query was needed since `uniprotkb_candidates.fasta` (the original 8,830-candidate universe) was already saved locally; re-applying the documented secondary blocklist to it reproduced exactly 8,233 kept / 597 excluded, matching `stage_c1_provenance.txt` precisely, before any new candidates were drawn. |
+| 2026-10-14 | The corrected C1 pool is a new processed-tier artifact (`data/processed/c2_pu/stage_c1_decoys.fasta`) under the same canonical filename; the raw, still-contaminated original is left untouched at `data/raw/c2_pu/UniProt_decoys/stage_c1_decoys.fasta` | Explicit instruction: preserve the original as historical evidence, version the corrected artifact, rather than editing raw data in place. Mirrors the raw-vs-processed pattern already used for the FR1 positive pool (raw Multi-AOP/AnOxPePred CSVs vs. processed `aop_positives_*.parquet`). |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
