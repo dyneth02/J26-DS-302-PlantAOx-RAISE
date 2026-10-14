@@ -1,3 +1,6 @@
 pandas
 pyarrow
 pytest
+torch
+scikit-learn==1.9.0
+pulearn==0.2.0

@@ -299,3 +299,48 @@ data/interim/c2_pu/test_fr3_reembed_spotcheck_report.json
 data/interim/c2_pu/ext_control_homology/needleall_output.pair
 data/interim/c2_pu/ext_control_homology/external_control.fasta
 data/interim/c2_pu/ext_control_homology/positives.fasta
+
+# Bucket 4.1 -- run directories (resolved configs, epoch logs, checkpoints)
+# produced by the infrastructure smoke test and any future Bucket 4
+# training run. Entirely regeneratable/reproducible from the frozen
+# feature cache + a run's own resolved config; checkpoints in particular
+# are large binary PyTorch state -- same "don't commit large arrays" rule
+# as model weights and embedding caches elsewhere in this project.
+data/interim/c2_pu/fr4_infra_smoke_test_runs/
+
+# Bucket 4.2 -- PN baseline run directories (resolved configs, epoch
+# logs, PyTorch checkpoints). Same reasoning as the smoke-test runs dir
+# above; committed summaries (fr4_pn_baseline_fold*_summary.json) and the
+# checkpoint SHA-256 they record are the durable, auditable artifacts.
+data/interim/c2_pu/fr4_pn_baseline_runs/
+
+# Bucket 4.3 -- nnPU baseline run directories (resolved configs, epoch
+# logs, PyTorch checkpoints). Same reasoning as the PN runs dir above;
+# committed summaries (fr4_nnpu_baseline_fold*_summary.json) and the
+# checkpoint SHA-256 they record are the durable, auditable artifacts.
+data/interim/c2_pu/fr4_nnpu_baseline_runs/
+
+# Task 4.3 POST-ACCEPTANCE DIAGNOSTIC -- pi-sensitivity run directories
+# (resolved configs, epoch logs, PyTorch checkpoints). Same reasoning as
+# the accepted-baseline runs dir above; committed summaries
+# (fr4_nnpu_prior_sensitivity_pi*_fold*_summary.json) and the checkpoint
+# SHA-256 they record are the durable, auditable artifacts. Entirely
+# separate from fr4_nnpu_baseline_runs/ so the diagnostic can never
+# collide with or overwrite the accepted pi=0.10 baseline's own run dirs.
+data/interim/c2_pu/fr4_nnpu_prior_sensitivity_runs/
+
+# Task 4.3 corrective beta/gamma follow-up -- separate run directories,
+# epoch logs, and PyTorch checkpoints. The compact summary, curve, and
+# checkpoint hashes are committed; binary model state remains local.
+data/interim/c2_pu/fr4_nnpu_corrective_runs/
+
+# Bucket 4.4 -- Two-Step PU / PU-Bagging run directories (resolved
+# configs, epoch logs, scikit-learn/pulearn estimator checkpoints saved
+# via joblib -- NOT PyTorch .pt files, since these baselines wrap
+# sklearn-compatible estimators, not models.BinaryMlp). Same "don't
+# commit large binary artifacts" reasoning as every other Bucket-4 runs
+# dir above; committed summaries (fr4_two_step_pu_baseline_fold*_summary.json,
+# fr4_pu_bagging_baseline_fold*_summary.json) and the checkpoint SHA-256
+# they record are the durable, auditable artifacts.
+data/interim/c2_pu/fr4_two_step_pu_baseline_runs/
+data/interim/c2_pu/fr4_pu_bagging_baseline_runs/

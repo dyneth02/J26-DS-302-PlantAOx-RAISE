@@ -2703,6 +2703,1155 @@ def run_fr3_demo(fold_id: int = FR3_DEMO_FOLD_ID) -> dict:
     return summary
 
 
+# Bucket 4.1 -- Shared Experiment Infrastructure (config, model, fold-aware
+# data interface, seeding, run recorder). Every torch-dependent Bucket-4
+# module is imported LAZILY inside this function only, so every other CLI
+# stage above keeps its existing torch-free import graph unchanged.
+FR4_SMOKE_TEST_RUNS_DIR = INTERIM_DIR / "fr4_infra_smoke_test_runs"  # gitignored, scratch
+
+
+def run_fr4_infra_smoke_test(fold_id: int = 0) -> dict:
+    """Bucket 4.1 acceptance smoke test: config validation, fold-aware
+    data loading (real fold-``fold_id`` cache), model construction, a
+    forward pass, seeding, and a full checkpoint save/load round-trip --
+    all against real artifacts, entirely offline. This is explicitly an
+    INFRASTRUCTURE check, not a trained PN/PU baseline: no training loop,
+    no loss function, and no fabricated performance metric is produced or
+    recorded anywhere in this function.
+    """
+    import torch
+
+    from plantaox.c2_pu.common.seeding import resolve_device, set_global_seed
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.run_recorder import (
+        RunContext,
+        append_epoch_metrics,
+        create_run_dir,
+        load_checkpoint,
+        save_checkpoint,
+        write_resolved_config,
+    )
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    config = ExperimentConfig(
+        experiment_id="fr4_infra_smoke_test", baseline="PN", fold_id=fold_id, checkpoint_dir=str(FR4_SMOKE_TEST_RUNS_DIR)
+    )
+    seed_context = set_global_seed(config.train_seed)
+    device = resolve_device(config.device)
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+
+    model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims)).to(device)
+    sample = torch.from_numpy(data.train_positive.features[: min(8, len(data.train_positive.features))]).to(device)
+    with torch.no_grad():
+        logits = model(sample)
+        proba = model.predict_proba(sample)
+
+    resolved_config = config.to_dict()
+    resolved_config["seed_context"] = seed_context
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        append_epoch_metrics(
+            run_dir,
+            epoch=0,
+            metrics={
+                "diagnostic_note": "infra smoke test only -- NOT a trained PN/PU baseline",
+                "forward_pass_logit_mean": float(logits.mean().item()),
+                "forward_pass_proba_mean": float(proba.mean().item()),
+            },
+        )
+        checkpoint_path = save_checkpoint(
+            run_dir, model, epoch=0, metrics={"note": "infra smoke test, untrained model"},
+            is_best=True, extra={"infra_smoke_test": True},
+        )
+        save_checkpoint(
+            run_dir, model, epoch=0, metrics={"note": "infra smoke test, untrained model"},
+            is_best=False, extra={"infra_smoke_test": True},
+        )
+        reload_model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(checkpoint_path, reload_model)
+
+        summary = {
+            "run_dir": str(run_dir),
+            "device": str(device),
+            "data_pool_sizes": {
+                "train_positive": len(data.train_positive.peptide_ids),
+                "validation_positive": len(data.validation_positive.peptide_ids),
+                "held_out_positive": len(data.held_out_positive.peptide_ids),
+                "c1": len(data.c1.peptide_ids),
+                "c2": len(data.c2.peptide_ids),
+                "c3_fold_challenges": len(data.c3_fold_challenges.peptide_ids),
+                "external_control": len(data.external_control.peptide_ids),
+            },
+            "leakage_report": data.leakage_report,
+            "forward_pass": {
+                "logits_shape": list(logits.shape),
+                "logits_finite": bool(torch.isfinite(logits).all().item()),
+                "proba_bounded": bool(((proba >= 0) & (proba <= 1)).all().item()),
+            },
+            "checkpoint_round_trip_ok": True,
+            "checkpoint_epoch": checkpoint_info["epoch"],
+            "note": "INFRASTRUCTURE SMOKE TEST ONLY -- not a trained PN/PU baseline (no training loop, no loss, no real metrics).",
+        }
+    return summary
+
+
+# Bucket 4.2 -- PN (Positive-Negative) supervised baseline: E1 positives
+# vs. C1 assumed negatives, BCE-with-logits, on the accepted Task 4.1
+# infrastructure. Every torch-dependent module is imported LAZILY inside
+# this function, mirroring Bucket 4.1's `fr4-infra-smoke-test` -- run.py's
+# module-level import graph stays torch-free.
+FR4_PN_BASELINE_RUNS_DIR = INTERIM_DIR / "fr4_pn_baseline_runs"  # gitignored, scratch
+FR4_PN_BASELINE_SUMMARY_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_pn_baseline_fold{fold_id}_summary.json")
+FR4_PN_BASELINE_LEARNING_CURVE_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_pn_baseline_fold{fold_id}_learning_curve.svg")
+FR4_PN_BASELINE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_pn_baseline_provenance.jsonl"
+
+
+def run_fr4_pn_baseline(
+    fold_id: int = 0,
+    max_epochs: int | None = None,
+    use_class_weight: bool = True,
+    early_stopping_patience: int | None = 10,
+) -> dict:
+    """Bucket 4.2: train the PN supervised baseline for GraphPart fold
+    ``fold_id`` -- E1 positives vs. C1 assumed negatives -- using Task
+    4.1's BinaryMlp/build_experiment_data/run_recorder/seeding exactly as
+    accepted. C1 is an assumed-negative (PU-unlabeled) pool, never
+    experimentally confirmed inactive; this is the field's conventional-
+    practice reference baseline, not a validated antioxidant predictor.
+    """
+    import torch
+
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.pn_baseline import build_pn_dataset, train_pn_baseline
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, load_checkpoint, write_resolved_config
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    config_kwargs = {
+        "experiment_id": f"fr4_pn_baseline_fold{fold_id}",
+        "baseline": "PN",
+        "fold_id": fold_id,
+        "checkpoint_dir": str(FR4_PN_BASELINE_RUNS_DIR),
+    }
+    if max_epochs is not None:
+        config_kwargs["max_epochs"] = max_epochs
+    config = ExperimentConfig(**config_kwargs)
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_pn_dataset(data, config)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["pn_dataset_provenance"] = {
+        "class_counts": dataset.class_counts,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "e1_train_ids_count": len(dataset.e1_train_ids),
+        "e1_validation_ids_count": len(dataset.e1_validation_ids),
+        "c1_train_ids_count": len(dataset.c1_train_ids),
+        "c1_validation_ids_count": len(dataset.c1_validation_ids),
+    }
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_pn_baseline(
+            config, dataset, run_dir, use_class_weight=use_class_weight, early_stopping_patience=early_stopping_patience
+        )
+
+        best_checkpoint_path = run_dir / "checkpoint_best.pt"
+        last_checkpoint_path = run_dir / "checkpoint_last.pt"
+        reload_model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(best_checkpoint_path, reload_model)
+
+        sample_n = min(16, len(dataset.validation_features))
+        sample_x = torch.from_numpy(dataset.validation_features[:sample_n])
+        proba = reload_model.predict_proba(sample_x)
+
+        learning_curve_committed_path = Path(FR4_PN_BASELINE_LEARNING_CURVE_PATH_TEMPLATE.format(fold_id=fold_id))
+        learning_curve_committed_path.write_text(
+            Path(training_summary["learning_curve_path"]).read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+        )
+
+        summary = {
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "class_counts": dataset.class_counts,
+            "c1_partition": {
+                "validation_fraction": dataset.c1_validation_fraction,
+                "seed": dataset.c1_partition_seed,
+            },
+            "training": {k: v for k, v in training_summary.items() if k != "learning_curve_path"},
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+                "best_checkpoint_epoch": checkpoint_info["epoch"],
+            },
+            "checkpoint_reload_verification": {
+                "proba_shape": list(proba.shape),
+                "proba_bounded": bool(((proba >= 0) & (proba <= 1)).all().item()),
+                "proba_finite": bool(torch.isfinite(proba).all().item()),
+            },
+            "outputs": {
+                "learning_curve": str(learning_curve_committed_path),
+            },
+            "limitations": {
+                "assumed_negative_labels": "C1 is an assumed-negative/PU-unlabeled pool, NOT experimentally confirmed "
+                "antioxidant-inactive. PN is a conventional supervised control, not a validated predictor.",
+                "shortcut_bias_risk": "FR2 (Task 2.5) documented substantial FR1-positive-vs-C1 distributional "
+                "differences (length, charge, GRAVY, aromaticity, composition). High validation performance here "
+                "may reflect these shortcuts rather than genuine antioxidant-activity discrimination.",
+                "evidence_tiers": "E1 only is used for the PN positive class; E2 remains available for subsequent "
+                "evidence-tiered PU experiments (Task 4.3+).",
+                "evaluation_scope": "Fold-0-only initial baseline. Full C1/C2/C3 cross-pool comparison, calibration, "
+                "RNIS, and five-fold validation are out of Task 4.2's scope.",
+                "cross_fold_results": "A successful fold-0 run is an initial implementation demonstration, not "
+                "completed five-fold experimental validation.",
+                "scientific_sign_off": "Technical acceptance only -- no supervisor or scientific sign-off is implied.",
+            },
+        }
+    summary_path = Path(FR4_PN_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_PN_BASELINE_PROVENANCE_LOG_PATH, {"stage": "fr4_pn_baseline", "summary": summary})
+    return summary
+
+
+# Bucket 4.3 -- plain non-negative PU (nnPU) baseline: E1+E2 labeled
+# positives vs. C1 treated as UNLABELED (never a confirmed negative),
+# the non-negative PU risk estimator (direct-clamped variant), on the
+# accepted Task 4.1 infrastructure. Every torch-dependent module is
+# imported LAZILY inside this function, mirroring Bucket 4.2 -- run.py's
+# module-level import graph stays torch-free.
+FR4_NNPU_BASELINE_RUNS_DIR = INTERIM_DIR / "fr4_nnpu_baseline_runs"  # gitignored, scratch
+FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_nnpu_baseline_fold{fold_id}_summary.json")
+FR4_NNPU_BASELINE_LEARNING_CURVE_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_nnpu_baseline_fold{fold_id}_learning_curve.svg")
+FR4_NNPU_BASELINE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_nnpu_baseline_provenance.jsonl"
+FR4_NNPU_CORRECTIVE_RUNS_DIR = INTERIM_DIR / "fr4_nnpu_corrective_runs"
+FR4_NNPU_CORRECTIVE_SUMMARY_PATH = PROCESSED_DIR / "fr4_nnpu_corrective_fold0_summary.json"
+FR4_NNPU_CORRECTIVE_LEARNING_CURVE_PATH = PROCESSED_DIR / "fr4_nnpu_corrective_fold0_learning_curve.svg"
+FR4_NNPU_CORRECTIVE_PROVENANCE_PATH = PROCESSED_DIR / "fr4_nnpu_corrective_provenance.jsonl"
+
+
+def run_fr4_nnpu_baseline(
+    fold_id: int = 0,
+    max_epochs: int | None = None,
+    prior: float | None = None,
+    early_stopping_patience: int | None = 10,
+) -> dict:
+    """Bucket 4.3: train the plain nnPU baseline for GraphPart fold
+    ``fold_id`` -- E1+E2 labeled positives vs. C1 treated as UNLABELED --
+    using Task 4.1's BinaryMlp/build_experiment_data/run_recorder/seeding
+    exactly as accepted, and Task 4.2's deterministic C1 partition
+    (``pn_baseline.split_c1_train_validation``) reused unchanged. C1 is
+    never assigned a confirmed-negative label anywhere in this function;
+    it is passed to the non-negative PU risk estimator
+    (``nnpu_risk.compute_nnpu_risk``) as the unlabeled group U.
+    """
+    import torch
+
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.nnpu_baseline import DEFAULT_PRIOR, PRIOR_PROVENANCE_NOTE, PRIOR_SENSITIVITY_GRID, build_nnpu_dataset, train_nnpu_baseline
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, load_checkpoint, write_resolved_config
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    resolved_prior = prior if prior is not None else DEFAULT_PRIOR
+
+    config_kwargs = {
+        "experiment_id": f"fr4_nnpu_baseline_fold{fold_id}",
+        "baseline": "nnPU",
+        "fold_id": fold_id,
+        "checkpoint_dir": str(FR4_NNPU_BASELINE_RUNS_DIR),
+    }
+    if max_epochs is not None:
+        config_kwargs["max_epochs"] = max_epochs
+    config = ExperimentConfig(**config_kwargs)
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_nnpu_dataset(data, config, prior=resolved_prior)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["nnpu_dataset_provenance"] = {
+        "e1_train_count": dataset.e1_train_count,
+        "e2_train_count": dataset.e2_train_count,
+        "e1_validation_count": dataset.e1_validation_count,
+        "e2_validation_count": dataset.e2_validation_count,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "n_c1_unlabeled_train": int(dataset.train_unlabeled_features.shape[0]),
+        "n_c1_unlabeled_validation": int(dataset.validation_unlabeled_features.shape[0]),
+    }
+    resolved_config["nnpu_prior"] = {
+        "value": dataset.prior,
+        "sensitivity_grid": list(PRIOR_SENSITIVITY_GRID),
+        "provenance_note": PRIOR_PROVENANCE_NOTE,
+    }
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_nnpu_baseline(config, dataset, run_dir, early_stopping_patience=early_stopping_patience)
+
+        best_checkpoint_path = run_dir / "checkpoint_best.pt"
+        last_checkpoint_path = run_dir / "checkpoint_last.pt"
+        reload_model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(best_checkpoint_path, reload_model)
+
+        sample_n = min(16, len(dataset.validation_positive_features))
+        sample_x = torch.from_numpy(dataset.validation_positive_features[:sample_n])
+        proba = reload_model.predict_proba(sample_x)
+
+        learning_curve_committed_path = Path(FR4_NNPU_BASELINE_LEARNING_CURVE_PATH_TEMPLATE.format(fold_id=fold_id))
+        learning_curve_committed_path.write_text(
+            Path(training_summary["learning_curve_path"]).read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+        )
+
+        summary = {
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "class_counts": {
+                "train_positive": dataset.e1_train_count + dataset.e2_train_count,
+                "train_unlabeled": int(dataset.train_unlabeled_features.shape[0]),
+                "validation_positive": dataset.e1_validation_count + dataset.e2_validation_count,
+                "validation_unlabeled": int(dataset.validation_unlabeled_features.shape[0]),
+                "e1_train": dataset.e1_train_count,
+                "e2_train": dataset.e2_train_count,
+                "e1_validation": dataset.e1_validation_count,
+                "e2_validation": dataset.e2_validation_count,
+            },
+            "c1_partition": {
+                "validation_fraction": dataset.c1_validation_fraction,
+                "seed": dataset.c1_partition_seed,
+            },
+            "prior": {
+                "value": dataset.prior,
+                "sensitivity_grid": list(PRIOR_SENSITIVITY_GRID),
+                "provenance_note": PRIOR_PROVENANCE_NOTE,
+            },
+            "nnpu_variant": training_summary["nnpu_variant"],
+            "training": {k: v for k, v in training_summary.items() if k != "learning_curve_path"},
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+                "best_checkpoint_epoch": checkpoint_info["epoch"],
+            },
+            "checkpoint_reload_verification": {
+                "proba_shape": list(proba.shape),
+                "proba_bounded": bool(((proba >= 0) & (proba <= 1)).all().item()),
+                "proba_finite": bool(torch.isfinite(proba).all().item()),
+            },
+            "outputs": {
+                "learning_curve": str(learning_curve_committed_path),
+            },
+            "limitations": {
+                "assumed_unlabeled_c1": "C1 is an assumed-negative/PU-unlabeled pool, NEVER experimentally "
+                "confirmed antioxidant-inactive, and is never assigned a binary negative label anywhere in this "
+                "pipeline -- it is the unlabeled group U of the non-negative PU risk estimator.",
+                "prior_is_provisional": PRIOR_PROVENANCE_NOTE,
+                "evidence_tiers": "E1 (assay-confirmed) and E2 (provisional benchmark-annotated) positives are "
+                "POOLED as labeled positives per Task 4.3's baseline policy, but their provenance/counts remain "
+                "separately auditable (class_counts.e1_train/e2_train/...). E2 is not uniformly assay-confirmed; "
+                "no evidence-tier weighting or soft labels are applied.",
+                "positive_selection_bias": "The labeled-positive population (literature/benchmark-derived) may not "
+                "represent the true positive subpopulation present within C1 -- nnPU does not automatically "
+                "resolve this source-distribution bias.",
+                "nnpu_vs_pn_loss_comparability": "nnPU risk and PN's BCE loss are different estimators of different "
+                "targets under different label assumptions and must NEVER be compared numerically as evidence that "
+                "one baseline 'outperforms' the other.",
+                "shortcut_bias_risk": "FR2 (Task 2.5) documented substantial FR1-positive-vs-C1 distributional "
+                "differences (length, charge, GRAVY, aromaticity, composition); nnPU does not automatically "
+                "eliminate those differences.",
+                "evaluation_scope": "Fold-0-only initial baseline, single prior value (pi sensitivity grid "
+                "documented but full sensitivity TRAINING deferred). Full C1/C2/C3 cross-pool comparison, "
+                "calibration, RNIS, and five-fold validation are out of Task 4.3's scope.",
+                "cross_fold_results": "A successful fold-0 run is an initial implementation demonstration, not "
+                "completed five-fold experimental validation.",
+                "validation_risk_is_a_surrogate": "Validation nnPU risk is a surrogate under the assumed prior and "
+                "the C1 sampling model, not an independently measured biological classification error.",
+                "scientific_sign_off": "Technical acceptance only -- no supervisor or scientific sign-off is "
+                "implied for the chosen prior, evidence-pooling policy, or any scientific conclusion.",
+            },
+        }
+    summary_path = Path(FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_NNPU_BASELINE_PROVENANCE_LOG_PATH, {"stage": "fr4_nnpu_baseline", "summary": summary})
+    return summary
+
+
+def run_fr4_nnpu_corrective(fold_id: int = 0, max_epochs: int = 100) -> dict:
+    """Controlled beta/gamma corrective-nnPU follow-up; fold 0 only."""
+    import torch
+
+    from plantaox.c2_pu.corrective_nnpu import train_corrective_nnpu
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.nnpu_baseline import PRIOR_PROVENANCE_NOTE, build_nnpu_dataset
+    from plantaox.c2_pu.nnpu_prior_diagnostics import compute_group_score_distributions
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, load_checkpoint, write_resolved_config
+
+    if fold_id != 0:
+        raise ValueError("This bounded follow-up is specified for fold 0 only.")
+    accepted_path = Path(FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    accepted = json.loads(accepted_path.read_text(encoding="utf-8"))
+    accepted_config_path = Path(accepted["run_dir"]) / "resolved_config.json"
+    accepted_config = json.loads(accepted_config_path.read_text(encoding="utf-8"))
+
+    # Use the real accepted run configuration, not prose values that drifted
+    # from it, so optimization variant is the only controlled change.
+    config = ExperimentConfig.from_dict({
+        **accepted_config,
+        "experiment_id": "fr4_nnpu_corrective_fold0",
+        "checkpoint_dir": str(FR4_NNPU_CORRECTIVE_RUNS_DIR),
+        "max_epochs": max_epochs,
+    })
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+    data = build_experiment_data(config, Path(cache_entry["cache_path"]), cache_entry,
+                                 fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH)
+    dataset = build_nnpu_dataset(data, config, prior=0.10)
+
+    resolved = config.to_dict()
+    resolved.update({
+        "git_revision": _git_commit_hash(),
+        "nnpu_variant": "corrective_beta_gamma", "prior": 0.10, "beta": 0.0, "gamma": 1.0,
+        "prior_provenance_note": PRIOR_PROVENANCE_NOTE,
+        "accepted_direct_reference": {"summary": str(accepted_path), "summary_sha256": sha256_of(accepted_path)},
+        "source_artifact_checksums": {
+            "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+            "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+            "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+        },
+        "configuration_discrepancy": (
+            "The follow-up brief stated batch_size=64 and weight_decay=0.0001, but the accepted "
+            "direct run's immutable resolved_config records batch_size=32 and weight_decay=0.0. "
+            "This run uses the accepted artifact values to keep optimization variant as the only change."
+        ),
+    })
+    run_dir = create_run_dir(FR4_NNPU_CORRECTIVE_RUNS_DIR, config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved)
+        training = train_corrective_nnpu(config, dataset, run_dir, beta=0.0, gamma=1.0)
+        best_path, last_path = run_dir / "checkpoint_best.pt", run_dir / "checkpoint_last.pt"
+        model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(best_path, model)
+        score_groups = compute_group_score_distributions(model, dataset)
+        sample = model.predict_proba(torch.from_numpy(dataset.validation_positive_features[:16]))
+        FR4_NNPU_CORRECTIVE_LEARNING_CURVE_PATH.write_text(
+            Path(training["learning_curve_path"]).read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+        )
+        summary = {
+            "run_dir": str(run_dir), "fold_id": fold_id,
+            "class_counts": {"train_positive": 604, "validation_positive": 106,
+                             "train_unlabeled": 3220, "validation_unlabeled": 568,
+                             "e1_train": 331, "e2_train": 273, "e1_validation": 48, "e2_validation": 58},
+            "configuration": config.to_dict(), "prior": 0.10, "beta": 0.0, "gamma": 1.0,
+            "nnpu_variant": "corrective_beta_gamma", "training": training,
+            "best_checkpoint_score_distributions": score_groups,
+            "checkpoint": {"best_path_sha256": sha256_of(best_path), "last_path_sha256": sha256_of(last_path),
+                           "best_checkpoint_epoch": checkpoint_info["epoch"]},
+            "checkpoint_reload_verification": {"proba_shape": list(sample.shape),
+                "proba_finite": bool(torch.isfinite(sample).all()),
+                "proba_bounded": bool(((sample >= 0) & (sample <= 1)).all())},
+            "accepted_direct_reference": resolved["accepted_direct_reference"],
+            "configuration_discrepancy": resolved["configuration_discrepancy"],
+            "learning_curve": str(FR4_NNPU_CORRECTIVE_LEARNING_CURVE_PATH),
+        }
+    with open(FR4_NNPU_CORRECTIVE_SUMMARY_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_NNPU_CORRECTIVE_PROVENANCE_PATH,
+                          {"stage": "fr4_nnpu_corrective", "summary": summary})
+    return summary
+
+
+# ---------------------------------------------------------------------------
+# Task 4.3 POST-ACCEPTANCE DIAGNOSTIC -- pi in {0.05, 0.10, 0.20} positive-
+# prior sensitivity / negative-risk-clamping investigation.
+#
+# Diagnostic-only: does NOT modify, retrain, or overwrite the accepted
+# pi=0.10 Task 4.3 baseline (`fr4_nnpu_baseline_fold*` files/run dirs
+# above) in any way. Writes to a completely separate run-directory tree
+# and separate committed-summary/provenance filenames so the two can
+# never collide. See docs/FR4_NNPU_PRIOR_SENSITIVITY_DIAGNOSTIC.md.
+# ---------------------------------------------------------------------------
+FR4_NNPU_PRIOR_SENSITIVITY_RUNS_DIR = INTERIM_DIR / "fr4_nnpu_prior_sensitivity_runs"  # gitignored, scratch
+FR4_NNPU_PRIOR_SENSITIVITY_SUMMARY_PATH_TEMPLATE = str(
+    PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_pi{prior_tag}_fold{fold_id}_summary.json"
+)
+FR4_NNPU_PRIOR_SENSITIVITY_LEARNING_CURVE_PATH_TEMPLATE = str(
+    PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_pi{prior_tag}_fold{fold_id}_learning_curve.svg"
+)
+FR4_NNPU_PRIOR_SENSITIVITY_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_provenance.jsonl"
+FR4_NNPU_PRIOR_SENSITIVITY_COMPARISON_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_comparison.json"
+FR4_NNPU_PRIOR_SENSITIVITY_PLOT_A_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_plotA_clamped_fraction.svg"
+FR4_NNPU_PRIOR_SENSITIVITY_PLOT_B_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_plotB_mean_unclamped_negative_risk.svg"
+FR4_NNPU_PRIOR_SENSITIVITY_PLOT_C_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_plotC_risk_components.svg"
+FR4_NNPU_PRIOR_SENSITIVITY_PLOT_D_PATH = PROCESSED_DIR / "fr4_nnpu_prior_sensitivity_plotD_score_distributions.svg"
+
+
+def _prior_tag(prior: float) -> str:
+    return f"{prior:.2f}".replace(".", "p")
+
+
+def run_fr4_nnpu_prior_sensitivity(
+    prior: float,
+    fold_id: int = 0,
+    max_epochs: int | None = None,
+    early_stopping_patience: int | None = 10,
+) -> dict:
+    """Task 4.3 POST-ACCEPTANCE DIAGNOSTIC: trains ONE pi-sensitivity
+    condition.
+
+    Identical data/model/optimizer/seed setup to the accepted
+    ``run_fr4_nnpu_baseline`` (same ``build_experiment_data``/
+    ``build_nnpu_dataset`` calls, same fold, same E1+E2/C1 partition,
+    same architecture/optimizer/seeds) -- ONLY ``prior`` varies, per the
+    diagnostic brief's controlled-variable requirement. Uses
+    ``nnpu_prior_diagnostics.train_nnpu_with_diagnostics`` (adds
+    per-update instrumentation; does not change the accepted training
+    math -- see that module's own docstring/regression test) instead of
+    ``nnpu_baseline.train_nnpu_baseline``, and writes to a run-directory
+    tree and committed-summary filename that can never collide with the
+    accepted pi=0.10 baseline's own files.
+    """
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.nnpu_baseline import PRIOR_PROVENANCE_NOTE, PRIOR_SENSITIVITY_GRID, build_nnpu_dataset
+    from plantaox.c2_pu.nnpu_prior_diagnostics import compute_group_score_distributions, train_nnpu_with_diagnostics
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, load_checkpoint, write_resolved_config
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    if prior not in PRIOR_SENSITIVITY_GRID:
+        raise ValueError(f"prior={prior} is not in the declared sensitivity grid {PRIOR_SENSITIVITY_GRID}.")
+
+    prior_tag = _prior_tag(prior)
+    config_kwargs = {
+        "experiment_id": f"fr4_nnpu_prior_sensitivity_pi{prior_tag}_fold{fold_id}",
+        "baseline": "nnPU",
+        "fold_id": fold_id,
+        "checkpoint_dir": str(FR4_NNPU_PRIOR_SENSITIVITY_RUNS_DIR),
+    }
+    if max_epochs is not None:
+        config_kwargs["max_epochs"] = max_epochs
+    config = ExperimentConfig(**config_kwargs)
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_nnpu_dataset(data, config, prior=prior)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["diagnostic_scope"] = (
+        "Task 4.3 POST-ACCEPTANCE DIAGNOSTIC (pi-sensitivity investigation), not a new baseline. "
+        "Does not modify, retrain, or supersede the accepted pi=0.10 Task 4.3 baseline."
+    )
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["nnpu_dataset_provenance"] = {
+        "e1_train_count": dataset.e1_train_count,
+        "e2_train_count": dataset.e2_train_count,
+        "e1_validation_count": dataset.e1_validation_count,
+        "e2_validation_count": dataset.e2_validation_count,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "n_c1_unlabeled_train": int(dataset.train_unlabeled_features.shape[0]),
+        "n_c1_unlabeled_validation": int(dataset.validation_unlabeled_features.shape[0]),
+    }
+    resolved_config["nnpu_prior"] = {
+        "value": dataset.prior,
+        "sensitivity_grid": list(PRIOR_SENSITIVITY_GRID),
+        "provenance_note": PRIOR_PROVENANCE_NOTE,
+    }
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_nnpu_with_diagnostics(
+            config, dataset, run_dir, early_stopping_patience=early_stopping_patience
+        )
+
+        best_checkpoint_path = run_dir / "checkpoint_best.pt"
+        last_checkpoint_path = run_dir / "checkpoint_last.pt"
+        reload_model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(best_checkpoint_path, reload_model)
+
+        score_distributions = compute_group_score_distributions(reload_model, dataset)
+
+        learning_curve_committed_path = Path(
+            FR4_NNPU_PRIOR_SENSITIVITY_LEARNING_CURVE_PATH_TEMPLATE.format(prior_tag=prior_tag, fold_id=fold_id)
+        )
+        learning_curve_committed_path.write_text(
+            Path(training_summary["learning_curve_path"]).read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+        )
+
+        diag_history = training_summary["diagnostic_history"]
+        sensitivity = training_summary["prior_sensitivity_stability"]
+
+        summary = {
+            "diagnostic_scope": resolved_config["diagnostic_scope"],
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "prior": {"value": dataset.prior, "sensitivity_grid": list(PRIOR_SENSITIVITY_GRID)},
+            "class_counts": {
+                "train_positive": dataset.e1_train_count + dataset.e2_train_count,
+                "train_unlabeled": int(dataset.train_unlabeled_features.shape[0]),
+                "validation_positive": dataset.e1_validation_count + dataset.e2_validation_count,
+                "validation_unlabeled": int(dataset.validation_unlabeled_features.shape[0]),
+                "e1_train": dataset.e1_train_count,
+                "e2_train": dataset.e2_train_count,
+                "e1_validation": dataset.e1_validation_count,
+                "e2_validation": dataset.e2_validation_count,
+            },
+            "c1_partition": {"validation_fraction": dataset.c1_validation_fraction, "seed": dataset.c1_partition_seed},
+            "nnpu_variant": training_summary["nnpu_variant"],
+            "training": {
+                k: v for k, v in training_summary.items() if k not in ("learning_curve_path", "history", "diagnostic_history")
+            },
+            "epoch_level_history": training_summary["history"],
+            "per_update_diagnostic_history": diag_history,
+            "prior_sensitivity_stability": sensitivity,
+            "best_checkpoint_score_distributions": score_distributions,
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+                "best_checkpoint_epoch": checkpoint_info["epoch"],
+            },
+            "outputs": {"learning_curve": str(learning_curve_committed_path)},
+            "limitations": {
+                "diagnostic_not_baseline": "This is a Task 4.3 post-acceptance diagnostic replicate, not a new "
+                "accepted baseline -- it does not supersede, retrain, or invalidate the accepted pi=0.10 result.",
+                "assumed_unlabeled_c1": "C1 remains the assumed-negative/PU-unlabeled pool, never a confirmed "
+                "antioxidant-inactive label, in every condition of this sensitivity grid.",
+                "do_not_rank_by_raw_risk": "The nnPU objective itself changes with pi -- a lower numeric nnPU risk "
+                "under one assumed prior is NOT evidence of biological superiority over another prior.",
+                "single_fold_only": "Fold-0 only, matching the accepted baseline's own scope.",
+            },
+        }
+    summary_path = Path(FR4_NNPU_PRIOR_SENSITIVITY_SUMMARY_PATH_TEMPLATE.format(prior_tag=prior_tag, fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(
+        FR4_NNPU_PRIOR_SENSITIVITY_PROVENANCE_LOG_PATH,
+        {"stage": "fr4_nnpu_prior_sensitivity", "prior": prior, "summary": summary},
+    )
+    return summary
+
+
+def run_fr4_nnpu_prior_sensitivity_report(fold_id: int = 0) -> dict:
+    """Assembles the pi-sensitivity comparison table + Plots A-D across
+    all three conditions (pi=0.05/0.10/0.20). Reuses the accepted pi=0.10
+    Task 4.3 summary and its still-present best checkpoint (verified
+    read-only, by SHA-256, against what that summary itself recorded) for
+    the pi=0.10 reference row -- never retrains pi=0.10, never writes to
+    its run directory. Raises a clear ``FileNotFoundError`` naming the
+    missing stage if the pi=0.05/0.20 diagnostic runs have not been
+    produced yet.
+    """
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.nnpu_baseline import build_nnpu_dataset
+    from plantaox.c2_pu.nnpu_prior_diagnostics import compute_group_score_distributions
+    from plantaox.c2_pu.nnpu_prior_sensitivity_report import (
+        build_comparison_table,
+        classify_prior_sensitivity,
+        render_dual_component_svg,
+        render_multi_series_line_svg,
+        render_score_distribution_svg,
+    )
+    from plantaox.c2_pu.run_recorder import load_checkpoint
+
+    accepted_summary_path = Path(FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    if not accepted_summary_path.exists():
+        raise FileNotFoundError(
+            f"{accepted_summary_path} not found -- the accepted Task 4.3 pi=0.10 baseline must exist first."
+        )
+    accepted_summary = json.loads(accepted_summary_path.read_text(encoding="utf-8"))
+
+    prior_rows: dict[str, dict] = {}
+    clamped_fraction_series: dict[str, list] = {}
+    mean_unclamped_rn_series: dict[str, list] = {}
+    positive_contribution_series: dict[str, list] = {}
+    negative_unclamped_series: dict[str, list] = {}
+    score_distributions_by_prior: dict[str, dict] = {}
+    mean_clamped_fraction_by_prior: dict[str, float] = {}
+
+    # --- pi = 0.10: accepted baseline, read-only reference ---
+    label_010 = "0.10"
+    history_010 = accepted_summary["training"]["history"]
+    clamped_fraction_series[label_010] = [(h["epoch"], h["train_clamped_update_fraction"]) for h in history_010]
+    mean_unclamped_rn_series[label_010] = [(h["epoch"], h["train_negative_risk_unclamped"]) for h in history_010]
+    positive_contribution_series[label_010] = [(h["epoch"], h["train_positive_risk_contribution"]) for h in history_010]
+    negative_unclamped_series[label_010] = [(h["epoch"], h["train_negative_risk_unclamped"]) for h in history_010]
+    mean_clamped_fraction_010 = float(np.mean([h["train_clamped_update_fraction"] for h in history_010]))
+    mean_clamped_fraction_by_prior[label_010] = mean_clamped_fraction_010
+
+    accepted_run_dir = Path(accepted_summary["run_dir"])
+    accepted_best_checkpoint = accepted_run_dir / "checkpoint_best.pt"
+    checkpoint_note = "accepted checkpoint missing or hash mismatch -- NOT re-measured"
+    empty_groups = {g: "NOT MEASURED" for g in ("train_e1", "train_e2", "train_c1", "val_e1", "val_e2", "val_c1")}
+    score_distributions_by_prior[label_010] = empty_groups
+    if accepted_best_checkpoint.exists() and sha256_of(accepted_best_checkpoint) == accepted_summary["checkpoint"]["best_path_sha256"]:
+        config_010 = ExperimentConfig(experiment_id="prior_sensitivity_reference_pi010", baseline="nnPU", fold_id=fold_id)
+        cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+        fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+        record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+        cache_entry = cache_manifest["folds"][str(fold_id)]
+        data_010 = build_experiment_data(
+            config_010, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+        )
+        dataset_010 = build_nnpu_dataset(data_010, config_010, prior=0.10)
+        reload_model_010 = BinaryMlp(MlpArchitecture(input_dim=config_010.feature_dim, hidden_dims=config_010.hidden_dims))
+        load_checkpoint(accepted_best_checkpoint, reload_model_010)  # read-only load; never saved back
+        score_distributions_by_prior[label_010] = compute_group_score_distributions(reload_model_010, dataset_010)
+        checkpoint_note = "measured_from_accepted_checkpoint (verified SHA-256 match, read-only)"
+
+    stability_010 = accepted_summary["training"]["stability_diagnostics"]
+
+    def _median_or_na(group_stats, group: str):
+        g = group_stats.get(group)
+        return g["median"] if isinstance(g, dict) and "median" in g else "NOT MEASURED"
+
+    prior_rows[label_010] = {
+        "executed_epochs": accepted_summary["training"]["executed_epochs"],
+        "best_epoch": accepted_summary["training"]["best_epoch"],
+        "best_val_nnpu_risk": accepted_summary["training"]["best_val_nnpu_risk"],
+        "mean_clamped_update_fraction": mean_clamped_fraction_010,
+        "final_five_epoch_clamped_fraction": stability_010["mean_train_clamped_fraction_last_5_epochs"],
+        "mean_train_negative_risk": float(np.mean([h["train_negative_risk_unclamped"] for h in history_010])),
+        "mean_val_negative_risk": float(np.mean([h["val_negative_risk_unclamped"] for h in history_010])),
+        "e1_median_score": _median_or_na(score_distributions_by_prior[label_010], "val_e1"),
+        "e2_median_score": _median_or_na(score_distributions_by_prior[label_010], "val_e2"),
+        "c1_median_score": _median_or_na(score_distributions_by_prior[label_010], "val_c1"),
+        "score_saturation_note": checkpoint_note,
+    }
+
+    # --- pi = 0.05 / 0.20: new diagnostic runs, must already exist ---
+    for prior_value in (0.05, 0.20):
+        prior_tag = _prior_tag(prior_value)
+        label = f"{prior_value:.2f}"
+        summary_path = Path(FR4_NNPU_PRIOR_SENSITIVITY_SUMMARY_PATH_TEMPLATE.format(prior_tag=prior_tag, fold_id=fold_id))
+        if not summary_path.exists():
+            raise FileNotFoundError(
+                f"{summary_path} not found -- run `fr4-nnpu-prior-sensitivity --prior {prior_value} "
+                f"--fold-id {fold_id}` first."
+            )
+        s = json.loads(summary_path.read_text(encoding="utf-8"))
+        history = s["epoch_level_history"]
+        clamped_fraction_series[label] = [(h["epoch"], h["train_clamped_update_fraction"]) for h in history]
+        mean_unclamped_rn_series[label] = [(h["epoch"], h["train_negative_risk_unclamped"]) for h in history]
+        positive_contribution_series[label] = [(h["epoch"], h["train_positive_risk_contribution"]) for h in history]
+        negative_unclamped_series[label] = [(h["epoch"], h["train_negative_risk_unclamped"]) for h in history]
+        mean_cf = float(np.mean([h["train_clamped_update_fraction"] for h in history]))
+        mean_clamped_fraction_by_prior[label] = mean_cf
+        score_distributions_by_prior[label] = s["best_checkpoint_score_distributions"]
+        stability = s["training"]["stability_diagnostics"]
+        prior_rows[label] = {
+            "executed_epochs": s["training"]["executed_epochs"],
+            "best_epoch": s["training"]["best_epoch"],
+            "best_val_nnpu_risk": s["training"]["best_val_nnpu_risk"],
+            "mean_clamped_update_fraction": mean_cf,
+            "final_five_epoch_clamped_fraction": stability["mean_train_clamped_fraction_last_5_epochs"],
+            "mean_train_negative_risk": float(np.mean([h["train_negative_risk_unclamped"] for h in history])),
+            "mean_val_negative_risk": float(np.mean([h["val_negative_risk_unclamped"] for h in history])),
+            "e1_median_score": _median_or_na(s["best_checkpoint_score_distributions"], "val_e1"),
+            "e2_median_score": _median_or_na(s["best_checkpoint_score_distributions"], "val_e2"),
+            "c1_median_score": _median_or_na(s["best_checkpoint_score_distributions"], "val_c1"),
+            "score_saturation_note": "measured_from_diagnostic_run",
+        }
+
+    comparison_table = build_comparison_table(prior_rows)
+    classification = classify_prior_sensitivity(mean_clamped_fraction_by_prior)
+
+    plot_a = render_multi_series_line_svg(
+        clamped_fraction_series,
+        FR4_NNPU_PRIOR_SENSITIVITY_PLOT_A_PATH,
+        title="Plot A: clamped-update fraction vs epoch (per prior)",
+        y_label="clamped fraction",
+    )
+    plot_b = render_multi_series_line_svg(
+        mean_unclamped_rn_series,
+        FR4_NNPU_PRIOR_SENSITIVITY_PLOT_B_PATH,
+        title="Plot B: mean unclamped R_n vs epoch (per prior)",
+        y_label="R_n",
+        zero_reference_line=True,
+    )
+    plot_c = render_dual_component_svg(
+        positive_contribution_series,
+        negative_unclamped_series,
+        FR4_NNPU_PRIOR_SENSITIVITY_PLOT_C_PATH,
+        title="Plot C: positive-risk contribution vs unclamped negative risk (per prior)",
+    )
+    plot_d = render_score_distribution_svg(score_distributions_by_prior, FR4_NNPU_PRIOR_SENSITIVITY_PLOT_D_PATH)
+
+    report = {
+        "fold_id": fold_id,
+        "priors_compared": sorted(mean_clamped_fraction_by_prior.keys()),
+        "comparison_table": comparison_table,
+        "mean_clamped_update_fraction_by_prior": mean_clamped_fraction_by_prior,
+        "classification": classification,
+        "plots": {
+            "plot_a_clamped_fraction": str(plot_a),
+            "plot_b_mean_unclamped_negative_risk": str(plot_b),
+            "plot_c_risk_components": str(plot_c),
+            "plot_d_score_distributions": str(plot_d),
+        },
+        "best_checkpoint_score_distributions_by_prior": score_distributions_by_prior,
+        "accepted_baseline_reference": {
+            "summary_path": str(accepted_summary_path),
+            "run_dir": accepted_summary["run_dir"],
+            "checkpoint_verified": checkpoint_note.startswith("measured_from_accepted_checkpoint"),
+        },
+        "limitations": {
+            "do_not_rank_by_raw_risk": "The nnPU objective changes with pi -- do not interpret a lower raw nnPU "
+            "validation risk under one prior as evidence that prior is biologically correct.",
+            "single_fold_only": "Fold-0 only; not a five-fold validated conclusion.",
+            "diagnostic_not_baseline": "This report compares diagnostic replicates against the accepted pi=0.10 "
+            "baseline; it does not alter Task 4.3's PASS status.",
+        },
+    }
+    with open(FR4_NNPU_PRIOR_SENSITIVITY_COMPARISON_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(report, handle, indent=2, default=str)
+    return report
+
+
+# ---------------------------------------------------------------------------
+# Bucket 4.4 -- Two-Step PU (Elkan & Noto 2008-style) and PU-Bagging
+# (Mordelet & Vert 2014-style) baselines: E1+E2 labeled positives vs. C1
+# treated as UNLABELED (same policy as nnPU, Task 4.3), on
+# scikit-learn/pulearn estimators rather than models.BinaryMlp -- see
+# pu_sklearn_common.py / two_step_pu_baseline.py / pu_bagging_baseline.py
+# for the full rationale. Every sklearn/pulearn-dependent module is
+# imported LAZILY inside each stage function, mirroring Buckets 4.1-4.3 --
+# run.py's module-level import graph stays torch-free AND sklearn-free.
+# ---------------------------------------------------------------------------
+FR4_TWO_STEP_PU_BASELINE_RUNS_DIR = INTERIM_DIR / "fr4_two_step_pu_baseline_runs"  # gitignored, scratch
+FR4_TWO_STEP_PU_BASELINE_SUMMARY_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_two_step_pu_baseline_fold{fold_id}_summary.json")
+FR4_TWO_STEP_PU_BASELINE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_two_step_pu_baseline_provenance.jsonl"
+
+FR4_PU_BAGGING_BASELINE_RUNS_DIR = INTERIM_DIR / "fr4_pu_bagging_baseline_runs"  # gitignored, scratch
+FR4_PU_BAGGING_BASELINE_SUMMARY_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_pu_bagging_baseline_fold{fold_id}_summary.json")
+FR4_PU_BAGGING_BASELINE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_pu_bagging_baseline_provenance.jsonl"
+
+_FR4_TASK_4_4_LIMITATIONS = {
+    "assumed_unlabeled_c1": "C1 is an assumed-negative/PU-unlabeled pool, NEVER experimentally confirmed "
+    "antioxidant-inactive. Both algorithms' first internal stage trains a classifier treating C1 rows AS IF "
+    "negative -- a standard, documented step of Two-Step PU/PU-Bagging themselves (Elkan & Noto 2008; "
+    "Mordelet & Vert 2014), not a project-level reclassification of C1's status.",
+    "evidence_tiers": "E1 (assay-confirmed) and E2 (provisional benchmark-annotated) positives are POOLED as "
+    "labeled positives, identical policy to nnPU (Task 4.3), but their provenance/counts remain separately "
+    "auditable (class_counts.e1_train/e2_train/...). E2 is not uniformly assay-confirmed.",
+    "base_estimator_not_binarymlp": "Two-Step PU and PU-Bagging wrap sklearn.linear_model.LogisticRegression, "
+    "NOT models.BinaryMlp -- a documented, deliberate departure from PN/nnPU's shared architecture (see each "
+    "baseline module's own BASE_ESTIMATOR_DECISION_NOTE and the Task 4.4 decision log). Comparing these "
+    "baselines' scores to PN/nnPU numerically must account for this architecture difference, not just the "
+    "label-assumption difference.",
+    "no_mcc_auprc_here": "This task (4.4) implements and sanity-checks the baselines only. MCC/AUPRC "
+    "computation and a cross-baseline comparison table are Task 4.5's explicit scope, not performed here.",
+    "shortcut_bias_risk": "FR2 (Task 2.5) documented substantial FR1-positive-vs-C1 distributional differences "
+    "(length, charge, GRAVY, aromaticity, composition); neither algorithm automatically eliminates those "
+    "differences.",
+    "evaluation_scope": "Fold-0-only initial baseline. Full C1/C2/C3 cross-pool comparison, calibration, RNIS, "
+    "and five-fold validation are out of Task 4.4's scope.",
+    "scientific_sign_off": "Technical acceptance only -- no supervisor or scientific sign-off is implied for "
+    "the chosen base estimator, hyperparameters, or any scientific conclusion.",
+}
+
+
+def run_fr4_two_step_pu_baseline(fold_id: int = 0, hold_out_ratio: float | None = None) -> dict:
+    """Bucket 4.4: train the Two-Step PU (Elkan & Noto 2008-style)
+    baseline for GraphPart fold ``fold_id`` -- E1+E2 labeled positives vs.
+    C1 treated as UNLABELED -- using Task 4.4's shared sklearn/pulearn PU
+    dataset assembly (``pu_sklearn_common.build_sklearn_pu_dataset``,
+    itself reusing Task 4.2/4.3's deterministic C1 partition and E1+E2
+    selection). See ``two_step_pu_baseline.py`` for the full algorithm
+    description and how this differs from PN/nnPU.
+    """
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.pu_sklearn_common import build_sklearn_pu_dataset, load_sklearn_checkpoint
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, write_resolved_config
+    from plantaox.c2_pu.two_step_pu_baseline import DEFAULT_HOLD_OUT_RATIO, train_two_step_pu_baseline
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    resolved_hold_out_ratio = hold_out_ratio if hold_out_ratio is not None else DEFAULT_HOLD_OUT_RATIO
+
+    config = ExperimentConfig(
+        experiment_id=f"fr4_two_step_pu_baseline_fold{fold_id}",
+        baseline="TwoStepPU",
+        fold_id=fold_id,
+        checkpoint_dir=str(FR4_TWO_STEP_PU_BASELINE_RUNS_DIR),
+    )
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_sklearn_pu_dataset(data, config)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["two_step_pu_dataset_provenance"] = {
+        "e1_train_count": dataset.e1_train_count,
+        "e2_train_count": dataset.e2_train_count,
+        "e1_validation_count": dataset.e1_validation_count,
+        "e2_validation_count": dataset.e2_validation_count,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "n_c1_unlabeled_train": int(dataset.train_unlabeled_features.shape[0]),
+        "n_c1_unlabeled_validation": int(dataset.validation_unlabeled_features.shape[0]),
+    }
+    resolved_config["hold_out_ratio"] = resolved_hold_out_ratio
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_two_step_pu_baseline(config, dataset, run_dir, hold_out_ratio=resolved_hold_out_ratio)
+
+        best_checkpoint_path = run_dir / "checkpoint_best.joblib"
+        last_checkpoint_path = run_dir / "checkpoint_last.joblib"
+        reload_payload = load_sklearn_checkpoint(best_checkpoint_path)
+        reload_estimator = reload_payload["estimator"]
+
+        sample_n = min(16, len(dataset.validation_positive_features))
+        sample_x = dataset.validation_positive_features[:sample_n]
+        reload_proba_corrected = reload_estimator.predict_proba(sample_x)[:, 1]
+        reload_proba_base = reload_estimator.estimator.predict_proba(sample_x)[:, 1]
+
+        summary = {
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "class_counts": {
+                "train_positive": dataset.e1_train_count + dataset.e2_train_count,
+                "train_unlabeled": int(dataset.train_unlabeled_features.shape[0]),
+                "validation_positive": dataset.e1_validation_count + dataset.e2_validation_count,
+                "validation_unlabeled": int(dataset.validation_unlabeled_features.shape[0]),
+                "e1_train": dataset.e1_train_count,
+                "e2_train": dataset.e2_train_count,
+                "e1_validation": dataset.e1_validation_count,
+                "e2_validation": dataset.e2_validation_count,
+            },
+            "c1_partition": {
+                "validation_fraction": dataset.c1_validation_fraction,
+                "seed": dataset.c1_partition_seed,
+            },
+            "hold_out_ratio": resolved_hold_out_ratio,
+            "estimated_c": training_summary["estimated_c"],
+            "base_estimator_decision": training_summary["base_estimator_decision"],
+            "label_encoding_note": training_summary["label_encoding_note"],
+            "training": training_summary,
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+            },
+            "checkpoint_reload_verification": {
+                "base_proba_shape": list(reload_proba_base.shape),
+                "base_proba_bounded_0_1": bool(np.all((reload_proba_base >= 0) & (reload_proba_base <= 1))),
+                "base_proba_finite": bool(np.isfinite(reload_proba_base).all()),
+                "corrected_proba_finite": bool(np.isfinite(reload_proba_corrected).all()),
+            },
+            "limitations": _FR4_TASK_4_4_LIMITATIONS,
+        }
+    summary_path = Path(FR4_TWO_STEP_PU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_TWO_STEP_PU_BASELINE_PROVENANCE_LOG_PATH, {"stage": "fr4_two_step_pu_baseline", "summary": summary})
+    return summary
+
+
+def run_fr4_pu_bagging_baseline(fold_id: int = 0, n_estimators: int | None = None) -> dict:
+    """Bucket 4.4: train the PU-Bagging (Mordelet & Vert 2014-style)
+    baseline for GraphPart fold ``fold_id`` -- E1+E2 labeled positives vs.
+    C1 treated as UNLABELED -- using the SAME Task 4.4 shared sklearn/
+    pulearn PU dataset assembly as Two-Step PU. See
+    ``pu_bagging_baseline.py`` for the full algorithm description and how
+    this differs from PN/nnPU/Two-Step PU.
+    """
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.pu_bagging_baseline import DEFAULT_N_ESTIMATORS, train_pu_bagging_baseline
+    from plantaox.c2_pu.pu_sklearn_common import build_sklearn_pu_dataset, load_sklearn_checkpoint
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, write_resolved_config
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    resolved_n_estimators = n_estimators if n_estimators is not None else DEFAULT_N_ESTIMATORS
+
+    config = ExperimentConfig(
+        experiment_id=f"fr4_pu_bagging_baseline_fold{fold_id}",
+        baseline="PUBagging",
+        fold_id=fold_id,
+        checkpoint_dir=str(FR4_PU_BAGGING_BASELINE_RUNS_DIR),
+    )
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_sklearn_pu_dataset(data, config)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["pu_bagging_dataset_provenance"] = {
+        "e1_train_count": dataset.e1_train_count,
+        "e2_train_count": dataset.e2_train_count,
+        "e1_validation_count": dataset.e1_validation_count,
+        "e2_validation_count": dataset.e2_validation_count,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "n_c1_unlabeled_train": int(dataset.train_unlabeled_features.shape[0]),
+        "n_c1_unlabeled_validation": int(dataset.validation_unlabeled_features.shape[0]),
+    }
+    resolved_config["n_estimators"] = resolved_n_estimators
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_pu_bagging_baseline(config, dataset, run_dir, n_estimators=resolved_n_estimators)
+
+        best_checkpoint_path = run_dir / "checkpoint_best.joblib"
+        last_checkpoint_path = run_dir / "checkpoint_last.joblib"
+        reload_payload = load_sklearn_checkpoint(best_checkpoint_path)
+        reload_estimator = reload_payload["estimator"]
+
+        sample_n = min(16, len(dataset.validation_positive_features))
+        sample_x = dataset.validation_positive_features[:sample_n]
+        reload_proba = reload_estimator.predict_proba(sample_x)[:, 1]
+
+        summary = {
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "class_counts": {
+                "train_positive": dataset.e1_train_count + dataset.e2_train_count,
+                "train_unlabeled": int(dataset.train_unlabeled_features.shape[0]),
+                "validation_positive": dataset.e1_validation_count + dataset.e2_validation_count,
+                "validation_unlabeled": int(dataset.validation_unlabeled_features.shape[0]),
+                "e1_train": dataset.e1_train_count,
+                "e2_train": dataset.e2_train_count,
+                "e1_validation": dataset.e1_validation_count,
+                "e2_validation": dataset.e2_validation_count,
+            },
+            "c1_partition": {
+                "validation_fraction": dataset.c1_validation_fraction,
+                "seed": dataset.c1_partition_seed,
+            },
+            "n_estimators": resolved_n_estimators,
+            "oob_metrics": training_summary["oob_metrics"],
+            "base_estimator_decision": training_summary["base_estimator_decision"],
+            "label_encoding_note": training_summary["label_encoding_note"],
+            "training": training_summary,
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+            },
+            "checkpoint_reload_verification": {
+                "proba_shape": list(reload_proba.shape),
+                "proba_bounded_0_1": bool(np.all((reload_proba >= 0) & (reload_proba <= 1))),
+                "proba_finite": bool(np.isfinite(reload_proba).all()),
+            },
+            "limitations": _FR4_TASK_4_4_LIMITATIONS,
+        }
+    summary_path = Path(FR4_PU_BAGGING_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_PU_BAGGING_BASELINE_PROVENANCE_LOG_PATH, {"stage": "fr4_pu_bagging_baseline", "summary": summary})
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -2730,6 +3879,38 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr3-feature-fusion", help="Fuse descriptors + embeddings into a 495-dim feature matrix with leakage-safe per-fold scalers (Bucket 3.3)")
     sub.add_parser("fr3-feature-cache", help="Materialize 5 fold-specific scaled feature caches from the accepted raw fused matrix (Bucket 3.4)")
     sub.add_parser("fr3-demo", help="Offline feature-pipeline demonstration: validate, extract, load, select (Bucket 3.5)")
+    sub.add_parser("fr4-infra-smoke-test", help="Shared experiment infrastructure smoke test: config, data, model, seeding, checkpoint round-trip (Bucket 4.1)")
+    sub.add_parser("fr4-pn-baseline", help="PN supervised baseline: E1 positives vs. C1 assumed negatives, BCE-with-logits (Bucket 4.2)")
+    sub.add_parser("fr4-nnpu-baseline", help="Plain nnPU baseline: E1+E2 positives vs. C1 as unlabeled, non-negative PU risk (Bucket 4.3)")
+    sub.add_parser(
+        "fr4-nnpu-corrective",
+        help="Task 4.3 follow-up: corrective beta/gamma nnPU at pi=0.10, beta=0, gamma=1",
+    )
+    p_sensitivity = sub.add_parser(
+        "fr4-nnpu-prior-sensitivity",
+        help="Task 4.3 POST-ACCEPTANCE DIAGNOSTIC: one pi-sensitivity training condition (pi in {0.05, 0.10, 0.20})",
+    )
+    p_sensitivity.add_argument("--prior", type=float, required=True, help="Positive-class prior pi to train with")
+    p_sensitivity.add_argument("--fold-id", type=int, default=0)
+    p_sensitivity.add_argument("--max-epochs", type=int, default=None)
+    sub.add_parser(
+        "fr4-nnpu-prior-sensitivity-report",
+        help="Task 4.3 POST-ACCEPTANCE DIAGNOSTIC: comparison table + Plots A-D across pi=0.05/0.10/0.20",
+    )
+    p_two_step = sub.add_parser(
+        "fr4-two-step-pu-baseline",
+        help="Two-Step PU (Elkan & Noto 2008-style) baseline: E1+E2 positives vs. C1 as unlabeled, "
+        "sklearn LogisticRegression + pulearn ElkanotoPuClassifier (Bucket 4.4)",
+    )
+    p_two_step.add_argument("--fold-id", type=int, default=0)
+    p_two_step.add_argument("--hold-out-ratio", type=float, default=None)
+    p_pu_bagging = sub.add_parser(
+        "fr4-pu-bagging-baseline",
+        help="PU-Bagging (Mordelet & Vert 2014-style) baseline: E1+E2 positives vs. C1 as unlabeled, "
+        "sklearn LogisticRegression + pulearn BaggingPuClassifier (Bucket 4.4)",
+    )
+    p_pu_bagging.add_argument("--fold-id", type=int, default=0)
+    p_pu_bagging.add_argument("--n-estimators", type=int, default=None)
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -2816,6 +3997,50 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr3-demo":
         summary = run_fr3_demo()
+        print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-infra-smoke-test":
+        summary = run_fr4_infra_smoke_test()
+        print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-pn-baseline":
+        summary = run_fr4_pn_baseline()
+        print(json.dumps({k: v for k, v in summary.items() if k != "training"} | {
+            "training": {k: v for k, v in summary["training"].items() if k != "history"}
+        }, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-nnpu-baseline":
+        summary = run_fr4_nnpu_baseline()
+        print(json.dumps({k: v for k, v in summary.items() if k != "training"} | {
+            "training": {k: v for k, v in summary["training"].items() if k != "history"}
+        }, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-nnpu-corrective":
+        summary = run_fr4_nnpu_corrective()
+        print(json.dumps({k: v for k, v in summary.items() if k != "training"} | {
+            "training": {k: v for k, v in summary["training"].items() if k != "history"}
+        }, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-nnpu-prior-sensitivity":
+        summary = run_fr4_nnpu_prior_sensitivity(prior=args.prior, fold_id=args.fold_id, max_epochs=args.max_epochs)
+        print(json.dumps(
+            {k: v for k, v in summary.items() if k not in ("epoch_level_history", "per_update_diagnostic_history")},
+            indent=2, default=str,
+        ))
+        return 0
+    if args.stage == "fr4-nnpu-prior-sensitivity-report":
+        report = run_fr4_nnpu_prior_sensitivity_report()
+        print(json.dumps(
+            {k: v for k, v in report.items() if k != "best_checkpoint_score_distributions_by_prior"},
+            indent=2, default=str,
+        ))
+        return 0
+    if args.stage == "fr4-two-step-pu-baseline":
+        summary = run_fr4_two_step_pu_baseline(fold_id=args.fold_id, hold_out_ratio=args.hold_out_ratio)
+        print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-pu-bagging-baseline":
+        summary = run_fr4_pu_bagging_baseline(fold_id=args.fold_id, n_estimators=args.n_estimators)
         print(json.dumps(summary, indent=2, default=str))
         return 0
     return 1

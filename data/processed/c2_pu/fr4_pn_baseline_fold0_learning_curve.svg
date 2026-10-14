@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+<rect width="640" height="360" fill="white"/>
+<line x1="48" y1="312" x2="592" y2="312" stroke="black"/>
+<line x1="48" y1="48" x2="48" y2="312" stroke="black"/>
+<polyline points="48.00,180.07 89.85,238.79 131.69,255.00 173.54,263.52 215.38,274.13 257.23,280.78 299.08,282.83 340.92,285.10 382.77,299.07 424.62,305.26 466.46,307.56 508.31,312.00 550.15,307.34 592.00,311.64" fill="none" stroke="#1f77b4" stroke-width="2"/>
+<polyline points="48.00,232.46 89.85,235.44 131.69,230.03 173.54,237.42 215.38,214.04 257.23,213.88 299.08,188.13 340.92,196.73 382.77,165.64 424.62,135.19 466.46,94.38 508.31,48.00 550.15,119.02 592.00,141.76" fill="none" stroke="#d62728" stroke-width="2"/>
+<text x="48" y="20" font-size="14">PN baseline: train (blue) vs validation (red) BCE loss</text>
+<text x="48" y="350" font-size="11">epoch</text>
+<text x="4" y="48" font-size="11">loss</text>
+</svg>

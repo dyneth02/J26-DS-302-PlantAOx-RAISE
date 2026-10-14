@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420">
+<rect width="720" height="420" fill="white"/>
+<line x1="56" y1="364" x2="664" y2="364" stroke="black"/>
+<line x1="56" y1="56" x2="56" y2="364" stroke="black"/>
+<text x="56" y="20" font-size="14">Plot B: mean unclamped R_n vs epoch (per prior)</text>
+<text x="56" y="410" font-size="11">epoch</text>
+<text x="4" y="56" font-size="11">R_n</text>
+<line x1="56" y1="56.00" x2="664" y2="56.00" stroke="#888" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="594" y="52.00" font-size="10" fill="#888">R_n = 0</text>
+<polyline points="56.00,56.56 80.32,65.93" fill="none" stroke="#2ca02c" stroke-width="2"/>
+<rect x="648" y="56" width="10" height="10" fill="#2ca02c"/>
+<text x="664" y="65" font-size="10">pi=0.05</text>
+<polyline points="56.00,61.00 80.32,80.58 104.64,93.74 128.96,101.59 153.28,112.12 177.60,128.08 201.92,130.57 226.24,149.94 250.56,134.00 274.88,195.16 299.20,183.72 323.52,177.86 347.84,171.47 372.16,216.39 396.48,253.81 420.80,234.26 445.12,242.80 469.44,324.51 493.76,318.70 518.08,313.55 542.40,312.98 566.72,339.95 591.04,331.06 615.36,364.00 639.68,362.24 664.00,362.00" fill="none" stroke="#1f77b4" stroke-width="2"/>
+<rect x="648" y="70" width="10" height="10" fill="#1f77b4"/>
+<text x="664" y="79" font-size="10">pi=0.10</text>
+<polyline points="56.00,71.64 80.32,102.40" fill="none" stroke="#d62728" stroke-width="2"/>
+<rect x="648" y="84" width="10" height="10" fill="#d62728"/>
+<text x="664" y="93" font-size="10">pi=0.20</text>
+</svg>

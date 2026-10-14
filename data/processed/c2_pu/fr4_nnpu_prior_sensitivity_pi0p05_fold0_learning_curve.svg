@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+<rect width="640" height="360" fill="white"/>
+<line x1="48" y1="312" x2="592" y2="312" stroke="black"/>
+<line x1="48" y1="48" x2="48" y2="312" stroke="black"/>
+<polyline points="48.00,48.00 592.00,277.81" fill="none" stroke="#1f77b4" stroke-width="2"/>
+<polyline points="48.00,233.01 592.00,312.00" fill="none" stroke="#d62728" stroke-width="2"/>
+<text x="48" y="20" font-size="14">nnPU prior-sensitivity diagnostic (pi=0.05): train (blue) vs validation (red) risk</text>
+<text x="48" y="350" font-size="11">epoch</text>
+<text x="4" y="48" font-size="11">loss</text>
+</svg>
