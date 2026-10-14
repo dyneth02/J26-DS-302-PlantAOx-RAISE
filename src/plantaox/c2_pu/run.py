@@ -3494,6 +3494,272 @@ def run_fr4_nnpu_prior_sensitivity_report(fold_id: int = 0) -> dict:
     return report
 
 
+# ---------------------------------------------------------------------------
+# Bucket 4.4 -- Two-Step PU (Elkan & Noto 2008-style) and PU-Bagging
+# (Mordelet & Vert 2014-style) baselines: E1+E2 labeled positives vs. C1
+# treated as UNLABELED (same policy as nnPU, Task 4.3), on
+# scikit-learn/pulearn estimators rather than models.BinaryMlp -- see
+# pu_sklearn_common.py / two_step_pu_baseline.py / pu_bagging_baseline.py
+# for the full rationale. Every sklearn/pulearn-dependent module is
+# imported LAZILY inside each stage function, mirroring Buckets 4.1-4.3 --
+# run.py's module-level import graph stays torch-free AND sklearn-free.
+# ---------------------------------------------------------------------------
+FR4_TWO_STEP_PU_BASELINE_RUNS_DIR = INTERIM_DIR / "fr4_two_step_pu_baseline_runs"  # gitignored, scratch
+FR4_TWO_STEP_PU_BASELINE_SUMMARY_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_two_step_pu_baseline_fold{fold_id}_summary.json")
+FR4_TWO_STEP_PU_BASELINE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_two_step_pu_baseline_provenance.jsonl"
+
+FR4_PU_BAGGING_BASELINE_RUNS_DIR = INTERIM_DIR / "fr4_pu_bagging_baseline_runs"  # gitignored, scratch
+FR4_PU_BAGGING_BASELINE_SUMMARY_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_pu_bagging_baseline_fold{fold_id}_summary.json")
+FR4_PU_BAGGING_BASELINE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_pu_bagging_baseline_provenance.jsonl"
+
+_FR4_TASK_4_4_LIMITATIONS = {
+    "assumed_unlabeled_c1": "C1 is an assumed-negative/PU-unlabeled pool, NEVER experimentally confirmed "
+    "antioxidant-inactive. Both algorithms' first internal stage trains a classifier treating C1 rows AS IF "
+    "negative -- a standard, documented step of Two-Step PU/PU-Bagging themselves (Elkan & Noto 2008; "
+    "Mordelet & Vert 2014), not a project-level reclassification of C1's status.",
+    "evidence_tiers": "E1 (assay-confirmed) and E2 (provisional benchmark-annotated) positives are POOLED as "
+    "labeled positives, identical policy to nnPU (Task 4.3), but their provenance/counts remain separately "
+    "auditable (class_counts.e1_train/e2_train/...). E2 is not uniformly assay-confirmed.",
+    "base_estimator_not_binarymlp": "Two-Step PU and PU-Bagging wrap sklearn.linear_model.LogisticRegression, "
+    "NOT models.BinaryMlp -- a documented, deliberate departure from PN/nnPU's shared architecture (see each "
+    "baseline module's own BASE_ESTIMATOR_DECISION_NOTE and the Task 4.4 decision log). Comparing these "
+    "baselines' scores to PN/nnPU numerically must account for this architecture difference, not just the "
+    "label-assumption difference.",
+    "no_mcc_auprc_here": "This task (4.4) implements and sanity-checks the baselines only. MCC/AUPRC "
+    "computation and a cross-baseline comparison table are Task 4.5's explicit scope, not performed here.",
+    "shortcut_bias_risk": "FR2 (Task 2.5) documented substantial FR1-positive-vs-C1 distributional differences "
+    "(length, charge, GRAVY, aromaticity, composition); neither algorithm automatically eliminates those "
+    "differences.",
+    "evaluation_scope": "Fold-0-only initial baseline. Full C1/C2/C3 cross-pool comparison, calibration, RNIS, "
+    "and five-fold validation are out of Task 4.4's scope.",
+    "scientific_sign_off": "Technical acceptance only -- no supervisor or scientific sign-off is implied for "
+    "the chosen base estimator, hyperparameters, or any scientific conclusion.",
+}
+
+
+def run_fr4_two_step_pu_baseline(fold_id: int = 0, hold_out_ratio: float | None = None) -> dict:
+    """Bucket 4.4: train the Two-Step PU (Elkan & Noto 2008-style)
+    baseline for GraphPart fold ``fold_id`` -- E1+E2 labeled positives vs.
+    C1 treated as UNLABELED -- using Task 4.4's shared sklearn/pulearn PU
+    dataset assembly (``pu_sklearn_common.build_sklearn_pu_dataset``,
+    itself reusing Task 4.2/4.3's deterministic C1 partition and E1+E2
+    selection). See ``two_step_pu_baseline.py`` for the full algorithm
+    description and how this differs from PN/nnPU.
+    """
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.pu_sklearn_common import build_sklearn_pu_dataset, load_sklearn_checkpoint
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, write_resolved_config
+    from plantaox.c2_pu.two_step_pu_baseline import DEFAULT_HOLD_OUT_RATIO, train_two_step_pu_baseline
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    resolved_hold_out_ratio = hold_out_ratio if hold_out_ratio is not None else DEFAULT_HOLD_OUT_RATIO
+
+    config = ExperimentConfig(
+        experiment_id=f"fr4_two_step_pu_baseline_fold{fold_id}",
+        baseline="TwoStepPU",
+        fold_id=fold_id,
+        checkpoint_dir=str(FR4_TWO_STEP_PU_BASELINE_RUNS_DIR),
+    )
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_sklearn_pu_dataset(data, config)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["two_step_pu_dataset_provenance"] = {
+        "e1_train_count": dataset.e1_train_count,
+        "e2_train_count": dataset.e2_train_count,
+        "e1_validation_count": dataset.e1_validation_count,
+        "e2_validation_count": dataset.e2_validation_count,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "n_c1_unlabeled_train": int(dataset.train_unlabeled_features.shape[0]),
+        "n_c1_unlabeled_validation": int(dataset.validation_unlabeled_features.shape[0]),
+    }
+    resolved_config["hold_out_ratio"] = resolved_hold_out_ratio
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_two_step_pu_baseline(config, dataset, run_dir, hold_out_ratio=resolved_hold_out_ratio)
+
+        best_checkpoint_path = run_dir / "checkpoint_best.joblib"
+        last_checkpoint_path = run_dir / "checkpoint_last.joblib"
+        reload_payload = load_sklearn_checkpoint(best_checkpoint_path)
+        reload_estimator = reload_payload["estimator"]
+
+        sample_n = min(16, len(dataset.validation_positive_features))
+        sample_x = dataset.validation_positive_features[:sample_n]
+        reload_proba_corrected = reload_estimator.predict_proba(sample_x)[:, 1]
+        reload_proba_base = reload_estimator.estimator.predict_proba(sample_x)[:, 1]
+
+        summary = {
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "class_counts": {
+                "train_positive": dataset.e1_train_count + dataset.e2_train_count,
+                "train_unlabeled": int(dataset.train_unlabeled_features.shape[0]),
+                "validation_positive": dataset.e1_validation_count + dataset.e2_validation_count,
+                "validation_unlabeled": int(dataset.validation_unlabeled_features.shape[0]),
+                "e1_train": dataset.e1_train_count,
+                "e2_train": dataset.e2_train_count,
+                "e1_validation": dataset.e1_validation_count,
+                "e2_validation": dataset.e2_validation_count,
+            },
+            "c1_partition": {
+                "validation_fraction": dataset.c1_validation_fraction,
+                "seed": dataset.c1_partition_seed,
+            },
+            "hold_out_ratio": resolved_hold_out_ratio,
+            "estimated_c": training_summary["estimated_c"],
+            "base_estimator_decision": training_summary["base_estimator_decision"],
+            "label_encoding_note": training_summary["label_encoding_note"],
+            "training": training_summary,
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+            },
+            "checkpoint_reload_verification": {
+                "base_proba_shape": list(reload_proba_base.shape),
+                "base_proba_bounded_0_1": bool(np.all((reload_proba_base >= 0) & (reload_proba_base <= 1))),
+                "base_proba_finite": bool(np.isfinite(reload_proba_base).all()),
+                "corrected_proba_finite": bool(np.isfinite(reload_proba_corrected).all()),
+            },
+            "limitations": _FR4_TASK_4_4_LIMITATIONS,
+        }
+    summary_path = Path(FR4_TWO_STEP_PU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_TWO_STEP_PU_BASELINE_PROVENANCE_LOG_PATH, {"stage": "fr4_two_step_pu_baseline", "summary": summary})
+    return summary
+
+
+def run_fr4_pu_bagging_baseline(fold_id: int = 0, n_estimators: int | None = None) -> dict:
+    """Bucket 4.4: train the PU-Bagging (Mordelet & Vert 2014-style)
+    baseline for GraphPart fold ``fold_id`` -- E1+E2 labeled positives vs.
+    C1 treated as UNLABELED -- using the SAME Task 4.4 shared sklearn/
+    pulearn PU dataset assembly as Two-Step PU. See
+    ``pu_bagging_baseline.py`` for the full algorithm description and how
+    this differs from PN/nnPU/Two-Step PU.
+    """
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.pu_bagging_baseline import DEFAULT_N_ESTIMATORS, train_pu_bagging_baseline
+    from plantaox.c2_pu.pu_sklearn_common import build_sklearn_pu_dataset, load_sklearn_checkpoint
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, write_resolved_config
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    resolved_n_estimators = n_estimators if n_estimators is not None else DEFAULT_N_ESTIMATORS
+
+    config = ExperimentConfig(
+        experiment_id=f"fr4_pu_bagging_baseline_fold{fold_id}",
+        baseline="PUBagging",
+        fold_id=fold_id,
+        checkpoint_dir=str(FR4_PU_BAGGING_BASELINE_RUNS_DIR),
+    )
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_sklearn_pu_dataset(data, config)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["pu_bagging_dataset_provenance"] = {
+        "e1_train_count": dataset.e1_train_count,
+        "e2_train_count": dataset.e2_train_count,
+        "e1_validation_count": dataset.e1_validation_count,
+        "e2_validation_count": dataset.e2_validation_count,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "n_c1_unlabeled_train": int(dataset.train_unlabeled_features.shape[0]),
+        "n_c1_unlabeled_validation": int(dataset.validation_unlabeled_features.shape[0]),
+    }
+    resolved_config["n_estimators"] = resolved_n_estimators
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_pu_bagging_baseline(config, dataset, run_dir, n_estimators=resolved_n_estimators)
+
+        best_checkpoint_path = run_dir / "checkpoint_best.joblib"
+        last_checkpoint_path = run_dir / "checkpoint_last.joblib"
+        reload_payload = load_sklearn_checkpoint(best_checkpoint_path)
+        reload_estimator = reload_payload["estimator"]
+
+        sample_n = min(16, len(dataset.validation_positive_features))
+        sample_x = dataset.validation_positive_features[:sample_n]
+        reload_proba = reload_estimator.predict_proba(sample_x)[:, 1]
+
+        summary = {
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "class_counts": {
+                "train_positive": dataset.e1_train_count + dataset.e2_train_count,
+                "train_unlabeled": int(dataset.train_unlabeled_features.shape[0]),
+                "validation_positive": dataset.e1_validation_count + dataset.e2_validation_count,
+                "validation_unlabeled": int(dataset.validation_unlabeled_features.shape[0]),
+                "e1_train": dataset.e1_train_count,
+                "e2_train": dataset.e2_train_count,
+                "e1_validation": dataset.e1_validation_count,
+                "e2_validation": dataset.e2_validation_count,
+            },
+            "c1_partition": {
+                "validation_fraction": dataset.c1_validation_fraction,
+                "seed": dataset.c1_partition_seed,
+            },
+            "n_estimators": resolved_n_estimators,
+            "oob_metrics": training_summary["oob_metrics"],
+            "base_estimator_decision": training_summary["base_estimator_decision"],
+            "label_encoding_note": training_summary["label_encoding_note"],
+            "training": training_summary,
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+            },
+            "checkpoint_reload_verification": {
+                "proba_shape": list(reload_proba.shape),
+                "proba_bounded_0_1": bool(np.all((reload_proba >= 0) & (reload_proba <= 1))),
+                "proba_finite": bool(np.isfinite(reload_proba).all()),
+            },
+            "limitations": _FR4_TASK_4_4_LIMITATIONS,
+        }
+    summary_path = Path(FR4_PU_BAGGING_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_PU_BAGGING_BASELINE_PROVENANCE_LOG_PATH, {"stage": "fr4_pu_bagging_baseline", "summary": summary})
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -3535,6 +3801,20 @@ def main(argv: list[str] | None = None) -> int:
         "fr4-nnpu-prior-sensitivity-report",
         help="Task 4.3 POST-ACCEPTANCE DIAGNOSTIC: comparison table + Plots A-D across pi=0.05/0.10/0.20",
     )
+    p_two_step = sub.add_parser(
+        "fr4-two-step-pu-baseline",
+        help="Two-Step PU (Elkan & Noto 2008-style) baseline: E1+E2 positives vs. C1 as unlabeled, "
+        "sklearn LogisticRegression + pulearn ElkanotoPuClassifier (Bucket 4.4)",
+    )
+    p_two_step.add_argument("--fold-id", type=int, default=0)
+    p_two_step.add_argument("--hold-out-ratio", type=float, default=None)
+    p_pu_bagging = sub.add_parser(
+        "fr4-pu-bagging-baseline",
+        help="PU-Bagging (Mordelet & Vert 2014-style) baseline: E1+E2 positives vs. C1 as unlabeled, "
+        "sklearn LogisticRegression + pulearn BaggingPuClassifier (Bucket 4.4)",
+    )
+    p_pu_bagging.add_argument("--fold-id", type=int, default=0)
+    p_pu_bagging.add_argument("--n-estimators", type=int, default=None)
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -3652,6 +3932,14 @@ def main(argv: list[str] | None = None) -> int:
             {k: v for k, v in report.items() if k != "best_checkpoint_score_distributions_by_prior"},
             indent=2, default=str,
         ))
+        return 0
+    if args.stage == "fr4-two-step-pu-baseline":
+        summary = run_fr4_two_step_pu_baseline(fold_id=args.fold_id, hold_out_ratio=args.hold_out_ratio)
+        print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-pu-bagging-baseline":
+        summary = run_fr4_pu_bagging_baseline(fold_id=args.fold_id, n_estimators=args.n_estimators)
+        print(json.dumps(summary, indent=2, default=str))
         return 0
     return 1
 
