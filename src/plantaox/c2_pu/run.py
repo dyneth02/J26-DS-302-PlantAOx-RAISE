@@ -49,10 +49,17 @@ from plantaox.c2_pu.curation.audit import (
     sequence_integrity_report,
 )
 from plantaox.c2_pu.curation.biopep import BIOPEP_CITATION, BIOPEP_SEARCH_URL, fetch_biopep_by_activity
-from plantaox.c2_pu.common.descriptors import DESCRIPTOR_NAMES, SCHEMA_VERSION as DESCRIPTOR_SCHEMA_VERSION
+from plantaox.c2_pu.common.descriptors import (
+    DESCRIPTOR_NAMES,
+    SCHEMA_VERSION as DESCRIPTOR_SCHEMA_VERSION,
+    compute_descriptors_batch,
+)
 from plantaox.c2_pu.common.feature_cache import (
     CACHE_SCHEMA_VERSION,
     build_fold_cache_arrays,
+    get_c3_fold_challenge_rows,
+    get_held_out_rows,
+    get_pool_rows,
     get_training_rows,
     load_fold_feature_cache,
     scaler_identity_sha256,
@@ -2505,6 +2512,197 @@ def run_fr3_feature_cache(n_folds: int = 5) -> dict:
     return summary
 
 
+# Bucket 3.5 -- Feature Pipeline Demonstration. A small, fast, fully
+# offline walkthrough of the ALREADY-ACCEPTED Tasks 3.1-3.4 pipeline,
+# built entirely from real, already-produced artifacts and the real
+# shared functions -- no reimplementation, no new formulas, and no live
+# ESM-2/WSL inference anywhere in this path (embeddings are loaded from
+# the existing fr3_embeddings.npz cache, never recomputed). Requires
+# Tasks 3.1-3.4 to have already been run locally at least once, since it
+# reads their real (gitignored) large-array outputs -- see the
+# FileNotFoundError below for exactly which commands to run first.
+#
+# The 7 demo peptide_ids are a fixed, deterministic selection of REAL
+# peptides already present in the accepted pipeline outputs (not
+# fabricated/synthetic), chosen to cover every pool plus both sides of
+# fold 0's GraphPart split and two of fold 0's real C3 top-2000 hard
+# challenges (ranks 1-2):
+FR3_DEMO_FOLD_ID = 0
+FR3_DEMO_PEPTIDE_IDS = {
+    "FR1_positive_fold0_training": "AOP-002DDE226A",
+    "FR1_positive_fold0_held_out": "AOP-0089BF570C",
+    "C1": "C1-00174EE65A",
+    "C2": "C2-00316810B4",
+    "C3_fold0_rank1": "C3-8A629D6877",
+    "C3_fold0_rank2": "C3-73E12D123B",
+    "external_control": "AOP-053EB70717",
+}
+FR3_DEMO_OUTPUT_PATH = PROCESSED_DIR / "fr3_demo_output.json"
+FR3_DEMO_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr3_demo_provenance.jsonl"
+
+
+def run_fr3_demo(fold_id: int = FR3_DEMO_FOLD_ID) -> dict:
+    """Bucket 3.5: demonstrate, end to end and offline, that the accepted
+    Tasks 3.1-3.4 pipeline (a) validates input sequences, (b) extracts
+    descriptors via the real shared implementation, (c) loads (never
+    recomputes) ESM-2 embeddings, (d) loads (never recomputes or refits)
+    a fold-specific scaled feature cache, and (e) correctly selects
+    training/held-out/C1/C2/fold-specific-C3/external-control rows from
+    it -- writing a deterministic JSON summary suitable as a PP1
+    presentation artifact and as an exact expected-output reference for
+    tests.
+    """
+    fold_cache_path = Path(FR3_FEATURE_CACHE_PATH_TEMPLATE.format(fold_id=fold_id))
+    required = [
+        FR3_RECORD_MAP_PATH,
+        FR3_DESCRIPTOR_TABLE_PATH,
+        FR3_EMBEDDINGS_CACHE_PATH,
+        FR3_EMBEDDINGS_MANIFEST_PATH,
+        FR3_FUSION_SCALERS_PATH,
+        FR3_FEATURE_CACHE_MANIFEST_PATH,
+        fold_cache_path,
+        C3_RANKING_PATH,
+    ]
+    missing = [p for p in required if not Path(p).exists()]
+    if missing:
+        raise FileNotFoundError(
+            f"Bucket 3.5 demo requires Tasks 3.1-3.4 to have already been run locally. Missing: "
+            f"{[str(p) for p in missing]}. Run in order: `fr3-descriptors`, `fr3-embeddings`, "
+            "`fr3-feature-fusion`, `fr3-feature-cache`."
+        )
+
+    descriptor_df = pd.read_parquet(FR3_DESCRIPTOR_TABLE_PATH)
+    demo_ids = list(FR3_DEMO_PEPTIDE_IDS.values())
+    missing_ids = [pid for pid in demo_ids if pid not in set(descriptor_df["peptide_id"])]
+    if missing_ids:
+        raise RuntimeError(f"Demo peptide_id(s) not found in fr3_descriptor_table.parquet: {missing_ids}")
+
+    demo_rows = (
+        descriptor_df[descriptor_df["peptide_id"].isin(demo_ids)]
+        .set_index("peptide_id")
+        .loc[demo_ids]
+        .reset_index()
+    )
+
+    # Step 1: input validation -- standard 20-AA alphabet, 3-50 AA window.
+    validation_step = {
+        label: {"peptide_id": pid, "sequence": seq, "valid_alphabet_and_length": is_valid_peptide(seq)}
+        for label, pid, seq in zip(FR3_DEMO_PEPTIDE_IDS.keys(), demo_rows["peptide_id"], demo_rows["sequence"])
+    }
+    if not all(v["valid_alphabet_and_length"] for v in validation_step.values()):
+        raise RuntimeError("One or more demo sequences failed the standard-alphabet/3-50AA check.")
+
+    # Step 2: descriptor extraction -- the real, shared implementation,
+    # computed live (fast, pure numpy, no GPU/WSL), then cross-checked
+    # against the frozen fr3_descriptor_table.parquet values.
+    live_descriptors = compute_descriptors_batch(demo_rows["peptide_id"].tolist(), demo_rows["sequence"].tolist())
+    descriptors_match = np.allclose(
+        live_descriptors[list(DESCRIPTOR_NAMES)].to_numpy(dtype=float),
+        demo_rows[list(DESCRIPTOR_NAMES)].to_numpy(dtype=float),
+    )
+
+    # Step 3: ESM-2 embeddings -- LOADED from the existing cache, never
+    # recomputed (no WSL/ESM-2 call anywhere in this function).
+    with np.load(FR3_EMBEDDINGS_CACHE_PATH, allow_pickle=False) as npz:
+        emb_ids = npz["peptide_ids"]
+        emb_matrix = npz["embeddings"]
+    emb_id_to_row = {str(pid): i for i, pid in enumerate(emb_ids)}
+    demo_embeddings = np.stack([emb_matrix[emb_id_to_row[pid]] for pid in demo_ids])
+    embeddings_manifest = json.loads(FR3_EMBEDDINGS_MANIFEST_PATH.read_text(encoding="utf-8"))
+
+    # Step 4: the existing fold-specific scaled 495-dim cache -- loaded
+    # (strict checksum-verified), never recomputed or refit.
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fold_entry = cache_manifest["folds"][str(fold_id)]
+    cache = load_fold_feature_cache(fold_entry["cache_path"], fold_entry)
+
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    scaler = fusion_scalers[str(fold_id)]
+
+    _, training_rows = get_training_rows(cache, scaler["training_peptide_ids"])
+    _, held_out_rows = get_held_out_rows(cache, scaler["held_out_peptide_ids"])
+    c1_ids, _ = get_pool_rows(cache, "C1")
+    c2_ids, _ = get_pool_rows(cache, "C2")
+    ext_ids, _ = get_pool_rows(cache, "external_control")
+    c3_fold_ids, c3_fold_rows, c3_fold_df = get_c3_fold_challenge_rows(cache, C3_RANKING_PATH, fold_id)
+
+    # Step 5: external-control-separate-from-training check.
+    external_overlap = set(ext_ids.tolist()) & (set(scaler["training_peptide_ids"]) | set(scaler["held_out_peptide_ids"]))
+
+    pool_coverage = {
+        "FR1_positives_training": len(scaler["training_peptide_ids"]),
+        "FR1_positives_held_out": len(scaler["held_out_peptide_ids"]),
+        "C1": int(len(c1_ids)),
+        "C2": int(len(c2_ids)),
+        "C3_union_in_cache": int((cache["pools"] == "C3").sum()),
+        f"C3_fold{fold_id}_challenge_selection": int(len(c3_fold_ids)),
+        "external_control": int(len(ext_ids)),
+    }
+
+    demo_peptide_rows = {}
+    for label, pid in FR3_DEMO_PEPTIDE_IDS.items():
+        row_idx = np.where(cache["peptide_ids"] == pid)[0]
+        if len(row_idx) == 0:
+            raise RuntimeError(f"Demo peptide_id {pid} not present in fold {fold_id}'s scaled cache.")
+        demo_peptide_rows[label] = {
+            "peptide_id": pid,
+            "pool": str(cache["pools"][row_idx[0]]),
+            "scaled_feature_shape": list(cache["features"][row_idx[0]].shape),
+            "scaled_feature_first_5": [round(float(x), 6) for x in cache["features"][row_idx[0]][:5]],
+        }
+    c3_demo_ids_selected_for_fold0 = {
+        pid for label, pid in FR3_DEMO_PEPTIDE_IDS.items() if label.startswith("C3_fold0")
+    }
+
+    validation = {
+        "all_demo_sequences_valid_alphabet_and_length": all(v["valid_alphabet_and_length"] for v in validation_step.values()),
+        "live_descriptors_match_frozen_cache": bool(descriptors_match),
+        "embeddings_loaded_not_recomputed_all_finite": bool(np.isfinite(demo_embeddings).all()),
+        "feature_cache_checksum_verified": True,
+        "scaled_features_all_finite": bool(np.isfinite(cache["features"]).all()),
+        "external_control_disjoint_from_training_and_held_out": bool(not external_overlap),
+        "c3_fold_selection_count_matches_top_n": bool(len(c3_fold_ids) == C3_TOP_N_PER_FOLD),
+        "demo_c3_peptides_present_in_fold0_real_selection": bool(
+            c3_demo_ids_selected_for_fold0 <= set(c3_fold_ids.tolist())
+        ),
+    }
+    if not all(validation.values()):
+        raise RuntimeError(f"Bucket 3.5 demo validation failed: {validation}")
+
+    summary = {
+        "fold_id": fold_id,
+        "schema": {
+            "descriptor_schema_version": DESCRIPTOR_SCHEMA_VERSION,
+            "fusion_schema_version": SCHEMA_VERSION,
+            "cache_schema_version": CACHE_SCHEMA_VERSION,
+            "embedding_model": embeddings_manifest["model_name"],
+            "embedding_dim": embeddings_manifest["embedding_dim"],
+            "fused_dim": FUSED_DIM,
+        },
+        "input_validation": validation_step,
+        "descriptor_extraction": {
+            "shape": list(live_descriptors[list(DESCRIPTOR_NAMES)].shape),
+            "source": "computed live via common.descriptors.compute_descriptors_batch (no GPU/WSL)",
+        },
+        "embedding_loading": {
+            "shape": list(demo_embeddings.shape),
+            "source": "loaded from fr3_embeddings.npz -- NOT recomputed",
+            "dtype": str(demo_embeddings.dtype),
+        },
+        "feature_cache_loading": {
+            "source": fold_entry["cache_path"],
+            "shape": list(cache["features"].shape),
+        },
+        "pool_coverage": pool_coverage,
+        "demo_peptide_rows": demo_peptide_rows,
+        "validation": validation,
+    }
+    with open(FR3_DEMO_OUTPUT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2)
+    append_provenance_log(FR3_DEMO_PROVENANCE_LOG_PATH, {"stage": "fr3_demo", "summary": summary})
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -2531,6 +2729,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr3-embeddings", help="Full ESM-2 embedding extraction over the Task 3.1 descriptor contract (Bucket 3.2)")
     sub.add_parser("fr3-feature-fusion", help="Fuse descriptors + embeddings into a 495-dim feature matrix with leakage-safe per-fold scalers (Bucket 3.3)")
     sub.add_parser("fr3-feature-cache", help="Materialize 5 fold-specific scaled feature caches from the accepted raw fused matrix (Bucket 3.4)")
+    sub.add_parser("fr3-demo", help="Offline feature-pipeline demonstration: validate, extract, load, select (Bucket 3.5)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -2613,6 +2812,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr3-feature-cache":
         summary = run_fr3_feature_cache()
+        print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr3-demo":
+        summary = run_fr3_demo()
         print(json.dumps(summary, indent=2, default=str))
         return 0
     return 1
