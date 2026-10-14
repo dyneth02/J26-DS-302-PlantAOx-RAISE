@@ -81,6 +81,53 @@
   SHA-256 hashes of every output file — byte-identical. 13 new tests total (`test_pools.py`,
   `test_fr2_c1_clean_acceptance.py`), all passing alongside the full existing suite (73 total).
 
+### Bucket 2, Task 2.1 — C1 standard-alphabet policy fix (follow-up, 2026-10-14)
+- **Policy approved by the project owner:** all curated peptides entering the ESM-2 and
+  physicochemical modeling pipelines must use the standard 20-amino-acid alphabet. Sequences
+  containing X, B, Z, or U are ineligible for the current pipeline — never silently substituted or
+  translated. This resolves Known Issues #9 and #10 for C1; the same requirement now applies to C2/C3
+  at initial curation (see Next tasks).
+- **Inspected the 260 affected records empirically before changing anything** (not just trusted the
+  prior count): 260 records / 259 unique sequences (one legitimate natural duplicate) in
+  `stage_c1_decoys.fasta` (v1). Residue breakdown confirmed by direct computation: X=251 (249
+  X-only + 2 combined with B/Z), B=7 (5 B-only + 2 combined), Z=3 (all combined with B/X), U=3
+  (all U-only) — matches the previously documented Known Issue #9 numbers exactly.
+  Lengths range 5–50 AA, nothing outside the shared 3–50 window.
+- **Eligible replacement pool checked before any fix was written:** 2,082 standard-alphabet,
+  non-blocklisted, non-screened candidates available in the untouched portion of
+  `uniprotkb_candidates.fasta` against 260 needed — no shortfall, so no need to consult the project
+  owner about changing source/criteria (the documented stop-and-ask condition didn't trigger).
+- **Resolution: swap, not resample — starting from the v1 leakage-clean pool, not the raw original.**
+  `clean_c1_alphabet()` (`pools.py`) removes the 260 non-standard records and deterministically
+  (seed 42) replaces them 1:1 from `uniprotkb_candidates.fasta`, re-screened against the secondary
+  bioactivity blocklist, all 1,205 FR1 positives, the 179 cross-source conflicts, **and** the
+  alphabet requirement itself (a replacement can never itself be non-standard). Verified empirically
+  that FR1's positive pool, the 179 conflicts, and the external control already contain zero
+  non-standard-alphabet sequences — this was a C1-only problem, not a project-wide one.
+- **Separately versioned, not overwritten:** per explicit instruction, the existing accepted v1
+  artifacts (`stage_c1_decoys.fasta`, `c1_accession_map.csv`, `c1_leakage_*_log.csv`,
+  `c1_clean_report.json`) are untouched (confirmed via `git status` showing no diff). The corrected
+  pool is a new artifact set: `stage_c1_decoys_v2.fasta`, `c1_accession_map_v2.csv`,
+  `c1_alphabet_exclusion_log.csv`, `c1_alphabet_replacement_log.csv`, `c1_alphabet_fix_report.json`.
+  **`stage_c1_decoys_v2.fasta` is now the canonical artifact for all future C1 consumption**
+  (embedding extraction, descriptor generation, C3 screening) — v1 is kept only for historical
+  diffing, and any future code reading `stage_c1_decoys.fasta` without the `_v2` suffix is reading
+  the superseded, alphabet-contaminated version.
+- **Unique-sequence count shifted slightly (3,786 → 3,785), documented not hidden:** removing 259
+  unique non-standard sequences and adding 260 replacement records (258 unique — two replacement
+  pairs share a sequence under different UniProt accessions, the same natural-duplication pattern
+  already accepted for C1 generally) nets to 3,785 unique sequences among the 5,000 records. Still
+  5,000 FASTA records, the project owner's confirmed acceptance unit.
+- **Full-file validation (not a sample):** all 5,000 v2 records confirmed standard-alphabet, 3–50 AA,
+  zero exact-sequence overlap with the 1,205 positives + 179 conflicts, accession map covers all 5,000
+  records with 0 missing accessions, exclusion/replacement logs are disjoint and match the report
+  counts exactly (`test_fr2_c1_alphabet_acceptance.py`, 7 new tests).
+- **Reproducibility:** `test_rerunning_alphabet_fix_is_reproducible` re-invokes the live fix and diffs
+  SHA-256 hashes of every output file — byte-identical. 9 new tests total (`test_pools.py` +2,
+  `test_fr2_c1_alphabet_acceptance.py` +7), full suite now 84 passed, 1 skipped (unchanged skip
+  reason: `test_embeddings.py` needs torch, runs for real inside WSL — 12 passed there separately).
+  `pp1_baseline_v1` and the v1 C1 artifacts confirmed untouched via `git status` before and after.
+
 ### Bucket 3, Task 3.2 — ESM-2 Environment Setup and Smoke Test
 - **Status: environment configured, interface built and tested, smoke test passing.** This is
   explicitly NOT full feature generation — embedding the full positive pool and C1/C2/C3 (Bucket
@@ -177,8 +224,19 @@ tasks below.)*
 6. **RESOLVED 2026-10-14.** C1's "5,000 records / 3,786 unique sequences" question was confirmed with the project owner as satisfied at the record level — see Bucket 2, Task 2.1 (close-out) above. Kept here for history; not an open item anymore.
 7. **RESOLVED 2026-10-14.** The `DRVYIHPF` leakage was found, screened conservatively (against all 1,205 positives + 179 conflicts, not just the frozen 834), and fixed by a 1-for-1 deterministic swap — see Bucket 2, Task 2.1 (close-out) above. `pp1_baseline_v1` was unaffected (the sequence was never in the frozen split).
 8. **The one new C1 replacement record (`RL34_XANVE`) has not had an independent manual spot-check**, distinct from the six historical rounds covering the other 4,999 unchanged records. Noted in the Task 2.1 close-out rather than silently assumed covered by the prior rounds.
-9. **260 of 5,000 C1 decoys (5.2%) contain non-standard residue codes** — X (251, "unknown residue"), B (7, Asx ambiguity), Z (3, Glx ambiguity), U (3, selenocysteine — a genuine 21st proteinogenic amino acid, not an error). `common/sequence.py`'s `is_standard_alphabet()` (enforced throughout FR1's positive pool, and now also the default in `embed_sequences()`) would reject all of these. Found while verifying the Planner's "remove malformed sequences" checklist item for Bucket 2.1 — **still not fixed**, now also directly blocking: `embed_sequences()` will raise `AmbiguousResidueError` on any of these 260 the moment full C1 feature extraction is attempted. The policy decision (exclude via another leakage-style swap? keep U but not X/B/Z? keep all and pass `validate_alphabet=False` explicitly?) needs to happen before Bucket 3.2's "extract embeddings for... C1" checklist item can proceed, not just before Bucket 2.1's "malformed sequences" checkbox.
-10. **Ambiguous-residue handling policy has not been decided for any pool** (C1's 260, and whatever fraction of C2/C3/positives turn out to carry X/B/Z/U once those exist) — `embed_sequences()` refuses to make this decision silently (raises `AmbiguousResidueError` by default) by design, but the actual policy is still open. This blocks full feature generation (Bucket 3.2's later checklist items), not the environment/interface/smoke-test work just completed.
+9. **RESOLVED 2026-10-14.** 260 of 5,000 C1 decoys (5.2%) contained non-standard residue codes — X
+   (251), B (7), Z (3), U (3). Fixed by `clean_c1_alphabet()` — see Bucket 2.1 "standard-alphabet
+   policy fix" above. The corrected, canonical artifact is `stage_c1_decoys_v2.fasta`; v1 is kept only
+   as historical evidence and is no longer the artifact any new code should read.
+10. **Ambiguous-residue policy: approved and enforced project-wide (2026-10-14), C1 fixed, C2/C3 still
+    pending construction.** Project-owner-approved policy: all curated peptides entering the ESM-2 and
+    physicochemical pipelines must use the standard 20-amino-acid alphabet; X/B/Z/U sequences are
+    ineligible, never silently substituted or translated. FR1's positive pool, the 179 conflicts, and
+    the external control were checked and already contain zero non-standard-alphabet sequences (this
+    was a C1-only problem). **C2 and C3 do not exist yet** (Task 2.2/2.3) — when built, their curation
+    code must apply `is_standard_alphabet()` at initial construction, not as a post-hoc patch like C1
+    needed. `embed_sequences()`'s `AmbiguousResidueError` default remains the structural backstop
+    against ever skipping this silently.
 
 ## ⏭️ Next tasks (in order)
 
@@ -186,14 +244,19 @@ tasks below.)*
    the conflict-resolution policy, the E2 provisional-tier default, the C1 source ambiguity, and the
    missing formal `data_registry.csv`. None block continued FR2/FR3 work on `pp1_baseline_v1`, but
    FR1 isn't *scientifically* closed until these are addressed.
-2. **Bucket 2.1 (C1) is closed out** — see Completed tasks above. Optional follow-up: an independent
-   spot-check of the one new replacement record (`RL34_XANVE`), low priority.
+2. **Bucket 2.1 (C1) is closed out, including the standard-alphabet policy fix** — see Completed tasks
+   above. Optional follow-ups, both low priority: an independent spot-check of the one new leakage
+   replacement record (`RL34_XANVE`); a spot-check of a few of the 260 new alphabet-fix replacement
+   records (none had an independent fresh review beyond the automated blocklist/screen checks).
 3. **Bucket 3.2's environment/interface/smoke-test scope is closed out** — see Completed tasks above.
-   Before starting full embedding extraction (the remaining Bucket 3.2 checklist items: "extract
-   embeddings for remaining positives and C1/C2/C3," "verify dimensions/ordering/dtype/completeness"):
-   decide the ambiguous-residue policy (Known Issues #9/#10) — it will otherwise hard-stop on the
-   first contaminated C1 sequence.
+   The ambiguous-residue policy blocker (former Known Issues #9/#10) is now resolved for C1; full
+   embedding extraction (the remaining Bucket 3.2 checklist items: "extract embeddings for remaining
+   positives and C1/C2/C3," "verify dimensions/ordering/dtype/completeness") can read
+   `stage_c1_decoys_v2.fasta` directly with `embed_sequences(..., validate_alphabet=True)` (the
+   default) and expect zero `AmbiguousResidueError`s from C1. Not yet attempted — still separate,
+   deliberately out-of-scope work.
 4. **Task 2.2 (C2 — Peptipedia bioactive pool)** can start any time; not blocked on anything above.
+   Must apply the standard-alphabet filter at initial curation (Known Issue #10), not as a later patch.
 5. **Bucket 3.1 (15 physicochemical descriptors)** can also start any time in parallel with C2/C3 —
    not blocked on the ESM-2 work.
 6. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
@@ -226,5 +289,9 @@ tasks below.)*
 | 2026-10-14 | `common/embeddings.py` (imports torch) is never imported directly into `run.py` (which runs on the Windows-side Python that has no torch) — the actual inference runs inside WSL's `pu_aop` env via a standalone `esm2_cli.py` entrypoint, invoked through `common/wsl.py`'s `run_in_conda_env` | Importing embeddings.py's module-level `import torch` into run.py's top-level imports would have broken every existing command (`fr1-positives`, `fr1-cluster`, etc.) the instant Windows tried to import torch. Mirrors the exact subprocess pattern already used for CD-HIT and GraphPart, which are also WSL-only. `pytest` was added to the `pu_aop` env specifically so the new torch-dependent tests (`test_embeddings.py`) can actually execute for real there, while still skipping cleanly (not failing) when the main suite runs from the Windows `.venv` via `pytest.importorskip("torch")`. |
 | 2026-10-14 | `embed_sequences()` validates every sequence against the standard 20-letter alphabet by default and raises `AmbiguousResidueError` (naming every offending peptide_id/sequence/residue) rather than embedding or dropping non-standard residues (X/B/Z/U) silently; `validate_alphabet=False` is an explicit, named opt-out | Explicit instruction: ambiguous residues must never be silently translated. The actual *policy* (how C1's 260 non-standard sequences, and any future C2/C3/positives cases, should be handled) has NOT been decided — this only guarantees the decision can't be skipped accidentally once full feature generation starts (Known Issues #9/#10). |
 | 2026-10-14 | Representation layer frozen at 12 and embedding dimension at 480, both confirmed by directly inspecting the loaded `esm2_t12_35M_UR50D` model's `num_layers`/`embed_dim` attributes (and `load_embedder` now asserts the dimension at load time) rather than assumed from the checkpoint name | The BOS/EOS/PAD token layout (`prepend_bos=True`, `append_eos=True`, residues at positions `1..len(seq)`) was likewise confirmed by tokenizing two real test sequences and inspecting the token tensor directly, not inferred from fair-esm's documentation. Matches the project's established practice (GraphPart's CLI/denominator semantics were verified the same way in Bucket 1.6) of verifying third-party tool behavior empirically before writing code against it. |
+
+| 2026-10-14 | Standard-20-amino-acid-alphabet policy approved: X/B/Z/U sequences are ineligible for the ESM-2/physicochemical modeling pipeline project-wide, never silently substituted or translated | Explicit project-owner approval. Closes the policy gap `embed_sequences()`'s `AmbiguousResidueError` was deliberately left open pending (Known Issues #9/#10). Verified empirically that only C1 was affected (260/5,000 records) — FR1 positives, the 179 conflicts, and the external control already contain zero non-standard-alphabet sequences. |
+| 2026-10-14 | C1's 260 non-standard-alphabet records fixed by `clean_c1_alphabet()`, starting from the v1 leakage-clean pool (not the raw original), swap-not-resample, seed 42, re-screened against the blocklist + all 1,205 positives + 179 conflicts + the alphabet requirement itself | Mirrors the exact pattern already used and accepted for the `DRVYIHPF` leakage fix. 2,082 eligible standard-alphabet replacements were available against 260 needed, confirmed before writing any replacement code — no shortfall, so the documented stop-and-ask condition never triggered. |
+| 2026-10-14 | The alphabet-fix output is a separately versioned artifact set (`stage_c1_decoys_v2.fasta` + `c1_accession_map_v2.csv` + `c1_alphabet_*_log.csv` + `c1_alphabet_fix_report.json`); the existing accepted v1 artifacts are left untouched rather than overwritten, and `stage_c1_decoys_v2.fasta` is now the canonical artifact for all future C1 consumption | Explicit instruction: preserve the existing accepted version, don't overwrite it in place. Mirrors the raw-vs-processed and `pp1_baseline_v1`-vs-future-`v2` versioning patterns already established elsewhere in this component — old version kept for historical diffing, canonical "latest" reference moves forward, logged rather than silently swapped. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

@@ -5,8 +5,10 @@ from __future__ import annotations
 from plantaox.c2_pu.pools import (
     BIOACTIVITY_KEYWORDS,
     apply_secondary_blocklist,
+    clean_c1_alphabet,
     clean_c1_pool,
     find_contamination,
+    find_non_standard_alphabet,
     matches_bioactivity_blocklist,
     parse_uniprot_header,
     sample_c1_decoys,
@@ -125,6 +127,62 @@ def test_clean_c1_pool_reports_shortfall_without_crashing_when_no_eligible_candi
     clean, exclusion_log, replacement_log, summary = clean_c1_pool(c1, candidate_pool, {"BADSEQ"}, seed=42)
 
     assert summary["n_contaminated_removed"] == 1
+    assert summary["n_replacements_made"] == 0
+    assert summary["shortfall"] == 1
+    assert summary["n_output_records"] == 0
+    assert clean == []
+    assert replacement_log == []
+
+
+def test_find_non_standard_alphabet():
+    records = [("a", "ACDEF"), ("b", "ACXEF"), ("c", "ACBEF"), ("d", "GGGQZ"), ("e", "MKUT")]
+    found = find_non_standard_alphabet(records)
+    assert {h for h, _ in found} == {"b", "c", "d", "e"}
+
+
+def test_clean_c1_alphabet_swaps_non_standard_for_standard_replacement():
+    c1 = [
+        ("sp|KEEP1|X desc1", "ACDEFG"),  # standard, kept as-is
+        ("sp|AMBIG|X desc2", "ACXEFG"),  # non-standard (X), must be removed+replaced
+        ("sp|KEEP2|X desc3", "GHIKLM"),  # standard, kept as-is
+    ]
+    candidate_pool = [
+        ("sp|KEEP1|X desc1", "ACDEFG"),  # already in c1, not eligible
+        ("sp|BAD|X some toxin peptide", "TOXINSE"),  # blocklisted, not eligible
+        ("sp|STILLBAD|X fresh candidate", "ACXFRESH"),  # non-standard itself, not eligible
+        ("sp|ALSO_POS|X desc", "OTHERPOS"),  # in screen set, not eligible
+        ("sp|REPL|X fresh candidate", "FRESHSEQ"),  # the only eligible replacement
+    ]
+    screen = {"OTHERPOS"}
+
+    clean, exclusion_log, replacement_log, summary = clean_c1_alphabet(c1, candidate_pool, screen, seed=42)
+
+    assert summary["n_input_records"] == 3
+    assert summary["n_non_standard_removed"] == 1
+    assert summary["n_replacements_needed"] == 1
+    assert summary["n_replacements_made"] == 1
+    assert summary["shortfall"] == 0
+    assert summary["n_output_records"] == 3
+
+    clean_seqs = {s for _, s in clean}
+    assert "ACXEFG" not in clean_seqs
+    assert "ACDEFG" in clean_seqs and "GHIKLM" in clean_seqs
+    assert "FRESHSEQ" in clean_seqs
+
+    assert len(exclusion_log) == 1
+    assert exclusion_log[0]["sequence"] == "ACXEFG"
+    assert exclusion_log[0]["non_standard_residues"] == ["X"]
+    assert exclusion_log[0]["reason"] == "non_standard_alphabet_residue"
+
+    assert len(replacement_log) == 1
+    assert replacement_log[0]["sequence"] == "FRESHSEQ"
+
+
+def test_clean_c1_alphabet_reports_shortfall_without_crashing():
+    c1 = [("sp|AMBIG|X", "ACXEFG")]
+    clean, exclusion_log, replacement_log, summary = clean_c1_alphabet(c1, [], set(), seed=42)
+
+    assert summary["n_non_standard_removed"] == 1
     assert summary["n_replacements_made"] == 0
     assert summary["shortfall"] == 1
     assert summary["n_output_records"] == 0

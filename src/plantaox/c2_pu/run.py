@@ -43,7 +43,7 @@ from plantaox.c2_pu.curation.splits import (
     write_stratified_fasta,
 )
 from plantaox.c2_pu.curation.tiers import build_positive_pool
-from plantaox.c2_pu.pools import clean_c1_pool, parse_uniprot_header
+from plantaox.c2_pu.pools import clean_c1_alphabet, clean_c1_pool, parse_uniprot_header
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RAW_DIR = REPO_ROOT / "data" / "raw" / "c2_pu"
@@ -95,6 +95,16 @@ C1_REPLACEMENT_LOG_PATH = PROCESSED_DIR / "c1_leakage_replacement_log.csv"
 C1_ACCESSION_MAP_PATH = PROCESSED_DIR / "c1_accession_map.csv"
 C1_CLEAN_REPORT_PATH = PROCESSED_DIR / "c1_clean_report.json"
 C1_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr2_c1_provenance.jsonl"
+
+# Bucket 2.1 follow-up: standard-20-amino-acid alphabet policy (2026-10-14
+# project-owner decision). The v1 artifacts above (post-leakage-fix,
+# pre-alphabet-fix) are preserved untouched, per explicit instruction, rather
+# than overwritten -- this is a separately versioned, superseding artifact.
+C1_CLEAN_FASTA_V2_PATH = PROCESSED_DIR / "stage_c1_decoys_v2.fasta"
+C1_ACCESSION_MAP_V2_PATH = PROCESSED_DIR / "c1_accession_map_v2.csv"
+C1_ALPHABET_EXCLUSION_LOG_PATH = PROCESSED_DIR / "c1_alphabet_exclusion_log.csv"
+C1_ALPHABET_REPLACEMENT_LOG_PATH = PROCESSED_DIR / "c1_alphabet_replacement_log.csv"
+C1_ALPHABET_FIX_REPORT_PATH = PROCESSED_DIR / "c1_alphabet_fix_report.json"
 
 
 def run_fr1_positives(seed: int = 42) -> dict:
@@ -441,6 +451,97 @@ def run_fr2_c1_clean(seed: int = 42) -> dict:
     return summary
 
 
+def run_fr2_c1_alphabet_fix(seed: int = 42) -> dict:
+    """Bucket 2.1 follow-up: enforce the standard-20-amino-acid-alphabet
+    policy on C1 (2026-10-14 project-owner decision -- see Known Issues #9/#10
+    in IMPLEMENTATION_STATUS.md).
+
+    Starts from the v1 leakage-clean pool (``C1_CLEAN_FASTA_PATH``, the
+    existing accepted Task 2.1 artifact) -- NOT the raw, still-leaky original
+    -- and swaps every non-standard-alphabet record (X/B/Z/U) 1:1 for a
+    standard-alphabet replacement drawn from the same candidate universe,
+    re-screened against the secondary blocklist and all 1,205 FR1 positives
+    + 179 conflicts. The v1 artifacts are left untouched; this writes a
+    separately versioned v2 artifact set rather than overwriting them.
+    """
+    if not C1_CLEAN_FASTA_PATH.exists():
+        raise FileNotFoundError(f"{C1_CLEAN_FASTA_PATH} not found -- run fr2-c1-clean first.")
+    if not C1_RAW_CANDIDATES_PATH.exists():
+        raise FileNotFoundError(f"{C1_RAW_CANDIDATES_PATH} not found.")
+    if not POSITIVE_POOL_PATH.exists():
+        raise FileNotFoundError(f"{POSITIVE_POOL_PATH} not found -- run fr1-positives first.")
+
+    c1_records = read_fasta(C1_CLEAN_FASTA_PATH)
+    candidate_pool_records = read_fasta(C1_RAW_CANDIDATES_PATH)
+    positive_df = pd.read_parquet(POSITIVE_POOL_PATH)
+    conflict_df = pd.read_csv(CONFLICT_LOG_PATH)
+    screen_sequences = set(positive_df["sequence"]) | set(conflict_df["sequence"])
+
+    clean_records, exclusion_log, replacement_log, summary = clean_c1_alphabet(
+        c1_records, candidate_pool_records, screen_sequences, seed=seed
+    )
+    if summary["shortfall"] > 0:
+        raise RuntimeError(
+            f"Eligible standard-alphabet replacement pool exhausted: needed "
+            f"{summary['n_replacements_needed']}, only {summary['n_replacements_available']} "
+            "available. Stopping rather than silently shipping a short pool -- see the "
+            "project owner before changing source/criteria."
+        )
+
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    write_fasta(C1_CLEAN_FASTA_V2_PATH, clean_records)
+
+    accession_map = pd.DataFrame(
+        [
+            {"peptide_header": h, "sequence": s, "length": len(s), **parse_uniprot_header(h)}
+            for h, s in clean_records
+        ]
+    )
+    accession_map.to_csv(C1_ACCESSION_MAP_V2_PATH, index=False, lineterminator="\n")
+
+    exclusion_df = pd.DataFrame(exclusion_log)
+    exclusion_df.to_csv(C1_ALPHABET_EXCLUSION_LOG_PATH, index=False, lineterminator="\n")
+
+    replacement_df = pd.DataFrame(replacement_log)
+    replacement_df.to_csv(C1_ALPHABET_REPLACEMENT_LOG_PATH, index=False, lineterminator="\n")
+
+    unique_seqs = set(s for _, s in clean_records)
+    lengths = [len(s) for s in unique_seqs]
+    summary.update(
+        {
+            "seed": seed,
+            "n_unique_sequences": len(unique_seqs),
+            "min_length": min(lengths) if lengths else None,
+            "max_length": max(lengths) if lengths else None,
+            "screen_set_size": len(screen_sequences),
+            "source_version": str(C1_CLEAN_FASTA_PATH),
+            "output_version": str(C1_CLEAN_FASTA_V2_PATH),
+        }
+    )
+    with open(C1_ALPHABET_FIX_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2)
+
+    append_provenance_log(
+        C1_PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr2_c1_alphabet_policy_fix",
+            "source_version": str(C1_CLEAN_FASTA_PATH),
+            "raw_candidates": str(C1_RAW_CANDIDATES_PATH),
+            "screen_sources": [str(POSITIVE_POOL_PATH), str(CONFLICT_LOG_PATH)],
+            "seed": seed,
+            "summary": summary,
+            "outputs": {
+                "clean_fasta_v2": str(C1_CLEAN_FASTA_V2_PATH),
+                "accession_map_v2": str(C1_ACCESSION_MAP_V2_PATH),
+                "alphabet_exclusion_log": str(C1_ALPHABET_EXCLUSION_LOG_PATH),
+                "alphabet_replacement_log": str(C1_ALPHABET_REPLACEMENT_LOG_PATH),
+                "report": str(C1_ALPHABET_FIX_REPORT_PATH),
+            },
+        },
+    )
+    return summary
+
+
 # Bucket 3.2 — ESM-2 embedding interface smoke test. torch/fair-esm live
 # only in the WSL pu_aop conda env (installed there per the project owner's
 # explicit decision, 2026-10-14: CPU-only, since the 35M-param model's
@@ -529,6 +630,10 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr1-split", help="GraphPart 40% identity 5-fold split (Bucket 1.6)")
     sub.add_parser("fr1-freeze", help="Snapshot validated FR1 artifacts as a versioned baseline (Bucket 1.7)")
     sub.add_parser("fr2-c1-clean", help="Resolve C1/positive-pool leakage (Bucket 2.1 close-out)")
+    sub.add_parser(
+        "fr2-c1-alphabet-fix",
+        help="Enforce standard-20-AA-alphabet policy on C1, versioned as v2 (Bucket 2.1 follow-up)",
+    )
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     args = parser.parse_args(argv)
 
@@ -550,6 +655,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr2-c1-clean":
         summary = run_fr2_c1_clean()
+        print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-c1-alphabet-fix":
+        summary = run_fr2_c1_alphabet_fix()
         print(json.dumps(summary, indent=2))
         return 0
     if args.stage == "esm2-smoketest":

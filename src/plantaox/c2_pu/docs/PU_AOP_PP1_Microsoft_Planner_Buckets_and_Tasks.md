@@ -130,10 +130,13 @@ decision log (2026-10-14). Recommend scheduling separately — it does not block
 - [x] Implement reproducible **3–50 AA** fragment sampling with a fixed seed. *(ported into tested code, `pools.py`; reproduces the saved file exactly from the saved candidate pool — `test_original_construction_is_reproducible_from_scratch`)*
 - [x] Construct and verify the **5,000-record** decoy dataset. *(confirmed 5,000 records / 3,786 unique sequences; record-level interpretation confirmed with the project owner, 2026-10-14)*
 - [x] Screen available annotations for known bioactivities; record limitations of annotation coverage. *(secondary blocklist verified to reproduce 8,233 kept / 597 excluded exactly; residual coverage gaps documented in `PU_AOP_RESEARCH_CONTEXT.md` §7)*
-- [ ] Remove known AOP matches, malformed sequences, and duplicates. *(AOP matches: done — 1 found via conservative screening against 1,205 positives + 179 conflicts, swapped out. Malformed sequences: **not done** — 260/5,000 contain non-standard residue codes (X/B/Z/U), found but not yet resolved, see Known Issues #9. Duplicates: **not removed** — kept intentionally, per the record-vs-unique decision above.)*
-- [x] Save C1 FASTA/CSV plus accession/fragment-coordinate mapping and exclusion log. *(`c1_accession_map.csv`, `c1_leakage_exclusion_log.csv`, `c1_leakage_replacement_log.csv` — no literal fragment coordinates exist to map, since C1 decoys are whole short UniProt entries, not fragments cut by this pipeline; documented in IMPLEMENTATION_STATUS.md)*
+- [x] Remove known AOP matches, malformed sequences, and duplicates. *(AOP matches: done — 1 found via conservative screening against 1,205 positives + 179 conflicts, swapped out. Malformed sequences: **done, 2026-10-14** — 260/5,000 non-standard-residue (X/B/Z/U) records swapped 1:1 for standard-alphabet replacements, re-screened against the blocklist + positives + conflicts; canonical artifact is now `stage_c1_decoys_v2.fasta`; see IMPLEMENTATION_STATUS.md Known Issues #9/#10 (resolved) and `test_fr2_c1_alphabet_acceptance.py`. Duplicates: **not removed** — kept intentionally, per the record-vs-unique decision above; unique-sequence count shifted to 3,785 as a result of the swap, documented not hidden.)*
+- [x] Save C1 FASTA/CSV plus accession/fragment-coordinate mapping and exclusion log. *(`c1_accession_map.csv`, `c1_leakage_exclusion_log.csv`, `c1_leakage_replacement_log.csv` (v1) plus `c1_accession_map_v2.csv`, `c1_alphabet_exclusion_log.csv`, `c1_alphabet_replacement_log.csv` (v2, alphabet-fixed) — no literal fragment coordinates exist to map, since C1 decoys are whole short UniProt entries, not fragments cut by this pipeline; documented in IMPLEMENTATION_STATUS.md)*
 
 ## 2.2 — C2 Bioactive Unlabeled Pool Construction
+*(Standard-20-amino-acid-alphabet policy, approved 2026-10-14: apply `is_standard_alphabet()` at
+initial curation here, not as a post-hoc patch like C1 needed — see IMPLEMENTATION_STATUS.md Known
+Issue #10.)*
 - [ ] Acquire Peptipedia records and their bioactivity annotations.
 - [ ] Select peptides with documented non-antioxidant bioactivities (e.g., antimicrobial, antihypertensive).
 - [ ] Exclude explicitly antioxidant-annotated peptides.
@@ -143,6 +146,10 @@ decision log (2026-10-14). Recommend scheduling separately — it does not block
 - [ ] Export C2 FASTA/CSV and inclusion/exclusion summary.
 
 ## 2.3 — C3 ESM-2 Hard-Challenge Construction
+*(Standard-20-amino-acid-alphabet policy, approved 2026-10-14: filter the UniRef50 candidate
+universe to standard-alphabet sequences at initial curation — see IMPLEMENTATION_STATUS.md Known
+Issue #10. `embed_sequences()` will reject any non-standard sequence at the embedding step regardless,
+but filtering earlier avoids building a candidate pool that can't be embedded.)*
 - [ ] Prepare an appropriately sized, versioned UniRef50 candidate fragment universe.
 - [ ] Install/test **esm2_t12_35M_UR50D** for consistent sequence embedding.
 - [ ] Cache positive-pool embeddings and define fold-safe centroid construction.
