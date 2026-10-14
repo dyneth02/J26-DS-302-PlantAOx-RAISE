@@ -73,6 +73,7 @@ MIN_PRIOR = 0.0
 MAX_PRIOR = 1.0
 
 NNPU_VARIANT_DIRECT_CLAMPED = "direct_clamped"
+NNPU_VARIANT_CORRECTIVE_BETA_GAMMA = "corrective_beta_gamma"
 
 
 class InvalidPriorError(ValueError):
@@ -144,6 +145,81 @@ class NnPuRiskResult:
     prior: float
     n_positive: int
     n_unlabeled: int
+
+
+@dataclass
+class CorrectiveNnPuRiskResult:
+    """Branch-specific optimizer loss plus the separately reported nnPU risk."""
+
+    training_loss: torch.Tensor
+    reported_nnpu_risk: torch.Tensor
+    positive_risk_contribution: float
+    positive_as_negative_risk: float
+    unlabeled_as_negative_risk: float
+    negative_risk_unclamped: float
+    negative_risk_contribution: float
+    corrective_branch: bool
+    beta: float
+    gamma: float
+    prior: float
+
+
+def compute_corrective_nnpu_risk(
+    positive_logits: torch.Tensor,
+    unlabeled_logits: torch.Tensor,
+    prior: float,
+    beta: float = 0.0,
+    gamma: float = 1.0,
+) -> CorrectiveNnPuRiskResult:
+    """Kiryo et al. beta/gamma optimization with separate monitoring risk.
+
+    When ``R_n < -beta``, minimizing ``-gamma * R_n`` performs gradient
+    ascent on the estimated negative-risk component. Otherwise the optimizer
+    follows the unbiased PU risk. The displayed risk always remains
+    ``pi*R_p^+ + max(0, R_n)`` and is never conflated with the training loss.
+    """
+    prior = validate_prior(prior)
+    beta = float(beta)
+    gamma = float(gamma)
+    if not math.isfinite(beta) or beta < 0:
+        raise ValueError(f"beta must be finite and >= 0, got {beta!r}")
+    if not math.isfinite(gamma) or gamma <= 0:
+        raise ValueError(f"gamma must be finite and > 0, got {gamma!r}")
+    if positive_logits.numel() == 0:
+        raise EmptyBatchError("compute_corrective_nnpu_risk: positive batch/group is empty.")
+    if unlabeled_logits.numel() == 0:
+        raise EmptyBatchError("compute_corrective_nnpu_risk: unlabeled batch/group is empty.")
+
+    positive_logits = positive_logits.reshape(-1)
+    unlabeled_logits = unlabeled_logits.reshape(-1)
+    if not torch.isfinite(positive_logits).all() or not torch.isfinite(unlabeled_logits).all():
+        raise ValueError("compute_corrective_nnpu_risk: non-finite logit(s) passed in.")
+
+    r_p_plus = logistic_loss_positive(positive_logits).mean()
+    r_p_minus = logistic_loss_negative(positive_logits).mean()
+    r_u_minus = logistic_loss_negative(unlabeled_logits).mean()
+    positive_term = prior * r_p_plus
+    negative_risk = r_u_minus - prior * r_p_minus
+    corrective_branch = bool(negative_risk.detach().item() < -beta)
+    training_loss = -gamma * negative_risk if corrective_branch else positive_term + negative_risk
+    negative_contribution = torch.clamp(negative_risk, min=0.0)
+    reported_risk = positive_term + negative_contribution
+    if not torch.isfinite(training_loss) or not torch.isfinite(reported_risk):
+        raise ValueError("compute_corrective_nnpu_risk: resulting loss/risk is non-finite.")
+
+    return CorrectiveNnPuRiskResult(
+        training_loss=training_loss,
+        reported_nnpu_risk=reported_risk,
+        positive_risk_contribution=float(positive_term.detach().item()),
+        positive_as_negative_risk=float(r_p_minus.detach().item()),
+        unlabeled_as_negative_risk=float(r_u_minus.detach().item()),
+        negative_risk_unclamped=float(negative_risk.detach().item()),
+        negative_risk_contribution=float(negative_contribution.detach().item()),
+        corrective_branch=corrective_branch,
+        beta=beta,
+        gamma=gamma,
+        prior=prior,
+    )
 
 
 def compute_nnpu_risk(

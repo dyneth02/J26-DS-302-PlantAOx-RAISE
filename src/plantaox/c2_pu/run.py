@@ -2964,6 +2964,10 @@ FR4_NNPU_BASELINE_RUNS_DIR = INTERIM_DIR / "fr4_nnpu_baseline_runs"  # gitignore
 FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_nnpu_baseline_fold{fold_id}_summary.json")
 FR4_NNPU_BASELINE_LEARNING_CURVE_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_nnpu_baseline_fold{fold_id}_learning_curve.svg")
 FR4_NNPU_BASELINE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_nnpu_baseline_provenance.jsonl"
+FR4_NNPU_CORRECTIVE_RUNS_DIR = INTERIM_DIR / "fr4_nnpu_corrective_runs"
+FR4_NNPU_CORRECTIVE_SUMMARY_PATH = PROCESSED_DIR / "fr4_nnpu_corrective_fold0_summary.json"
+FR4_NNPU_CORRECTIVE_LEARNING_CURVE_PATH = PROCESSED_DIR / "fr4_nnpu_corrective_fold0_learning_curve.svg"
+FR4_NNPU_CORRECTIVE_PROVENANCE_PATH = PROCESSED_DIR / "fr4_nnpu_corrective_provenance.jsonl"
 
 
 def run_fr4_nnpu_baseline(
@@ -3127,6 +3131,94 @@ def run_fr4_nnpu_baseline(
     with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
         json.dump(summary, handle, indent=2, default=str)
     append_provenance_log(FR4_NNPU_BASELINE_PROVENANCE_LOG_PATH, {"stage": "fr4_nnpu_baseline", "summary": summary})
+    return summary
+
+
+def run_fr4_nnpu_corrective(fold_id: int = 0, max_epochs: int = 100) -> dict:
+    """Controlled beta/gamma corrective-nnPU follow-up; fold 0 only."""
+    import torch
+
+    from plantaox.c2_pu.corrective_nnpu import train_corrective_nnpu
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.nnpu_baseline import PRIOR_PROVENANCE_NOTE, build_nnpu_dataset
+    from plantaox.c2_pu.nnpu_prior_diagnostics import compute_group_score_distributions
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, load_checkpoint, write_resolved_config
+
+    if fold_id != 0:
+        raise ValueError("This bounded follow-up is specified for fold 0 only.")
+    accepted_path = Path(FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    accepted = json.loads(accepted_path.read_text(encoding="utf-8"))
+    accepted_config_path = Path(accepted["run_dir"]) / "resolved_config.json"
+    accepted_config = json.loads(accepted_config_path.read_text(encoding="utf-8"))
+
+    # Use the real accepted run configuration, not prose values that drifted
+    # from it, so optimization variant is the only controlled change.
+    config = ExperimentConfig.from_dict({
+        **accepted_config,
+        "experiment_id": "fr4_nnpu_corrective_fold0",
+        "checkpoint_dir": str(FR4_NNPU_CORRECTIVE_RUNS_DIR),
+        "max_epochs": max_epochs,
+    })
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+    data = build_experiment_data(config, Path(cache_entry["cache_path"]), cache_entry,
+                                 fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH)
+    dataset = build_nnpu_dataset(data, config, prior=0.10)
+
+    resolved = config.to_dict()
+    resolved.update({
+        "git_revision": _git_commit_hash(),
+        "nnpu_variant": "corrective_beta_gamma", "prior": 0.10, "beta": 0.0, "gamma": 1.0,
+        "prior_provenance_note": PRIOR_PROVENANCE_NOTE,
+        "accepted_direct_reference": {"summary": str(accepted_path), "summary_sha256": sha256_of(accepted_path)},
+        "source_artifact_checksums": {
+            "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+            "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+            "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+        },
+        "configuration_discrepancy": (
+            "The follow-up brief stated batch_size=64 and weight_decay=0.0001, but the accepted "
+            "direct run's immutable resolved_config records batch_size=32 and weight_decay=0.0. "
+            "This run uses the accepted artifact values to keep optimization variant as the only change."
+        ),
+    })
+    run_dir = create_run_dir(FR4_NNPU_CORRECTIVE_RUNS_DIR, config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved)
+        training = train_corrective_nnpu(config, dataset, run_dir, beta=0.0, gamma=1.0)
+        best_path, last_path = run_dir / "checkpoint_best.pt", run_dir / "checkpoint_last.pt"
+        model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(best_path, model)
+        score_groups = compute_group_score_distributions(model, dataset)
+        sample = model.predict_proba(torch.from_numpy(dataset.validation_positive_features[:16]))
+        FR4_NNPU_CORRECTIVE_LEARNING_CURVE_PATH.write_text(
+            Path(training["learning_curve_path"]).read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+        )
+        summary = {
+            "run_dir": str(run_dir), "fold_id": fold_id,
+            "class_counts": {"train_positive": 604, "validation_positive": 106,
+                             "train_unlabeled": 3220, "validation_unlabeled": 568,
+                             "e1_train": 331, "e2_train": 273, "e1_validation": 48, "e2_validation": 58},
+            "configuration": config.to_dict(), "prior": 0.10, "beta": 0.0, "gamma": 1.0,
+            "nnpu_variant": "corrective_beta_gamma", "training": training,
+            "best_checkpoint_score_distributions": score_groups,
+            "checkpoint": {"best_path_sha256": sha256_of(best_path), "last_path_sha256": sha256_of(last_path),
+                           "best_checkpoint_epoch": checkpoint_info["epoch"]},
+            "checkpoint_reload_verification": {"proba_shape": list(sample.shape),
+                "proba_finite": bool(torch.isfinite(sample).all()),
+                "proba_bounded": bool(((sample >= 0) & (sample <= 1)).all())},
+            "accepted_direct_reference": resolved["accepted_direct_reference"],
+            "configuration_discrepancy": resolved["configuration_discrepancy"],
+            "learning_curve": str(FR4_NNPU_CORRECTIVE_LEARNING_CURVE_PATH),
+        }
+    with open(FR4_NNPU_CORRECTIVE_SUMMARY_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_NNPU_CORRECTIVE_PROVENANCE_PATH,
+                          {"stage": "fr4_nnpu_corrective", "summary": summary})
     return summary
 
 
@@ -3790,6 +3882,10 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr4-infra-smoke-test", help="Shared experiment infrastructure smoke test: config, data, model, seeding, checkpoint round-trip (Bucket 4.1)")
     sub.add_parser("fr4-pn-baseline", help="PN supervised baseline: E1 positives vs. C1 assumed negatives, BCE-with-logits (Bucket 4.2)")
     sub.add_parser("fr4-nnpu-baseline", help="Plain nnPU baseline: E1+E2 positives vs. C1 as unlabeled, non-negative PU risk (Bucket 4.3)")
+    sub.add_parser(
+        "fr4-nnpu-corrective",
+        help="Task 4.3 follow-up: corrective beta/gamma nnPU at pi=0.10, beta=0, gamma=1",
+    )
     p_sensitivity = sub.add_parser(
         "fr4-nnpu-prior-sensitivity",
         help="Task 4.3 POST-ACCEPTANCE DIAGNOSTIC: one pi-sensitivity training condition (pi in {0.05, 0.10, 0.20})",
@@ -3915,6 +4011,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr4-nnpu-baseline":
         summary = run_fr4_nnpu_baseline()
+        print(json.dumps({k: v for k, v in summary.items() if k != "training"} | {
+            "training": {k: v for k, v in summary["training"].items() if k != "history"}
+        }, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-nnpu-corrective":
+        summary = run_fr4_nnpu_corrective()
         print(json.dumps({k: v for k, v in summary.items() if k != "training"} | {
             "training": {k: v for k, v in summary["training"].items() if k != "history"}
         }, indent=2, default=str))
