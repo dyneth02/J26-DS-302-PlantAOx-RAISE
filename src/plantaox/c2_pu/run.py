@@ -2816,6 +2816,144 @@ def run_fr4_infra_smoke_test(fold_id: int = 0) -> dict:
     return summary
 
 
+# Bucket 4.2 -- PN (Positive-Negative) supervised baseline: E1 positives
+# vs. C1 assumed negatives, BCE-with-logits, on the accepted Task 4.1
+# infrastructure. Every torch-dependent module is imported LAZILY inside
+# this function, mirroring Bucket 4.1's `fr4-infra-smoke-test` -- run.py's
+# module-level import graph stays torch-free.
+FR4_PN_BASELINE_RUNS_DIR = INTERIM_DIR / "fr4_pn_baseline_runs"  # gitignored, scratch
+FR4_PN_BASELINE_SUMMARY_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_pn_baseline_fold{fold_id}_summary.json")
+FR4_PN_BASELINE_LEARNING_CURVE_PATH_TEMPLATE = str(PROCESSED_DIR / "fr4_pn_baseline_fold{fold_id}_learning_curve.svg")
+FR4_PN_BASELINE_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr4_pn_baseline_provenance.jsonl"
+
+
+def run_fr4_pn_baseline(
+    fold_id: int = 0,
+    max_epochs: int | None = None,
+    use_class_weight: bool = True,
+    early_stopping_patience: int | None = 10,
+) -> dict:
+    """Bucket 4.2: train the PN supervised baseline for GraphPart fold
+    ``fold_id`` -- E1 positives vs. C1 assumed negatives -- using Task
+    4.1's BinaryMlp/build_experiment_data/run_recorder/seeding exactly as
+    accepted. C1 is an assumed-negative (PU-unlabeled) pool, never
+    experimentally confirmed inactive; this is the field's conventional-
+    practice reference baseline, not a validated antioxidant predictor.
+    """
+    import torch
+
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.pn_baseline import build_pn_dataset, train_pn_baseline
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, load_checkpoint, write_resolved_config
+
+    for p in (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH, C3_RANKING_PATH):
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found -- run Tasks 3.1-3.4 (`fr3-descriptors`..`fr3-feature-cache`) first.")
+
+    config_kwargs = {
+        "experiment_id": f"fr4_pn_baseline_fold{fold_id}",
+        "baseline": "PN",
+        "fold_id": fold_id,
+        "checkpoint_dir": str(FR4_PN_BASELINE_RUNS_DIR),
+    }
+    if max_epochs is not None:
+        config_kwargs["max_epochs"] = max_epochs
+    config = ExperimentConfig(**config_kwargs)
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"][str(fold_id)]
+
+    data = build_experiment_data(
+        config, Path(cache_entry["cache_path"]), cache_entry, fusion_scalers[str(fold_id)], record_map, C3_RANKING_PATH
+    )
+    dataset = build_pn_dataset(data, config)
+
+    resolved_config = config.to_dict()
+    resolved_config["git_revision"] = _git_commit_hash()
+    resolved_config["source_artifact_checksums"] = {
+        "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+        "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+        "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+    }
+    resolved_config["pn_dataset_provenance"] = {
+        "class_counts": dataset.class_counts,
+        "c1_validation_fraction": dataset.c1_validation_fraction,
+        "c1_partition_seed": dataset.c1_partition_seed,
+        "e1_train_ids_count": len(dataset.e1_train_ids),
+        "e1_validation_ids_count": len(dataset.e1_validation_ids),
+        "c1_train_ids_count": len(dataset.c1_train_ids),
+        "c1_validation_ids_count": len(dataset.c1_validation_ids),
+    }
+
+    run_dir = create_run_dir(Path(config.checkpoint_dir), config.experiment_id)
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved_config)
+        training_summary = train_pn_baseline(
+            config, dataset, run_dir, use_class_weight=use_class_weight, early_stopping_patience=early_stopping_patience
+        )
+
+        best_checkpoint_path = run_dir / "checkpoint_best.pt"
+        last_checkpoint_path = run_dir / "checkpoint_last.pt"
+        reload_model = BinaryMlp(MlpArchitecture(input_dim=config.feature_dim, hidden_dims=config.hidden_dims))
+        checkpoint_info = load_checkpoint(best_checkpoint_path, reload_model)
+
+        sample_n = min(16, len(dataset.validation_features))
+        sample_x = torch.from_numpy(dataset.validation_features[:sample_n])
+        proba = reload_model.predict_proba(sample_x)
+
+        learning_curve_committed_path = Path(FR4_PN_BASELINE_LEARNING_CURVE_PATH_TEMPLATE.format(fold_id=fold_id))
+        learning_curve_committed_path.write_text(
+            Path(training_summary["learning_curve_path"]).read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+        )
+
+        summary = {
+            "run_dir": str(run_dir),
+            "fold_id": fold_id,
+            "class_counts": dataset.class_counts,
+            "c1_partition": {
+                "validation_fraction": dataset.c1_validation_fraction,
+                "seed": dataset.c1_partition_seed,
+            },
+            "training": {k: v for k, v in training_summary.items() if k != "learning_curve_path"},
+            "checkpoint": {
+                "best_path_sha256": sha256_of(best_checkpoint_path),
+                "last_path_sha256": sha256_of(last_checkpoint_path),
+                "best_checkpoint_epoch": checkpoint_info["epoch"],
+            },
+            "checkpoint_reload_verification": {
+                "proba_shape": list(proba.shape),
+                "proba_bounded": bool(((proba >= 0) & (proba <= 1)).all().item()),
+                "proba_finite": bool(torch.isfinite(proba).all().item()),
+            },
+            "outputs": {
+                "learning_curve": str(learning_curve_committed_path),
+            },
+            "limitations": {
+                "assumed_negative_labels": "C1 is an assumed-negative/PU-unlabeled pool, NOT experimentally confirmed "
+                "antioxidant-inactive. PN is a conventional supervised control, not a validated predictor.",
+                "shortcut_bias_risk": "FR2 (Task 2.5) documented substantial FR1-positive-vs-C1 distributional "
+                "differences (length, charge, GRAVY, aromaticity, composition). High validation performance here "
+                "may reflect these shortcuts rather than genuine antioxidant-activity discrimination.",
+                "evidence_tiers": "E1 only is used for the PN positive class; E2 remains available for subsequent "
+                "evidence-tiered PU experiments (Task 4.3+).",
+                "evaluation_scope": "Fold-0-only initial baseline. Full C1/C2/C3 cross-pool comparison, calibration, "
+                "RNIS, and five-fold validation are out of Task 4.2's scope.",
+                "cross_fold_results": "A successful fold-0 run is an initial implementation demonstration, not "
+                "completed five-fold experimental validation.",
+                "scientific_sign_off": "Technical acceptance only -- no supervisor or scientific sign-off is implied.",
+            },
+        }
+    summary_path = Path(FR4_PN_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=fold_id))
+    with open(summary_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2, default=str)
+    append_provenance_log(FR4_PN_BASELINE_PROVENANCE_LOG_PATH, {"stage": "fr4_pn_baseline", "summary": summary})
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -2844,6 +2982,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("fr3-feature-cache", help="Materialize 5 fold-specific scaled feature caches from the accepted raw fused matrix (Bucket 3.4)")
     sub.add_parser("fr3-demo", help="Offline feature-pipeline demonstration: validate, extract, load, select (Bucket 3.5)")
     sub.add_parser("fr4-infra-smoke-test", help="Shared experiment infrastructure smoke test: config, data, model, seeding, checkpoint round-trip (Bucket 4.1)")
+    sub.add_parser("fr4-pn-baseline", help="PN supervised baseline: E1 positives vs. C1 assumed negatives, BCE-with-logits (Bucket 4.2)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -2935,6 +3074,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr4-infra-smoke-test":
         summary = run_fr4_infra_smoke_test()
         print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-pn-baseline":
+        summary = run_fr4_pn_baseline()
+        print(json.dumps({k: v for k, v in summary.items() if k != "training"} | {
+            "training": {k: v for k, v in summary["training"].items() if k != "history"}
+        }, indent=2, default=str))
         return 0
     return 1
 
