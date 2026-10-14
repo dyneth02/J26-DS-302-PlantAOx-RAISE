@@ -1404,6 +1404,35 @@
   al.'s original procedure) comparison is recommended before relying on nnPU results in Task 4.5/4.6 —
   proposed as a follow-up only, not implemented here.
 
+### Bucket 4, Task 4.3 — Corrective nnPU beta/gamma follow-up
+- **Status: controlled follow-up complete. Task 4.3's accepted PASS and direct-clamped artifacts are
+  unchanged.** Added `corrective_beta_gamma` as a separately named optimization variant; the accepted
+  `direct_clamped` function and training loop retain their prior behavior. The corrective branch
+  minimizes `-gamma * R_n` when `R_n < -beta`, while displayed/validation risk remains
+  `pi*R_p^+ + max(0,R_n)` and is logged separately from optimizer loss.
+- **Controlled run:** fold 0, π=0.10, β=0, γ=1, same E1+E2/C1 membership, fused 495-dimensional
+  features, `BinaryMlp`, Adam, initialization and sample-order seeds, and early-stopping rule as the
+  accepted run. A discrepancy was found between the brief (batch 64, weight decay 0.0001) and the
+  accepted immutable resolved config (batch 32, weight decay 0.0); the latter was used so optimization
+  variant remained the only changed factor.
+- **Genuine result:** 27 epochs, best epoch 16, best validation nnPU surrogate risk 0.0630219. The
+  corrective branch was used in 53.25% of all updates (52.87% over the final five epochs), versus the
+  accepted direct run's 98.63% threshold/clamping frequency. This does not mean threshold frequency is
+  itself a performance metric: the key difference is that corrective updates carry a C1-dependent
+  gradient instead of suppressing it.
+- **Best-checkpoint scores changed materially:** validation medians E1 1.000→0.682, E2 1.000→0.534,
+  C1 0.0378→0.0168; fractions above 0.5 changed from 100%/100%/35.6% to 70.8%/53.4%/1.76%.
+  Numerical training was stable, checkpoints reload, and scores are finite/bounded. These are
+  diagnostic model scores, not calibrated biological probabilities; C1 remains unlabeled.
+- **Artifacts/report:** `fr4_nnpu_corrective_fold0_summary.json`, separate gitignored best/last
+  checkpoints, `fr4_nnpu_corrective_fold0_learning_curve.svg`, and
+  [`FR4_NNPU_CORRECTIVE_COMPARISON.md`](FR4_NNPU_CORRECTIVE_COMPARISON.md). Corrective nnPU should be
+  included as a distinct model in Task 4.5; no Task 4.5 evaluation was performed here.
+- **Verification:** focused/relevant nnPU suite: 69 passed; complete repository suite:
+  **646 passed, 1 skipped, 0 failed** (`python -m pytest tests -q`, 1249.45s). The skip is the existing
+  environment-gated case, not a new failure. Frozen FR1/FR2 manifests and the FR3 cache manifest
+  retained their accepted SHA-256 values.
+
 ### Bucket 4, Task 4.4 — Additional PU Baselines (Two-Step PU, PU-Bagging)
 - **Status: technical acceptance passed (PASS).** Two more PU-learning baselines for Component 02,
   reusing Task 4.2/4.3's deterministic E1+E2 positive selection and C1 train/validation partition
@@ -1798,6 +1827,8 @@ tasks below.)*
 | 2026-10-15 | Task 4.3 post-acceptance diagnostic: investigated the accepted π=0.10 run's ≈98-100% negative-risk-clamping finding via a controlled π ∈ {0.05, 0.10, 0.20} sensitivity experiment (fold 0, all else held constant), WITHOUT modifying `nnpu_risk.py`/`nnpu_baseline.py` and WITHOUT implementing the beta/gamma corrective variant | Explicit post-acceptance-diagnostic brief: investigate, don't rebuild. Real finding: clamping is persistently near-universal across the whole declared grid (mean per-update clamped fraction 0.9825/0.9863/0.9915 for π=0.05/0.10/0.20) — classified "Persistently clamped," not resolved by retuning π. A genuinely prior-sensitive secondary finding (C1 median predicted score rises with π: 0.0063→0.0378→0.2977) is reported separately so it is not conflated with the clamping mechanism itself. See `FR4_NNPU_PRIOR_SENSITIVITY_DIAGNOSTIC.md` for the full report. |
 | 2026-10-15 | The accepted π=0.10 run's best checkpoint (gitignored but present on disk in this checkout, under `data/interim/c2_pu/fr4_nnpu_baseline_runs/fr4_nnpu_baseline_fold0__20261014T183214Z/`) was verified by SHA-256 against what the committed summary itself recorded, then loaded READ-ONLY to compute prediction-distribution diagnostics Task 4.3's own run never recorded — never retrained, never resaved | Per the diagnostic brief's explicit instruction: reuse the accepted reference wherever its records are sufficient, and verify rather than assume a gitignored artifact is still the one the committed summary describes. Confirmed matching both before this diagnostic's work began and after every new π=0.05/0.20 training run. |
 | 2026-10-15 | New diagnostic instrumentation (`nnpu_prior_diagnostics.py`'s `train_nnpu_with_diagnostics`) lives in a SEPARATE module from the accepted `nnpu_baseline.train_nnpu_baseline`, duplicating the training loop's structure rather than modifying the accepted function in place, with a regression test proving the two produce identical epoch-level aggregates at the same prior/seed | The accepted Task 4.3 training loop must remain byte-for-byte as accepted (AGENTS.md rule #4's spirit extended to accepted code, not just frozen data artifacts) — adding instrumentation via a parallel function, verified equivalent by test, avoids any risk of silently altering the accepted baseline's own reproducibility guarantee while still getting genuine per-update diagnostics. |
+| 2026-10-15 | Implemented the separately named `corrective_beta_gamma` nnPU follow-up at π=0.10, β=0, γ=1; retain the accepted `direct_clamped` variant as the historical Task 4.3 baseline | The prior-sensitivity diagnostic found 98–99% direct-clamping across π=0.05/0.10/0.20. Kiryo et al.'s corrective procedure gives the unlabeled-risk term a gradient-ascent update below the threshold rather than zero gradient. One controlled fold-0 run was authorized before Task 4.5; no β/γ sweep was performed. |
+| 2026-10-15 | Used batch size 32 and weight decay 0.0 for the corrective comparison, matching the accepted direct run's immutable `resolved_config.json`, despite the follow-up brief listing 64 and 0.0001 | A controlled optimization-rule comparison requires the accepted artifact's actual settings. Using the prose values would simultaneously change batch size and regularization, confounding the result. The mismatch is documented in the corrective run config, summary, and comparison report rather than silently ignored. |
 
 | 2026-10-15 | Task 4.4's Two-Step PU and PU-Bagging baselines wrap `sklearn.linear_model.LogisticRegression` via `pulearn.ElkanotoPuClassifier`/`BaggingPuClassifier` respectively, NOT `models.BinaryMlp` | No pre-specified base classifier/architecture for either algorithm was found in `PU_AOP_RESEARCH_CONTEXT.md`, the Planner doc, or the proposal (inspected directly before writing any code). Per the task brief's own explicit instruction, wrapping the existing torch `BinaryMlp` as a scikit-learn estimator merely to force architectural uniformity with PN/nnPU was considered and rejected as a disproportionate engineering detour -- Two-Step PU/PU-Bagging are specific algorithms built around scikit-learn-compatible base estimators in both the originating literature and the only practical PU-learning library (`pulearn`). Logistic regression (over e.g. `RandomForestClassifier`) was chosen because it is the more common choice in the original Two-Step PU (Elkan & Noto 2008)/PU-Bagging (Mordelet & Vert 2014) papers, is simpler to reason about and exactly reproduce, and keeps both new baselines on the same base-estimator family for a cleaner Task 4.5 comparison between them. |
 | 2026-10-15 | `pulearn==0.2.0` installed and used directly (no hand-rolled fallback implementation) | Verified end-to-end against a tiny synthetic P-vs-U example (`ElkanotoPuClassifier`, `WeightedElkanotoPuClassifier`, `BaggingPuClassifier`) BEFORE use on real data, per the task brief's own gate. Works cleanly against the already-installed scikit-learn 1.9.0 (pulearn's own declared constraint: `scikit-learn<2,>=1.4.2`). One API-naming surprise caught during verification, not assumed from pulearn's prose docs: `BaggingPuClassifier`'s constructor parameter is `estimator=`, not the `base_estimator=` name used in its own docstring (residual drift from upstream scikit-learn's `base_estimator`→`estimator` rename in sklearn >=1.2) -- confirmed via `inspect.signature` before writing any training code against it. |

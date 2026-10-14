@@ -329,6 +329,11 @@ data/interim/c2_pu/fr4_nnpu_baseline_runs/
 # collide with or overwrite the accepted pi=0.10 baseline's own run dirs.
 data/interim/c2_pu/fr4_nnpu_prior_sensitivity_runs/
 
+# Task 4.3 corrective beta/gamma follow-up -- separate run directories,
+# epoch logs, and PyTorch checkpoints. The compact summary, curve, and
+# checkpoint hashes are committed; binary model state remains local.
+data/interim/c2_pu/fr4_nnpu_corrective_runs/
+
 # Bucket 4.4 -- Two-Step PU / PU-Bagging run directories (resolved
 # configs, epoch logs, scikit-learn/pulearn estimator checkpoints saved
 # via joblib -- NOT PyTorch .pt files, since these baselines wrap
