@@ -1,0 +1,149 @@
+{
+  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_pu_bagging_baseline_runs\\fr4_pu_bagging_baseline_fold0__20261014T215024Z",
+  "fold_id": 0,
+  "class_counts": {
+    "train_positive": 604,
+    "train_unlabeled": 3220,
+    "validation_positive": 106,
+    "validation_unlabeled": 568,
+    "e1_train": 331,
+    "e2_train": 273,
+    "e1_validation": 48,
+    "e2_validation": 58
+  },
+  "c1_partition": {
+    "validation_fraction": 0.15,
+    "seed": 42
+  },
+  "n_estimators": 100,
+  "oob_metrics": {
+    "oob_score": 0.7952405857740585,
+    "n_rows_never_out_of_bag": 604,
+    "n_rows_total": 3824,
+    "positive_rows": {
+      "n": 0,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "max": null,
+      "fraction_near_zero_lt_0p01": null,
+      "fraction_near_one_gt_0p99": null
+    },
+    "unlabeled_rows": {
+      "n": 3220,
+      "mean": 0.06473542248755082,
+      "median": 8.035082208553823e-06,
+      "min": 6.910132944998117e-17,
+      "max": 0.9997190033134661,
+      "fraction_near_zero_lt_0p01": 0.787888198757764,
+      "fraction_near_one_gt_0p99": 0.002484472049689441
+    }
+  },
+  "base_estimator_decision": "Base estimator: sklearn.linear_model.LogisticRegression(max_iter=2000, random_state=<config.train_seed>), default L2 penalty, C=1.0 (sklearn's own default). No pre-specified base-classifier/architecture for Two-Step PU or PU-Bagging was found in docs/PU_AOP_RESEARCH_CONTEXT.md, the Planner doc, or the proposal (inspected directly before writing this module, not assumed). Logistic regression was chosen over a tree ensemble (e.g. RandomForestClassifier) because it is the more common choice in the original Two-Step PU (Elkan & Noto 2008) and PU-Bagging (Mordelet & Vert 2014) literature, is simpler to reason about and faster to fit/reproduce exactly, and keeps both new baselines on the SAME base-estimator family for a cleaner later comparison between them. Wrapping the existing torch BinaryMlp as a scikit-learn estimator merely to force architectural uniformity with PN/nnPU was explicitly considered and rejected as a disproportionate engineering detour for a baseline-implementation task -- see docs/IMPLEMENTATION_STATUS.md's Task 4.4 decision log entry.",
+  "label_encoding_note": "y=1 encodes an E1/E2 labeled positive; y=0 encodes a C1 row passed to the scikit-learn/pulearn estimator's unlabeled-surrogate slot. This 0 is a library-API numeric requirement (pulearn's PU estimators accept exactly one 'unlabeled' numeric code and have no three-way positive/unlabeled/negative label type), not a project-level claim that C1 is a confirmed negative -- see AGENTS.md rule #1 and this module's own docstring.",
+  "training": {
+    "seed_context": {
+      "effective_seed": 42,
+      "library": "scikit-learn 1.9.0 / pulearn",
+      "note": "Determinism is controlled entirely via BaggingPuClassifier(random_state=..., n_jobs=1) and LogisticRegression(random_state=...); no separate global numpy/torch seed call is needed or made by this module."
+    },
+    "base_estimator_decision": "Base estimator: sklearn.linear_model.LogisticRegression(max_iter=2000, random_state=<config.train_seed>), default L2 penalty, C=1.0 (sklearn's own default). No pre-specified base-classifier/architecture for Two-Step PU or PU-Bagging was found in docs/PU_AOP_RESEARCH_CONTEXT.md, the Planner doc, or the proposal (inspected directly before writing this module, not assumed). Logistic regression was chosen over a tree ensemble (e.g. RandomForestClassifier) because it is the more common choice in the original Two-Step PU (Elkan & Noto 2008) and PU-Bagging (Mordelet & Vert 2014) literature, is simpler to reason about and faster to fit/reproduce exactly, and keeps both new baselines on the SAME base-estimator family for a cleaner later comparison between them. Wrapping the existing torch BinaryMlp as a scikit-learn estimator merely to force architectural uniformity with PN/nnPU was explicitly considered and rejected as a disproportionate engineering detour for a baseline-implementation task -- see docs/IMPLEMENTATION_STATUS.md's Task 4.4 decision log entry.",
+    "label_encoding_note": "y=1 encodes an E1/E2 labeled positive; y=0 encodes a C1 row passed to the scikit-learn/pulearn estimator's unlabeled-surrogate slot. This 0 is a library-API numeric requirement (pulearn's PU estimators accept exactly one 'unlabeled' numeric code and have no three-way positive/unlabeled/negative label type), not a project-level claim that C1 is a confirmed negative -- see AGENTS.md rule #1 and this module's own docstring.",
+    "n_estimators": 100,
+    "max_samples": 1.0,
+    "oob_metrics": {
+      "oob_score": 0.7952405857740585,
+      "n_rows_never_out_of_bag": 604,
+      "n_rows_total": 3824,
+      "positive_rows": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "min": null,
+        "max": null,
+        "fraction_near_zero_lt_0p01": null,
+        "fraction_near_one_gt_0p99": null
+      },
+      "unlabeled_rows": {
+        "n": 3220,
+        "mean": 0.06473542248755082,
+        "median": 8.035082208553823e-06,
+        "min": 6.910132944998117e-17,
+        "max": 0.9997190033134661,
+        "fraction_near_zero_lt_0p01": 0.787888198757764,
+        "fraction_near_one_gt_0p99": 0.002484472049689441
+      }
+    },
+    "train_metrics": {
+      "n_estimators": 100,
+      "max_samples": 1.0,
+      "n_train_positive": 604,
+      "n_train_unlabeled": 3220,
+      "oob": {
+        "oob_score": 0.7952405857740585,
+        "n_rows_never_out_of_bag": 604,
+        "n_rows_total": 3824,
+        "positive_rows": {
+          "n": 0,
+          "mean": null,
+          "median": null,
+          "min": null,
+          "max": null,
+          "fraction_near_zero_lt_0p01": null,
+          "fraction_near_one_gt_0p99": null
+        },
+        "unlabeled_rows": {
+          "n": 3220,
+          "mean": 0.06473542248755082,
+          "median": 8.035082208553823e-06,
+          "min": 6.910132944998117e-17,
+          "max": 0.9997190033134661,
+          "fraction_near_zero_lt_0p01": 0.787888198757764,
+          "fraction_near_one_gt_0p99": 0.002484472049689441
+        }
+      }
+    },
+    "validation_metrics": {
+      "positive_rows": {
+        "n": 106,
+        "mean": 0.7663956460377396,
+        "median": 0.908972093462944,
+        "min": 0.001145597277577508,
+        "max": 0.9999999570846557,
+        "fraction_near_zero_lt_0p01": 0.018867924528301886,
+        "fraction_near_one_gt_0p99": 0.32075471698113206
+      },
+      "unlabeled_rows": {
+        "n": 568,
+        "mean": 0.05002360862485921,
+        "median": 1.5230556054407485e-05,
+        "min": 1.7192874340498106e-13,
+        "max": 0.9985909378528595,
+        "fraction_near_zero_lt_0p01": 0.7940140845070423,
+        "fraction_near_one_gt_0p99": 0.0035211267605633804
+      }
+    },
+    "no_learning_curve_reason": "PU-Bagging's .fit() is a single, non-iterative procedure that internally trains n_estimators bootstrap members in one call -- there is no per-epoch optimization trajectory to plot, unlike PN/nnPU's mini-batch training loops. The ensemble's own internal validation signal (out-of-bag score) is reported in oob_metrics instead of a held-out loss curve.",
+    "elapsed_seconds": 13.740054368972778
+  },
+  "checkpoint": {
+    "best_path_sha256": "fd26379eb98b3ee839a730f6a42f13cefb2f9f7b7d7a5b78801dd1a3e867480d",
+    "last_path_sha256": "52de7f62a9cfd3877495e362324755816805a36f7fee3fc9d05f3b67ea2a2217"
+  },
+  "checkpoint_reload_verification": {
+    "proba_shape": [
+      16
+    ],
+    "proba_bounded_0_1": true,
+    "proba_finite": true
+  },
+  "limitations": {
+    "assumed_unlabeled_c1": "C1 is an assumed-negative/PU-unlabeled pool, NEVER experimentally confirmed antioxidant-inactive. Both algorithms' first internal stage trains a classifier treating C1 rows AS IF negative -- a standard, documented step of Two-Step PU/PU-Bagging themselves (Elkan & Noto 2008; Mordelet & Vert 2014), not a project-level reclassification of C1's status.",
+    "evidence_tiers": "E1 (assay-confirmed) and E2 (provisional benchmark-annotated) positives are POOLED as labeled positives, identical policy to nnPU (Task 4.3), but their provenance/counts remain separately auditable (class_counts.e1_train/e2_train/...). E2 is not uniformly assay-confirmed.",
+    "base_estimator_not_binarymlp": "Two-Step PU and PU-Bagging wrap sklearn.linear_model.LogisticRegression, NOT models.BinaryMlp -- a documented, deliberate departure from PN/nnPU's shared architecture (see each baseline module's own BASE_ESTIMATOR_DECISION_NOTE and the Task 4.4 decision log). Comparing these baselines' scores to PN/nnPU numerically must account for this architecture difference, not just the label-assumption difference.",
+    "no_mcc_auprc_here": "This task (4.4) implements and sanity-checks the baselines only. MCC/AUPRC computation and a cross-baseline comparison table are Task 4.5's explicit scope, not performed here.",
+    "shortcut_bias_risk": "FR2 (Task 2.5) documented substantial FR1-positive-vs-C1 distributional differences (length, charge, GRAVY, aromaticity, composition); neither algorithm automatically eliminates those differences.",
+    "evaluation_scope": "Fold-0-only initial baseline. Full C1/C2/C3 cross-pool comparison, calibration, RNIS, and five-fold validation are out of Task 4.4's scope.",
+    "scientific_sign_off": "Technical acceptance only -- no supervisor or scientific sign-off is implied for the chosen base estimator, hyperparameters, or any scientific conclusion."
+  }
+}

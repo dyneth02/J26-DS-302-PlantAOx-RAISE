@@ -1,0 +1,125 @@
+{
+  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_two_step_pu_baseline_runs\\fr4_two_step_pu_baseline_fold0__20261014T215020Z",
+  "fold_id": 0,
+  "class_counts": {
+    "train_positive": 604,
+    "train_unlabeled": 3220,
+    "validation_positive": 106,
+    "validation_unlabeled": 568,
+    "e1_train": 331,
+    "e2_train": 273,
+    "e1_validation": 48,
+    "e2_validation": 58
+  },
+  "c1_partition": {
+    "validation_fraction": 0.15,
+    "seed": 42
+  },
+  "hold_out_ratio": 0.1,
+  "estimated_c": 0.708530843257904,
+  "base_estimator_decision": "Base estimator: sklearn.linear_model.LogisticRegression(max_iter=2000, random_state=<config.train_seed>), default L2 penalty, C=1.0 (sklearn's own default). No pre-specified base-classifier/architecture for Two-Step PU or PU-Bagging was found in docs/PU_AOP_RESEARCH_CONTEXT.md, the Planner doc, or the proposal (inspected directly before writing this module, not assumed). Logistic regression was chosen over a tree ensemble (e.g. RandomForestClassifier) because it is the more common choice in the original Two-Step PU (Elkan & Noto 2008) and PU-Bagging (Mordelet & Vert 2014) literature, is simpler to reason about and faster to fit/reproduce exactly, and keeps both new baselines on the SAME base-estimator family for a cleaner later comparison between them. Wrapping the existing torch BinaryMlp as a scikit-learn estimator merely to force architectural uniformity with PN/nnPU was explicitly considered and rejected as a disproportionate engineering detour for a baseline-implementation task -- see docs/IMPLEMENTATION_STATUS.md's Task 4.4 decision log entry.",
+  "label_encoding_note": "y=1 encodes an E1/E2 labeled positive; y=0 encodes a C1 row passed to the scikit-learn/pulearn estimator's unlabeled-surrogate slot. This 0 is a library-API numeric requirement (pulearn's PU estimators accept exactly one 'unlabeled' numeric code and have no three-way positive/unlabeled/negative label type), not a project-level claim that C1 is a confirmed negative -- see AGENTS.md rule #1 and this module's own docstring.",
+  "training": {
+    "seed_context": {
+      "effective_seed": 42,
+      "library": "scikit-learn 1.9.0 / pulearn",
+      "note": "Determinism is controlled entirely via ElkanotoPuClassifier(random_state=...) and LogisticRegression(random_state=...); lbfgs is itself a deterministic solver given fixed data, so no separate global numpy/torch seed call is needed or made by this module."
+    },
+    "base_estimator_decision": "Base estimator: sklearn.linear_model.LogisticRegression(max_iter=2000, random_state=<config.train_seed>), default L2 penalty, C=1.0 (sklearn's own default). No pre-specified base-classifier/architecture for Two-Step PU or PU-Bagging was found in docs/PU_AOP_RESEARCH_CONTEXT.md, the Planner doc, or the proposal (inspected directly before writing this module, not assumed). Logistic regression was chosen over a tree ensemble (e.g. RandomForestClassifier) because it is the more common choice in the original Two-Step PU (Elkan & Noto 2008) and PU-Bagging (Mordelet & Vert 2014) literature, is simpler to reason about and faster to fit/reproduce exactly, and keeps both new baselines on the SAME base-estimator family for a cleaner later comparison between them. Wrapping the existing torch BinaryMlp as a scikit-learn estimator merely to force architectural uniformity with PN/nnPU was explicitly considered and rejected as a disproportionate engineering detour for a baseline-implementation task -- see docs/IMPLEMENTATION_STATUS.md's Task 4.4 decision log entry.",
+    "label_encoding_note": "y=1 encodes an E1/E2 labeled positive; y=0 encodes a C1 row passed to the scikit-learn/pulearn estimator's unlabeled-surrogate slot. This 0 is a library-API numeric requirement (pulearn's PU estimators accept exactly one 'unlabeled' numeric code and have no three-way positive/unlabeled/negative label type), not a project-level claim that C1 is a confirmed negative -- see AGENTS.md rule #1 and this module's own docstring.",
+    "estimated_c": 0.708530843257904,
+    "hold_out_ratio": 0.1,
+    "train_metrics": {
+      "estimated_c": 0.708530843257904,
+      "hold_out_ratio": 0.1,
+      "n_train_positive": 604,
+      "n_train_unlabeled": 3220
+    },
+    "validation_metrics": {
+      "base_estimator_proba": {
+        "positive_rows": {
+          "n": 106,
+          "mean": 0.7276448011398315,
+          "median": 0.9201744198799133,
+          "min": 0.00047188092139549553,
+          "max": 1.0,
+          "fraction_near_zero_lt_0p01": 0.018867924528301886,
+          "fraction_near_one_gt_0p99": 0.3490566037735849
+        },
+        "unlabeled_rows": {
+          "n": 568,
+          "mean": 0.043740712106227875,
+          "median": 2.467829290253576e-06,
+          "min": 6.390776733069378e-20,
+          "max": 0.9993564486503601,
+          "fraction_near_zero_lt_0p01": 0.8309859154929577,
+          "fraction_near_one_gt_0p99": 0.0035211267605633804
+        }
+      },
+      "corrected_proba_unclipped": {
+        "positive_rows": {
+          "n": 106,
+          "mean": 1.0269768103124697,
+          "median": 1.298707664012909,
+          "min": 0.0006659991340711713,
+          "max": 1.411371111869812,
+          "fraction_near_zero_lt_0p01": 0.018867924528301886,
+          "fraction_near_one_gt_0p99": 0.6792452830188679
+        },
+        "unlabeled_rows": {
+          "n": 568,
+          "mean": 0.0617343780354905,
+          "median": 3.483022965156124e-06,
+          "min": 9.019757698802356e-20,
+          "max": 1.4104628562927246,
+          "fraction_near_zero_lt_0p01": 0.8098591549295775,
+          "fraction_near_one_gt_0p99": 0.017605633802816902
+        },
+        "fraction_exceeding_one_overall": 0.1201780415430267
+      },
+      "corrected_proba_clipped_0_1": {
+        "positive_rows": {
+          "n": 106,
+          "mean": 0.7998148416584129,
+          "median": 1.0,
+          "min": 0.0006659991340711713,
+          "max": 1.0,
+          "fraction_near_zero_lt_0p01": 0.018867924528301886,
+          "fraction_near_one_gt_0p99": 0.6792452830188679
+        },
+        "unlabeled_rows": {
+          "n": 568,
+          "mean": 0.05796940846327549,
+          "median": 3.483022965156124e-06,
+          "min": 9.019757698802356e-20,
+          "max": 1.0,
+          "fraction_near_zero_lt_0p01": 0.8098591549295775,
+          "fraction_near_one_gt_0p99": 0.017605633802816902
+        }
+      }
+    },
+    "no_learning_curve_reason": "Two-Step PU's .fit() is a single, non-iterative procedure (one hold-out split, one classifier fit, one scalar correction constant) -- there is no per-epoch optimization trajectory to plot, unlike PN/nnPU's mini-batch training loops.",
+    "elapsed_seconds": 0.12760448455810547
+  },
+  "checkpoint": {
+    "best_path_sha256": "d965aceec798327c09cc9f217951738f2004a5c031c1481e79ee63a50e5aef27",
+    "last_path_sha256": "1c106cd5424e31a2e794813f8d9bbf4955935d0ca4f5b11bc3ff68486ec95113"
+  },
+  "checkpoint_reload_verification": {
+    "base_proba_shape": [
+      16
+    ],
+    "base_proba_bounded_0_1": true,
+    "base_proba_finite": true,
+    "corrected_proba_finite": true
+  },
+  "limitations": {
+    "assumed_unlabeled_c1": "C1 is an assumed-negative/PU-unlabeled pool, NEVER experimentally confirmed antioxidant-inactive. Both algorithms' first internal stage trains a classifier treating C1 rows AS IF negative -- a standard, documented step of Two-Step PU/PU-Bagging themselves (Elkan & Noto 2008; Mordelet & Vert 2014), not a project-level reclassification of C1's status.",
+    "evidence_tiers": "E1 (assay-confirmed) and E2 (provisional benchmark-annotated) positives are POOLED as labeled positives, identical policy to nnPU (Task 4.3), but their provenance/counts remain separately auditable (class_counts.e1_train/e2_train/...). E2 is not uniformly assay-confirmed.",
+    "base_estimator_not_binarymlp": "Two-Step PU and PU-Bagging wrap sklearn.linear_model.LogisticRegression, NOT models.BinaryMlp -- a documented, deliberate departure from PN/nnPU's shared architecture (see each baseline module's own BASE_ESTIMATOR_DECISION_NOTE and the Task 4.4 decision log). Comparing these baselines' scores to PN/nnPU numerically must account for this architecture difference, not just the label-assumption difference.",
+    "no_mcc_auprc_here": "This task (4.4) implements and sanity-checks the baselines only. MCC/AUPRC computation and a cross-baseline comparison table are Task 4.5's explicit scope, not performed here.",
+    "shortcut_bias_risk": "FR2 (Task 2.5) documented substantial FR1-positive-vs-C1 distributional differences (length, charge, GRAVY, aromaticity, composition); neither algorithm automatically eliminates those differences.",
+    "evaluation_scope": "Fold-0-only initial baseline. Full C1/C2/C3 cross-pool comparison, calibration, RNIS, and five-fold validation are out of Task 4.4's scope.",
+    "scientific_sign_off": "Technical acceptance only -- no supervisor or scientific sign-off is implied for the chosen base estimator, hyperparameters, or any scientific conclusion."
+  }
+}
