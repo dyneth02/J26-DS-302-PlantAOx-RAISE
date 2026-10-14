@@ -248,10 +248,13 @@ IMPLEMENTATION_STATUS.md.)*
 - [x] Run an automated feature pipeline smoke test. *(subprocess-isolated: loads a real cache, confirms `torch`/`esm` never enter `sys.modules`, completes in <10s.)*
 
 ## 3.5 — Feature Pipeline Demonstration
-- [ ] Demonstrate FASTA/CSV to descriptor/embedding features.
-- [ ] Demonstrate cached feature loading without re-embedding.
-- [ ] Save representative shape summaries and validation logs.
-- [ ] Document one-command reproduction of the demonstration.
+- [x] Demonstrate FASTA/CSV to descriptor/embedding features. *(7 real peptide_ids, standard-alphabet/3-50AA validation + live `compute_descriptors_batch()`, cross-checked against the frozen descriptor table; embeddings loaded from cache per the brief's "heavy extraction may be precomputed" allowance.)*
+- [x] Demonstrate cached feature loading without re-embedding. *(`load_fold_feature_cache()` on the real fold-0 495-dim cache; zero ESM-2/WSL calls, verified via a subprocess-isolated smoke test.)*
+- [x] Save representative shape summaries and validation logs. *(`fr3_demo_output.json`, committed — schema versions, shapes at every stage, pool coverage, per-peptide scaled-feature preview, explicit pass/fail validation block.)*
+- [x] Document one-command reproduction of the demonstration. *(`FR3_FEATURE_PIPELINE_DEMO.md`: `python -m plantaox.c2_pu.run fr3-demo`, prerequisites, and the expected-output reference.)*
+
+**Bucket 3 (Feature Engineering Pipeline) is now fully closed out as of Task 3.5's acceptance.** FR3
+itself remains incomplete pending the four classification baselines and their evaluation (Bucket 4).
 
 **Feature evidence attachments:** descriptor definitions, feature matrices and mappings, embedding manifests, preprocessing config, sanity plots, tests, demo instructions.
 
