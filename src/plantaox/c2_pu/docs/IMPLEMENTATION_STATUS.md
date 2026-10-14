@@ -953,6 +953,98 @@
   on the overall 15-feature composition should still be confirmed by the project owner/supervisor at
   the next review, consistent with this project's standing distinction between the two.
 
+### Bucket 4, Task 4.1 — Shared Experiment Infrastructure
+- **Status: technical acceptance passed.** First Bucket 4 (Model Baselines) work — branch
+  `feat/c2-model-baselines-setup`. Delivers configuration, model architecture, fold-aware data
+  interface, seeding, and checkpoint/run-recording utilities shared by every FR3 baseline (PN, nnPU,
+  Two-Step PU, PU-Bagging). **No risk estimator, training objective, or training loop is implemented —
+  that is explicitly Task 4.2+'s job**, kept out of this task's scope on purpose so every baseline is
+  later compared on identical architecture/data/reproducibility footing.
+- **`torch` is now a declared dependency** (added to `requirements.txt`) — previously installed in the
+  Windows `.venv` but undeclared (same gap already flagged for several other packages at Task 3.1).
+  Unlike Bucket 3.2's ESM-2 extraction, Bucket 4 model code runs directly on Windows (CPU-only here,
+  `torch.cuda.is_available()` is `False` in this environment) — there is no WSL subprocess indirection
+  for model training, since nothing about an MLP forward/backward pass requires the WSL-only
+  fair-esm/CD-HIT/GraphPart toolchain. **`run.py`'s module-level import graph remains torch-free**
+  despite this: the new `fr4-infra-smoke-test` CLI stage lazily imports every torch-dependent Bucket-4
+  module (`models.py`, `experiment_data.py`, `run_recorder.py`, `common/seeding.py`, and `torch` itself)
+  INSIDE the stage function only — verified directly (`'torch' not in sys.modules` immediately after
+  `import plantaox.c2_pu.run`), so every pre-existing FR1/FR2/FR3 CLI stage's behavior is provably
+  unchanged.
+- **§A Configuration (`experiment_config.py::ExperimentConfig`):** a plain, frozen `dataclass` (no
+  pydantic — not an existing project dependency, and the validation needed is simple range/membership
+  checks, consistent with this project's hand-rolled-validation style elsewhere) with `__post_init__`
+  raising a specific `ValueError` per invalid field. Covers every field the task brief lists:
+  experiment identifier, baseline (`PN`/`nnPU`/`TwoStepPU`/`PUBagging`), frozen `pp1_baseline_v1`/
+  `pp2_baseline_v1` identifiers, `fold_id` (0–4), `feature_representation` (`fused`/`esm`/`descriptors`,
+  with `feature_dim` 495/480/15 derived automatically), train/eval seeds, architecture
+  (`hidden_dims`/`activation`) and optimizer (`optimizer`/`learning_rate`/`weight_decay`)
+  hyperparameters, `batch_size`/`max_epochs`/`device`/`checkpoint_dir`, and explicit
+  positive/unlabeled/validation/evaluation pool selection. The remaining record-keeping half (source-
+  artifact checksums, git revision, software versions, timestamps, run status) is assembled at run
+  time by `run_recorder.py` from real files, rather than duplicated into the static config.
+- **§B Model (`models.py::BinaryMlp`/`MlpArchitecture`):** the proposed initial architecture exactly
+  (495 → 128 ReLU → 64 ReLU → 1 logit), with `hidden_dims`/`activation`/`input_dim` all configurable.
+  `forward()` returns raw logits only (shape/dtype validated); `predict_proba()` applies sigmoid under
+  `no_grad()` without permanently changing the model's train/eval mode. `architecture_signature()` +
+  `load_compatible_state_dict()` give "compatible model-state loading": a checkpoint's recorded
+  architecture is compared against the live model's own BEFORE `load_state_dict` is ever called,
+  raising `ArchitectureMismatchError` on any mismatch. **Zero loss function, optimizer step, or risk
+  estimator anywhere in this file** — confirmed by direct inspection, not just intent.
+- **§C Data (`experiment_data.py::build_experiment_data`):** thin orchestration over the already-
+  accepted `common/feature_cache.py` loader — reuses `load_fold_feature_cache`/`get_training_rows`/
+  `get_held_out_rows`/`get_pool_rows`/`get_c3_fold_challenge_rows` directly, adding only what Task 4.1
+  requires on top: (1) column-slicing the same scaled 495-dim matrix for `esm`/`descriptors`
+  representations (a documented simplification — these are post-hoc slices of the SAME jointly-fitted
+  scaling, not an independently-refit standardization; see decision log), (2) a validation split carved
+  deterministically from training-side positive IDs ONLY (a local, unseeded-by-global-state
+  `random.Random`, never touching GraphPart's held-out fold), (3) evidence-tier attachment for every
+  positive-pool subset, and (4) a pairwise peptide-ID-AND-sequence overlap check across all 7 returned
+  subsets (train/validation/held-out positives, C1, C2, fold-specific C3, external control) that raises
+  `DataLeakageError` with full detail on the first violation. `WrongFoldError` rejects a cache/fold_id
+  mismatch explicitly. Verified empirically against the REAL fold-0 cache: 604 train + 106 validation
+  (=710, the documented fold-0 training total) + 124 held-out, 3,788 C1, 2,000 C2, 2,000 C3 (fold-0's
+  actual selection, confirmed smaller than the 2,325-sequence union — not silently returning the whole
+  union), 38 external control, zero overlap across all 21 subset pairs.
+- **§D Seeding (`common/seeding.py::set_global_seed`/`resolve_device`):** seeds Python/NumPy/PyTorch
+  (CPU and CUDA-if-present) from one int, sets `torch.use_deterministic_algorithms(True, warn_only=True)`.
+  Verified bit-identical on CPU: same seed → identical `torch.randn` output, identical `BinaryMlp`
+  initial weights, identical forward-pass logits. **Determinism claim scoped precisely, per explicit
+  instruction:** CPU bit-identity is verified directly; GPU bit-identity is explicitly NOT claimed
+  (no CUDA device exists in this environment to verify against, and cuDNN kernels are well documented
+  as not bit-reproducible across GPU architectures even with this flag set) — the returned context dict
+  records `cuda_available`/device name precisely so a later audit knows which execution context
+  produced a given result, rather than asserting an unverifiable universal guarantee.
+- **§E Checkpointing/logs (`run_recorder.py`):** `create_run_dir` is collision-safe (timestamp +
+  numeric suffix on collision); `write_resolved_config` is write-once-immutable (raises on a second,
+  differing write); `append_epoch_metrics` reuses `common/io.py::append_provenance_log` rather than a
+  second JSONL-append implementation; `save_checkpoint` is atomic (temp file + `os.replace()`, cleaned
+  up on any exception) with an explicit `checkpoint_best.pt`/`checkpoint_last.pt` filename distinction;
+  `load_checkpoint` verifies architecture compatibility (via §B) before loading; `RunContext` is a
+  context manager writing `run_manifest.json` through `initialized` (on construction) →
+  `running` (on `with` entry) → `completed`/`failed` (on exit), capturing full exception
+  type/message/traceback on failure and never swallowing the exception.
+- **One-command offline infrastructure smoke test** (`python -m plantaox.c2_pu.run
+  fr4-infra-smoke-test`): config validation → real fold-0 data loading → `BinaryMlp` construction →
+  one forward pass on 8 real training-positive rows → full checkpoint save/load round-trip, all under
+  one `RunContext`. **Explicitly labeled, in both the printed summary and a dedicated acceptance test,
+  as an infrastructure check, never a trained-baseline result** — no loss function, no training loop,
+  no fabricated performance metric (accuracy/MCC/AUPRC/AUROC/F1/precision/recall/RNIS) appears anywhere
+  in its output; a dedicated test asserts this key set is absent.
+- **Tests:** 89 new tests total — 31 unit (`test_experiment_config.py`), 16 unit (`test_models.py`),
+  11 unit (`test_seeding.py`), 13 unit (`test_run_recorder.py`), 18 unit (`test_experiment_data.py`,
+  including deliberately-injected repeated-sequence-leakage and external-control-overlap scenarios that
+  must be caught), and 11 full-file acceptance (`test_fr4_infra_smoke_test_acceptance.py` — real fold-0
+  pool-size matching, leakage-report confirmation, checkpoint round-trip, run-manifest completeness,
+  missing-prerequisite error clarity, reproducible reruns, collision-safe run dirs, and confirmation
+  that every one of Tasks 3.1–3.5's real artifacts plus `pp1_baseline_v1`/`pp2_baseline_v1` remain
+  byte-unchanged by SHA-256 before/after). Full project suite confirmed green after this change (see
+  decision log for the exact before/after counts).
+- **No unnecessary abstraction introduced.** No new config/validation library, no new JSONL writer (the
+  existing `append_provenance_log` is reused), no new checksum helper (the existing
+  `common/feature_cache.py::sha256_of` is reused), no duplicate C3 fold-selection logic (the existing
+  `load_fold_challenges`/`get_c3_fold_challenge_rows` are called directly).
+
 ## 🔄 Current work in progress
 
 *(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
@@ -1070,10 +1162,14 @@ tasks below.)*
    Engineering Pipeline) is now fully closed out.** See Completed tasks above (`fr3-demo` CLI stage,
    `FR3_FEATURE_PIPELINE_DEMO.md`). **FR3 itself is explicitly NOT complete** — it still requires the
    four classification baselines (PN, nnPU, Two-Step PU, PU-Bagging) and their evaluation, which have
-   not been started. **FR4/Bucket 4 model training is the next item** — training code should load
-   features exclusively via `common/feature_cache.py`'s `load_fold_feature_cache`/`get_training_rows`/
-   `get_held_out_rows`/`get_pool_rows`/`get_c3_fold_challenge_rows`, never by re-deriving scaled
-   features by hand.
+   not been started.
+6e. **RESOLVED 2026-10-14. Bucket 4, Task 4.1 (shared experiment infrastructure) is complete** — see
+   Completed tasks above (`experiment_config.py`, `models.py`, `experiment_data.py`,
+   `common/seeding.py`, `run_recorder.py`, CLI stage `fr4-infra-smoke-test`). Kept here for history;
+   not an open item anymore. **Task 4.2 (PN baseline implementation) is the next item, not yet
+   started** — it should build on this task's `BinaryMlp` architecture and `build_experiment_data()`
+   output directly (never re-deriving scaled features or fold selection by hand), adding only the PN
+   training objective/loop Task 4.1 deliberately left out.
 7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
@@ -1166,5 +1262,10 @@ tasks below.)*
 | 2026-10-14 | Bucket 3.5's demo uses 7 fixed, real peptide_ids read live from the accepted pipeline outputs, instead of bundling a small synthetic/precomputed fixture dataset | A parallel toy dataset would need its own maintenance and could silently drift from the real pipeline's actual behavior, undermining the point of a pipeline *demonstration*. Operating directly on the real (if gitignored) large-array outputs means the demo only runs after Tasks 3.1-3.4 have actually been executed in this checkout — judged the correct tradeoff, since the task brief frames this as demonstrating the *existing* pipeline, not a standalone fresh-clone showcase. A clear `FileNotFoundError` naming the exact missing file and which command produces it covers the "not yet run" case rather than failing confusingly. |
 | 2026-10-14 | ESM-2 embeddings are loaded from `fr3_embeddings.npz` in the demo rather than re-invoked live via `embed_via_wsl`, even though WSL is available in this dev environment | Directly satisfies "independent of internet/GPU access" and "heavy extraction may be precomputed for the offline presentation" from the task brief — a presenter without WSL/GPU set up (or presenting from a different machine) can still run the demo as long as Tasks 3.1-3.4's artifacts are present. Verified empirically, not just by code inspection, via a subprocess-isolated smoke test confirming `torch`/`esm` never enter `sys.modules` anywhere in the demo's execution. |
 | 2026-10-14 | The demo's output file (`fr3_demo_output.json`) is committed and doubles as the literal expected-output reference, rather than a separate static example written by hand | A hand-written example could silently drift from what the real code actually produces. Committing the live output and asserting byte-identical reproducibility in tests means the "expected output" can never go stale without a test catching it. |
+| 2026-10-14 | `torch` added to `requirements.txt`; Bucket 4 model code imports it directly on Windows (CPU-only, no CUDA device in this environment) rather than going through the WSL subprocess pattern used for ESM-2 | Model training is pure PyTorch tensor math with no dependency on the WSL-only fair-esm/CD-HIT/GraphPart toolchain; routing it through a WSL subprocess the way Bucket 3.2 does for ESM-2 would add indirection for no reason. `torch` was already installed in the Windows `.venv` (confirmed during Task 3.1's dependency audit) but never declared — now declared since Bucket-4 modules import it at module level. |
+| 2026-10-14 | `run.py`'s module-level import graph stays torch-free: the new `fr4-infra-smoke-test` stage lazily imports every torch-dependent Bucket-4 module (and `torch` itself) INSIDE the stage function, not at the top of `run.py` | Every pre-existing FR1/FR2/FR3 CLI stage must keep working exactly as before even if, hypothetically, torch were ever unavailable in a given environment — mirrors the exact reasoning already applied to keeping `common/embeddings.py` out of `run.py`'s top-level imports (Bucket 3.2). Verified directly: `'torch' not in sys.modules` immediately after `import plantaox.c2_pu.run`. |
+| 2026-10-14 | Bucket 4.1's experiment-config validation is a hand-rolled `dataclass.__post_init__`, not pydantic (not an existing project dependency) | Consistent with this project's established preference for transparent, dependency-free validation over adding a schema library for range/membership checks this simple (same reasoning already applied to Task 3.3's hand-rolled z-score scaler over scikit-learn's `StandardScaler`). |
+| 2026-10-14 | `esm`/`descriptors` feature representations in `experiment_data.py` are column slices of the SAME jointly-scaled 495-dim fused matrix, not an independently-refit standardization over just those 480 or 15 columns | The fold's scaler (Task 3.3) was fit once, jointly, across all 495 dimensions, on that fold's training positives. Refitting a second, narrower scaler specifically for `esm`-only or `descriptors`-only experiments would be a genuinely different (and currently unrequested) preprocessing design, and would silently diverge from the single frozen `fusion_v1` scaling contract every other part of this project assumes. Documented here as a simplification, not silently decided: if `esm`/`descriptors`-only baselines are later found to need independently-refit scaling, that is a new, explicit decision for whoever implements Task 4.2+, not something this task should have pre-empted. |
+| 2026-10-14 | Bucket 4.1's validation-set carve-out uses a dedicated, local `random.Random(eval_seed)` instance (not the global Python/NumPy/PyTorch seed state `common.seeding.set_global_seed` configures) | Keeps the validation split's determinism independent of, and non-interfering with, whatever global seeding a training script does for model initialization/data shuffling/dropout elsewhere — the split should be reproducible from `eval_seed` alone, not incidentally depend on how many other random calls happened to run before it in a given training script. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

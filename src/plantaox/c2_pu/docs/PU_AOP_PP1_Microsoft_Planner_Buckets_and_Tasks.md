@@ -266,11 +266,13 @@ itself remains incomplete pending the four classification baselines and their ev
 **Definition of done:** At least a working PN baseline with validated training and metrics; additional nnPU/PU baselines only claimed complete when functional. The full FR3 requires **PN + nnPU + Two-Step PU + PU-Bagging**.
 
 ## 4.1 — Shared Experiment Infrastructure
-- [ ] Create reusable experiment configuration and run metadata schema.
-- [ ] Implement architecture-matched MLP model and consistent feature interface.
-- [ ] Implement fold-aware positive/unlabeled data loaders.
-- [ ] Fix random seeds and log package/model versions.
-- [ ] Add model checkpointing, logs, and run manifests.
+- [x] Create reusable experiment configuration and run metadata schema. *(`experiment_config.py::ExperimentConfig`, validated dataclass; resolved config + source-artifact checksums + git revision + seed context recorded per run by `run_recorder.py`.)*
+- [x] Implement architecture-matched MLP model and consistent feature interface. *(`models.py::BinaryMlp`/`MlpArchitecture` — 495→128→64→1, configurable; architecture + training algorithm deliberately NOT coupled, per Task 4.1 scope.)*
+- [x] Implement fold-aware positive/unlabeled data loaders. *(`experiment_data.py::build_experiment_data`, built on the accepted `common/feature_cache.py` loader — train/validation/held-out positives, C1, C2, fold-specific C3, external control, with cross-subset identity/sequence-leakage checks.)*
+- [x] Fix random seeds and log package/model versions. *(`common/seeding.py::set_global_seed` — Python/NumPy/PyTorch, CPU-verified bit-identical reproducibility; records CUDA availability/device, deterministic-algorithm setting, library versions.)*
+- [x] Add model checkpointing, logs, and run manifests. *(`run_recorder.py` — collision-safe run dirs, immutable resolved config, atomic best/last checkpoints with architecture-compatibility checks, per-epoch JSONL metrics, run manifest with initialized/running/completed/failed status + captured exception details.)*
+
+**Technical acceptance passed** — see IMPLEMENTATION_STATUS.md for the full account, the one-command offline smoke test (`python -m plantaox.c2_pu.run fr4-infra-smoke-test`), and the explicit note that this is infrastructure only, not a trained PN/PU baseline (Task 4.2+).
 
 ## 4.2 — PN Baseline Implementation
 - [ ] Implement PN classifier using E1 positives and **C1 assumed negatives**.
