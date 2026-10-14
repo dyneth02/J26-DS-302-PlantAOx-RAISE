@@ -755,6 +755,61 @@
   consistent with this project's existing hand-rolled-formula style (same reasoning as Task 3.1's
   descriptor implementations) rather than a dependency for something this simple.
 
+### Bucket 3, Task 3.4 — Feature Cache and Reproducibility
+- **Status: technical acceptance passed.** Materializes 5 fold-specific scaled feature caches by
+  applying Task 3.3's already-fitted per-fold scalers (never refit) to Task 3.3's already-built raw
+  fused matrix (never recomputed). New module `common/feature_cache.py` — deliberately minimal
+  imports (numpy/pandas/json/hashlib only, zero `torch`/`esm`/WSL anywhere in its import chain) so
+  loading a cache for training genuinely never requires ESM-2 inference, a WSL environment, or
+  recomputing Task 3.1's descriptors.
+- **Each of the 5 caches covers all 9,356 rows** (every pool), scaled under that fold's own scaler —
+  a row's presence in fold k's cache is NOT a claim it belongs to fold k's curriculum. C1/C2 pool
+  membership is a plain filter; **C3's fold-specific hard-challenge selection still requires
+  `curation/c3.py::load_fold_challenges(path, fold_id)`**, joined against the cache by `peptide_id` via
+  the new `get_c3_fold_challenge_rows()` helper — which additionally refuses (raises `ValueError`) if
+  asked for a different fold's C3 selection than the cache's own fold_id, since scoring one fold's
+  challenge candidates under a different fold's scaler would silently mix two folds' leakage-safety
+  guarantees. There is deliberately no function anywhere in this module that returns "the whole C3
+  union as fold k's challenge set."
+- **Strict, checksum-verified loading, not just file-existence trust:** `load_fold_feature_cache()`
+  computes the cache file's SHA-256 and compares it to the manifest's recorded hash **before** reading
+  any array, then separately re-checks shape, dtype, schema version, and a scaler-identity fingerprint
+  (SHA-256 of the embedded mean+std bytes) against the manifest — raising `CorruptedCacheError` with
+  the specific mismatch on any failure. Verified against 6 distinct corruption modes in tests (missing
+  file, flipped bytes, wrong shape, wrong dtype, wrong schema version, wrong scaler identity), plus an
+  end-to-end acceptance test that corrupts one of the 5 REAL generated caches (not a synthetic one) and
+  confirms rejection.
+- **Verified against the real data:** per-fold training-row standardization (mean≈0, std≈8.4e-6 to
+  1.2e-5 max-abs; std 0.9999976–1.0000027) survives the float32 downcast essentially unchanged from
+  Task 3.3's float64 validation. Every cache's C3-pool row count is exactly 2,325 (the full union,
+  confirming it is NOT silently fold-filtered). External-control peptide_ids confirmed disjoint from
+  every fold's training AND held-out sets (re-checked independently here, not re-trusted from Task
+  3.3). `peptide_id_order_sha256` matches Task 3.2/3.3's own hash exactly across all three stages.
+- **Real end-to-end C3 integration test, not mocked:** `get_c3_fold_challenge_rows()` is exercised
+  against the actual `c3_similarity_ranking.csv` for all 5 folds, confirming exactly 2,000 rows
+  returned per fold (matching `C3_TOP_N_PER_FOLD`) and that requesting fold k's cache with a different
+  fold's `fold_id` argument is rejected.
+- **Smoke test (requirement #9), run in a genuinely fresh subprocess** (not just "torch wasn't imported
+  in this test file," which other already-torch-importing tests in the same session could mask):
+  imports only `common/feature_cache.py`, asserts `"torch"`/`"esm"` are absent from `sys.modules`
+  both before AND after loading a real 9,356×495 cache, and completes in well under 10 seconds —
+  several orders of magnitude faster than a real ESM-2 model load, let alone inference.
+- **Outputs:** `fr3_fold{0..4}_scaled_features.npz` (gitignored, ~9MB each — fully regeneratable from
+  the already-committed `fr3_fused_raw.npz`-regenerating inputs + `fr3_fusion_scalers.json`),
+  `fr3_feature_cache_manifest.json` (committed — per-fold cache path/SHA-256/shape/dtype/schema
+  version/scaler-identity-fingerprint/`n_training_samples`, plus the three input files' own SHA-256 so
+  the whole provenance chain is checksummed), `fr3_feature_cache_validation_report.json`,
+  `fr3_feature_cache_provenance.jsonl`.
+- **Tests:** 15 unit tests (`test_feature_cache.py` — scaler-identity/hash determinism, happy-path
+  load, all 6 corruption-rejection modes, pool/training/held-out row accessors, the C3-fold-mismatch
+  rejection, and a real-schema C3 integration test against a synthetic ranking CSV) + 12 full-file
+  acceptance tests (`test_fr3_feature_cache_acceptance.py` — Task 3.1–3.3 outputs and frozen baselines
+  confirmed byte-unchanged, all 5 real caches round-trip-load and are fully finite, real
+  `c3_similarity_ranking.csv` integration across all 5 folds, real-cache corruption rejection,
+  bit-identical rerun reproducibility, and the subprocess smoke test).
+- **No new dependencies.** Model training (Bucket 4) and Task 3.5 are untouched — this task stops at a
+  loadable, checksummed, leakage-safe feature cache plus the reusable loader utilities.
+
 ### Bucket 3, Task 3.1 — 15-Dimensional Physicochemical Descriptor Extraction
 - **Status: technical acceptance passed.** The canonical 15-descriptor schema is frozen as
   `descriptors_v1` in `common/descriptors.py`; `common/descriptors.py` is no longer an empty stub
@@ -953,11 +1008,13 @@ tasks below.)*
    here for history; not an open item anymore.
 6b. **RESOLVED 2026-10-14. Bucket 3.3 (feature fusion and leakage-safe preprocessing) is complete** —
    see Completed tasks above (`curation/feature_fusion.py`, schema `fusion_v1`, CLI stage
-   `fr3-feature-fusion`). Kept here for history; not an open item anymore. **Bucket 3.4 (the per-fold
-   scaled feature cache, materializing `apply_scaler()`'s output for each fold ready for FR4 training)
-   is the next item, not yet started** — this task deliberately stopped at raw fusion + scaler
-   parameters + a tested transform function, not 5 materialized scaled caches, per its own scope
-   boundary.
+   `fr3-feature-fusion`). Kept here for history; not an open item anymore.
+6c. **RESOLVED 2026-10-14. Bucket 3.4 (feature cache and reproducibility) is complete** — see Completed
+   tasks above (`common/feature_cache.py`, schema `feature_cache_v1`, CLI stage `fr3-feature-cache`).
+   Kept here for history; not an open item anymore. **Bucket 3.5 (if planned) or FR4/Bucket 4 model
+   training is the next item, not yet started** — training code should load features exclusively via
+   `common/feature_cache.py`'s `load_fold_feature_cache`/`get_training_rows`/`get_held_out_rows`/
+   `get_pool_rows`/`get_c3_fold_challenge_rows`, never by re-deriving scaled features by hand.
 7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
@@ -1043,5 +1100,9 @@ tasks below.)*
 | 2026-10-14 | Bucket 3.3's per-fold scaler is fit exclusively on that fold's GraphPart training-positive rows (never on held-out positives, C1, C2, C3, or the external control), rather than one global scaler fit on all 1,205 FR1 positives | Mirrors the already-approved C3 fold-safe-centroid design (`curation/c3.py`, AGENTS.md rule 5) rather than opening a new approval round for the same leakage-prevention principle applied to a second statistic. A global scaler would let fold k's own held-out positives influence the statistics later used to transform those same held-out positives at evaluation time — a real, if subtle, leakage channel. Verified directly: each fold's own training rows standardize to mean≈0/std≈1 after applying that fold's scaler; training/held-out peptide_id sets never overlap and always sum to exactly 834 per fold, with zero C1/C2/C3/external-control contamination. Flagged explicitly since it determines downstream experiment comparability — every FR4 condition must use its own fold's scaler, never a shared one. |
 | 2026-10-14 | Bucket 3.3 materializes only the raw 495-dim fused matrix plus small per-fold scaler parameters (mean/std/training-peptide-id-list) and a tested `apply_scaler()` function — it does NOT write 5 separate fully-scaled feature caches (one per fold) | Reserved for Task 3.4 per the task's own explicit scope boundary ("do not duplicate the feature-cache responsibilities assigned to Task 3.4"). A fold-specific scaled cache is trivially derivable from the committed scaler parameters + the raw fused matrix via `apply_scaler()`, so nothing is lost by not precomputing it here, and it avoids ~5x the storage for an artifact nobody asked this task to own. |
 | 2026-10-14 | Bucket 3.3's z-score scaler is hand-implemented (~10 lines of numpy: mean/std with a zero-variance-to-1.0 guard) rather than using scikit-learn's `StandardScaler`, even though scikit-learn 1.7.2 is already installed in this environment | Consistent with this project's existing hand-rolled-formula style (same reasoning already applied to Task 3.1's descriptor formulas over Biopython) — the operation is simple enough that a transparent, fully-auditable implementation is preferable to a library dependency that isn't declared in `requirements.txt`/`pyproject.toml` anyway. No new dependency added or declared. |
+| 2026-10-14 | Bucket 3.4's `common/feature_cache.py` imports only numpy/pandas/json/hashlib (plus a lazy, same-constraint import of `curation/feature_fusion.py`'s `apply_scaler` and, only inside the C3-specific helper, `curation/c3.py`) — never `common/embeddings.py`, `esm`, or `torch` | The whole point of a "feature cache" is that an FR4 training script can load it without an ESM-2 model load, a WSL subprocess, or GPU/CPU inference — verified empirically in a genuinely fresh subprocess (not just "this test file never imported torch"), since other tests in the same pytest session already import torch and would mask a real accidental import if checked in-process. |
+| 2026-10-14 | Each of Bucket 3.4's 5 fold caches holds the SCALED version of every one of the 9,356 rows (the full C3 union included), not a fold-filtered subset | Matches Task 3.3's own validation pattern (apply each fold's scaler to every row) and keeps the cache's job purely about *scaling*, not about *selection* — C3's fold-specific hard-challenge membership is a separate, already-solved problem (`curation/c3.py::load_fold_challenges`) that this task must not reimplement or shortcut. `get_c3_fold_challenge_rows()` enforces this by construction: it resolves membership via that function and additionally refuses a cache/fold_id mismatch, so a caller cannot accidentally score fold k's candidates under fold j's scaler. |
+| 2026-10-14 | The scaled feature cache is stored as float32 (one explicit downcast from the scaler's float64 fit/apply arithmetic), not float64 | Halves on-disk size (5 × ~9MB vs. ~18MB) for an error on the order of 1e-7 relative, many orders of magnitude below any meaningful downstream classifier signal — consistent with the embeddings cache's own float32 convention (Bucket 3.2) and the project's established tolerance-setting precedent for floating-point rounding that doesn't change scientific conclusions. Verified directly: each fold's training rows still standardize to mean≈0/std≈1 after the downcast, matching Task 3.3's float64-precision validation closely. |
+| 2026-10-14 | `load_fold_feature_cache()` verifies the cache file's SHA-256 against its manifest entry BEFORE reading any array, then separately re-verifies shape/dtype/schema-version/scaler-identity after loading, raising a specific `CorruptedCacheError` naming the exact mismatch rather than a generic exception | Satisfies the explicit "corrupted-cache rejection" acceptance requirement with real teeth — a cache that merely fails to parse would be caught by numpy regardless, but a cache that parses fine yet silently drifted (wrong fold's scaler embedded by a copy-paste mistake, a truncated-but-still-valid-zip file, a stale manifest after a partial regeneration) would not be, without this layered check. Verified against 6 distinct corruption modes in unit tests plus one real-file corruption in the acceptance suite. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

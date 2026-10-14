@@ -241,11 +241,11 @@ IMPLEMENTATION_STATUS.md.)*
 - [x] Validate fused model-input shape and ordering. *(`fr3_fusion_validation_report.json`: shape (9356, 495), all finite, peptide-ID order confirmed identical to Task 3.1/3.2's own order via matching SHA-256.)*
 
 ## 3.4 — Feature Cache and Reproducibility
-- [ ] Save cached `.npy` matrices and metadata/index mappings.
-- [ ] Version feature extraction configuration and cache schema.
-- [ ] Implement cache load/validation utilities.
-- [ ] Check shape, dtype, order, missing entries, and checksums.
-- [ ] Run an automated feature pipeline smoke test.
+- [x] Save cached `.npy` matrices and metadata/index mappings. *(5 fold-specific `.npz` caches — peptide_ids/pools/features/feature_names/scaler_mean/scaler_std — gitignored per repo policy; committed manifest records path/hash/shape/dtype per fold.)*
+- [x] Version feature extraction configuration and cache schema. *(`feature_cache_v1`, recorded in `fr3_feature_cache_manifest.json` alongside the upstream `fusion_v1` schema version it was built from.)*
+- [x] Implement cache load/validation utilities. *(`common/feature_cache.py`: `load_fold_feature_cache`, `get_pool_rows`, `get_training_rows`, `get_held_out_rows`, `get_c3_fold_challenge_rows` — torch/WSL-free.)*
+- [x] Check shape, dtype, order, missing entries, and checksums. *(strict SHA-256 + shape/dtype/schema-version/scaler-identity verification before any array is trusted; 6 corruption modes tested.)*
+- [x] Run an automated feature pipeline smoke test. *(subprocess-isolated: loads a real cache, confirms `torch`/`esm` never enter `sys.modules`, completes in <10s.)*
 
 ## 3.5 — Feature Pipeline Demonstration
 - [ ] Demonstrate FASTA/CSV to descriptor/embedding features.
