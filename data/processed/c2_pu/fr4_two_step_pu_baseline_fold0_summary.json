@@ -1,5 +1,5 @@
 {
-  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_two_step_pu_baseline_runs\\fr4_two_step_pu_baseline_fold0__20261014T215020Z",
+  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_two_step_pu_baseline_runs\\fr4_two_step_pu_baseline_fold0__20261014T224037Z",
   "fold_id": 0,
   "class_counts": {
     "train_positive": 604,
@@ -99,11 +99,11 @@
       }
     },
     "no_learning_curve_reason": "Two-Step PU's .fit() is a single, non-iterative procedure (one hold-out split, one classifier fit, one scalar correction constant) -- there is no per-epoch optimization trajectory to plot, unlike PN/nnPU's mini-batch training loops.",
-    "elapsed_seconds": 0.12760448455810547
+    "elapsed_seconds": 0.26064467430114746
   },
   "checkpoint": {
-    "best_path_sha256": "d965aceec798327c09cc9f217951738f2004a5c031c1481e79ee63a50e5aef27",
-    "last_path_sha256": "1c106cd5424e31a2e794813f8d9bbf4955935d0ca4f5b11bc3ff68486ec95113"
+    "best_path_sha256": "975f1414e935f7080ea69005dea7a6a98a654efbd07559e9e2be635b94d65978",
+    "last_path_sha256": "07ffdd7475d6b5bf0f2c12e7f0e6b3d96c56addeb6a198a6036bb80779ed6ee2"
   },
   "checkpoint_reload_verification": {
     "base_proba_shape": [

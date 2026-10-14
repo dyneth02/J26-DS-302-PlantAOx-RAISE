@@ -1,5 +1,5 @@
 {
-  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_nnpu_baseline_runs\\fr4_nnpu_baseline_fold0__20261014T183214Z",
+  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_nnpu_baseline_runs\\fr4_nnpu_baseline_fold0__20261014T223923Z",
   "fold_id": 0,
   "class_counts": {
     "train_positive": 604,
@@ -56,7 +56,7 @@
     "n_c1_unlabeled_train": 3220,
     "n_c1_unlabeled_validation": 568,
     "total_optimizer_updates": 2626,
-    "elapsed_seconds": 12.201555252075195,
+    "elapsed_seconds": 15.05482292175293,
     "stability_diagnostics": {
       "persistent_negative_risk_clamping_last_5_epochs": false,
       "mean_train_clamped_fraction_last_5_epochs": 0.994059405940594,
@@ -668,8 +668,8 @@
     ]
   },
   "checkpoint": {
-    "best_path_sha256": "13bf7822c5992058339ad82ad9bbf616394862dc86fba4eca52272649afa4b29",
-    "last_path_sha256": "4e009378129fdffd6b2838cf48bc74e4be0d0a32a7b47835c7515376b9205904",
+    "best_path_sha256": "37eb6840143a9eabe336ca5ff7ad5b08380132707fb2ce5b089ad6ab46e3f2bc",
+    "last_path_sha256": "8590fc1e3a954d15c6402ece335dae63601da3048782c4dd27add47f7f1e19f7",
     "best_checkpoint_epoch": 15
   },
   "checkpoint_reload_verification": {

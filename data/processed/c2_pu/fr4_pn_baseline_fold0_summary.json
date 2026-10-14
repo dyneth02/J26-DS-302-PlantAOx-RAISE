@@ -1,5 +1,5 @@
 {
-  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_pn_baseline_runs\\fr4_pn_baseline_fold0__20261014T175605Z",
+  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_pn_baseline_runs\\fr4_pn_baseline_fold0__20261014T223957Z",
   "fold_id": 0,
   "class_counts": {
     "train_positive": 331,
@@ -41,7 +41,7 @@
     },
     "pos_weight": 9.72809667673716,
     "use_class_weight": true,
-    "elapsed_seconds": 4.701785564422607,
+    "elapsed_seconds": 4.9002556800842285,
     "history": [
       {
         "epoch": 0,
@@ -200,8 +200,8 @@
     ]
   },
   "checkpoint": {
-    "best_path_sha256": "c2973e0974b0de7013e8ab3239d533139e23d67df2b152b4c128702ad4122f3c",
-    "last_path_sha256": "647e921f7df9f4144f097533d9d766cc91392ca804c11d78e5bce8d3374ad6e7",
+    "best_path_sha256": "1c5208ac97de0ecd6d29107b114cd9fd424593be725acaa8304465f4100cae1c",
+    "last_path_sha256": "f4fec1a5518c73cb6eb618842253469deb1bdfc302b3c8e8897cdb707a628e41",
     "best_checkpoint_epoch": 3
   },
   "checkpoint_reload_verification": {

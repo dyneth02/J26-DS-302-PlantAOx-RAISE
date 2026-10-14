@@ -1,5 +1,5 @@
 {
-  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_pu_bagging_baseline_runs\\fr4_pu_bagging_baseline_fold0__20261014T215024Z",
+  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_pu_bagging_baseline_runs\\fr4_pu_bagging_baseline_fold0__20261014T224032Z",
   "fold_id": 0,
   "class_counts": {
     "train_positive": 604,
@@ -15,10 +15,10 @@
     "validation_fraction": 0.15,
     "seed": 42
   },
-  "n_estimators": 100,
+  "n_estimators": 10,
   "oob_metrics": {
-    "oob_score": 0.7952405857740585,
-    "n_rows_never_out_of_bag": 604,
+    "oob_score": 0.7968096234309623,
+    "n_rows_never_out_of_bag": 636,
     "n_rows_total": 3824,
     "positive_rows": {
       "n": 0,
@@ -30,13 +30,13 @@
       "fraction_near_one_gt_0p99": null
     },
     "unlabeled_rows": {
-      "n": 3220,
-      "mean": 0.06473542248755082,
-      "median": 8.035082208553823e-06,
-      "min": 6.910132944998117e-17,
-      "max": 0.9997190033134661,
-      "fraction_near_zero_lt_0p01": 0.787888198757764,
-      "fraction_near_one_gt_0p99": 0.002484472049689441
+      "n": 3188,
+      "mean": 0.06416951819015188,
+      "median": 6.024305571962014e-06,
+      "min": 6.161927202139886e-20,
+      "max": 0.9994011521339417,
+      "fraction_near_zero_lt_0p01": 0.8074027603513174,
+      "fraction_near_one_gt_0p99": 0.0037641154328732747
     }
   },
   "base_estimator_decision": "Base estimator: sklearn.linear_model.LogisticRegression(max_iter=2000, random_state=<config.train_seed>), default L2 penalty, C=1.0 (sklearn's own default). No pre-specified base-classifier/architecture for Two-Step PU or PU-Bagging was found in docs/PU_AOP_RESEARCH_CONTEXT.md, the Planner doc, or the proposal (inspected directly before writing this module, not assumed). Logistic regression was chosen over a tree ensemble (e.g. RandomForestClassifier) because it is the more common choice in the original Two-Step PU (Elkan & Noto 2008) and PU-Bagging (Mordelet & Vert 2014) literature, is simpler to reason about and faster to fit/reproduce exactly, and keeps both new baselines on the SAME base-estimator family for a cleaner later comparison between them. Wrapping the existing torch BinaryMlp as a scikit-learn estimator merely to force architectural uniformity with PN/nnPU was explicitly considered and rejected as a disproportionate engineering detour for a baseline-implementation task -- see docs/IMPLEMENTATION_STATUS.md's Task 4.4 decision log entry.",
@@ -49,11 +49,11 @@
     },
     "base_estimator_decision": "Base estimator: sklearn.linear_model.LogisticRegression(max_iter=2000, random_state=<config.train_seed>), default L2 penalty, C=1.0 (sklearn's own default). No pre-specified base-classifier/architecture for Two-Step PU or PU-Bagging was found in docs/PU_AOP_RESEARCH_CONTEXT.md, the Planner doc, or the proposal (inspected directly before writing this module, not assumed). Logistic regression was chosen over a tree ensemble (e.g. RandomForestClassifier) because it is the more common choice in the original Two-Step PU (Elkan & Noto 2008) and PU-Bagging (Mordelet & Vert 2014) literature, is simpler to reason about and faster to fit/reproduce exactly, and keeps both new baselines on the SAME base-estimator family for a cleaner later comparison between them. Wrapping the existing torch BinaryMlp as a scikit-learn estimator merely to force architectural uniformity with PN/nnPU was explicitly considered and rejected as a disproportionate engineering detour for a baseline-implementation task -- see docs/IMPLEMENTATION_STATUS.md's Task 4.4 decision log entry.",
     "label_encoding_note": "y=1 encodes an E1/E2 labeled positive; y=0 encodes a C1 row passed to the scikit-learn/pulearn estimator's unlabeled-surrogate slot. This 0 is a library-API numeric requirement (pulearn's PU estimators accept exactly one 'unlabeled' numeric code and have no three-way positive/unlabeled/negative label type), not a project-level claim that C1 is a confirmed negative -- see AGENTS.md rule #1 and this module's own docstring.",
-    "n_estimators": 100,
+    "n_estimators": 10,
     "max_samples": 1.0,
     "oob_metrics": {
-      "oob_score": 0.7952405857740585,
-      "n_rows_never_out_of_bag": 604,
+      "oob_score": 0.7968096234309623,
+      "n_rows_never_out_of_bag": 636,
       "n_rows_total": 3824,
       "positive_rows": {
         "n": 0,
@@ -65,23 +65,23 @@
         "fraction_near_one_gt_0p99": null
       },
       "unlabeled_rows": {
-        "n": 3220,
-        "mean": 0.06473542248755082,
-        "median": 8.035082208553823e-06,
-        "min": 6.910132944998117e-17,
-        "max": 0.9997190033134661,
-        "fraction_near_zero_lt_0p01": 0.787888198757764,
-        "fraction_near_one_gt_0p99": 0.002484472049689441
+        "n": 3188,
+        "mean": 0.06416951819015188,
+        "median": 6.024305571962014e-06,
+        "min": 6.161927202139886e-20,
+        "max": 0.9994011521339417,
+        "fraction_near_zero_lt_0p01": 0.8074027603513174,
+        "fraction_near_one_gt_0p99": 0.0037641154328732747
       }
     },
     "train_metrics": {
-      "n_estimators": 100,
+      "n_estimators": 10,
       "max_samples": 1.0,
       "n_train_positive": 604,
       "n_train_unlabeled": 3220,
       "oob": {
-        "oob_score": 0.7952405857740585,
-        "n_rows_never_out_of_bag": 604,
+        "oob_score": 0.7968096234309623,
+        "n_rows_never_out_of_bag": 636,
         "n_rows_total": 3824,
         "positive_rows": {
           "n": 0,
@@ -93,42 +93,42 @@
           "fraction_near_one_gt_0p99": null
         },
         "unlabeled_rows": {
-          "n": 3220,
-          "mean": 0.06473542248755082,
-          "median": 8.035082208553823e-06,
-          "min": 6.910132944998117e-17,
-          "max": 0.9997190033134661,
-          "fraction_near_zero_lt_0p01": 0.787888198757764,
-          "fraction_near_one_gt_0p99": 0.002484472049689441
+          "n": 3188,
+          "mean": 0.06416951819015188,
+          "median": 6.024305571962014e-06,
+          "min": 6.161927202139886e-20,
+          "max": 0.9994011521339417,
+          "fraction_near_zero_lt_0p01": 0.8074027603513174,
+          "fraction_near_one_gt_0p99": 0.0037641154328732747
         }
       }
     },
     "validation_metrics": {
       "positive_rows": {
         "n": 106,
-        "mean": 0.7663956460377396,
-        "median": 0.908972093462944,
-        "min": 0.001145597277577508,
-        "max": 0.9999999570846557,
+        "mean": 0.7691522077480223,
+        "median": 0.9067744344472886,
+        "min": 0.0014303750449471409,
+        "max": 0.9999996781349182,
         "fraction_near_zero_lt_0p01": 0.018867924528301886,
-        "fraction_near_one_gt_0p99": 0.32075471698113206
+        "fraction_near_one_gt_0p99": 0.33962264150943394
       },
       "unlabeled_rows": {
         "n": 568,
-        "mean": 0.05002360862485921,
-        "median": 1.5230556054407485e-05,
-        "min": 1.7192874340498106e-13,
-        "max": 0.9985909378528595,
-        "fraction_near_zero_lt_0p01": 0.7940140845070423,
+        "mean": 0.04884427479106004,
+        "median": 1.3924824327040449e-05,
+        "min": 3.9213320586897303e-17,
+        "max": 0.9986605525016785,
+        "fraction_near_zero_lt_0p01": 0.7922535211267606,
         "fraction_near_one_gt_0p99": 0.0035211267605633804
       }
     },
     "no_learning_curve_reason": "PU-Bagging's .fit() is a single, non-iterative procedure that internally trains n_estimators bootstrap members in one call -- there is no per-epoch optimization trajectory to plot, unlike PN/nnPU's mini-batch training loops. The ensemble's own internal validation signal (out-of-bag score) is reported in oob_metrics instead of a held-out loss curve.",
-    "elapsed_seconds": 13.740054368972778
+    "elapsed_seconds": 2.6787266731262207
   },
   "checkpoint": {
-    "best_path_sha256": "fd26379eb98b3ee839a730f6a42f13cefb2f9f7b7d7a5b78801dd1a3e867480d",
-    "last_path_sha256": "52de7f62a9cfd3877495e362324755816805a36f7fee3fc9d05f3b67ea2a2217"
+    "best_path_sha256": "2d11c0c0455122f8e52db0b9fc401d2dc5a14708c73858183f98bbf4f590aee5",
+    "last_path_sha256": "2b8bef64d7840e22ee4670fbb9303525ba3ff99ccb1b67e0eb127d6809be9626"
   },
   "checkpoint_reload_verification": {
     "proba_shape": [
