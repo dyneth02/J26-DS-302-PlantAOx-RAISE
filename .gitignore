@@ -223,3 +223,11 @@ src/plantaox/c2_pu/docs/Proposal Report - IT23183018.pdf
 
 # EMBOSS (needleall, invoked by GraphPart) writes this to the CWD by default
 needleall.error
+
+# Peptipedia v2.0 Zenodo dump (281MB, DOI 10.5281/zenodo.21488992) -- too
+# large for a normal git push (GitHub's 100MB-per-file limit, no Git LFS
+# configured here), same "don't commit large binary artifacts" rule already
+# applied to ESM-2's pretrained weights. Its SHA-256/MD5 and DOI are recorded
+# in c2_build_report.json and fr2_c2_provenance.jsonl so anyone can
+# re-download the byte-identical file and reproduce C2 deterministically.
+data/raw/c2_pu/Peptipedia/*.sql.gz

@@ -32,6 +32,7 @@ from plantaox.c2_pu.curation.dedup import (
     run_cdhit,
 )
 from plantaox.c2_pu.curation.freeze import freeze_baseline
+from plantaox.c2_pu.curation.peptipedia import build_c2_pool, extract_c2_candidates, load_activity_names
 from plantaox.c2_pu.curation.splits import (
     GRAPHPART_DENOMINATOR,
     GRAPHPART_IDENTITY_THRESHOLD,
@@ -43,6 +44,7 @@ from plantaox.c2_pu.curation.splits import (
     write_stratified_fasta,
 )
 from plantaox.c2_pu.curation.tiers import build_positive_pool
+from plantaox.c2_pu.common.sequence import make_peptide_id
 from plantaox.c2_pu.pools import clean_c1_alphabet, clean_c1_pool, parse_uniprot_header
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -105,6 +107,15 @@ C1_ACCESSION_MAP_V2_PATH = PROCESSED_DIR / "c1_accession_map_v2.csv"
 C1_ALPHABET_EXCLUSION_LOG_PATH = PROCESSED_DIR / "c1_alphabet_exclusion_log.csv"
 C1_ALPHABET_REPLACEMENT_LOG_PATH = PROCESSED_DIR / "c1_alphabet_replacement_log.csv"
 C1_ALPHABET_FIX_REPORT_PATH = PROCESSED_DIR / "c1_alphabet_fix_report.json"
+
+# Bucket 2.2 -- C2 bioactive unlabeled pool, built from the Peptipedia v2.0
+# Zenodo dump (DOI 10.5281/zenodo.21488992), downloaded once and checksummed
+# as a versioned raw source, per AGENTS.md rule 5.
+C2_RAW_DUMP_PATH = RAW_DIR / "Peptipedia" / "peptipedia.20240323.sql.gz"
+C2_FASTA_PATH = PROCESSED_DIR / "stage_c2_bioactive_unlabeled.fasta"  # canonical registry name
+C2_ACTIVITY_MAP_PATH = PROCESSED_DIR / "c2_activity_map.csv"
+C2_BUILD_REPORT_PATH = PROCESSED_DIR / "c2_build_report.json"
+C2_PROVENANCE_LOG_PATH = PROCESSED_DIR / "fr2_c2_provenance.jsonl"
 
 
 def run_fr1_positives(seed: int = 42) -> dict:
@@ -542,6 +553,112 @@ def run_fr2_c1_alphabet_fix(seed: int = 42) -> dict:
     return summary
 
 
+def run_fr2_c2_build(seed: int = 42) -> dict:
+    """Bucket 2.2 -- build the C2 bioactive-unlabeled pool from the
+    Peptipedia v2.0 Zenodo dump.
+
+    The dump is parsed directly as a plain-text pg_dump stream (no database
+    server needed, see curation/peptipedia.py). Inclusion policy, confirmed
+    with the project owner: a peptide must have at least one *reported*
+    (not merely absent) non-antioxidant bioactivity, must not itself be
+    tagged Peptipedia's antioxidant activity (id 41, "Anti oxidative") even
+    if it also carries other activity tags, must pass the shared 3-50 AA /
+    standard-20-amino-acid-alphabet window, and must not exactly match any
+    of the 1,205 FR1 positives or 179 cross-source conflicts (same
+    conservative leakage screen used for C1). Experimentally-reported
+    peptides are preferred over ML-predicted-only ones when sampling down
+    to ~2,000 (mirrors the project's E1>E2 evidence precedence) -- in this
+    run the experimental tier alone comfortably supplies the full 2,000.
+
+    Known, explicitly-flagged gap (not done in this pass): the Planner's
+    "cross-reference AODB and DFBP" item. Peptipedia's own 76 integrated
+    source databases were checked directly (`source` table) and neither
+    AODB nor DFBP is among them, so this pool is not yet cross-checked
+    against those two specific resources -- flagged in
+    IMPLEMENTATION_STATUS.md rather than silently treated as covered.
+    """
+    if not C2_RAW_DUMP_PATH.exists():
+        raise FileNotFoundError(
+            f"{C2_RAW_DUMP_PATH} not found -- download the Peptipedia v2.0 Zenodo dump "
+            "(DOI 10.5281/zenodo.21488992, peptipedia.20240323.sql.gz) first."
+        )
+    if not POSITIVE_POOL_PATH.exists():
+        raise FileNotFoundError(f"{POSITIVE_POOL_PATH} not found -- run fr1-positives first.")
+
+    positive_df = pd.read_parquet(POSITIVE_POOL_PATH)
+    conflict_df = pd.read_csv(CONFLICT_LOG_PATH)
+    screen_sequences = set(positive_df["sequence"]) | set(conflict_df["sequence"])
+
+    activity_names = load_activity_names(C2_RAW_DUMP_PATH)
+    sequences, activities = extract_c2_candidates(C2_RAW_DUMP_PATH)
+    records, summary = build_c2_pool(sequences, activities, screen_sequences, seed=seed)
+    if summary["shortfall"] > 0:
+        raise RuntimeError(
+            f"Eligible C2 candidate pool exhausted: needed {summary['n_requested']}, only "
+            f"{summary['n_output_records']} assembled. Stopping rather than silently shipping "
+            "a short pool -- see the project owner before changing source/criteria."
+        )
+
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    fasta_records = [(make_peptide_id(r["sequence"], prefix="C2"), r["sequence"]) for r in records]
+    write_fasta(C2_FASTA_PATH, fasta_records)
+
+    activity_map = pd.DataFrame(
+        [
+            {
+                "peptide_id": peptide_id,
+                "id_peptide_peptipedia": r["id_peptide"],
+                "sequence": r["sequence"],
+                "length": r["length"],
+                "activity_ids": ";".join(str(a) for a in r["activity_ids"]),
+                "activity_names": ";".join(
+                    activity_names.get(a, f"unknown_activity_{a}") for a in r["activity_ids"]
+                ),
+                "has_experimental_evidence": r["has_experimental_evidence"],
+            }
+            for (peptide_id, _), r in zip(fasta_records, records)
+        ]
+    )
+    activity_map.to_csv(C2_ACTIVITY_MAP_PATH, index=False, lineterminator="\n")
+
+    import hashlib
+
+    dump_sha256 = hashlib.sha256(C2_RAW_DUMP_PATH.read_bytes()).hexdigest()
+    summary.update(
+        {
+            "source_dump": str(C2_RAW_DUMP_PATH),
+            "source_dump_sha256": dump_sha256,
+            "source_dump_doi": "10.5281/zenodo.21488992",
+            "screen_set_size": len(screen_sequences),
+            "antioxidant_activity_id": 41,
+            "antioxidant_activity_name": activity_names.get(41),
+            "cross_reference_aodb_dfbp": "NOT DONE -- neither AODB nor DFBP is among Peptipedia's "
+            "76 integrated source databases; see IMPLEMENTATION_STATUS.md Known Issues.",
+        }
+    )
+    with open(C2_BUILD_REPORT_PATH, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(summary, handle, indent=2)
+
+    append_provenance_log(
+        C2_PROVENANCE_LOG_PATH,
+        {
+            "stage": "fr2_c2_bioactive_pool_build",
+            "source_dump": str(C2_RAW_DUMP_PATH),
+            "source_dump_sha256": dump_sha256,
+            "source_dump_doi": "10.5281/zenodo.21488992",
+            "screen_sources": [str(POSITIVE_POOL_PATH), str(CONFLICT_LOG_PATH)],
+            "seed": seed,
+            "summary": summary,
+            "outputs": {
+                "clean_fasta": str(C2_FASTA_PATH),
+                "activity_map": str(C2_ACTIVITY_MAP_PATH),
+                "report": str(C2_BUILD_REPORT_PATH),
+            },
+        },
+    )
+    return summary
+
+
 # Bucket 3.2 — ESM-2 embedding interface smoke test. torch/fair-esm live
 # only in the WSL pu_aop conda env (installed there per the project owner's
 # explicit decision, 2026-10-14: CPU-only, since the 35M-param model's
@@ -634,6 +751,7 @@ def main(argv: list[str] | None = None) -> int:
         "fr2-c1-alphabet-fix",
         help="Enforce standard-20-AA-alphabet policy on C1, versioned as v2 (Bucket 2.1 follow-up)",
     )
+    sub.add_parser("fr2-c2-build", help="Build the C2 bioactive-unlabeled pool from Peptipedia (Bucket 2.2)")
     sub.add_parser("esm2-smoketest", help="ESM-2 embedding interface smoke test (Bucket 3.2)")
     args = parser.parse_args(argv)
 
@@ -659,6 +777,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.stage == "fr2-c1-alphabet-fix":
         summary = run_fr2_c1_alphabet_fix()
+        print(json.dumps(summary, indent=2))
+        return 0
+    if args.stage == "fr2-c2-build":
+        summary = run_fr2_c2_build()
         print(json.dumps(summary, indent=2))
         return 0
     if args.stage == "esm2-smoketest":

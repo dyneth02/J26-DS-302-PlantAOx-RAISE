@@ -128,6 +128,59 @@
   reason: `test_embeddings.py` needs torch, runs for real inside WSL — 12 passed there separately).
   `pp1_baseline_v1` and the v1 C1 artifacts confirmed untouched via `git status` before and after.
 
+### Bucket 2, Task 2.2 — C2 Bioactive Unlabeled Pool Construction
+- **Status: core pool built and acceptance-tested; AODB/DFBP cross-reference explicitly not done
+  (see gap below).** 2,000 unique, standard-alphabet, 3–50 AA peptides with ≥1 reported
+  non-antioxidant Peptipedia bioactivity, zero exact-sequence overlap with FR1's 1,205 positives or
+  the 179 conflicts, zero antioxidant-tagged records.
+- **Source: Peptipedia v2.0 Zenodo dump**, not the web app (DOI `10.5281/zenodo.21488992`,
+  `peptipedia.20240323.sql.gz`, 281MB gzip, ODbL-1.0 licensed). **Decision, confirmed with the project
+  owner:** the web app's "download by activity" button calls an undocumented endpoint behind
+  Cloudflare bot protection that an automated session couldn't trigger even with a real browser
+  session (verified: button clicks registered, selection persisted, but no corresponding network
+  request was ever captured) — not scriptable/reproducible, so the versioned, checksummable full
+  dump was used instead despite AGENTS.md rule 6's general preference for filtered queries over bulk
+  downloads. The dump is a **plain-text** `pg_dump` (confirmed via `gzip -t` + inspecting its `COPY`
+  blocks directly), not a binary dump, so it's parsed in pure Python
+  (`curation/peptipedia.py::iter_copy_rows`) without installing or running any PostgreSQL server —
+  keeping the "don't stand up unneeded infrastructure" spirit of rule 6 even though the download
+  itself is the larger, bulk option.
+- **281MB raw dump NOT committed to git** (`data/raw/c2_pu/Peptipedia/*.sql.gz` added to
+  `.gitignore`) — would fail a GitHub push outright (100MB-per-file limit, no Git LFS configured),
+  same "don't commit large binary artifacts" principle already applied to ESM-2's pretrained weights.
+  Its SHA-256 (`d8ff0e082874bb8e5a6b67543273f05c127dd96fc3f1937da3463cf8c407fb8f`, confirmed matching
+  the Zenodo-published MD5 `0605886c33919b5c756b66200024ef1c` after a first attempt was silently
+  truncated at 9.8% by a dropped connection — caught by `gzip -t` failing, not assumed complete from
+  a 200-exit-code background download) and DOI are recorded in `c2_build_report.json` and
+  `fr2_c2_provenance.jsonl`, so the exact same file can be re-downloaded and the pool reproduced
+  byte-for-byte.
+- **Inclusion policy** (`curation/peptipedia.py::build_c2_pool`): a peptide must have ≥1 *reported*
+  activity tag (Peptipedia's own `peptide_has_activity` table; absence of an antioxidant tag alone
+  isn't eligibility — AGENTS.md requires a *documented* non-antioxidant bioactivity, not merely an
+  unlabeled one), must not itself carry Peptipedia's antioxidant tag (activity id 41, "Anti
+  oxidative" — confirmed by direct inspection of the `activity` table, not a name-string guess),
+  standard 20-AA alphabet + shared 3–50 AA window (same policy as C1/positives), and no exact-sequence
+  match against the 1,205 FR1 positives + 179 conflicts (same conservative screen as C1's leakage
+  check). Of ~3.8M standard-alphabet/length-windowed Peptipedia sequences, 2.73M have ≥1 non-
+  antioxidant activity tag and pass the screen; of those, 66,506 have at least one
+  *experimentally-reported* (not merely ML-predicted) tag.
+- **Experimental evidence preferred over predicted-only, mirroring E1>E2 precedence:** the 2,000-record
+  sample was drawn entirely from the 66,506-strong experimental tier (seed 42) — the 2.66M
+  predicted-only tier wasn't needed and wasn't used. Documented as a tier-preference decision, not
+  silently defaulted.
+- **Deduplicated by sequence** (Peptipedia assigns multiple internal IDs to identical sequences
+  reported by different source databases) — one record per unique sequence, lowest `id_peptide` kept
+  for determinism. Peptide IDs are content-addressed (`make_peptide_id(seq, prefix="C2")`), consistent
+  with the FR1 positive-pool convention.
+- **Known gap, explicitly not done:** the Planner's "cross-reference AODB and DFBP" checklist item.
+  Peptipedia integrates 76 named source databases (`source` table, inspected directly) — neither AODB
+  nor DFBP is among them, so C2 is not yet cross-checked against those two specific AOP resources.
+  Flagging rather than silently treating as covered by Peptipedia's internal antioxidant tag alone.
+- **Tests:** 9 unit tests against synthetic fixtures (`test_peptipedia.py`) plus 6 full-file acceptance
+  tests (`test_fr2_c2_build_acceptance.py`, including byte-identical reproducibility), all gated to
+  skip cleanly when the (gitignored) raw dump or built pool isn't present locally. Full suite: 100
+  passed, 1 skipped (torch).
+
 ### Bucket 3, Task 3.2 — ESM-2 Environment Setup and Smoke Test
 - **Status: environment configured, interface built and tested, smoke test passing.** This is
   explicitly NOT full feature generation — embedding the full positive pool and C1/C2/C3 (Bucket
@@ -228,15 +281,19 @@ tasks below.)*
    (251), B (7), Z (3), U (3). Fixed by `clean_c1_alphabet()` — see Bucket 2.1 "standard-alphabet
    policy fix" above. The corrected, canonical artifact is `stage_c1_decoys_v2.fasta`; v1 is kept only
    as historical evidence and is no longer the artifact any new code should read.
-10. **Ambiguous-residue policy: approved and enforced project-wide (2026-10-14), C1 fixed, C2/C3 still
-    pending construction.** Project-owner-approved policy: all curated peptides entering the ESM-2 and
-    physicochemical pipelines must use the standard 20-amino-acid alphabet; X/B/Z/U sequences are
-    ineligible, never silently substituted or translated. FR1's positive pool, the 179 conflicts, and
-    the external control were checked and already contain zero non-standard-alphabet sequences (this
-    was a C1-only problem). **C2 and C3 do not exist yet** (Task 2.2/2.3) — when built, their curation
-    code must apply `is_standard_alphabet()` at initial construction, not as a post-hoc patch like C1
-    needed. `embed_sequences()`'s `AmbiguousResidueError` default remains the structural backstop
-    against ever skipping this silently.
+10. **RESOLVED for C1/C2, 2026-10-14. C3 still pending construction.** Project-owner-approved policy:
+    all curated peptides entering the ESM-2 and physicochemical pipelines must use the standard
+    20-amino-acid alphabet; X/B/Z/U sequences are ineligible, never silently substituted or translated.
+    FR1's positive pool, the 179 conflicts, and the external control already contain zero
+    non-standard-alphabet sequences. C1 was fixed (see above). C2 applied the filter at initial
+    construction (`build_c2_pool`), not as a post-hoc patch. **C3 does not exist yet** (Task 2.3) — when
+    built, its curation code must apply `is_standard_alphabet()` the same way. `embed_sequences()`'s
+    `AmbiguousResidueError` default remains the structural backstop against ever skipping this silently.
+11. **C2 is not cross-referenced against AODB or DFBP** (Planner Bucket 2.2 checklist item). Peptipedia
+    v2.0 integrates 76 named source databases, confirmed by direct inspection of its `source` table —
+    neither AODB nor DFBP is among them. C2's only antioxidant screen is Peptipedia's own internal
+    "Anti oxidative" activity tag plus the FR1 positive-pool/conflict exact-sequence screen. Acquiring
+    and cross-referencing AODB/DFBP specifically is unstarted, separate follow-up work.
 
 ## ⏭️ Next tasks (in order)
 
@@ -255,11 +312,15 @@ tasks below.)*
    `stage_c1_decoys_v2.fasta` directly with `embed_sequences(..., validate_alphabet=True)` (the
    default) and expect zero `AmbiguousResidueError`s from C1. Not yet attempted — still separate,
    deliberately out-of-scope work.
-4. **Task 2.2 (C2 — Peptipedia bioactive pool)** can start any time; not blocked on anything above.
-   Must apply the standard-alphabet filter at initial curation (Known Issue #10), not as a later patch.
-5. **Bucket 3.1 (15 physicochemical descriptors)** can also start any time in parallel with C2/C3 —
+4. **Task 2.2 (C2) core pool is built** — see Completed tasks above. Remaining: acquire and
+   cross-reference AODB/DFBP specifically (Known Issue #11), low/medium priority depending on how much
+   the PP1 report leans on that specific checklist line versus the broader antioxidant-exclusion
+   argument already satisfied.
+5. **Task 2.3 (C3 — ESM-2 hard challenges)** can start any time; not blocked on anything above. Must
+   apply the standard-alphabet filter at initial curation (Known Issue #10), not as a later patch.
+6. **Bucket 3.1 (15 physicochemical descriptors)** can also start any time in parallel with C3 —
    not blocked on the ESM-2 work.
-6. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
+7. Continue down the Bucket 1 → Bucket 2 → Bucket 3 → Bucket 4 sequence as defined in `PU_AOP_PP1_Microsoft_Planner_Buckets_and_Tasks.md`, respecting the FR1+FR2-first priority.
 
 ## 📝 Experiment decisions log
 
@@ -293,5 +354,11 @@ tasks below.)*
 | 2026-10-14 | Standard-20-amino-acid-alphabet policy approved: X/B/Z/U sequences are ineligible for the ESM-2/physicochemical modeling pipeline project-wide, never silently substituted or translated | Explicit project-owner approval. Closes the policy gap `embed_sequences()`'s `AmbiguousResidueError` was deliberately left open pending (Known Issues #9/#10). Verified empirically that only C1 was affected (260/5,000 records) — FR1 positives, the 179 conflicts, and the external control already contain zero non-standard-alphabet sequences. |
 | 2026-10-14 | C1's 260 non-standard-alphabet records fixed by `clean_c1_alphabet()`, starting from the v1 leakage-clean pool (not the raw original), swap-not-resample, seed 42, re-screened against the blocklist + all 1,205 positives + 179 conflicts + the alphabet requirement itself | Mirrors the exact pattern already used and accepted for the `DRVYIHPF` leakage fix. 2,082 eligible standard-alphabet replacements were available against 260 needed, confirmed before writing any replacement code — no shortfall, so the documented stop-and-ask condition never triggered. |
 | 2026-10-14 | The alphabet-fix output is a separately versioned artifact set (`stage_c1_decoys_v2.fasta` + `c1_accession_map_v2.csv` + `c1_alphabet_*_log.csv` + `c1_alphabet_fix_report.json`); the existing accepted v1 artifacts are left untouched rather than overwritten, and `stage_c1_decoys_v2.fasta` is now the canonical artifact for all future C1 consumption | Explicit instruction: preserve the existing accepted version, don't overwrite it in place. Mirrors the raw-vs-processed and `pp1_baseline_v1`-vs-future-`v2` versioning patterns already established elsewhere in this component — old version kept for historical diffing, canonical "latest" reference moves forward, logged rather than silently swapped. |
+
+| 2026-10-14 | C2 sourced from Peptipedia's full Zenodo database dump (281MB plain-text `pg_dump`), not the web app's per-activity download button | The web app's filtered download is a client-side button calling an undocumented endpoint behind Cloudflare bot protection — confirmed unreachable by an automated browser session (selection persisted, button click registered, but no corresponding network request was ever captured after multiple attempts). The Zenodo dump is versioned, checksummable, and -- being plain text, not a binary dump -- parseable in pure Python without installing a database server, so it doesn't actually require standing up new infrastructure despite being the "bulk" option AGENTS.md rule 6 generally cautions against. |
+| 2026-10-14 | The 281MB Peptipedia raw dump is excluded from git (`data/raw/c2_pu/Peptipedia/*.sql.gz` in `.gitignore`); its SHA-256 and Zenodo DOI are recorded in the provenance log instead | Committing it would make `git push` fail outright on GitHub's 100MB-per-file limit (no Git LFS configured). Same "don't commit large binary artifacts" principle as ESM-2's pretrained weights — the checksum + DOI make it independently re-downloadable and byte-verifiable without needing it in version control. |
+| 2026-10-14 | C2 excludes any peptide carrying Peptipedia's antioxidant activity tag (id 41, "Anti oxidative") regardless of whether that tag itself is predicted or experimentally reported | Mirrors C1's conservative leakage rule: a tag that might indicate real antioxidant activity is excluded outright rather than risk including a true positive in the "unlabeled, assumed non-antioxidant" pool, which would be a correctness violation of AGENTS.md rule 1, not just noise. |
+| 2026-10-14 | C2's 2,000-record sample was drawn entirely from Peptipedia peptides with at least one *experimentally-reported* (non-predicted) non-antioxidant activity tag, not the much larger ML-predicted-only tier | Mirrors the project's existing E1>E2 evidence-tier precedence (real/primary evidence preferred over inferred). The experimental tier (66,506 eligible) comfortably supplied the full 2,000 without needing to fall back to the 2.66M predicted-only tier; documented as a deliberate tier choice, not a default. |
+| 2026-10-14 | C2 is not yet cross-referenced against AODB or DFBP specifically (Planner Bucket 2.2 checklist item left open) | Peptipedia integrates 76 named source databases (confirmed by inspecting its `source` table directly) and neither AODB nor DFBP is among them. Acquiring and cross-checking those two resources is separate, unstarted follow-up work -- flagged rather than silently treated as covered by Peptipedia's internal antioxidant tag alone. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*

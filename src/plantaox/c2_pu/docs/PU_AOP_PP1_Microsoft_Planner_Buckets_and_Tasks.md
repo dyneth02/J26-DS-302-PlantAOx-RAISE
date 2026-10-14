@@ -134,16 +134,18 @@ decision log (2026-10-14). Recommend scheduling separately — it does not block
 - [x] Save C1 FASTA/CSV plus accession/fragment-coordinate mapping and exclusion log. *(`c1_accession_map.csv`, `c1_leakage_exclusion_log.csv`, `c1_leakage_replacement_log.csv` (v1) plus `c1_accession_map_v2.csv`, `c1_alphabet_exclusion_log.csv`, `c1_alphabet_replacement_log.csv` (v2, alphabet-fixed) — no literal fragment coordinates exist to map, since C1 decoys are whole short UniProt entries, not fragments cut by this pipeline; documented in IMPLEMENTATION_STATUS.md)*
 
 ## 2.2 — C2 Bioactive Unlabeled Pool Construction
-*(Standard-20-amino-acid-alphabet policy, approved 2026-10-14: apply `is_standard_alphabet()` at
+*(Standard-20-amino-acid-alphabet policy, approved 2026-10-14: applied `is_standard_alphabet()` at
 initial curation here, not as a post-hoc patch like C1 needed — see IMPLEMENTATION_STATUS.md Known
-Issue #10.)*
-- [ ] Acquire Peptipedia records and their bioactivity annotations.
-- [ ] Select peptides with documented non-antioxidant bioactivities (e.g., antimicrobial, antihypertensive).
-- [ ] Exclude explicitly antioxidant-annotated peptides.
-- [ ] Cross-reference known AOP resources including AODB and DFBP, with additional available reference sets.
-- [ ] Deduplicate and curate approximately **2,000** eligible peptides.
-- [ ] Retain original bioactivity categories and provenance without assigning confirmed-negative status.
-- [ ] Export C2 FASTA/CSV and inclusion/exclusion summary.
+Issue #10, resolved for C2.)*
+- [x] Acquire Peptipedia records and their bioactivity annotations. *(Peptipedia v2.0 Zenodo dump,
+  DOI 10.5281/zenodo.21488992, parsed directly as plain-text SQL — see IMPLEMENTATION_STATUS.md for
+  why the web app's filtered download wasn't usable)*
+- [x] Select peptides with documented non-antioxidant bioactivities (e.g., antimicrobial, antihypertensive). *(2,000 peptides, each with ≥1 reported non-antioxidant activity tag; experimentally-reported preferred over ML-predicted-only)*
+- [x] Exclude explicitly antioxidant-annotated peptides. *(Peptipedia activity id 41, "Anti oxidative," excluded regardless of predicted/experimental status; verified zero antioxidant-tagged records in the output, `test_c2_pool_has_no_antioxidant_tagged_records`)*
+- [ ] Cross-reference known AOP resources including AODB and DFBP, with additional available reference sets. *(**not done** — neither AODB nor DFBP is among Peptipedia's 76 integrated source databases; see IMPLEMENTATION_STATUS.md Known Issue #11)*
+- [x] Deduplicate and curate approximately **2,000** eligible peptides. *(exactly 2,000 unique sequences, unique peptide IDs, deduplicated by sequence across Peptipedia's internal duplicate IDs)*
+- [x] Retain original bioactivity categories and provenance without assigning confirmed-negative status. *(`c2_activity_map.csv` records every activity id/name and predicted-vs-experimental flag per peptide; framed as "unlabeled, assumed non-antioxidant" throughout, never "confirmed negative")*
+- [x] Export C2 FASTA/CSV and inclusion/exclusion summary. *(`stage_c2_bioactive_unlabeled.fasta`, `c2_activity_map.csv`, `c2_build_report.json`, `fr2_c2_provenance.jsonl`)*
 
 ## 2.3 — C3 ESM-2 Hard-Challenge Construction
 *(Standard-20-amino-acid-alphabet policy, approved 2026-10-14: filter the UniRef50 candidate
@@ -423,7 +425,7 @@ four items that most need a human look.
 **Same convention as FR1's checklist above: these are the supervisor's boxes, left unchecked on
 purpose, annotated with where the evidence lives.**
 - [ ] C1 has **5,000 verified records**, with source, seed, and screening log. *(5,000 records confirmed, reproducible from seed 42, 0 remaining leakage against FR1 positives/conflicts — see Bucket 2.1 close-out, IMPLEMENTATION_STATUS.md. Still open: 260 non-standard-residue sequences unresolved, Known Issues #9.)*
-- [ ] C2 has approximately **2,000 curated bioactive unlabeled** records. *(not started)*
+- [x] C2 has approximately **2,000 curated bioactive unlabeled** records. *(exactly 2,000, built from Peptipedia v2.0; AODB/DFBP cross-reference still outstanding, see Known Issue #11 — not blocking this count)*
 - [ ] C3 has **2,000 ESM-2-nearest unlabeled** candidates with ranked distances. *(not started; ESM-2 env/interface setup is now done (Bucket 3.2), so this is unblocked but still not begun)*
 - [ ] AOP exclusion and pool overlap audits documented. *(done for C1 vs. FR1 positives; C2/C3 not started)*
 - [ ] Length, composition, and descriptor checks included. *(C1 length range confirmed 4-50 AA; composition/descriptor checks not yet done for any pool)*
