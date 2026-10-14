@@ -248,6 +248,49 @@ data/interim/c2_pu/c3_embed_input.json
 data/interim/c2_pu/c3_embed_positives_report.json
 data/interim/c2_pu/c3_embed_candidates_report.json
 
+# Bucket 3.2 -- full embedding cache for all 9,356 fr3_descriptor_table.parquet
+# rows (~18MB float32 matrix), same "don't commit large embedding arrays"
+# rule as above. Fully regeneratable from the frozen descriptor table +
+# the frozen embedding spec (common/embeddings.py); SHA-256/shape recorded
+# in fr3_embeddings_manifest.json and fr3_embeddings_provenance.jsonl
+# instead. Reuses Bucket 2.3's own caches where possible, so a fresh run
+# only re-embeds what isn't already cached there.
+data/interim/c2_pu/fr3_embeddings.npz
+data/interim/c2_pu/fr3_fresh_embeddings.npz
+data/interim/c2_pu/fr3_embed_input.json
+data/interim/c2_pu/fr3_embed_report.json
+
+# Bucket 3.3 -- raw fused (495-dim) feature matrix, same "don't commit
+# large arrays" rule. Fully regeneratable from fr3_descriptor_table.parquet
+# + fr3_embeddings.npz; schema/scalers/validation (all small) are
+# committed instead via fr3_fusion_schema.json/fr3_fusion_scalers.json/
+# fr3_fusion_validation_report.json.
+data/interim/c2_pu/fr3_fused_raw.npz
+
+# Bucket 3.4 -- 5 fold-specific scaled feature caches (~9MB each at
+# float32), same "don't commit large arrays" rule. Fully regeneratable
+# from fr3_fused_raw.npz + fr3_fusion_scalers.json (both already
+# accounted for above); checksums/shape/dtype recorded in
+# fr3_feature_cache_manifest.json instead.
+data/interim/c2_pu/fr3_fold0_scaled_features.npz
+data/interim/c2_pu/fr3_fold1_scaled_features.npz
+data/interim/c2_pu/fr3_fold2_scaled_features.npz
+data/interim/c2_pu/fr3_fold3_scaled_features.npz
+data/interim/c2_pu/fr3_fold4_scaled_features.npz
+
+# Scratch files written by test_fr3_embeddings_acceptance.py's live
+# WSL re-embed spot-checks -- regenerated every test run, not a pipeline
+# artifact.
+data/interim/c2_pu/test_fr3_determinism_a.npz
+data/interim/c2_pu/test_fr3_determinism_a_input.json
+data/interim/c2_pu/test_fr3_determinism_a_report.json
+data/interim/c2_pu/test_fr3_determinism_b.npz
+data/interim/c2_pu/test_fr3_determinism_b_input.json
+data/interim/c2_pu/test_fr3_determinism_b_report.json
+data/interim/c2_pu/test_fr3_reembed_spotcheck.npz
+data/interim/c2_pu/test_fr3_reembed_spotcheck_input.json
+data/interim/c2_pu/test_fr3_reembed_spotcheck_report.json
+
 # Bucket 2.6 external-control homology audit -- raw EMBOSS needleall
 # alignment text (~20MB, all 45,790 external-control x FR1-positive pairs
 # in full srspair format). Fully regeneratable from the frozen external

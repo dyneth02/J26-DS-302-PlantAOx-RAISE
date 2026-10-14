@@ -632,6 +632,238 @@
   producing per-sequence embeddings; fold-safety is the caller's responsibility when that stage is
   built.
 
+### Bucket 3, Task 3.2 (remaining work) — Full ESM-2 Embedding Extraction
+- **Status: technical acceptance passed.** The environment/interface/smoke-test scope above was
+  already closed out; this entry covers the remaining checklist items — extracting embeddings for
+  the full positive pool and C1/C2/C3/external-control, verified against the Task 3.1 descriptor
+  contract. No existing code was rebuilt: `common/embeddings.py`, `esm2_cli.py`, and the WSL subprocess
+  mechanism are reused exactly as-is.
+- **`run.py::_embed_via_wsl` generalized to a public `embed_via_wsl` helper** (used by Bucket 2.3's C3
+  build and now this stage) rather than duplicated — added optional `embed_input_path`/
+  `summary_report_path`/`timeout` parameters, with defaults matching the original C3 call sites
+  exactly (confirmed via `git diff` that the two existing C3 calls are behaviorally unchanged).
+- **Embeddings computed once per unique sequence, in `fr3_descriptor_table.parquet`'s exact row
+  order** — alignment with the descriptor table is true by construction (the embedding stage reads
+  peptide_id/sequence directly from that table), not a separately-maintained convention to drift out
+  of sync.
+- **Existing Bucket 2.3 caches reused, not re-embedded — reported, not assumed compatible.** Of 9,356
+  total unique sequences, **3,159 (2,325 C3-union + 834 GraphPart-retained FR1 positives) were
+  already covered exactly** by `c3_candidate_embeddings.npz`/`c3_positive_embeddings.npz` (confirmed
+  by exact peptide_id-set membership before reuse, not just existence of the file) — only the
+  remaining **6,197** (3,788 C1 + 2,000 C2 + 371 FR1 positives outside the 834-retained split + 38
+  external control) needed fresh ESM-2 inference, completing in 175s on CPU. Every reused vector is
+  additionally shape/dtype/finiteness-checked before being trusted (`incompatible_cached_vectors_
+  excluded` in the manifest — empty on this run, but a real cache failure would be reported and that
+  vector re-embedded, never silently kept).
+- **A real idempotency bug found and fixed before acceptance:** the first implementation only checked
+  Bucket 2.3's two caches for reuse, not this stage's own prior output — re-running `fr3-embeddings` a
+  second time therefore re-embedded all 6,197 "fresh" sequences again instead of reusing the file it
+  had just written. Fixed by adding `fr3_embeddings.npz` itself to the reuse-source list. Verified via
+  the full acceptance suite: a second run now reports `freshly_embedded: 0`, `reused_from_existing_
+  caches: 9356`, and byte-identical `peptide_id_order_sha256`/`embeddings_cache_sha256` to the first
+  run (555s → 20s for the full acceptance suite after the fix).
+- **A real, quantified floating-point finding (not a bug, but worth recording precisely):** re-
+  embedding the identical single sequence in an isolated batch of 1 is bit-identical across repeated
+  WSL subprocess invocations (confirmed directly) — true determinism holds for a *fixed* batch
+  composition, consistent with `test_embeddings.py`'s existing `batch_size=32` vs. `batch_size=1`
+  check (which already uses `atol=1e-5`, not exact equality). What's new here is a direct,
+  isolated measurement of *why*: embedding the same 20-residue test sequence alone vs. padded
+  alongside a longer sequence in one batch changes its mean-pooled vector by up to ~9.5e-7 absolute
+  per element — PAD-token presence measurably perturbs floating-point summation/kernel-selection
+  order in self-attention for the *other*, real tokens in that batch, even though the pooling code
+  mathematically excludes PAD positions from the mean. Practical consequence: **`fr3_embeddings.npz`
+  is a mixed-provenance artifact** — vectors reused from Bucket 2.3's caches were computed under
+  *that* stage's own batch grouping, while freshly-embedded vectors used this stage's `batch_size=64`
+  grouping of a different sequence set. Both are internally reproducible given their own batch
+  composition, and agree with any independent re-embed to within ~1e-6 — many orders of magnitude
+  below any plausible downstream classifier signal for a 480-dim mean-pooled feature — but the
+  combined cache is not bit-reproducible from a hypothetical "embed all 9,356 in one giant batch"
+  alternative construction. Documented rather than glossed over, mirroring the project's existing
+  CD-HIT multi-threading non-determinism note (Known Issue #17).
+- **Outputs:** `fr3_embeddings.npz` (gitignored, 9,356×480 float32 + peptide_ids + pools, same row
+  order as `fr3_descriptor_table.parquet`), `fr3_embeddings_manifest.json` (model spec, reuse/fresh
+  counts, SHA-256 of both the peptide-ID order and the cache file, per-pool coverage), `fr3_embeddings_
+  validation_report.json` (shape/dtype/finiteness/order checks, L2-norm range), `fr3_embeddings_
+  provenance.jsonl`.
+- **C3 fold-safety preserved, not touched.** This cache holds exactly one embedding per C3-union
+  peptide_id — it is not a fold-specific accessor and `curation/c3.py::load_fold_challenges(path,
+  fold_id)` remains the only sanctioned way to get a fold's C3 membership; fold-specific training must
+  join that function's output against this cache by `peptide_id`.
+- **Tests:** 11 full-file acceptance tests (`test_fr3_embeddings_acceptance.py`) — exact row-count/
+  order/shape/dtype/finiteness match against the real descriptor table, per-pool coverage, manifest
+  correctness, meaningful-reuse-fraction check, idempotent-rerun reproducibility, a true bit-identical
+  determinism check (fixed batch composition), and the justified-tolerance differently-batched
+  spot-check described above. Frozen `pp1_baseline_v1`/`pp2_baseline_v1` confirmed untouched via
+  `git status` before and after every run.
+- **No new dependencies.** No cross-dataset statistic fit anywhere (same scope boundary as Task 3.1).
+  Feature fusion (Bucket 3.3) and model training are explicitly out of scope for this session.
+
+### Bucket 3, Task 3.3 — Feature Fusion and Leakage-Safe Preprocessing
+- **Status: technical acceptance passed.** Fuses Task 3.1's descriptor table and Task 3.2's embedding
+  cache into a 495-dim raw feature matrix (schema `fusion_v1`), then fits one leakage-safe z-score
+  scaler per GraphPart fold. Neither Task 3.1 nor Task 3.2 is recomputed — `curation/feature_fusion.py`
+  only loads, validates, concatenates, and fits/applies scalers.
+- **The one load-bearing design decision, made and documented rather than asked about again:** a
+  fold's scaler is fit **exclusively on that fold's training-positive rows** (the 4 other GraphPart
+  folds' retained positives), then applied (transform only) to everything else under that fold's
+  condition — its own held-out positives, C1, C2, that fold's C3 selection, and the external control.
+  This directly mirrors the project's own already-approved C3 fold-safe-centroid precedent
+  (`curation/c3.py`, AGENTS.md rule 5), rather than opening a new approval round for what is really the
+  same leakage-prevention principle applied to a second statistic. The rejected alternative (one global
+  scaler fit on all 1,205 FR1 positives) was ruled out because it would let fold k's own held-out
+  positives influence the statistics later used to transform those same held-out positives — the exact
+  leakage channel the C3 centroid's fold-safe design already exists to close. Flagged here explicitly
+  since it determines downstream experiment comparability (every PN/PU/curriculum condition in FR4
+  must use its OWN fold's scaler, never a shared one) — override at next review if a different scheme
+  is wanted, but this is the scheme implemented and tested.
+- **Verified against the real data, not assumed:** per-fold training sizes 710/700/697/661/568 — exact
+  match to the GraphPart split documented at Bucket 2.3/3.1. Every fold's own training rows
+  standardize to mean ≈0 (max abs ≤1.2e-5, floating-point floor) and std ≈1 (0.9999976–1.0000027)
+  after applying that fold's own scaler — confirms the fit is correct, not just "ran without erroring."
+  Training and held-out peptide_id sets never overlap for any fold (checked directly); training+
+  held-out always sums to exactly 834 (the GraphPart-retained total) with zero contamination from
+  C1/C2/C3/external-control peptide_ids (checked by exact set membership, not assumed from pool
+  labels).
+- **Independent, from-scratch validation of Task 3.1/3.2's correspondence contract** (not re-trusted
+  from their own test suites): peptide_id sets, row order, and pool assignments between
+  `fr3_descriptor_table.parquet` and `fr3_embeddings.npz` are re-checked here and hard-fail
+  (`FeatureAlignmentError`) on any mismatch — including the subtle "same ID set, different order" case,
+  which is deliberately never silently reconciled by reindexing (that would mask a real pipeline bug
+  rather than surface it). `fr3_fusion_validation_report.json`'s `peptide_id_order_sha256` matches
+  `fr3_embeddings_manifest.json`'s hash exactly, confirming cross-stage alignment empirically.
+- **`run.py`'s `embed_via_wsl` pattern was not needed here** (fusion is pure numpy/pandas, no ESM-2
+  inference) — no new dependency, no new WSL call.
+- **Outputs:** `fr3_fusion_schema.json` (committed — 495 feature names in their frozen concatenation
+  order, schema version), `fr3_fused_raw.npz` (gitignored, 9,356×495 float32 — same "don't commit large
+  arrays" rule as the embeddings cache, fully regeneratable from the two small committed inputs),
+  `fr3_fusion_scalers.json` (committed — per-fold mean/std/training-peptide-id-list/held-out-peptide-
+  id-list, so "which training samples were included in the scaler fit" is answerable by inspection, not
+  just by count), `fr3_fusion_validation_report.json`, `fr3_fusion_provenance.jsonl`.
+- **Scope boundary respected:** this task does NOT materialize 5 separate full scaled feature caches
+  (one per fold) — only the raw fused matrix plus the small per-fold scaler *parameters* and a tested
+  `apply_scaler()` function. Materializing fold-specific scaled caches ready for training is Task 3.4's
+  responsibility; duplicating it here was explicitly out of scope. Model training (Bucket 4) untouched.
+- **Tests:** 16 unit tests (`test_feature_fusion.py` — schema order, every `FeatureAlignmentError` path,
+  concatenation-order correctness, scaler fit/apply including the zero-variance-column guard, fold
+  training/held-out partitioning, empty-fold rejection) + 12 full-file acceptance tests
+  (`test_fr3_feature_fusion_acceptance.py` — Task 3.1/3.2 outputs confirmed byte-unchanged by SHA-256
+  before/after, frozen baselines untouched, exact fold-size/overlap/contamination checks against the
+  real data, embedding/descriptor column blocks verified identical to their source arrays, and
+  bit-identical rerun reproducibility for both the raw matrix and the scalers).
+- **No new dependencies.** scikit-learn is already installed in this environment but unused here —
+  the z-score scaler (mean/std, zero-variance guard) is ~10 lines of numpy, fully transparent and
+  consistent with this project's existing hand-rolled-formula style (same reasoning as Task 3.1's
+  descriptor implementations) rather than a dependency for something this simple.
+
+### Bucket 3, Task 3.4 — Feature Cache and Reproducibility
+- **Status: technical acceptance passed.** Materializes 5 fold-specific scaled feature caches by
+  applying Task 3.3's already-fitted per-fold scalers (never refit) to Task 3.3's already-built raw
+  fused matrix (never recomputed). New module `common/feature_cache.py` — deliberately minimal
+  imports (numpy/pandas/json/hashlib only, zero `torch`/`esm`/WSL anywhere in its import chain) so
+  loading a cache for training genuinely never requires ESM-2 inference, a WSL environment, or
+  recomputing Task 3.1's descriptors.
+- **Each of the 5 caches covers all 9,356 rows** (every pool), scaled under that fold's own scaler —
+  a row's presence in fold k's cache is NOT a claim it belongs to fold k's curriculum. C1/C2 pool
+  membership is a plain filter; **C3's fold-specific hard-challenge selection still requires
+  `curation/c3.py::load_fold_challenges(path, fold_id)`**, joined against the cache by `peptide_id` via
+  the new `get_c3_fold_challenge_rows()` helper — which additionally refuses (raises `ValueError`) if
+  asked for a different fold's C3 selection than the cache's own fold_id, since scoring one fold's
+  challenge candidates under a different fold's scaler would silently mix two folds' leakage-safety
+  guarantees. There is deliberately no function anywhere in this module that returns "the whole C3
+  union as fold k's challenge set."
+- **Strict, checksum-verified loading, not just file-existence trust:** `load_fold_feature_cache()`
+  computes the cache file's SHA-256 and compares it to the manifest's recorded hash **before** reading
+  any array, then separately re-checks shape, dtype, schema version, and a scaler-identity fingerprint
+  (SHA-256 of the embedded mean+std bytes) against the manifest — raising `CorruptedCacheError` with
+  the specific mismatch on any failure. Verified against 6 distinct corruption modes in tests (missing
+  file, flipped bytes, wrong shape, wrong dtype, wrong schema version, wrong scaler identity), plus an
+  end-to-end acceptance test that corrupts one of the 5 REAL generated caches (not a synthetic one) and
+  confirms rejection.
+- **Verified against the real data:** per-fold training-row standardization (mean≈0, std≈8.4e-6 to
+  1.2e-5 max-abs; std 0.9999976–1.0000027) survives the float32 downcast essentially unchanged from
+  Task 3.3's float64 validation. Every cache's C3-pool row count is exactly 2,325 (the full union,
+  confirming it is NOT silently fold-filtered). External-control peptide_ids confirmed disjoint from
+  every fold's training AND held-out sets (re-checked independently here, not re-trusted from Task
+  3.3). `peptide_id_order_sha256` matches Task 3.2/3.3's own hash exactly across all three stages.
+- **Real end-to-end C3 integration test, not mocked:** `get_c3_fold_challenge_rows()` is exercised
+  against the actual `c3_similarity_ranking.csv` for all 5 folds, confirming exactly 2,000 rows
+  returned per fold (matching `C3_TOP_N_PER_FOLD`) and that requesting fold k's cache with a different
+  fold's `fold_id` argument is rejected.
+- **Smoke test (requirement #9), run in a genuinely fresh subprocess** (not just "torch wasn't imported
+  in this test file," which other already-torch-importing tests in the same session could mask):
+  imports only `common/feature_cache.py`, asserts `"torch"`/`"esm"` are absent from `sys.modules`
+  both before AND after loading a real 9,356×495 cache, and completes in well under 10 seconds —
+  several orders of magnitude faster than a real ESM-2 model load, let alone inference.
+- **Outputs:** `fr3_fold{0..4}_scaled_features.npz` (gitignored, ~9MB each — fully regeneratable from
+  the already-committed `fr3_fused_raw.npz`-regenerating inputs + `fr3_fusion_scalers.json`),
+  `fr3_feature_cache_manifest.json` (committed — per-fold cache path/SHA-256/shape/dtype/schema
+  version/scaler-identity-fingerprint/`n_training_samples`, plus the three input files' own SHA-256 so
+  the whole provenance chain is checksummed), `fr3_feature_cache_validation_report.json`,
+  `fr3_feature_cache_provenance.jsonl`.
+- **Tests:** 15 unit tests (`test_feature_cache.py` — scaler-identity/hash determinism, happy-path
+  load, all 6 corruption-rejection modes, pool/training/held-out row accessors, the C3-fold-mismatch
+  rejection, and a real-schema C3 integration test against a synthetic ranking CSV) + 12 full-file
+  acceptance tests (`test_fr3_feature_cache_acceptance.py` — Task 3.1–3.3 outputs and frozen baselines
+  confirmed byte-unchanged, all 5 real caches round-trip-load and are fully finite, real
+  `c3_similarity_ranking.csv` integration across all 5 folds, real-cache corruption rejection,
+  bit-identical rerun reproducibility, and the subprocess smoke test).
+- **No new dependencies.** Model training (Bucket 4) and Task 3.5 are untouched — this task stops at a
+  loadable, checksummed, leakage-safe feature cache plus the reusable loader utilities.
+
+### Bucket 3, Task 3.5 — Feature Pipeline Demonstration (Bucket 3 CLOSED OUT)
+- **Status: technical acceptance passed. Bucket 3 (Feature Engineering Pipeline) is now fully
+  complete.** `run_fr3_demo()` (CLI `fr3-demo`) is a small, fast (~1.6s), fully offline walkthrough of
+  the already-accepted Tasks 3.1–3.4 pipeline — no reimplementation, no new formulas, no live ESM-2/WSL
+  inference anywhere in its path. Full usage doc: **[`FR3_FEATURE_PIPELINE_DEMO.md`](FR3_FEATURE_PIPELINE_DEMO.md)**.
+- **Explicitly NOT a claim that FR3 is complete.** FR3 additionally requires the four classification
+  baselines (PN, nnPU, Two-Step PU, PU-Bagging) and their evaluation — unstarted, out of this task's
+  scope per explicit instruction. This entry closes Bucket 3 (the feature-engineering prerequisite),
+  not FR3 itself.
+- **7 fixed, REAL peptide_ids, not synthetic data** — chosen deterministically from the accepted
+  pipeline outputs to cover every pool plus both sides of GraphPart fold 0's split and two of fold 0's
+  real C3 top-2000 hard challenges (verified by rank, not assumed): `AOP-002DDE226A` (FR1 positive,
+  fold-0 training), `AOP-0089BF570C` (FR1 positive, fold-0 held-out), `C1-00174EE65A`, `C2-00316810B4`,
+  `C3-8A629D6877`/`C3-73E12D123B` (fold-0 ranks 1–2), `AOP-053EB70717` (external control).
+- **Input validation (requirement 1):** all 7 sequences checked against the standard 20-AA
+  alphabet/3–50 AA window via the real, shared `common.sequence.is_valid_peptide` — no reimplemented
+  validation logic.
+- **Descriptor + embedding path, using existing implementations exactly as instructed (requirement 2):**
+  descriptors are computed **live** via `common.descriptors.compute_descriptors_batch()` (fast, pure
+  numpy, no GPU/WSL) and cross-checked bit-for-bit against the frozen `fr3_descriptor_table.parquet`
+  values for these same peptides. ESM-2 embeddings are the "heavy extraction" the task brief explicitly
+  allows precomputing — they are **loaded from the existing `fr3_embeddings.npz` cache**, never
+  recomputed; no ESM-2 model load or WSL subprocess call occurs anywhere in this demonstration,
+  verified not just by inspection but by a subprocess-isolated smoke test (see below).
+- **Feature-cache loading, not recomputation (requirement 3):** the fold-0 scaled 495-dim cache is
+  loaded through Bucket 3.4's own `load_fold_feature_cache()` (full checksum/shape/dtype/schema
+  verification included, not bypassed for the demo).
+- **Correct pool/fold selection, verified against the real data (requirement 4):** training (710),
+  held-out (124), C1 (3,788), C2 (2,000), C3 union-in-cache (2,325), and fold-0's real C3 challenge
+  selection (2,000, resolved via `curation.c3.load_fold_challenges` — never by filtering `pool=="C3"`)
+  — every count matches the documented, previously-verified values exactly.
+- **External control confirmed separate (requirement 5):** re-checked independently here (not
+  re-trusted from Task 3.4) that none of the 38 external-control peptide_ids appear in fold 0's
+  training or held-out sets.
+- **Concise, presentation-ready summary (requirement 6):** schema versions (all 3: descriptor/fusion/
+  cache), shapes at every stage, pool coverage, per-demo-peptide scaled-feature preview (first 5 of
+  495 dims), and an explicit `validation` block where every check must read `true` or the whole run
+  raises — no partial-success reporting.
+- **One-command, documented, with a literal expected-output reference (requirement 7):**
+  `python -m plantaox.c2_pu.run fr3-demo`. Output is written to the **committed**
+  `fr3_demo_output.json`, which doubles as the exact expected-output reference (re-running against an
+  unchanged pipeline reproduces it byte-for-byte — verified in tests, not just asserted in prose).
+- **Tests (requirement 8):** 11 full-file acceptance tests (`test_fr3_demo_acceptance.py`) — Tasks
+  3.1–3.4 outputs and frozen baselines confirmed byte-unchanged by SHA-256 before/after, exact
+  pool-coverage match, every validation check passes, correct descriptor/embedding/cache shapes, the
+  two demo C3 peptides independently re-verified as fold-0's real ranks 1–2 (not just trusted from the
+  demo's own output), on-disk output file matches the returned summary, bit-identical rerun
+  reproducibility, a clear `FileNotFoundError` for a missing prerequisite (tested via a deliberately
+  nonexistent `fold_id=99`), and a subprocess-isolated smoke test proving the full demo path needs no
+  `torch`/`esm` import and completes in well under the 10-second budget.
+- **No new dependencies, no dashboard.** Nothing beyond the existing `run.py` CLI-stage pattern was
+  needed — a new UI/dashboard was judged unnecessary for a PP1 presentation given a clear, versioned
+  JSON summary plus this markdown write-up already satisfies "concise, presentation-ready."
+
 ### Bucket 3, Task 3.1 — 15-Dimensional Physicochemical Descriptor Extraction
 - **Status: technical acceptance passed.** The canonical 15-descriptor schema is frozen as
   `descriptors_v1` in `common/descriptors.py`; `common/descriptors.py` is no longer an empty stub
@@ -812,13 +1044,10 @@ tasks below.)*
    above. Optional follow-ups, both low priority: an independent spot-check of the one new leakage
    replacement record (`RL34_XANVE`); a spot-check of a few of the 260 new alphabet-fix replacement
    records (none had an independent fresh review beyond the automated blocklist/screen checks).
-3. **Bucket 3.2's environment/interface/smoke-test scope is closed out** — see Completed tasks above.
-   The ambiguous-residue policy blocker (former Known Issues #9/#10) is now resolved for C1; full
-   embedding extraction (the remaining Bucket 3.2 checklist items: "extract embeddings for remaining
-   positives and C1/C2/C3," "verify dimensions/ordering/dtype/completeness") can read
-   `stage_c1_decoys_v3.fasta` directly with `embed_sequences(..., validate_alphabet=True)` (the
-   default) and expect zero `AmbiguousResidueError`s from C1. Not yet attempted — still separate,
-   deliberately out-of-scope work.
+3. **RESOLVED 2026-10-14. Bucket 3.2 is now fully complete** (environment/interface/smoke-test, AND
+   the remaining full-embedding-extraction checklist items) — see Completed tasks above (`fr3_
+   embeddings.npz`, `fr3_embeddings_manifest.json`, CLI stage `fr3-embeddings`). Kept here for
+   history; not an open item anymore.
 4. **FR2 (Buckets 2.1–2.7) is complete, technically accepted, and frozen as `pp2_baseline_v1`.** See
    `fr2_acceptance_report.md` for the full account. Canonical artifacts for ALL future consumption:
    `stage_c1_decoys_v3.fasta`, `stage_c2_bioactive_unlabeled_v2.fasta`, `stage_c3_esm2_hard_
@@ -830,8 +1059,21 @@ tasks below.)*
    unstarted task — revisit only if either resource becomes reachable or a DFBP hosting URL surfaces.
 6. **RESOLVED 2026-10-14. Bucket 3.1 (15 physicochemical descriptors) is complete** — see Completed
    tasks above (`common/descriptors.py`, schema `descriptors_v1`, CLI stage `fr3-descriptors`). Kept
-   here for history; not an open item anymore. Bucket 3.2's remaining full-embedding-extraction work
-   and Bucket 3.3 (feature fusion) can now both proceed using this frozen 15-feature contract.
+   here for history; not an open item anymore.
+6b. **RESOLVED 2026-10-14. Bucket 3.3 (feature fusion and leakage-safe preprocessing) is complete** —
+   see Completed tasks above (`curation/feature_fusion.py`, schema `fusion_v1`, CLI stage
+   `fr3-feature-fusion`). Kept here for history; not an open item anymore.
+6c. **RESOLVED 2026-10-14. Bucket 3.4 (feature cache and reproducibility) is complete** — see Completed
+   tasks above (`common/feature_cache.py`, schema `feature_cache_v1`, CLI stage `fr3-feature-cache`).
+   Kept here for history; not an open item anymore.
+6d. **RESOLVED 2026-10-14. Bucket 3.5 (feature pipeline demonstration) is complete — Bucket 3 (Feature
+   Engineering Pipeline) is now fully closed out.** See Completed tasks above (`fr3-demo` CLI stage,
+   `FR3_FEATURE_PIPELINE_DEMO.md`). **FR3 itself is explicitly NOT complete** — it still requires the
+   four classification baselines (PN, nnPU, Two-Step PU, PU-Bagging) and their evaluation, which have
+   not been started. **FR4/Bucket 4 model training is the next item** — training code should load
+   features exclusively via `common/feature_cache.py`'s `load_fold_feature_cache`/`get_training_rows`/
+   `get_held_out_rows`/`get_pool_rows`/`get_c3_fold_challenge_rows`, never by re-deriving scaled
+   features by hand.
 7. **FR3/FR4 training code consuming C3 must use `curation/c3.py::load_fold_challenges(path, fold_id)`**
    (not read the union FASTA or filter the ranking CSV by hand) to get that fold's hard-challenge set —
    flagging this contract here since it's the single easiest way to silently reintroduce C3's
@@ -910,5 +1152,19 @@ tasks below.)*
 | 2026-10-14 | Bucket 3.1's 15-descriptor schema's 9th feature, originally approved as Boman index, was substituted with `frac_proline` mid-implementation | Two targeted web searches for Boman (2003)'s per-residue solubility scale turned up only unverified/possibly-confused tables, not the original paper's Table 2. Freezing an unverifiable 20-value constant into a schema every downstream FR3/FR4 experiment depends on was judged a worse risk than a documented, project-owner-flagged substitution. `frac_proline` is trivially self-verifying (a residue count) and is itself motivated by this project's own Task 2.5 finding (FR1 positives are Pro-enriched at 10.6% vs. 4.1–5.6% in C1/C2/C3). Flagged for the project owner to confirm or override at next review — not silently decided. |
 | 2026-10-14 | The instability-index dipeptide weight table (Guruprasad et al. 1990, 400 cells) was downloaded verbatim from Biopython's `Bio.SeqUtils.ProtParamData` source file rather than hand-transcribed from training-data memory | A single wrong entry in a 400-cell lookup table would not be caught by a handful of reference-sequence unit tests, and this schema is meant to be frozen project-wide — verified provenance was judged worth the extra step over reconstructing the table from memory. Eisenberg (1984) hydrophobic-moment values and Ikai (1980) aliphatic-index coefficients were independently cross-checked against ExPASy ProtScale / the original citation for the same reason. |
 | 2026-10-14 | Bucket 3.1's descriptor cache uses flat CSV/parquet files directly under `data/processed/c2_pu/` (`fr3_descriptor_table.parquet`, `fr3_record_map.csv`, etc.), not the Planner Deliverable Registry's literal `descriptors.npy + ID map` naming | The Planner's `.npy`-based registry entry predates this project's actual established artifact convention — FR1's own positive pool is `.parquet`, every Task-2.5 descriptor/report table is `.csv`, and the task brief itself says to prefer the repository's existing preferred formats. Matching the registry's literal filename would have meant inventing a second, inconsistent feature-storage convention alongside the one every other stage already uses. |
+| 2026-10-14 | `run.py`'s private `_embed_via_wsl` (Bucket 2.3) was renamed to a public `embed_via_wsl` and generalized with optional `embed_input_path`/`summary_report_path`/`timeout` parameters, instead of writing a second, near-duplicate WSL-embedding helper for Bucket 3.2 | The WSL subprocess/caching mechanics (shell out to `esm2_cli.py`, save vectors to a `.npz`, read them back) don't differ between the C3 build and the full feature-cache extraction — only the input batch and cache path do. New parameters default to the exact values the two existing C3 call sites already used, confirmed via direct inspection that their behavior is unchanged. |
+| 2026-10-14 | Bucket 3.2's `fr3_embeddings.npz` directly reuses Bucket 2.3's `c3_positive_embeddings.npz`/`c3_candidate_embeddings.npz` wherever their peptide_ids already cover what's needed (3,159 of 9,356 sequences), only freshly embedding the remaining 6,197 | Confirmed by exact peptide_id-set membership check before reuse (not just file existence), and each reused vector is additionally shape/dtype/finiteness-checked, with any failure excluded from reuse and re-embedded instead — "reuse" is verified compatible, not assumed. Cut fresh ESM-2 inference from ~9,356 to ~6,197 sequences (175s on CPU). |
+| 2026-10-14 | Fixed a real idempotency bug found during acceptance testing: `run_fr3_embeddings()`'s initial implementation only checked Bucket 2.3's two caches for reuse, not its own prior output (`fr3_embeddings.npz` itself), so a second run re-embedded all 6,197 "fresh" sequences again | Caught by the acceptance suite's reproducibility test, not assumed correct from the first green run. Fixed by adding the stage's own output path to the reuse-source list; re-verified a second run now reports `freshly_embedded: 0` and byte-identical `peptide_id_order_sha256`/`embeddings_cache_sha256` to the first run (acceptance suite: 555s → 20s). |
+| 2026-10-14 | A spot-check acceptance test comparing a freshly re-embedded 5-sequence sample against `fr3_embeddings.npz` uses `atol=1e-5` (justified, not loosened-until-green), not exact equality | A direct diagnostic (embedding one fixed test sequence alone vs. padded alongside a longer sequence in the same batch, in two separate WSL calls) measured a real ~2.7e-7-9.5e-7 absolute per-element difference — PAD-token presence perturbs floating-point summation order in self-attention for the other real tokens in that batch, even though pooling mathematically excludes PAD positions. Repeated calls with the IDENTICAL batch composition (verified separately) ARE bit-identical, so this is padding-dependent numerical noise, not true non-determinism. Tolerance set two orders of magnitude above the measured noise floor. Consistent with (and quantifies more precisely than) `test_embeddings.py`'s existing `batch_size=32` vs. `batch_size=1` check, which already used `atol=1e-5` rather than exact equality. |
+| 2026-10-14 | Bucket 3.3's per-fold scaler is fit exclusively on that fold's GraphPart training-positive rows (never on held-out positives, C1, C2, C3, or the external control), rather than one global scaler fit on all 1,205 FR1 positives | Mirrors the already-approved C3 fold-safe-centroid design (`curation/c3.py`, AGENTS.md rule 5) rather than opening a new approval round for the same leakage-prevention principle applied to a second statistic. A global scaler would let fold k's own held-out positives influence the statistics later used to transform those same held-out positives at evaluation time — a real, if subtle, leakage channel. Verified directly: each fold's own training rows standardize to mean≈0/std≈1 after applying that fold's scaler; training/held-out peptide_id sets never overlap and always sum to exactly 834 per fold, with zero C1/C2/C3/external-control contamination. Flagged explicitly since it determines downstream experiment comparability — every FR4 condition must use its own fold's scaler, never a shared one. |
+| 2026-10-14 | Bucket 3.3 materializes only the raw 495-dim fused matrix plus small per-fold scaler parameters (mean/std/training-peptide-id-list) and a tested `apply_scaler()` function — it does NOT write 5 separate fully-scaled feature caches (one per fold) | Reserved for Task 3.4 per the task's own explicit scope boundary ("do not duplicate the feature-cache responsibilities assigned to Task 3.4"). A fold-specific scaled cache is trivially derivable from the committed scaler parameters + the raw fused matrix via `apply_scaler()`, so nothing is lost by not precomputing it here, and it avoids ~5x the storage for an artifact nobody asked this task to own. |
+| 2026-10-14 | Bucket 3.3's z-score scaler is hand-implemented (~10 lines of numpy: mean/std with a zero-variance-to-1.0 guard) rather than using scikit-learn's `StandardScaler`, even though scikit-learn 1.7.2 is already installed in this environment | Consistent with this project's existing hand-rolled-formula style (same reasoning already applied to Task 3.1's descriptor formulas over Biopython) — the operation is simple enough that a transparent, fully-auditable implementation is preferable to a library dependency that isn't declared in `requirements.txt`/`pyproject.toml` anyway. No new dependency added or declared. |
+| 2026-10-14 | Bucket 3.4's `common/feature_cache.py` imports only numpy/pandas/json/hashlib (plus a lazy, same-constraint import of `curation/feature_fusion.py`'s `apply_scaler` and, only inside the C3-specific helper, `curation/c3.py`) — never `common/embeddings.py`, `esm`, or `torch` | The whole point of a "feature cache" is that an FR4 training script can load it without an ESM-2 model load, a WSL subprocess, or GPU/CPU inference — verified empirically in a genuinely fresh subprocess (not just "this test file never imported torch"), since other tests in the same pytest session already import torch and would mask a real accidental import if checked in-process. |
+| 2026-10-14 | Each of Bucket 3.4's 5 fold caches holds the SCALED version of every one of the 9,356 rows (the full C3 union included), not a fold-filtered subset | Matches Task 3.3's own validation pattern (apply each fold's scaler to every row) and keeps the cache's job purely about *scaling*, not about *selection* — C3's fold-specific hard-challenge membership is a separate, already-solved problem (`curation/c3.py::load_fold_challenges`) that this task must not reimplement or shortcut. `get_c3_fold_challenge_rows()` enforces this by construction: it resolves membership via that function and additionally refuses a cache/fold_id mismatch, so a caller cannot accidentally score fold k's candidates under fold j's scaler. |
+| 2026-10-14 | The scaled feature cache is stored as float32 (one explicit downcast from the scaler's float64 fit/apply arithmetic), not float64 | Halves on-disk size (5 × ~9MB vs. ~18MB) for an error on the order of 1e-7 relative, many orders of magnitude below any meaningful downstream classifier signal — consistent with the embeddings cache's own float32 convention (Bucket 3.2) and the project's established tolerance-setting precedent for floating-point rounding that doesn't change scientific conclusions. Verified directly: each fold's training rows still standardize to mean≈0/std≈1 after the downcast, matching Task 3.3's float64-precision validation closely. |
+| 2026-10-14 | `load_fold_feature_cache()` verifies the cache file's SHA-256 against its manifest entry BEFORE reading any array, then separately re-verifies shape/dtype/schema-version/scaler-identity after loading, raising a specific `CorruptedCacheError` naming the exact mismatch rather than a generic exception | Satisfies the explicit "corrupted-cache rejection" acceptance requirement with real teeth — a cache that merely fails to parse would be caught by numpy regardless, but a cache that parses fine yet silently drifted (wrong fold's scaler embedded by a copy-paste mistake, a truncated-but-still-valid-zip file, a stale manifest after a partial regeneration) would not be, without this layered check. Verified against 6 distinct corruption modes in unit tests plus one real-file corruption in the acceptance suite. |
+| 2026-10-14 | Bucket 3.5's demo uses 7 fixed, real peptide_ids read live from the accepted pipeline outputs, instead of bundling a small synthetic/precomputed fixture dataset | A parallel toy dataset would need its own maintenance and could silently drift from the real pipeline's actual behavior, undermining the point of a pipeline *demonstration*. Operating directly on the real (if gitignored) large-array outputs means the demo only runs after Tasks 3.1-3.4 have actually been executed in this checkout — judged the correct tradeoff, since the task brief frames this as demonstrating the *existing* pipeline, not a standalone fresh-clone showcase. A clear `FileNotFoundError` naming the exact missing file and which command produces it covers the "not yet run" case rather than failing confusingly. |
+| 2026-10-14 | ESM-2 embeddings are loaded from `fr3_embeddings.npz` in the demo rather than re-invoked live via `embed_via_wsl`, even though WSL is available in this dev environment | Directly satisfies "independent of internet/GPU access" and "heavy extraction may be precomputed for the offline presentation" from the task brief — a presenter without WSL/GPU set up (or presenting from a different machine) can still run the demo as long as Tasks 3.1-3.4's artifacts are present. Verified empirically, not just by code inspection, via a subprocess-isolated smoke test confirming `torch`/`esm` never enter `sys.modules` anywhere in the demo's execution. |
+| 2026-10-14 | The demo's output file (`fr3_demo_output.json`) is committed and doubles as the literal expected-output reference, rather than a separate static example written by hand | A hand-written example could silently drift from what the real code actually produces. Committing the live output and asserting byte-identical reproducibility in tests means the "expected output" can never go stale without a test catching it. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
