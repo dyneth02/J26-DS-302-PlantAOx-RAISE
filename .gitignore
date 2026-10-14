@@ -299,3 +299,11 @@ data/interim/c2_pu/test_fr3_reembed_spotcheck_report.json
 data/interim/c2_pu/ext_control_homology/needleall_output.pair
 data/interim/c2_pu/ext_control_homology/external_control.fasta
 data/interim/c2_pu/ext_control_homology/positives.fasta
+
+# Bucket 4.1 -- run directories (resolved configs, epoch logs, checkpoints)
+# produced by the infrastructure smoke test and any future Bucket 4
+# training run. Entirely regeneratable/reproducible from the frozen
+# feature cache + a run's own resolved config; checkpoints in particular
+# are large binary PyTorch state -- same "don't commit large arrays" rule
+# as model weights and embedding caches elsewhere in this project.
+data/interim/c2_pu/fr4_infra_smoke_test_runs/
