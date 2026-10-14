@@ -1,0 +1,226 @@
+{
+  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_pn_baseline_runs\\fr4_pn_baseline_fold0__20261014T175605Z",
+  "fold_id": 0,
+  "class_counts": {
+    "train_positive": 331,
+    "train_negative": 3220,
+    "validation_positive": 48,
+    "validation_negative": 568
+  },
+  "c1_partition": {
+    "validation_fraction": 0.15,
+    "seed": 42
+  },
+  "training": {
+    "seed_context": {
+      "effective_seed": 42,
+      "deterministic_algorithms_requested": true,
+      "cuda_available": false,
+      "cuda_device_name": null,
+      "device_count": 0,
+      "cpu_count": 12,
+      "torch_version": "2.14.0+cpu",
+      "numpy_version": "2.4.6",
+      "python_version": "3.11.14 (main, Dec  9 2025, 18:59:10) [MSC v.1944 64 bit (AMD64)]",
+      "platform": "Windows-10-10.0.22631-SP0"
+    },
+    "device": "cpu",
+    "executed_epochs": 14,
+    "max_epochs": 100,
+    "early_stopping_patience": 10,
+    "min_improvement": 0.0001,
+    "best_epoch": 3,
+    "best_val_loss": 0.3137817978858948,
+    "final_train_loss": 0.07231750721397769,
+    "final_val_loss": 0.6250327229499817,
+    "class_counts": {
+      "train_positive": 331,
+      "train_negative": 3220,
+      "validation_positive": 48,
+      "validation_negative": 568
+    },
+    "pos_weight": 9.72809667673716,
+    "use_class_weight": true,
+    "elapsed_seconds": 4.701785564422607,
+    "history": [
+      {
+        "epoch": 0,
+        "train_bce_loss": 0.5003992617885619,
+        "val_bce_loss": 0.3299396336078644,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": true
+      },
+      {
+        "epoch": 1,
+        "train_bce_loss": 0.3093259869344266,
+        "val_bce_loss": 0.3202228248119354,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": true
+      },
+      {
+        "epoch": 2,
+        "train_bce_loss": 0.25660852389633065,
+        "val_bce_loss": 0.3378273844718933,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 3,
+        "train_bce_loss": 0.22887280289009235,
+        "val_bce_loss": 0.3137817978858948,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": true
+      },
+      {
+        "epoch": 4,
+        "train_bce_loss": 0.19433824115825418,
+        "val_bce_loss": 0.389876127243042,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 5,
+        "train_bce_loss": 0.1727248339527461,
+        "val_bce_loss": 0.390401154756546,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 6,
+        "train_bce_loss": 0.16605389423897085,
+        "val_bce_loss": 0.4741811752319336,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 7,
+        "train_bce_loss": 0.15865985319328893,
+        "val_bce_loss": 0.44620513916015625,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 8,
+        "train_bce_loss": 0.11320179563579057,
+        "val_bce_loss": 0.5473368763923645,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 9,
+        "train_bce_loss": 0.09305371630147952,
+        "val_bce_loss": 0.6464328765869141,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 10,
+        "train_bce_loss": 0.08558376906851427,
+        "val_bce_loss": 0.779201090335846,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 11,
+        "train_bce_loss": 0.0711322995241059,
+        "val_bce_loss": 0.9301190972328186,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 12,
+        "train_bce_loss": 0.08628050943060774,
+        "val_bce_loss": 0.6990252137184143,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      },
+      {
+        "epoch": 13,
+        "train_bce_loss": 0.07231750721397769,
+        "val_bce_loss": 0.6250327229499817,
+        "learning_rate": 0.001,
+        "train_positive_count": 331,
+        "train_negative_count": 3220,
+        "validation_positive_count": 48,
+        "validation_negative_count": 568,
+        "is_best": false
+      }
+    ]
+  },
+  "checkpoint": {
+    "best_path_sha256": "c2973e0974b0de7013e8ab3239d533139e23d67df2b152b4c128702ad4122f3c",
+    "last_path_sha256": "647e921f7df9f4144f097533d9d766cc91392ca804c11d78e5bce8d3374ad6e7",
+    "best_checkpoint_epoch": 3
+  },
+  "checkpoint_reload_verification": {
+    "proba_shape": [
+      16,
+      1
+    ],
+    "proba_bounded": true,
+    "proba_finite": true
+  },
+  "outputs": {
+    "learning_curve": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\fr4_pn_baseline_fold0_learning_curve.svg"
+  },
+  "limitations": {
+    "assumed_negative_labels": "C1 is an assumed-negative/PU-unlabeled pool, NOT experimentally confirmed antioxidant-inactive. PN is a conventional supervised control, not a validated predictor.",
+    "shortcut_bias_risk": "FR2 (Task 2.5) documented substantial FR1-positive-vs-C1 distributional differences (length, charge, GRAVY, aromaticity, composition). High validation performance here may reflect these shortcuts rather than genuine antioxidant-activity discrimination.",
+    "evidence_tiers": "E1 only is used for the PN positive class; E2 remains available for subsequent evidence-tiered PU experiments (Task 4.3+).",
+    "evaluation_scope": "Fold-0-only initial baseline. Full C1/C2/C3 cross-pool comparison, calibration, RNIS, and five-fold validation are out of Task 4.2's scope.",
+    "cross_fold_results": "A successful fold-0 run is an initial implementation demonstration, not completed five-fold experimental validation.",
+    "scientific_sign_off": "Technical acceptance only -- no supervisor or scientific sign-off is implied."
+  }
+}
