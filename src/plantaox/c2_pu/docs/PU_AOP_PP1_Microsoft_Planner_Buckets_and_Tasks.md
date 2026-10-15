@@ -346,12 +346,20 @@ save/reload reproducibility, full research-limitations section, and the explicit
 and a cross-baseline comparison table are Task 4.5's scope, not performed here.
 
 ## 4.5 — Initial Model Evaluation and Testing
-- [ ] Run reduced-data one-fold PN smoke test.
-- [ ] Run reduced-data one-fold nnPU smoke test.
-- [ ] Test additional PU baselines where implemented.
-- [ ] Verify MCC and AUPRC calculations on labeled/assumption-based sets as appropriate.
-- [ ] Check probability bounds, NaN/Inf, stability, and checkpoints.
-- [ ] Generate a clearly labeled preliminary comparison table.
+- [x] Run reduced-data one-fold PN smoke test.
+- [x] Run reduced-data one-fold nnPU smoke test.
+- [x] Test additional PU baselines where implemented.
+- [x] Verify MCC and AUPRC calculations on labeled/assumption-based sets as appropriate.
+- [x] Check probability bounds, NaN/Inf, stability, and checkpoints.
+- [x] Generate a clearly labeled preliminary comparison table.
+
+**Technical acceptance passed (PASS), 2026-10-15.** Existing Task 4.2–4.4 smoke/training evidence was
+reused and all five accepted best checkpoints were reloaded for a common, inference-only fold-0
+evaluation. The primary comparison uses 124 GraphPart-held-out positives and 38 assay-inactive external
+controls at a fixed 0.5 threshold. C1/C2/fold-0 C3 results remain separately labeled as unlabeled
+descriptions or assumed-negative proxies. Two-Step PU raw corrected scores are retained while bounded
+copies are used for threshold/Brier metrics. See `FR4_BASELINE_EVALUATION_REPORT.md`; no Task 4.6 work
+was performed.
 
 ## 4.6 — Optional FR4 Curriculum Prototype
 - [ ] Implement nnPU progression **C1 → C2 → C3**.
