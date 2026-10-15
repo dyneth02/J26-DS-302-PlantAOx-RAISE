@@ -1,0 +1,21 @@
+{
+  "schema_version": "descriptors_v1",
+  "descriptor_names": [
+    "length",
+    "molecular_weight",
+    "net_charge_ph7",
+    "isoelectric_point",
+    "gravy",
+    "aromaticity",
+    "instability_index",
+    "aliphatic_index",
+    "hydrophobic_moment",
+    "frac_charged",
+    "frac_polar",
+    "frac_hydrophobic",
+    "frac_positive",
+    "frac_negative",
+    "frac_proline"
+  ],
+  "n_descriptors": 15
+}

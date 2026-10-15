@@ -1,0 +1,278 @@
+{
+  "diagnostic_scope": "Task 4.3 POST-ACCEPTANCE DIAGNOSTIC (pi-sensitivity investigation), not a new baseline. Does not modify, retrain, or supersede the accepted pi=0.10 Task 4.3 baseline.",
+  "run_dir": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_nnpu_prior_sensitivity_runs\\fr4_nnpu_prior_sensitivity_pi0p05_fold0__20261014T223942Z",
+  "fold_id": 0,
+  "prior": {
+    "value": 0.05,
+    "sensitivity_grid": [
+      0.05,
+      0.1,
+      0.2
+    ]
+  },
+  "class_counts": {
+    "train_positive": 604,
+    "train_unlabeled": 3220,
+    "validation_positive": 106,
+    "validation_unlabeled": 568,
+    "e1_train": 331,
+    "e2_train": 273,
+    "e1_validation": 48,
+    "e2_validation": 58
+  },
+  "c1_partition": {
+    "validation_fraction": 0.15,
+    "seed": 42
+  },
+  "nnpu_variant": "direct_clamped",
+  "training": {
+    "seed_context": {
+      "effective_seed": 42,
+      "deterministic_algorithms_requested": true,
+      "cuda_available": false,
+      "cuda_device_name": null,
+      "device_count": 0,
+      "cpu_count": 12,
+      "torch_version": "2.14.0+cpu",
+      "numpy_version": "2.4.6",
+      "python_version": "3.11.14 (main, Dec  9 2025, 18:59:10) [MSC v.1944 64 bit (AMD64)]",
+      "platform": "Windows-10-10.0.22631-SP0"
+    },
+    "device": "cpu",
+    "executed_epochs": 2,
+    "max_epochs": 2,
+    "early_stopping_patience": null,
+    "min_improvement": 0.0001,
+    "best_epoch": 1,
+    "best_val_nnpu_risk": 0.010697327554225922,
+    "final_train_nnpu_risk": 0.018551610977105473,
+    "final_val_nnpu_risk": 0.010697327554225922,
+    "prior": 0.05,
+    "nnpu_variant": "direct_clamped",
+    "e1_train_count": 331,
+    "e2_train_count": 273,
+    "e1_validation_count": 48,
+    "e2_validation_count": 58,
+    "n_c1_unlabeled_train": 3220,
+    "n_c1_unlabeled_validation": 568,
+    "total_optimizer_updates": 202,
+    "elapsed_seconds": 0.922393798828125,
+    "stability_diagnostics": {
+      "persistent_negative_risk_clamping_last_5_epochs": false,
+      "mean_train_clamped_fraction_last_5_epochs": 0.806930693069307,
+      "validation_prediction_saturation": {
+        "fraction_near_zero": 0.34124627709388733,
+        "fraction_near_one": 0.07566765695810318
+      },
+      "diverging_risk_detected": false
+    },
+    "prior_sensitivity_stability": {
+      "fraction_epochs_with_negative_epoch_aggregate_train_risk": 1.0,
+      "fraction_epochs_with_negative_full_validation_risk": 1.0,
+      "mean_per_update_clamped_fraction_all_epochs": 0.806930693069307,
+      "mean_per_update_clamped_fraction_last_5_epochs": 0.806930693069307,
+      "r_n_never_negative_for_any_epoch": false
+    }
+  },
+  "epoch_level_history": [
+    {
+      "epoch": 0,
+      "train_nnpu_risk": 0.07134639512493003,
+      "train_positive_risk_contribution": 0.04558620308034168,
+      "train_positive_as_negative_risk": 1.938603867655215,
+      "train_unlabeled_as_negative_risk": 0.08356782358533107,
+      "train_negative_risk_unclamped": -0.013362370727595335,
+      "train_negative_risk_contribution": 0.025760192382409706,
+      "train_clamped_update_fraction": 0.6534653465346535,
+      "val_nnpu_risk": 0.028843749314546585,
+      "val_positive_risk_contribution": 0.028843749314546585,
+      "val_positive_as_negative_risk": 4.933984756469727,
+      "val_unlabeled_as_negative_risk": 0.10544755309820175,
+      "val_negative_risk_unclamped": -0.14125168323516846,
+      "val_negative_risk_contribution": 0.0,
+      "val_is_clamped": true,
+      "learning_rate": 0.001,
+      "prior": 0.05,
+      "n_e1e2_positive_train": 604,
+      "n_c1_unlabeled_train": 3220,
+      "n_optimizer_updates_this_epoch": 101,
+      "is_best": true
+    },
+    {
+      "epoch": 1,
+      "train_nnpu_risk": 0.018551610977105473,
+      "train_positive_risk_contribution": 0.016745005929784746,
+      "train_positive_as_negative_risk": 7.941344705427656,
+      "train_unlabeled_as_negative_risk": 0.1609473242892982,
+      "train_negative_risk_unclamped": -0.23611991783106548,
+      "train_negative_risk_contribution": 0.0018066050843422458,
+      "train_clamped_update_fraction": 0.9603960396039604,
+      "val_nnpu_risk": 0.010697327554225922,
+      "val_positive_risk_contribution": 0.010697327554225922,
+      "val_positive_as_negative_risk": 10.11970043182373,
+      "val_unlabeled_as_negative_risk": 0.3156459927558899,
+      "val_negative_risk_unclamped": -0.19033902883529663,
+      "val_negative_risk_contribution": 0.0,
+      "val_is_clamped": true,
+      "learning_rate": 0.001,
+      "prior": 0.05,
+      "n_e1e2_positive_train": 604,
+      "n_c1_unlabeled_train": 3220,
+      "n_optimizer_updates_this_epoch": 101,
+      "is_best": true
+    }
+  ],
+  "per_update_diagnostic_history": [
+    {
+      "epoch": 0,
+      "n_updates": 101,
+      "n_clamped_updates": 66,
+      "clamped_update_fraction": 0.6534653465346535,
+      "per_update_negative_risk_unclamped": {
+        "n": 101,
+        "min": -0.21509435772895813,
+        "max": 0.6531545519828796,
+        "mean": -0.012968641060339932,
+        "p5": -0.13650020956993103,
+        "p50": -0.02004038542509079,
+        "p95": 0.09268215298652649
+      },
+      "epoch_aggregate_negative_risk_unclamped_recomputed": -0.013362370727595335,
+      "epoch_aggregate_is_negative": true,
+      "full_validation_negative_risk_unclamped": -0.14125168323516846,
+      "full_validation_is_clamped": true
+    },
+    {
+      "epoch": 1,
+      "n_updates": 101,
+      "n_clamped_updates": 97,
+      "clamped_update_fraction": 0.9603960396039604,
+      "per_update_negative_risk_unclamped": {
+        "n": 101,
+        "min": -0.5520058870315552,
+        "max": 0.14630615711212158,
+        "mean": -0.23672425960845286,
+        "p5": -0.4420697093009949,
+        "p50": -0.23542819917201996,
+        "p95": -0.05114646255970001
+      },
+      "epoch_aggregate_negative_risk_unclamped_recomputed": -0.23611991783106548,
+      "epoch_aggregate_is_negative": true,
+      "full_validation_negative_risk_unclamped": -0.19033902883529663,
+      "full_validation_is_clamped": true
+    }
+  ],
+  "prior_sensitivity_stability": {
+    "fraction_epochs_with_negative_epoch_aggregate_train_risk": 1.0,
+    "fraction_epochs_with_negative_full_validation_risk": 1.0,
+    "mean_per_update_clamped_fraction_all_epochs": 0.806930693069307,
+    "mean_per_update_clamped_fraction_last_5_epochs": 0.806930693069307,
+    "r_n_never_negative_for_any_epoch": false
+  },
+  "best_checkpoint_score_distributions": {
+    "train_e1": {
+      "n": 331,
+      "min": 0.2319725751876831,
+      "max": 1.0,
+      "mean": 0.9046838550949384,
+      "median": 0.9996215105056763,
+      "std": 0.17801387282134307,
+      "p5": 0.466284841299057,
+      "p25": 0.8984264135360718,
+      "p75": 1.0,
+      "p95": 1.0,
+      "fraction_lt_0_01": 0.0,
+      "fraction_gt_0_99": 0.622356495468278,
+      "fraction_gt_0_5": 0.9395770392749244
+    },
+    "train_e2": {
+      "n": 273,
+      "min": 0.30538684129714966,
+      "max": 1.0,
+      "mean": 0.8592937823398646,
+      "median": 0.9283985495567322,
+      "std": 0.16064424261335006,
+      "p5": 0.5497333526611328,
+      "p25": 0.765784740447998,
+      "p75": 0.9949485063552856,
+      "p95": 1.0,
+      "fraction_lt_0_01": 0.0,
+      "fraction_gt_0_99": 0.30036630036630035,
+      "fraction_gt_0_5": 0.9560439560439561
+    },
+    "train_c1": {
+      "n": 3220,
+      "min": 0.0005033945781178772,
+      "max": 0.9999513626098633,
+      "mean": 0.15033872646953178,
+      "median": 0.013531563803553581,
+      "std": 0.2557777871108667,
+      "p5": 0.002218293002806604,
+      "p25": 0.005154362763278186,
+      "p75": 0.15637291595339775,
+      "p95": 0.7924196153879165,
+      "fraction_lt_0_01": 0.43540372670807453,
+      "fraction_gt_0_99": 0.004658385093167702,
+      "fraction_gt_0_5": 0.13074534161490683
+    },
+    "val_e1": {
+      "n": 48,
+      "min": 0.33077988028526306,
+      "max": 1.0,
+      "mean": 0.8799566266437372,
+      "median": 0.9998564720153809,
+      "std": 0.2079024317019373,
+      "p5": 0.4117587074637413,
+      "p25": 0.8875325620174408,
+      "p75": 1.0,
+      "p95": 1.0,
+      "fraction_lt_0_01": 0.0,
+      "fraction_gt_0_99": 0.6041666666666666,
+      "fraction_gt_0_5": 0.8541666666666666
+    },
+    "val_e2": {
+      "n": 58,
+      "min": 0.31139376759529114,
+      "max": 1.0,
+      "mean": 0.8118162936177747,
+      "median": 0.9045840799808502,
+      "std": 0.21051133811070005,
+      "p5": 0.4011586859822273,
+      "p25": 0.6610300838947296,
+      "p75": 0.999598354101181,
+      "p95": 1.0,
+      "fraction_lt_0_01": 0.0,
+      "fraction_gt_0_99": 0.3275862068965517,
+      "fraction_gt_0_5": 0.896551724137931
+    },
+    "val_c1": {
+      "n": 568,
+      "min": 0.0005754927988164127,
+      "max": 1.0,
+      "mean": 0.14524845255216629,
+      "median": 0.015585246495902538,
+      "std": 0.25060863901945757,
+      "p5": 0.002689599618315697,
+      "p25": 0.005702238995581865,
+      "p75": 0.14225156232714653,
+      "p95": 0.7591403424739835,
+      "fraction_lt_0_01": 0.40492957746478875,
+      "fraction_gt_0_99": 0.00528169014084507,
+      "fraction_gt_0_5": 0.125
+    }
+  },
+  "checkpoint": {
+    "best_path_sha256": "da39d87c16f323b27a28688cdeba6037700846aba62fe05b12997beb40ff9aa1",
+    "last_path_sha256": "cbb311a52cb989fb2944dd43db5e32034c61e4ad4ed6499948d80440084f36f3",
+    "best_checkpoint_epoch": 1
+  },
+  "outputs": {
+    "learning_curve": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\fr4_nnpu_prior_sensitivity_pi0p05_fold0_learning_curve.svg"
+  },
+  "limitations": {
+    "diagnostic_not_baseline": "This is a Task 4.3 post-acceptance diagnostic replicate, not a new accepted baseline -- it does not supersede, retrain, or invalidate the accepted pi=0.10 result.",
+    "assumed_unlabeled_c1": "C1 remains the assumed-negative/PU-unlabeled pool, never a confirmed antioxidant-inactive label, in every condition of this sensitivity grid.",
+    "do_not_rank_by_raw_risk": "The nnPU objective itself changes with pi -- a lower numeric nnPU risk under one assumed prior is NOT evidence of biological superiority over another prior.",
+    "single_fold_only": "Fold-0 only, matching the accepted baseline's own scope."
+  }
+}

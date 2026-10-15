@@ -1,0 +1,352 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#   Usually these files are written by a python script from a template
+#   before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+*.lcov
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+# Pipfile.lock
+
+# uv
+#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+# uv.lock
+
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+# poetry.lock
+# poetry.toml
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#   pdm recommends including project-wide configuration in pdm.toml, but excluding .pdm-python.
+#   https://pdm-project.org/en/latest/usage/project/#working-with-version-control
+# pdm.lock
+# pdm.toml
+.pdm-python
+.pdm-build/
+
+# pixi
+#   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
+# pixi.lock
+#   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
+#   in the .venv directory. It is recommended not to include this directory in version control.
+.pixi/*
+!.pixi/config.toml
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule*
+celerybeat.pid
+
+# Redis
+*.rdb
+*.aof
+*.pid
+
+# RabbitMQ
+mnesia/
+rabbitmq/
+rabbitmq-data/
+
+# ActiveMQ
+activemq-data/
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs/Zensical documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+#   JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#   be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#   and can be added to the global gitignore or merged into this file.  For a more nuclear
+#   option (not recommended) you can uncomment the following to ignore the entire idea folder.
+.idea/
+
+# Abstra
+#   Abstra is an AI-powered process automation framework.
+#   Ignore directories containing user credentials, local state, and settings.
+#   Learn more at https://abstra.io/docs
+.abstra/
+
+# Visual Studio Code
+#   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore that
+#   can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
+#   and can be added to the global gitignore or merged into this file. However, if you prefer, you
+#   could uncomment the following to ignore the entire vscode folder
+# .vscode/
+# Temporary file for partial code execution
+tempCodeRunnerFile.py
+
+# Ruff stuff:
+.ruff_cache/
+
+# PyPI configuration file
+.pypirc
+
+# Marimo
+marimo/_static/
+marimo/_lsp/
+__marimo__/
+
+# Streamlit
+.streamlit/secrets.toml
+
+src/plantaox/c2_pu/docs/Proposal Report - IT23183018.pdf
+
+# EMBOSS (needleall, invoked by GraphPart) writes this to the CWD by default
+needleall.error
+
+# Peptipedia v2.0 Zenodo dump (281MB, DOI 10.5281/zenodo.21488992) -- too
+# large for a normal git push (GitHub's 100MB-per-file limit, no Git LFS
+# configured here), same "don't commit large binary artifacts" rule already
+# applied to ESM-2's pretrained weights. Its SHA-256/MD5 and DOI are recorded
+# in c2_build_report.json and fr2_c2_provenance.jsonl so anyone can
+# re-download the byte-identical file and reproduce C2 deterministically.
+data/raw/c2_pu/Peptipedia/*.sql.gz
+
+# Bucket 2.3 (C3) ESM-2 embedding caches -- raw vectors for ~26k sequences,
+# same "don't commit large embedding arrays" rule as model weights. Fully
+# regeneratable from stage_c3's cached raw inputs + the frozen embedding
+# spec (common/embeddings.py); SHA-256/shape recorded in c3_build_report.json
+# and fr2_c3_provenance.jsonl instead.
+data/interim/c2_pu/c3_positive_embeddings.npz
+data/interim/c2_pu/c3_candidate_embeddings.npz
+
+# Scratch I/O for the WSL esm2_cli.py subprocess call above -- overwritten
+# every run, and the candidates variant balloons to several MB of
+# per-peptide scalar fingerprints with no information not already captured
+# (more usefully) in c3_build_report.json and fr2_c3_provenance.jsonl.
+data/interim/c2_pu/c3_embed_input.json
+data/interim/c2_pu/c3_embed_positives_report.json
+data/interim/c2_pu/c3_embed_candidates_report.json
+
+# Bucket 3.2 -- full embedding cache for all 9,356 fr3_descriptor_table.parquet
+# rows (~18MB float32 matrix), same "don't commit large embedding arrays"
+# rule as above. Fully regeneratable from the frozen descriptor table +
+# the frozen embedding spec (common/embeddings.py); SHA-256/shape recorded
+# in fr3_embeddings_manifest.json and fr3_embeddings_provenance.jsonl
+# instead. Reuses Bucket 2.3's own caches where possible, so a fresh run
+# only re-embeds what isn't already cached there.
+data/interim/c2_pu/fr3_embeddings.npz
+data/interim/c2_pu/fr3_fresh_embeddings.npz
+data/interim/c2_pu/fr3_embed_input.json
+data/interim/c2_pu/fr3_embed_report.json
+
+# Bucket 3.3 -- raw fused (495-dim) feature matrix, same "don't commit
+# large arrays" rule. Fully regeneratable from fr3_descriptor_table.parquet
+# + fr3_embeddings.npz; schema/scalers/validation (all small) are
+# committed instead via fr3_fusion_schema.json/fr3_fusion_scalers.json/
+# fr3_fusion_validation_report.json.
+data/interim/c2_pu/fr3_fused_raw.npz
+
+# Bucket 3.4 -- 5 fold-specific scaled feature caches (~9MB each at
+# float32), same "don't commit large arrays" rule. Fully regeneratable
+# from fr3_fused_raw.npz + fr3_fusion_scalers.json (both already
+# accounted for above); checksums/shape/dtype recorded in
+# fr3_feature_cache_manifest.json instead.
+data/interim/c2_pu/fr3_fold0_scaled_features.npz
+data/interim/c2_pu/fr3_fold1_scaled_features.npz
+data/interim/c2_pu/fr3_fold2_scaled_features.npz
+data/interim/c2_pu/fr3_fold3_scaled_features.npz
+data/interim/c2_pu/fr3_fold4_scaled_features.npz
+
+# Scratch files written by test_fr3_embeddings_acceptance.py's live
+# WSL re-embed spot-checks -- regenerated every test run, not a pipeline
+# artifact.
+data/interim/c2_pu/test_fr3_determinism_a.npz
+data/interim/c2_pu/test_fr3_determinism_a_input.json
+data/interim/c2_pu/test_fr3_determinism_a_report.json
+data/interim/c2_pu/test_fr3_determinism_b.npz
+data/interim/c2_pu/test_fr3_determinism_b_input.json
+data/interim/c2_pu/test_fr3_determinism_b_report.json
+data/interim/c2_pu/test_fr3_reembed_spotcheck.npz
+data/interim/c2_pu/test_fr3_reembed_spotcheck_input.json
+data/interim/c2_pu/test_fr3_reembed_spotcheck_report.json
+
+# Bucket 2.6 external-control homology audit -- raw EMBOSS needleall
+# alignment text (~20MB, all 45,790 external-control x FR1-positive pairs
+# in full srspair format). Fully regeneratable from the frozen external
+# control + positive pool; the parsed, compact summary
+# (ext_control_homology_pairs.csv) is committed instead.
+data/interim/c2_pu/ext_control_homology/needleall_output.pair
+data/interim/c2_pu/ext_control_homology/external_control.fasta
+data/interim/c2_pu/ext_control_homology/positives.fasta
+
+# Bucket 4.1 -- run directories (resolved configs, epoch logs, checkpoints)
+# produced by the infrastructure smoke test and any future Bucket 4
+# training run. Entirely regeneratable/reproducible from the frozen
+# feature cache + a run's own resolved config; checkpoints in particular
+# are large binary PyTorch state -- same "don't commit large arrays" rule
+# as model weights and embedding caches elsewhere in this project.
+data/interim/c2_pu/fr4_infra_smoke_test_runs/
+
+# Bucket 4.2 -- PN baseline run directories (resolved configs, epoch
+# logs, PyTorch checkpoints). Same reasoning as the smoke-test runs dir
+# above; committed summaries (fr4_pn_baseline_fold*_summary.json) and the
+# checkpoint SHA-256 they record are the durable, auditable artifacts.
+data/interim/c2_pu/fr4_pn_baseline_runs/
+
+# Bucket 4.3 -- nnPU baseline run directories (resolved configs, epoch
+# logs, PyTorch checkpoints). Same reasoning as the PN runs dir above;
+# committed summaries (fr4_nnpu_baseline_fold*_summary.json) and the
+# checkpoint SHA-256 they record are the durable, auditable artifacts.
+data/interim/c2_pu/fr4_nnpu_baseline_runs/
+
+# Task 4.3 POST-ACCEPTANCE DIAGNOSTIC -- pi-sensitivity run directories
+# (resolved configs, epoch logs, PyTorch checkpoints). Same reasoning as
+# the accepted-baseline runs dir above; committed summaries
+# (fr4_nnpu_prior_sensitivity_pi*_fold*_summary.json) and the checkpoint
+# SHA-256 they record are the durable, auditable artifacts. Entirely
+# separate from fr4_nnpu_baseline_runs/ so the diagnostic can never
+# collide with or overwrite the accepted pi=0.10 baseline's own run dirs.
+data/interim/c2_pu/fr4_nnpu_prior_sensitivity_runs/
+
+# Task 4.3 corrective beta/gamma follow-up -- separate run directories,
+# epoch logs, and PyTorch checkpoints. The compact summary, curve, and
+# checkpoint hashes are committed; binary model state remains local.
+data/interim/c2_pu/fr4_nnpu_corrective_runs/
+
+# Bucket 4.4 -- Two-Step PU / PU-Bagging run directories (resolved
+# configs, epoch logs, scikit-learn/pulearn estimator checkpoints saved
+# via joblib -- NOT PyTorch .pt files, since these baselines wrap
+# sklearn-compatible estimators, not models.BinaryMlp). Same "don't
+# commit large binary artifacts" reasoning as every other Bucket-4 runs
+# dir above; committed summaries (fr4_two_step_pu_baseline_fold*_summary.json,
+# fr4_pu_bagging_baseline_fold*_summary.json) and the checkpoint SHA-256
+# they record are the durable, auditable artifacts.
+data/interim/c2_pu/fr4_two_step_pu_baseline_runs/
+data/interim/c2_pu/fr4_pu_bagging_baseline_runs/
+
+# Bucket 4.6 -- C1 -> C2 -> C3 curriculum run directories (resolved
+# configs, stage logs, and PyTorch checkpoints). The compact summary,
+# comparison CSV/SVG, and checkpoint hashes are committed; binary model
+# state remains local under the same policy as the other Bucket-4 runs.
+data/interim/c2_pu/fr4_curriculum_runs/

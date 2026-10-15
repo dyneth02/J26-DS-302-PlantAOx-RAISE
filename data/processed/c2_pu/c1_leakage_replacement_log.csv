@@ -1,0 +1,2 @@
+header,sequence,length,source,db,accession,entry_name,description,organism,is_fragment
+sp|A7IGM5|RL34_XANVE Large ribosomal subunit protein bL34 OS=Xanthobacter versatilis OX=78245 GN=rpmH PE=3 SV=1,MKRTYQPSKLVRKRRHGFRARMATRNGRKIIAARRNHGRQRLSA,44,"uniprotkb_candidates.fasta (post-secondary-blocklist, not in original sample)",sp,A7IGM5,RL34_XANVE,Large ribosomal subunit protein bL34,Xanthobacter versatilis,False

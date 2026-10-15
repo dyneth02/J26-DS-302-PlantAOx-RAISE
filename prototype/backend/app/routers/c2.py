@@ -1,8 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from app.artifacts import load_json
+from app.live import c2_rnis
 
 router = APIRouter()
+
+
+class LiveRnisRequest(BaseModel):
+    pools: list[str]
 
 
 @router.get("/summary")
@@ -33,3 +39,21 @@ def get_calibration():
 @router.get("/stage-comparison")
 def get_stage_comparison():
     return load_json("c2", "stage_comparison.json")
+
+
+# --- Live RNIS: real MCC/RNIS recomputed for a user-chosen negative-pool combination ---
+
+@router.post("/live-rnis")
+def post_live_rnis(body: LiveRnisRequest):
+    try:
+        return c2_rnis.live_rnis(body.pools)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/live-calibration")
+def post_live_calibration(body: LiveRnisRequest):
+    try:
+        return c2_rnis.live_calibration(body.pools)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

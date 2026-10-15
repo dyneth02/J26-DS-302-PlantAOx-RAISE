@@ -1,0 +1,82 @@
+{
+  "version_id": "pp2_baseline_v1",
+  "created_at": "2026-10-14T05:06:03.615501+00:00",
+  "supersedes": null,
+  "fr1_baseline_dependency": "pp1_baseline_v1",
+  "git_commit": "08a45a0fcbeb5d525f6e889e57400b39316554dd",
+  "tool_versions": {
+    "cd-hit": "4.8.1",
+    "graph-part": "1.0.2",
+    "emboss_needleall": "6.6.0.0",
+    "python_pipeline": "3.11.14",
+    "pandas": "3.0.5"
+  },
+  "counts": {
+    "c1_v3_records": 5000,
+    "c1_v3_unique_sequences": 3788,
+    "c2_v2_records": 2000,
+    "c3_union_records": 2325,
+    "c3_ranking_rows": 10000,
+    "external_control_records": 38
+  },
+  "raw_source_references": {
+    "peptipedia_v2_zenodo_dump": {
+      "path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\raw\\c2_pu\\Peptipedia\\peptipedia.20240323.sql.gz",
+      "doi": "10.5281/zenodo.21488992",
+      "sha256": "d8ff0e082874bb8e5a6b67543273f05c127dd96fc3f1937da3463cf8c407fb8f",
+      "committed_to_git": false
+    },
+    "uniref50_candidates_snapshot": {
+      "path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\raw\\c2_pu\\UniRef50\\uniref50_candidates.fasta",
+      "sha256": "7a9619101a77e934e9d09f9961d27965d8cd1efd05d35c9f47f5f103b102fcb0",
+      "committed_to_git": true
+    },
+    "biopep_uwm_antioxidative_scrape": {
+      "path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\raw\\c2_pu\\BIOPEP-UWM\\biopep_antioxidative.json",
+      "citation": "Minkiewicz P, Iwaniak A, Darewicz M. BIOPEP-UWM database of bioactive peptides: current opportunities. Int J Mol Sci. 2019;20(23):5978. doi:10.3390/ijms20235978",
+      "sha256": "9d04fb2ce1d7c81ebef1cbc796706af6f651d79571b980d7953e0c99cd7cf1d9",
+      "committed_to_git": true
+    }
+  },
+  "known_limitations": [
+    "11 remaining C1<->C2 near-duplicate homology families -- project-owner-approved documented limitation, conditional on (and re-verified as) zero FR1-positive involvement in the real (>=15 AA) homology relationship.",
+    "AODB and DFBP remain unscreened for documented access reasons (HTTP 502 + expired cert; no discoverable hosting URL), not as an unstarted task.",
+    "2 BIOPEP-UWM-vs-AnOxPePred external-control annotation conflicts flagged, retention recommended, not yet explicitly confirmed by the project owner.",
+    "C1 retains natural record-level duplicates by design (5,000 records / 3,788 unique sequences) -- any future train/val/test split MUST group identical sequences together.",
+    "C3's union FASTA is not a valid fold-specific challenge set on its own -- FR3/FR4/FR6 MUST use curation.c3.load_fold_challenges(path, fold_id).",
+    "FR1-vs-C1/C2/C3 length/mass/charge/hydrophobicity/aromaticity distributions differ significantly (quantified, Task 2.5) -- a measured shortcut-bias risk, NOT evidence of a validated C1-to-C2-to-C3 difficulty ordering.",
+    "FR1 positives have no organism metadata available -- an unchecked, not assumed-absent, shortcut-risk gap.",
+    "FR1's 4 pending supervisor approvals remain open (see fr1_acceptance_report.md \u00a710); FR2 technical acceptance does not constitute scientific sign-off.",
+    "No formal data_registry.csv covers FR2's own new external sources (Peptipedia dump, UniRef50 snapshot, BIOPEP-UWM scrape) -- same gap already flagged for FR1, now also applying to FR2; per-stage provenance JSONLs are a stopgap, not a substitute."
+  ],
+  "file_checksums": {
+    "stage_c1_decoys_v3.fasta": "113544d807941c749991abc511e9b36ef11c8966e8dabc31514ef37564513332",
+    "c1_accession_map_v3.csv": "163f3315d8df001d0ef2f45093b347962bff68566d13a8e34557dfa2a7cbbc88",
+    "c1_cross_pool_exclusion_log.csv": "5a886ba506027e512a335dddba2ac8426a0ca31c07fef193dbd53264eb32b895",
+    "c1_cross_pool_replacement_log.csv": "44f3c7d51ae20682f2baeb3f110f5bef1c8a9903db8decb3ea564c2e55df9f28",
+    "c1_cross_pool_fix_report.json": "af1dcf576ff6d8bc0242586977fc304ad15edf6a67c5ceefb82429498353c01e",
+    "stage_c2_bioactive_unlabeled_v2.fasta": "daa5266b75e63cfe37e9aff748e1177d83100e476a5b5a46f5b19408fe704d96",
+    "c2_activity_map_v2.csv": "7fe07ab4d672b150888588c7280cc8664047db950ba148ab6ca689a989a07859",
+    "c2_cross_pool_exclusion_log.csv": "794a0c5a628ae37ee6cb47000efda7b22aa95db26f13739e24eab0e96c1f4147",
+    "c2_cross_pool_replacement_log.csv": "c959ffac959e4304b933b3b373796cb6c220cdd5a6909afbbd2087c0a6d03781",
+    "c2_cross_pool_fix_report.json": "be114317163df48e7cc527b5f7df436379baf3c00804d4545b762348bfd8891a",
+    "stage_c3_esm2_hard_challenges.fasta": "bbdc3b322778f7defcecd431824cf09ae3abb9bce45861df9951badc8a62899d",
+    "c3_similarity_ranking.csv": "9f9061fed4a0d14a03b55baf29e6ec31099c8b63f586e6fd9a90f90b2667b06a",
+    "c3_build_report.json": "6e14bfc4f588980f9108173f720f9da7faa0615db40aae1b94575f721cc04972",
+    "anoxpepred_external_control_validated.csv": "026b732634b27be470c55121eba11ae2635bc584ba31107d6e07db51de52f674",
+    "ext_control_homology_pairs.csv": "adceb7acf93c4efbf28980217f4a6b229718772d584706dfa9856b821bde3a38",
+    "ext_control_validation_report.json": "56ded89bda5292f09e525174f10d8d2c3d4f979d3e2817805f05bdf451d7c9ac",
+    "audit_integrity_report.json": "edb76cbf45da65822d8c0bb3c3168bc026e17ae50885c59e7f28a6316563d4e6",
+    "audit_exact_overlap_matrix.csv": "49b6e729ee667585890bf986c69fd024c427827d3a3592bc8afbf42521c3303e",
+    "audit_exact_overlap_detail.csv": "b79c7282996744f79b5fddbf7acb87b368cf912129baf40cd663a9527c57989d",
+    "audit_external_aop_screen.json": "275873df63e243fc50f6d4358e1d90533607e810e287f8f05dc107f0eddae163",
+    "audit_cross_pool_homology_clusters.csv": "84c86807880619e7f865d14120da1cb4ac60c5215d67e31c3084acf24a473c87",
+    "audit_cross_pool_homology_summary.json": "f56f876c30329c841f1bfc181db15044b5c032f76b9c639044c7d122dda25763",
+    "audit_c3_fold_contract_report.json": "09e0f7d7c8bb73d0a29b12aab681146c4606695fac0816d0db30a9ffbc1f5e17",
+    "fr2_pool_audit_report.json": "982ee574e7e5bd689e128aa996cafa827f8cb59ce41fea06538b7ad8e9e0f4bc",
+    "distribution_descriptor_table.csv": "12122b6b061bb04e40d294d5a60ac6fa38b5b4b722329e1c06917f2611add6d7",
+    "distribution_aa_composition.csv": "7b194bcf5bd3e59a91ee4479cb3b2efa1d6bdc189515c2ac3893886b70837a7c",
+    "distribution_ks_comparison.csv": "7f807f4cdf88cef6b0b3d376cb63ac98b43e16747beb4a9e9bc8f331ca3a9135",
+    "distribution_shortcut_report.json": "5a66700ce37f4fd8d17fdcaf5dd106cd51ba21c4e722e9c31f70afcf5836a23f"
+  }
+}

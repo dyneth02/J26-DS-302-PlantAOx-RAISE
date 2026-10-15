@@ -1,8 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from app.artifacts import load_json
+from app.live import c1_retrieval
 
 router = APIRouter()
+
+
+class LiveRetrievalRequest(BaseModel):
+    query_id: str
+    top_k: int = 10
 
 
 @router.get("/summary")
@@ -87,3 +94,19 @@ def get_tier3_summary():
 @router.get("/improvement-experiment")
 def get_improvement_experiment():
     return load_json("c1", "c1_improvement_experiment.json")
+
+
+# --- Live retrieval: real cosine-similarity search over the full 781-sequence pool ---
+
+@router.get("/live-pool")
+def get_live_pool():
+    """Lightweight id/sequence/tier list for the frontend's searchable query picker."""
+    return c1_retrieval.get_live_pool()
+
+
+@router.post("/live-retrieval")
+def post_live_retrieval(body: LiveRetrievalRequest):
+    try:
+        return c1_retrieval.live_retrieval(body.query_id, top_k=body.top_k)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

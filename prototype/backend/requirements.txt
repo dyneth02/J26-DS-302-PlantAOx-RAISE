@@ -1,4 +1,11 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 fastapi
 uvicorn[standard]
 pandas
 pyarrow
+numpy
+torch
+scikit-learn
+joblib
+biopython

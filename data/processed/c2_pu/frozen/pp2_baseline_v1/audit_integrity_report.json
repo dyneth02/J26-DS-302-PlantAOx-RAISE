@@ -1,0 +1,62 @@
+[
+  {
+    "pool": "FR1_positives",
+    "n_records": 1205,
+    "n_unique_ids": 1205,
+    "n_duplicate_ids": 0,
+    "n_unique_sequences": 1205,
+    "n_duplicate_sequences": 0,
+    "n_non_standard_alphabet": 0,
+    "n_length_window_violations": 0
+  },
+  {
+    "pool": "conflicts_179",
+    "n_records": 179,
+    "n_unique_ids": 179,
+    "n_duplicate_ids": 0,
+    "n_unique_sequences": 179,
+    "n_duplicate_sequences": 0,
+    "n_non_standard_alphabet": 0,
+    "n_length_window_violations": 4
+  },
+  {
+    "pool": "external_control",
+    "n_records": 38,
+    "n_unique_ids": 38,
+    "n_duplicate_ids": 0,
+    "n_unique_sequences": 38,
+    "n_duplicate_sequences": 0,
+    "n_non_standard_alphabet": 0,
+    "n_length_window_violations": 0
+  },
+  {
+    "pool": "C1_v3",
+    "n_records": 5000,
+    "n_unique_ids": 5000,
+    "n_duplicate_ids": 0,
+    "n_unique_sequences": 3788,
+    "n_duplicate_sequences": 1212,
+    "n_non_standard_alphabet": 0,
+    "n_length_window_violations": 0
+  },
+  {
+    "pool": "C2_v2",
+    "n_records": 2000,
+    "n_unique_ids": 2000,
+    "n_duplicate_ids": 0,
+    "n_unique_sequences": 2000,
+    "n_duplicate_sequences": 0,
+    "n_non_standard_alphabet": 0,
+    "n_length_window_violations": 0
+  },
+  {
+    "pool": "C3_union",
+    "n_records": 2325,
+    "n_unique_ids": 2325,
+    "n_duplicate_ids": 0,
+    "n_unique_sequences": 2325,
+    "n_duplicate_sequences": 0,
+    "n_non_standard_alphabet": 0,
+    "n_length_window_violations": 0
+  }
+]

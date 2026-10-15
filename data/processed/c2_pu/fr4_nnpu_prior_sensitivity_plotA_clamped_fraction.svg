@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420">
+<rect width="720" height="420" fill="white"/>
+<line x1="56" y1="364" x2="664" y2="364" stroke="black"/>
+<line x1="56" y1="56" x2="56" y2="364" stroke="black"/>
+<text x="56" y="20" font-size="14">Plot A: clamped-update fraction vs epoch (per prior)</text>
+<text x="56" y="410" font-size="11">epoch</text>
+<text x="4" y="56" font-size="11">clamped fraction</text>
+<polyline points="56.00,364.00 80.32,91.20" fill="none" stroke="#2ca02c" stroke-width="2"/>
+<rect x="648" y="56" width="10" height="10" fill="#2ca02c"/>
+<text x="664" y="65" font-size="10">pi=0.05</text>
+<polyline points="56.00,232.00 80.32,82.40 104.64,73.60 128.96,73.60 153.28,56.00 177.60,64.80 201.92,64.80 226.24,64.80 250.56,64.80 274.88,56.00 299.20,56.00 323.52,56.00 347.84,56.00 372.16,64.80 396.48,56.00 420.80,56.00 445.12,64.80 469.44,56.00 493.76,56.00 518.08,56.00 542.40,56.00 566.72,64.80 591.04,64.80 615.36,56.00 639.68,64.80 664.00,56.00" fill="none" stroke="#1f77b4" stroke-width="2"/>
+<rect x="648" y="70" width="10" height="10" fill="#1f77b4"/>
+<text x="664" y="79" font-size="10">pi=0.10</text>
+<polyline points="56.00,170.40 80.32,64.80" fill="none" stroke="#d62728" stroke-width="2"/>
+<rect x="648" y="84" width="10" height="10" fill="#d62728"/>
+<text x="664" y="93" font-size="10">pi=0.20</text>
+</svg>

@@ -1,0 +1,74 @@
+{
+  "models": [
+    {
+      "model_id": "M1",
+      "model": "PN",
+      "checkpoint_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_pn_baseline_runs\\fr4_pn_baseline_fold0__20261014T223957Z\\checkpoint_best.pt",
+      "checkpoint_sha256": "1c5208ac97de0ecd6d29107b114cd9fd424593be725acaa8304465f4100cae1c",
+      "summary_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\fr4_pn_baseline_fold0_summary.json",
+      "architecture": "BinaryMlp 495->128->64->1",
+      "positive_evidence_tiers": "E1",
+      "unlabeled_training_pool": "C1 treated as assumed negative",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": null,
+      "score_transformation": "none beyond model inference"
+    },
+    {
+      "model_id": "M2",
+      "model": "Direct-clamped nnPU",
+      "checkpoint_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_nnpu_baseline_runs\\fr4_nnpu_baseline_fold0__20261014T223923Z\\checkpoint_best.pt",
+      "checkpoint_sha256": "37eb6840143a9eabe336ca5ff7ad5b08380132707fb2ce5b089ad6ab46e3f2bc",
+      "summary_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\fr4_nnpu_baseline_fold0_summary.json",
+      "architecture": "BinaryMlp 495->128->64->1",
+      "positive_evidence_tiers": "E1+E2",
+      "unlabeled_training_pool": "C1",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": 0.1,
+      "score_transformation": "none beyond model inference"
+    },
+    {
+      "model_id": "M3",
+      "model": "Corrective nnPU",
+      "checkpoint_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_nnpu_corrective_runs\\fr4_nnpu_corrective_fold0__20261014T221912Z\\checkpoint_best.pt",
+      "checkpoint_sha256": "d4446b4dff90b1d1ce3d2c03fa314bd0a65134e6621cf3c01f3a9332442307dd",
+      "summary_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\fr4_nnpu_corrective_fold0_summary.json",
+      "architecture": "BinaryMlp 495->128->64->1",
+      "positive_evidence_tiers": "E1+E2",
+      "unlabeled_training_pool": "C1",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": 0.1,
+      "score_transformation": "none beyond model inference"
+    },
+    {
+      "model_id": "M4",
+      "model": "Two-Step PU",
+      "checkpoint_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_two_step_pu_baseline_runs\\fr4_two_step_pu_baseline_fold0__20261014T224037Z\\checkpoint_best.joblib",
+      "checkpoint_sha256": "975f1414e935f7080ea69005dea7a6a98a654efbd07559e9e2be635b94d65978",
+      "summary_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\fr4_two_step_pu_baseline_fold0_summary.json",
+      "architecture": "pulearn + LogisticRegression",
+      "positive_evidence_tiers": "E1+E2",
+      "unlabeled_training_pool": "C1",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": null,
+      "score_transformation": "raw and bounded recorded separately"
+    },
+    {
+      "model_id": "M5",
+      "model": "PU-Bagging",
+      "checkpoint_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\fr4_pu_bagging_baseline_runs\\fr4_pu_bagging_baseline_fold0__20261014T224032Z\\checkpoint_best.joblib",
+      "checkpoint_sha256": "2d11c0c0455122f8e52db0b9fc401d2dc5a14708c73858183f98bbf4f590aee5",
+      "summary_path": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\fr4_pu_bagging_baseline_fold0_summary.json",
+      "architecture": "pulearn + LogisticRegression",
+      "positive_evidence_tiers": "E1+E2",
+      "unlabeled_training_pool": "C1",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": null,
+      "score_transformation": "none beyond model inference"
+    }
+  ]
+}

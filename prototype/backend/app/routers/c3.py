@@ -1,10 +1,16 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from app.artifacts import load_json
+from app.live import c3_perturbation
 
 router = APIRouter()
 
 DEFAULT_PREDICTOR = "c2_logreg"
+
+
+class LivePerturbationRequest(BaseModel):
+    sequence: str
 
 
 @router.get("/summary")
@@ -35,3 +41,13 @@ def get_example_perturbation(predictor: str = DEFAULT_PREDICTOR):
 @router.get("/perturbation-results")
 def get_perturbation_results(predictor: str = DEFAULT_PREDICTOR):
     return load_json("c3", f"perturbation_results__{predictor}.json")
+
+
+# --- Live perturbation scoring: user-supplied sequence, c2_logreg only ---
+
+@router.post("/live-perturbation")
+def post_live_perturbation(body: LivePerturbationRequest):
+    try:
+        return c3_perturbation.live_perturbation(body.sequence)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

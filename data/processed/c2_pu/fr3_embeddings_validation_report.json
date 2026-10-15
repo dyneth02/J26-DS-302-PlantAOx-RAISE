@@ -1,0 +1,10 @@
+{
+  "n_rows": 9356,
+  "shape_correct": true,
+  "dtype_correct": true,
+  "all_finite": true,
+  "peptide_id_order_matches_descriptor_table": true,
+  "l2_norm_min": 4.294342041015625,
+  "l2_norm_max": 7.602576732635498,
+  "l2_norm_mean": 7.039000511169434
+}

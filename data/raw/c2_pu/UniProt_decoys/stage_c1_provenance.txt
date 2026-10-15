@@ -1,0 +1,8 @@
+Stage C1 Decoy Pool - Provenance Log
+Generated: 2026-10-07T22:52:41.108877
+Source: UniProtKB REST API (reviewed:true, length 3-50 AA)
+Query: reviewed:true AND length:[3 TO 50] NOT keyword:Toxin NOT keyword:Hormone NOT keyword:Neuropeptide NOT keyword:Antimicrobial NOT keyword:Antibiotic NOT keyword:Antioxidant NOT keyword:"Amphibian defense peptide"
+Candidates after query-level filter: 8830
+Candidates after secondary keyword filter: 8233
+Final sampled count: 5000
+Random seed: 42

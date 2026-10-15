@@ -1,0 +1,2 @@
+header,sequence,length,reason,db,accession,entry_name,description,organism,is_fragment
+sp|Q10582|ANGT2_BOTJA Angiotensin-like peptide 2 (Fragment) OS=Bothrops jararaca OX=8724 PE=1 SV=1,DRVYIHPF,8,exact_sequence_match_against_fr1_positive_or_conflict,sp,Q10582,ANGT2_BOTJA,Angiotensin-like peptide 2 (Fragment),Bothrops jararaca,True

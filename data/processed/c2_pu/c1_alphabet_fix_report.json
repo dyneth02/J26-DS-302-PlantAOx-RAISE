@@ -1,0 +1,17 @@
+{
+  "n_input_records": 5000,
+  "n_non_standard_removed": 260,
+  "n_replacements_needed": 260,
+  "n_replacements_available": 2082,
+  "n_replacements_made": 260,
+  "n_output_records": 5000,
+  "shortfall": 0,
+  "n_unique_sequences_output": 3785,
+  "seed": 42,
+  "n_unique_sequences": 3785,
+  "min_length": 4,
+  "max_length": 50,
+  "screen_set_size": 1384,
+  "source_version": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\stage_c1_decoys.fasta",
+  "output_version": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\processed\\c2_pu\\stage_c1_decoys_v2.fasta"
+}

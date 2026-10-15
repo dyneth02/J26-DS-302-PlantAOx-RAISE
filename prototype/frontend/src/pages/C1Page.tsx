@@ -16,11 +16,21 @@ import {
   Cell,
   ReferenceLine,
 } from "recharts";
+import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import { c1Api } from "../api/client";
 import PageHeader from "../components/PageHeader";
 import Card from "../components/Card";
 import Banner from "../components/Banner";
 import StatCard from "../components/StatCard";
+import AnimatedStatCard from "../components/AnimatedStatCard";
+import SegmentedControl from "../components/SegmentedControl";
+import Select from "../components/Select";
+import Section from "../components/Section";
+import Skeleton from "../components/Skeleton";
+import WalkthroughStepper from "../components/WalkthroughStepper";
+import { InfoTooltip } from "../components/Tooltip";
+import { usePresentationStore } from "../store/presentationStore";
 import {
   CHART_GRID,
   CHART_LEGEND_STYLE,
@@ -30,6 +40,7 @@ import {
   tooltipItemStyle,
   tooltipLabelStyle,
 } from "../components/chartTheme";
+import type { LivePoolEntry, LiveRetrievalResult } from "../types/c1";
 
 const MODEL_COLORS: Record<string, string> = {
   "Baseline (original Phase 4)": "rgb(var(--c-lime))",
@@ -107,6 +118,26 @@ export default function C1Page() {
     Tier3_GEN: true,
   });
 
+  // Live retrieval (query against the real full 781-sequence pool, not just the 5
+  // hardcoded examples) and the model-comparison stepper.
+  const [livePool, setLivePool] = useState<LivePoolEntry[]>([]);
+  const [liveQueryId, setLiveQueryId] = useState<string | null>(null);
+  const [liveResult, setLiveResult] = useState<LiveRetrievalResult | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [liveError, setLiveError] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const safeMode = usePresentationStore((s) => s.safeMode);
+  const resetSignal = usePresentationStore((s) => s.resetSignal);
+
+  useEffect(() => {
+    if (resetSignal === 0) return;
+    setSelectedModel(null);
+    setLiveQueryId(null);
+    setLiveResult(null);
+    setLiveError(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetSignal]);
+
   useEffect(() => {
     c1Api.summary().then(setSummary);
     c1Api.umap().then(setUmap);
@@ -119,6 +150,7 @@ export default function C1Page() {
     c1Api.trainedEmbedding().then(setTrainedEmbedding);
     c1Api.trainedPrototypes().then(setTrainedPrototypes);
     c1Api.trainedRetrieval().then(setTrainedRetrieval);
+    c1Api.livePool().then(setLivePool);
     c1Api.ablationComparison().then((data) => {
       // Recharts' Bar animation keys off the data array reference; mapping inline in JSX
       // creates a new array every render and can leave bars stuck at zero height. Transform
@@ -155,6 +187,18 @@ export default function C1Page() {
     (acc[pt.mechanism_tier] ??= []).push(pt);
     return acc;
   }, {});
+
+  const handleLiveQuery = (id: string) => {
+    setLiveQueryId(id);
+    setLiveResult(null);
+    setLiveError(null);
+    setLiveLoading(true);
+    c1Api
+      .liveRetrieval(id, 10)
+      .then(setLiveResult)
+      .catch((e) => setLiveError(e?.response?.data?.detail ?? "Live retrieval failed."))
+      .finally(() => setLiveLoading(false));
+  };
 
   const toggleTier = (tier: string) => setVisibleTiers((prev) => ({ ...prev, [tier]: !prev[tier] }));
   const toggleBaselineTier = (tier: string) => setVisibleBaselineTiers((prev) => ({ ...prev, [tier]: !prev[tier] }));
@@ -210,7 +254,12 @@ export default function C1Page() {
           </Banner>
         )}
 
-        {summary && (
+        <Section
+          id="c1-overview"
+          label="Overview"
+          notes="Open by framing the problem: existing antioxidant peptide predictors are binary classifiers with no notion of mechanism. AOP-ProCon is positive-only contrastive learning — emphasize we never needed negative examples to train it."
+        >
+        {summary ? (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <StatCard label="Total sequences" value={summary.total_sequences} />
             <StatCard label="Training eligible" value={summary.training_eligible_sequences} />
@@ -219,7 +268,14 @@ export default function C1Page() {
             <StatCard label="Tier_Dual" value={summary.tier_counts.Tier_Dual} accent="violet" />
             <StatCard label="Tier3_GEN" value={summary.tier_counts.Tier3_GEN} />
           </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-[4.75rem]" />
+            ))}
+          </div>
         )}
+        </Section>
 
         {/* ================= REAL TRAINED MODEL (headline = current best, promoted from the Phase 5c experiment below) ================= */}
         {trainedSummary && presentationMode && (
@@ -241,13 +297,19 @@ export default function C1Page() {
                 <p className="text-glow font-display text-6xl font-medium leading-none tracking-tight text-lime">
                   {Math.round((trainedSummary.primary_metrics["recall@10"] ?? 0) * 100)}%
                 </p>
-                <p className="mt-3 label-tag text-ink-faint">Recall@10 retrieval accuracy</p>
+                <p className="mt-3 label-tag flex items-center gap-1.5 text-ink-faint">
+                  Recall@10 retrieval accuracy
+                  <InfoTooltip content="Of the top-10 peptides retrieved for a query, the fraction that actually share the query's mechanism tier. Higher is better — 100% means every top-10 match is mechanistically correct." />
+                </p>
               </div>
               <div>
                 <p className="font-display text-6xl font-medium leading-none tracking-tight text-teal">
                   {Math.round((trainedSummary.primary_metrics["tier2_recall@5"] ?? 0) * 100)}%
                 </p>
-                <p className="mt-3 label-tag text-ink-faint">Tier2 (hardest tier) Recall@5</p>
+                <p className="mt-3 label-tag flex items-center gap-1.5 text-ink-faint">
+                  Tier2 (hardest tier) Recall@5
+                  <InfoTooltip content="Same idea as Recall@10, but restricted to Tier2 (metal-chelation) queries only — the hardest, most under-represented mechanism tier, and top-5 instead of top-10." />
+                </p>
               </div>
               <div>
                 <p className="font-display text-6xl font-medium leading-none tracking-tight text-amber">
@@ -284,30 +346,44 @@ export default function C1Page() {
             subtitle="A simplified walkthrough using example peptides — illustrative only, not real experimental data"
             eyebrow="CONCEPT WALKTHROUGH · ILLUSTRATIVE EXAMPLE"
           >
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-              <div className="panel p-4">
-                <p className="label-tag text-lime">Step 1</p>
-                <p className="mt-2 text-sm leading-relaxed text-ink">
-                  Every peptide's sequence is turned into a numeric "fingerprint" using a pretrained protein language
-                  model (ESM-2) that already understands general patterns from millions of proteins.
-                </p>
-              </div>
-              <div className="panel p-4">
-                <p className="label-tag text-teal">Step 2</p>
-                <p className="mt-2 text-sm leading-relaxed text-ink">
-                  During training, the model only looks at pairs of peptides <em>known</em> to share the same
-                  mechanism, and nudges their fingerprints closer together — no need for hard-to-find "confirmed
-                  non-antioxidant" examples.
-                </p>
-              </div>
-              <div className="panel p-4">
-                <p className="label-tag text-amber">Step 3</p>
-                <p className="mt-2 text-sm leading-relaxed text-ink">
-                  For a new, unlabelled peptide, we compare its fingerprint to known ones — its closest matches
-                  reveal its most likely mechanism. This "nearest neighbour" lookup is what we call retrieval.
-                </p>
-              </div>
-            </div>
+            <WalkthroughStepper
+              steps={[
+                {
+                  label: "Step 1",
+                  color: "rgb(var(--c-lime))",
+                  title: "Step 1 · Sequence → fingerprint",
+                  body: (
+                    <>
+                      Every peptide's sequence is turned into a numeric "fingerprint" using a pretrained protein
+                      language model (ESM-2) that already understands general patterns from millions of proteins.
+                    </>
+                  ),
+                },
+                {
+                  label: "Step 2",
+                  color: "rgb(var(--c-teal))",
+                  title: "Step 2 · Contrastive pulling",
+                  body: (
+                    <>
+                      During training, the model only looks at pairs of peptides <em>known</em> to share the same
+                      mechanism, and nudges their fingerprints closer together — no need for hard-to-find "confirmed
+                      non-antioxidant" examples.
+                    </>
+                  ),
+                },
+                {
+                  label: "Step 3",
+                  color: "rgb(var(--c-amber))",
+                  title: "Step 3 · Retrieval",
+                  body: (
+                    <>
+                      For a new, unlabelled peptide, we compare its fingerprint to known ones — its closest matches
+                      reveal its most likely mechanism. This "nearest neighbour" lookup is what we call retrieval.
+                    </>
+                  ),
+                },
+              ]}
+            />
 
             <p className="mt-6 label-tag text-ink-faint">Example (illustrative, not real data)</p>
             <div className="mt-2 overflow-x-auto">
@@ -486,6 +562,11 @@ export default function C1Page() {
         </Card>
         )}
 
+        <Section
+          id="c1-models"
+          label="Model comparison & live retrieval"
+          notes="Let the panel pick a model from the stepper themselves — the numbers really do recompute. For the live retrieval search, invite someone to type a real amino-acid sequence and watch the cosine-similarity search run against the full 781-sequence pool live."
+        >
         <Card
           title={presentationMode ? "Model comparison" : "Ablation comparison"}
           subtitle={
@@ -494,6 +575,19 @@ export default function C1Page() {
               : "Recomputed independently from the real checkpoints (this prototype's own re-evaluation, not copied from the log)"
           }
           eyebrow="Real · Phase 4v2/5b"
+          actions={
+            ablation?.results?.length ? (
+              <SegmentedControl
+                layoutId="model-stepper"
+                value={selectedModel ?? ablation.results[0].model}
+                onChange={setSelectedModel}
+                options={ablation.results.map((r: any) => ({
+                  value: r.model,
+                  label: MODEL_SHORT_NAMES[r.model] ?? r.model,
+                }))}
+              />
+            ) : undefined
+          }
         >
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={ablation?.results ?? []} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
@@ -510,12 +604,58 @@ export default function C1Page() {
               <Tooltip contentStyle={tooltipContentStyle()} labelStyle={tooltipLabelStyle()} itemStyle={tooltipItemStyle()} />
               <Legend wrapperStyle={CHART_LEGEND_STYLE} />
               <Bar dataKey="recall10" name="Recall@10" radius={[4, 4, 0, 0]} isAnimationActive={false}>
-                {(ablation?.results ?? []).map((row: any, i: number) => (
-                  <Cell key={i} fill={MODEL_COLORS[row.model] ?? "rgb(var(--c-ink-faint))"} />
-                ))}
+                {(ablation?.results ?? []).map((row: any, i: number) => {
+                  const activeModel = selectedModel ?? ablation.results[0]?.model;
+                  const isActive = row.model === activeModel;
+                  return (
+                    <Cell
+                      key={i}
+                      fill={MODEL_COLORS[row.model] ?? "rgb(var(--c-ink-faint))"}
+                      fillOpacity={isActive ? 1 : 0.28}
+                    />
+                  );
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+
+          {ablation?.results?.length > 0 && (
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              {(() => {
+                const row = ablation.results.find((r: any) => r.model === (selectedModel ?? ablation.results[0].model));
+                if (!row) return null;
+                return (
+                  <>
+                    <AnimatedStatCard
+                      key={row.model}
+                      label="Recall@10"
+                      value={row["recall@10"]}
+                      decimals={4}
+                      accent="lime"
+                      tooltip="Fraction of top-10 retrieved peptides that share the query's mechanism tier."
+                    />
+                    <AnimatedStatCard
+                      key={row.model + "-t2"}
+                      label="Tier2 Recall@5"
+                      value={row["tier2_recall@5"]}
+                      decimals={4}
+                      accent="amber"
+                      tooltip="Same metric restricted to Tier2 (metal-chelation) queries only — the hardest, most data-scarce tier."
+                    />
+                    <AnimatedStatCard
+                      key={row.model + "-ari"}
+                      label="ARI"
+                      value={row.ari}
+                      decimals={4}
+                      accent="violet"
+                      tooltip="Adjusted Rand Index: how well an unsupervised K-means clustering of the embedding space recovers the true mechanism tiers, corrected for chance. 1.0 = perfect agreement, 0.0 = random."
+                    />
+                  </>
+                );
+              })()}
+            </div>
+          )}
+
           {presentationMode ? (
             <p className="mt-3 text-xs leading-relaxed text-ink-faint">
               All variants score highly (94–98% retrieval accuracy); later experiments (below) build on this to
@@ -686,6 +826,77 @@ export default function C1Page() {
             </p>
           </Card>
         )}
+
+        {livePool.length > 0 && (
+          <Card
+            title="Try it yourself: live retrieval"
+            subtitle="Pick any of the 781 real Tier1/Tier2 sequences — the projection head runs a genuine cosine-similarity search over the full pool on demand, not a lookup of a fixed example"
+            eyebrow="Live · full pool"
+          >
+            {safeMode ? (
+              <p className="text-sm text-ink-faint">
+                Safe mode is on — live queries against the backend are disabled. Turn off safe mode in the toolbar below to try it.
+              </p>
+            ) : (
+              <>
+                <Select
+                  options={livePool.map((p) => ({
+                    value: p.id,
+                    label: p.sequence,
+                    sublabel: p.mechanism_tier,
+                  }))}
+                  value={liveQueryId}
+                  onChange={handleLiveQuery}
+                  placeholder={`Search ${livePool.length} sequences…`}
+                />
+
+                <div className="mt-4 min-h-[4rem]">
+                  {liveLoading && (
+                    <div className="flex items-center gap-2 text-sm text-ink-faint">
+                      <Loader2 size={14} className="animate-spin" />
+                      Computing similarity against the full pool…
+                    </div>
+                  )}
+                  {liveError && <p className="text-sm text-coral">{liveError}</p>}
+                  <>
+                    {liveResult && !liveLoading && (
+                      <motion.div
+                        key={liveResult.query.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <p className="text-sm text-ink">
+                          Query <span className="font-data font-medium text-lime">{liveResult.query.sequence}</span>{" "}
+                          <span className="text-ink-faint">({liveResult.query.mechanism_tier})</span> — searched against{" "}
+                          {liveResult.pool_size} real sequences
+                        </p>
+                        <div className="mt-2.5 flex flex-wrap gap-2">
+                          {liveResult.top_matches.map((m) => (
+                            <span
+                              key={m.rank}
+                              className="rounded-md border px-2 py-1 font-data text-xs text-ink-dim"
+                              style={{
+                                borderColor:
+                                  TIER_COLORS[
+                                    m.mechanism_tier === "Tier1" ? "Tier1_FRS" : m.mechanism_tier === "Tier2" ? "Tier2_MC" : "Tier3_GEN"
+                                  ],
+                              }}
+                              title={`${m.mechanism_tier} · sim ${m.similarity}`}
+                            >
+                              {m.sequence} <span className="text-ink-faint">{m.similarity}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </>
+                </div>
+              </>
+            )}
+          </Card>
+        )}
+        </Section>
 
         {presentationMode && (
           <div className="panel p-6">

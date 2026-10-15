@@ -1,0 +1,68 @@
+{
+  "version_id": "pp1_baseline_v1",
+  "created_at": "2026-10-13T23:53:10.675165+00:00",
+  "git_commit": "1f3a397611067cb1266e1e3cce1b3b73ec1e1a0f",
+  "tool_versions": {
+    "cd-hit": "4.8.1",
+    "graph-part": "1.0.2",
+    "emboss_needleall": "6.6.0.0",
+    "python_pipeline": "3.11.14",
+    "pandas": "3.0.5"
+  },
+  "config": {
+    "cdhit": {
+      "identity": 0.9,
+      "word_length": 2,
+      "throwaway_length": 2
+    },
+    "graphpart": {
+      "mode": "needle",
+      "identity_threshold": 0.4,
+      "transformation": "one-minus",
+      "partitions": 5,
+      "denominator": "full",
+      "labels_name": "tier"
+    },
+    "note": "No stochastic steps exist in Buckets 1.1-1.6: positive-pool merge/conflict-resolution is deterministic threshold logic, CD-HIT's greedy clustering and GraphPart's slow-nn partitioning are both seed-free. Reproducibility here means 'same inputs -> byte-identical outputs', verified directly, not 'same seed -> same sample'."
+  },
+  "counts": {
+    "positive_pool_provisional": 1205,
+    "positive_pool_provisional_e1": 670,
+    "positive_pool_provisional_e2": 535,
+    "cdhit_clusters": 925,
+    "graphpart_retained": 834,
+    "graphpart_excluded_for_homology": 91,
+    "label_conflicts_excluded": 179,
+    "external_control_clean": 38,
+    "fold_sizes": {
+      "0.0": 124,
+      "1.0": 134,
+      "2.0": 137,
+      "3.0": 173,
+      "4.0": 266
+    }
+  },
+  "known_limitations": [
+    "179 Multi-AOP positives contradicted by AnOxPePred's own assay call are excluded from both the positive pool and the external control, pending manual/supervisor review (label_conflicts_anox_vs_multiaop.csv).",
+    "553 of the frozen positives (pre-CD-HIT) are E2 'provisional' -- Multi-AOP-only, no per-record assay metadata -- pending supervisor review.",
+    "91 CD-HIT representatives (9.8%) were excluded by GraphPart to resolve cross-fold homology violations at the 40% identity threshold (graphpart_excluded_for_homology.csv).",
+    "Fold 4 remains evidence-tier-skewed (64% E1) relative to the other folds (44-52%) even after label stratification -- a residual, not a defect, documented for awareness in per-fold metric comparisons."
+  ],
+  "pending_supervisor_approvals": [
+    "Conflict-resolution policy (assay evidence overrides Multi-AOP's label) -- 2026-10-14 decision log.",
+    "E2 provisional-tier default for Multi-AOP-only positives -- 2026-10-14 decision log.",
+    "C1 source ambiguity (SwissProt vs UniRef50) -- unrelated to FR1 but still open, see PU_AOP_RESEARCH_CONTEXT.md section 4."
+  ],
+  "file_checksums": {
+    "aop_positives_provisional.parquet": "d5b7cd8eeddbf169227ef53db430e8e75530b06085e0e15eb68885550e72c589",
+    "aop_positives_cdhit90.parquet": "2e44c9fa7d2ecd038974cb38e071c52d37c32121bcfe1db12dd807ebe45ea09b",
+    "cdhit_clusters.tsv": "3fde4f0bcbfb58f0bc3342cf4a8ea61af9e28b383a2194b12a538d737f13b846",
+    "cdhit_before_after_report.json": "1ba03a654769a7ccdcd4ba00c81176d27d45e69a4a0ab4d2dcb3223b2814a25b",
+    "graphpart_splits.csv": "d42c96d376b20acb6e138f1f492e571872d318763c9e739fd45adfb3cbc95048",
+    "graphpart_excluded_for_homology.csv": "cd2a79893ed99b95e6ea9331fead1475d7d7f10b2999b12daf75922942467c2d",
+    "graphpart_splits_report.json": "5ebb70b47e2c95e83044eeb135bf659de6ad0240fc1cddc365fafacdc1aa325a",
+    "graphpart_split_summary.json": "d1a3384034e66757b9a7e2425d0d2a33538a3dbe771f08fa2ce6ce02b726b184",
+    "label_conflicts_anox_vs_multiaop.csv": "a0020f03e283563a0b5fc08205ad1a352fc0d73cdd68cec305a9f7d26c04f3d8",
+    "anoxpepred_inactives_clean.csv": "21d66932ab7826be81b4e1fabaf7e10ea0b69acaee790e54cb9b97255259690f"
+  }
+}
