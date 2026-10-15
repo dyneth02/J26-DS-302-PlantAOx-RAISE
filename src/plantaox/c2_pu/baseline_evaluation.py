@@ -205,20 +205,30 @@ def evaluate_models(
         challenge = {}
         for pool_name in ("C1", "C2", "C3_fold0"):
             output = predictions[pool_name]
-            summary = score_summary(output.bounded)
+            bounded_summary = score_summary(output.bounded)
+            raw_summary = score_summary(output.raw)
             proxy_y = np.concatenate([np.ones(len(held.raw), dtype=np.int64), np.zeros(len(output.raw), dtype=np.int64)])
             proxy = classification_metrics(proxy_y, np.concatenate([held.raw, output.raw]),
                                            np.concatenate([held.bounded, output.bounded]))
-            challenge[pool_name] = {"score_summary": summary, "assumed_negative_proxy_metrics": proxy}
+            challenge[pool_name] = {
+                "bounded_score_summary": bounded_summary,
+                "raw_score_summary": raw_summary,
+                "assumed_negative_proxy_metrics": proxy,
+            }
             proxy_rows.append({"model_id": loaded.model_id, "model": loaded.name, "challenge_pool": pool_name,
-                               **summary, "proxy_mcc": proxy["mcc"], "proxy_average_precision": proxy["average_precision"],
+                               **bounded_summary,
+                               "raw_mean": raw_summary["mean"], "raw_median": raw_summary["median"],
+                               "raw_min": raw_summary["min"], "raw_max": raw_summary["max"],
+                               "proxy_mcc": proxy["mcc"], "proxy_average_precision": proxy["average_precision"],
                                "proxy_auroc": proxy["auroc"],
                                "label_assumption": "challenge pool provisionally assigned 0; NOT confirmed biological negatives"})
 
         all_results[loaded.model_id] = {
             "model": loaded.name,
             "positive_recovery": {"overall": score_summary(held.bounded),
+                                  "raw_score_summary": score_summary(held.raw),
                                   "by_evidence_tier": _tier_summaries(data.held_out_positive, held.bounded)},
+            "external_control_scores": {"bounded": score_summary(ext.bounded), "raw": score_summary(ext.raw)},
             "challenge_behavior": challenge,
             "external_assay_supported": primary,
             "external_assay_supported_excluding_two_disputed_controls": sensitivity,

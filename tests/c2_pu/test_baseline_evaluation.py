@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import csv
+import json
 from pathlib import Path
 
 import numpy as np
@@ -62,4 +64,18 @@ def test_all_five_accepted_checkpoints_reload_and_score_with_valid_bounded_outpu
         assert np.isfinite(output.bounded).all()
         assert ((output.bounded >= 0) & (output.bounded <= 1)).all()
     assert "clipped" in models[3].predict(features).transformation
+
+
+def test_real_fold0_evaluation_contains_five_models_and_common_samples():
+    root = Path("data/processed/c2_pu")
+    evaluation = json.loads((root / "fr4_baseline_evaluation_fold0.json").read_text(encoding="utf-8"))
+    with open(root / "fr4_baseline_comparison_fold0.csv", encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert [row["model_id"] for row in rows] == ["M1", "M2", "M3", "M4", "M5"]
+    assert {(row["n_positive"], row["n_control"]) for row in rows} == {("124", "38")}
+    assert evaluation["dataset_counts"] == {
+        "held_out_positive": 124, "C1": 3788, "C2": 2000, "C3_fold0": 2000, "external_control": 38,
+    }
+    assert evaluation["leakage_report"]["overlap_found"] is False
+    assert evaluation["smoke_checks"]["retraining_performed"] is False
 
