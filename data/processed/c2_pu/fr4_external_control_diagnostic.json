@@ -1,0 +1,552 @@
+{
+  "status": "NO_BLOCKING_IMPLEMENTATION_DEFECT_IDENTIFIED",
+  "orientation_verified": true,
+  "label_mapping_verified": true,
+  "feature_row_alignment_verified": true,
+  "n_held_out_positive": 124,
+  "n_held_out_E1": 59,
+  "n_held_out_E2": 65,
+  "n_external_control": 38,
+  "descriptor_summaries": {
+    "held_out_E1": {
+      "length": {
+        "mean": 6.237288135593221,
+        "median": 5.0,
+        "min": 3.0,
+        "max": 15.0,
+        "std": 2.720536979963838
+      },
+      "molecular_weight": {
+        "mean": 716.4458237288136,
+        "median": 664.7563,
+        "min": 320.3636,
+        "max": 1410.7194,
+        "std": 257.2268845698421
+      },
+      "net_charge_ph7": {
+        "mean": -0.5815143870500115,
+        "median": -0.09746914267566043,
+        "min": -3.997094262433132,
+        "max": 1.9502509557580432,
+        "std": 0.9513095339975235
+      },
+      "aromaticity": {
+        "mean": 0.1503016286914592,
+        "median": 0.16666666666666666,
+        "min": 0.0,
+        "max": 0.6,
+        "std": 0.13305469542673987
+      },
+      "gravy": {
+        "mean": -0.19271186440677973,
+        "median": -0.04999999999999999,
+        "min": -2.766666666666667,
+        "max": 1.985714285714286,
+        "std": 0.9822046929879568
+      },
+      "hydrophobic_moment": {
+        "mean": 0.36414196066461496,
+        "median": 0.3442603794862418,
+        "min": 0.004563321994914719,
+        "max": 0.8119338322929881,
+        "std": 0.21194396187680087
+      },
+      "frac_proline": {
+        "mean": 0.06507936507936508,
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.6666666666666666,
+        "std": 0.11224685212794454
+      }
+    },
+    "held_out_E2": {
+      "length": {
+        "mean": 8.292307692307693,
+        "median": 8.0,
+        "min": 3.0,
+        "max": 16.0,
+        "std": 2.6874241423173344
+      },
+      "molecular_weight": {
+        "mean": 928.6449907692308,
+        "median": 910.0409000000001,
+        "min": 438.5599,
+        "max": 1412.609,
+        "std": 251.41247119076021
+      },
+      "net_charge_ph7": {
+        "mean": 0.00411453139074783,
+        "median": -0.001572527752497832,
+        "min": -3.0006762481422387,
+        "max": 1.997977676792247,
+        "std": 1.017027303648335
+      },
+      "aromaticity": {
+        "mean": 0.11940836940836941,
+        "median": 0.1,
+        "min": 0.0,
+        "max": 0.6,
+        "std": 0.13980256231570942
+      },
+      "gravy": {
+        "mean": -0.269493783993784,
+        "median": -0.24000000000000005,
+        "min": -2.88,
+        "max": 2.875,
+        "std": 1.2606116651108523
+      },
+      "hydrophobic_moment": {
+        "mean": 0.33781801157508945,
+        "median": 0.2946154572901748,
+        "min": 0.052178287017786845,
+        "max": 1.029000434635723,
+        "std": 0.19880848497661885
+      },
+      "frac_proline": {
+        "mean": 0.0827114552114552,
+        "median": 0.08333333333333333,
+        "min": 0.0,
+        "max": 0.375,
+        "std": 0.09266916408990512
+      }
+    },
+    "external_control": {
+      "length": {
+        "mean": 4.7894736842105265,
+        "median": 3.5,
+        "min": 3.0,
+        "max": 9.0,
+        "std": 2.041128361017402
+      },
+      "molecular_weight": {
+        "mean": 587.5491500000002,
+        "median": 499.60060000000004,
+        "min": 304.303,
+        "max": 992.0997000000001,
+        "std": 210.9884246547423
+      },
+      "net_charge_ph7": {
+        "mean": 0.21085542090442178,
+        "median": -0.0020157006072527572,
+        "min": -2.9993476095514335,
+        "max": 2.9973909203884883,
+        "std": 1.0283921254720134
+      },
+      "aromaticity": {
+        "mean": 0.19019423558897242,
+        "median": 0.14285714285714285,
+        "min": 0.0,
+        "max": 0.6666666666666666,
+        "std": 0.1910479424448155
+      },
+      "gravy": {
+        "mean": -0.2808208020050126,
+        "median": -0.2142857142857143,
+        "min": -3.5,
+        "max": 3.133333333333333,
+        "std": 1.5581169750275436
+      },
+      "hydrophobic_moment": {
+        "mean": 0.48101710282597204,
+        "median": 0.4118497899650707,
+        "min": 0.062272587543175904,
+        "max": 1.2696596486582816,
+        "std": 0.3131657691863197
+      },
+      "frac_proline": {
+        "mean": 0.09255430242272349,
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.42857142857142855,
+        "std": 0.13543914917704947
+      }
+    }
+  },
+  "model_findings": {
+    "M1": {
+      "model": "PN",
+      "score_convention": "higher score means stronger model support for positive/AOP class",
+      "label_mapping": {
+        "held_out_positive": 1,
+        "external_assay_inactive_control": 0
+      },
+      "metrics_reproduced": {
+        "status": "defined",
+        "n": 162,
+        "class_counts": {
+          "positive": 124,
+          "negative": 38
+        },
+        "threshold": 0.5,
+        "mcc": -0.18325866528039952,
+        "average_precision": 0.6392386723974869,
+        "auroc": 0.2541383701188455,
+        "precision": 0.7397260273972602,
+        "recall": 0.8709677419354839,
+        "f1": 0.8,
+        "balanced_accuracy": 0.43548387096774194,
+        "brier_score_bounded": 0.30014303053512476,
+        "confusion_matrix": {
+          "tp": 108,
+          "tn": 0,
+          "fp": 38,
+          "fn": 16
+        }
+      },
+      "score_summaries": {
+        "E1": {
+          "n": 59,
+          "mean": 0.886017271392521,
+          "median": 0.977279782295227,
+          "min": 0.002459130948409438,
+          "max": 0.9999973773956299,
+          "fraction_gt_0_5": 0.9661016949152542,
+          "fraction_lt_0_01": 0.01694915254237288,
+          "fraction_gt_0_99": 0.4576271186440678
+        },
+        "E2": {
+          "n": 65,
+          "mean": 0.703971921136746,
+          "median": 0.8148245215415955,
+          "min": 0.05114663392305374,
+          "max": 0.999998927116394,
+          "fraction_gt_0_5": 0.7846153846153846,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.13846153846153847
+        },
+        "external_control": {
+          "n": 38,
+          "mean": 0.9560486674308777,
+          "median": 0.992495059967041,
+          "min": 0.5210294723510742,
+          "max": 1.0,
+          "fraction_gt_0_5": 1.0,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.5
+        }
+      }
+    },
+    "M2": {
+      "model": "Direct-clamped nnPU",
+      "score_convention": "higher score means stronger model support for positive/AOP class",
+      "label_mapping": {
+        "held_out_positive": 1,
+        "external_assay_inactive_control": 0
+      },
+      "metrics_reproduced": {
+        "status": "defined",
+        "n": 162,
+        "class_counts": {
+          "positive": 124,
+          "negative": 38
+        },
+        "threshold": 0.5,
+        "mcc": -0.04362827256608702,
+        "average_precision": 0.6914846617527814,
+        "auroc": 0.32353565365025466,
+        "precision": 0.7639751552795031,
+        "recall": 0.9919354838709677,
+        "f1": 0.8631578947368421,
+        "balanced_accuracy": 0.4959677419354839,
+        "brier_score_bounded": 0.2362265450412377,
+        "confusion_matrix": {
+          "tp": 123,
+          "tn": 0,
+          "fp": 38,
+          "fn": 1
+        }
+      },
+      "score_summaries": {
+        "E1": {
+          "n": 59,
+          "mean": 0.9904924085584738,
+          "median": 1.0,
+          "min": 0.4791603684425354,
+          "max": 1.0,
+          "fraction_gt_0_5": 0.9830508474576272,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.9661016949152542
+        },
+        "E2": {
+          "n": 65,
+          "mean": 0.99735115308028,
+          "median": 0.999934196472168,
+          "min": 0.9655258059501648,
+          "max": 1.0,
+          "fraction_gt_0_5": 1.0,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.9384615384615385
+        },
+        "external_control": {
+          "n": 38,
+          "mean": 0.999914006183022,
+          "median": 1.0,
+          "min": 0.9973582625389099,
+          "max": 1.0,
+          "fraction_gt_0_5": 1.0,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 1.0
+        }
+      }
+    },
+    "M3": {
+      "model": "Corrective nnPU",
+      "score_convention": "higher score means stronger model support for positive/AOP class",
+      "label_mapping": {
+        "held_out_positive": 1,
+        "external_assay_inactive_control": 0
+      },
+      "metrics_reproduced": {
+        "status": "defined",
+        "n": 162,
+        "class_counts": {
+          "positive": 124,
+          "negative": 38
+        },
+        "threshold": 0.5,
+        "mcc": -0.2498140237465507,
+        "average_precision": 0.6826902895541226,
+        "auroc": 0.32236842105263164,
+        "precision": 0.6831683168316832,
+        "recall": 0.5564516129032258,
+        "f1": 0.6133333333333333,
+        "balanced_accuracy": 0.35717317487266553,
+        "brier_score_bounded": 0.3013489203236727,
+        "confusion_matrix": {
+          "tp": 69,
+          "tn": 6,
+          "fp": 32,
+          "fn": 55
+        }
+      },
+      "score_summaries": {
+        "E1": {
+          "n": 59,
+          "mean": 0.5948435660704212,
+          "median": 0.632888913154602,
+          "min": 0.007298672571778297,
+          "max": 0.8918898105621338,
+          "fraction_gt_0_5": 0.6779661016949152,
+          "fraction_lt_0_01": 0.01694915254237288,
+          "fraction_gt_0_99": 0.0
+        },
+        "E2": {
+          "n": 65,
+          "mean": 0.48654814522999984,
+          "median": 0.47677871584892273,
+          "min": 0.10609236359596252,
+          "max": 0.8754845857620239,
+          "fraction_gt_0_5": 0.4461538461538462,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.0
+        },
+        "external_control": {
+          "n": 38,
+          "mean": 0.6583360927669626,
+          "median": 0.7022696137428284,
+          "min": 0.23238477110862732,
+          "max": 0.8883475065231323,
+          "fraction_gt_0_5": 0.8421052631578947,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.0
+        }
+      }
+    },
+    "M4": {
+      "model": "Two-Step PU",
+      "score_convention": "higher score means stronger model support for positive/AOP class",
+      "label_mapping": {
+        "held_out_positive": 1,
+        "external_assay_inactive_control": 0
+      },
+      "metrics_reproduced": {
+        "status": "defined",
+        "n": 162,
+        "class_counts": {
+          "positive": 124,
+          "negative": 38
+        },
+        "threshold": 0.5,
+        "mcc": -0.16938919531853894,
+        "average_precision": 0.6466199875616923,
+        "auroc": 0.28183361629881154,
+        "precision": 0.7333333333333333,
+        "recall": 0.7983870967741935,
+        "f1": 0.7644787644787645,
+        "balanced_accuracy": 0.42550933786078093,
+        "brier_score_bounded": 0.33877396982054986,
+        "confusion_matrix": {
+          "tp": 99,
+          "tn": 2,
+          "fp": 36,
+          "fn": 25
+        }
+      },
+      "score_summaries": {
+        "E1": {
+          "n": 59,
+          "mean": 0.8774937992536668,
+          "median": 1.0,
+          "min": 0.012732707895338535,
+          "max": 1.0,
+          "fraction_gt_0_5": 0.9322033898305084,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.7288135593220338
+        },
+        "E2": {
+          "n": 65,
+          "mean": 0.7002695888137588,
+          "median": 0.9639512300491333,
+          "min": 0.011744423769414425,
+          "max": 1.0,
+          "fraction_gt_0_5": 0.676923076923077,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.4461538461538462
+        },
+        "external_control": {
+          "n": 38,
+          "mean": 0.9507733420713952,
+          "median": 1.0,
+          "min": 0.09919057041406631,
+          "max": 1.0,
+          "fraction_gt_0_5": 0.9473684210526315,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.868421052631579
+        }
+      }
+    },
+    "M5": {
+      "model": "PU-Bagging",
+      "score_convention": "higher score means stronger model support for positive/AOP class",
+      "label_mapping": {
+        "held_out_positive": 1,
+        "external_assay_inactive_control": 0
+      },
+      "metrics_reproduced": {
+        "status": "defined",
+        "n": 162,
+        "class_counts": {
+          "positive": 124,
+          "negative": 38
+        },
+        "threshold": 0.5,
+        "mcc": -0.24953493707741828,
+        "average_precision": 0.6567173448365493,
+        "auroc": 0.30050933786078105,
+        "precision": 0.7109375,
+        "recall": 0.7338709677419355,
+        "f1": 0.7222222222222222,
+        "balanced_accuracy": 0.38009337860780984,
+        "brier_score_bounded": 0.3243689619846739,
+        "confusion_matrix": {
+          "tp": 91,
+          "tn": 1,
+          "fp": 37,
+          "fn": 33
+        }
+      },
+      "score_summaries": {
+        "E1": {
+          "n": 59,
+          "mean": 0.8275590706466683,
+          "median": 0.9504063904285431,
+          "min": 0.08180784662254155,
+          "max": 0.9999566793441772,
+          "fraction_gt_0_5": 0.8813559322033898,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.3389830508474576
+        },
+        "E2": {
+          "n": 65,
+          "mean": 0.6324506287930014,
+          "median": 0.728353488445282,
+          "min": 0.05459656117309351,
+          "max": 0.9999955534934998,
+          "fraction_gt_0_5": 0.6,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.15384615384615385
+        },
+        "external_control": {
+          "n": 38,
+          "mean": 0.8965809559155452,
+          "median": 0.9878082245588302,
+          "min": 0.21982121020555495,
+          "max": 0.9999996781349182,
+          "fraction_gt_0_5": 0.9736842105263158,
+          "fraction_lt_0_01": 0.0,
+          "fraction_gt_0_99": 0.47368421052631576
+        }
+      }
+    }
+  },
+  "control_pattern": {
+    "controls_above_0_5_in_all_five_models": 32,
+    "controls_above_0_5_in_at_least_four_models": 36,
+    "leave_one_control_out_auroc": {
+      "M1": {
+        "full_auroc": 0.2541383701188455,
+        "minimum_after_excluding_one_control": 0.23768526591107236,
+        "maximum_after_excluding_one_control": 0.2610069747166521,
+        "maximum_absolute_change": 0.016453104207773128
+      },
+      "M2": {
+        "full_auroc": 0.32353565365025466,
+        "minimum_after_excluding_one_control": 0.3093940714908457,
+        "maximum_after_excluding_one_control": 0.3260680034873583,
+        "maximum_absolute_change": 0.014141582159408972
+      },
+      "M3": {
+        "full_auroc": 0.32236842105263164,
+        "minimum_after_excluding_one_control": 0.3062336530078466,
+        "maximum_after_excluding_one_control": 0.33064516129032256,
+        "maximum_absolute_change": 0.01613476804478503
+      },
+      "M4": {
+        "full_auroc": 0.28183361629881154,
+        "minimum_after_excluding_one_control": 0.2643853530950305,
+        "maximum_after_excluding_one_control": 0.28945074106364427,
+        "maximum_absolute_change": 0.017448263203781067
+      },
+      "M5": {
+        "full_auroc": 0.30050933786078105,
+        "minimum_after_excluding_one_control": 0.28421970357454224,
+        "maximum_after_excluding_one_control": 0.30863121185701825,
+        "maximum_absolute_change": 0.016289634286238808
+      }
+    },
+    "interpretation": "A small-subset explanation is unsupported when deleting any one control changes AUROC only slightly."
+  },
+  "control_sources": {
+    "10.1007/s00217-009-1093-1": 6,
+    "10.1007/s13594-015-0226-5": 9,
+    "10.1016/j.foodchem.2010.11.146": 2,
+    "10.1016/j.foodchem.2015.11.092": 2,
+    "10.1016/j.foodchem.2016.02.119": 1,
+    "10.1016/j.foodchem.2018.01.033": 4,
+    "10.1016/j.jff.2014.02.012": 1,
+    "10.1021/jf021191n": 9,
+    "10.1051/lait:2007019": 1,
+    "10.3390/ijms161226155": 2,
+    "10.4315/0362-028X-67.9.1939": 1
+  },
+  "biopep_conflict_ids": [
+    "AOP-37BD4B4933",
+    "AOP-DDCD54E4BA"
+  ],
+  "limitations": [
+    "The control labels are assay-specific and do not establish universal antioxidant inactivity.",
+    "Source and descriptor differences can support shortcut behavior but do not prove a causal mechanism.",
+    "Only 38 controls and one GraphPart fold are available."
+  ],
+  "task": "Task 4.5 follow-up external-control diagnostic",
+  "read_only": true,
+  "retraining_performed": false,
+  "threshold_optimization_performed": false,
+  "source_hashes": {
+    "task45_evaluation": "23f0b8dac7e794f6c9a5e4a678df6607b19b17c1d7fba51d0c93302fc307a458",
+    "descriptor_table": "9b295accc0074ee09f1f5be8c9246d284447a6be309695c69526ce6692402efe",
+    "feature_cache_manifest": "81c87075eec8643a3643a3b726268e35569a1a1f00b15f457d87e1ef3268d97a",
+    "external_control": "026b732634b27be470c55121eba11ae2635bc584ba31107d6e07db51de52f674"
+  },
+  "git_revision": "049308eabe5c26698b830acf8a849bdd5bf4a8b1"
+}
