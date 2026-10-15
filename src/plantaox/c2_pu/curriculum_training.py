@@ -139,6 +139,17 @@ def _score_model(model, features: np.ndarray) -> np.ndarray:
     return result
 
 
+def _save_checkpoint_with_windows_retry(save_checkpoint, *args, **kwargs):
+    """Retain the recorder's atomic write while tolerating transient Windows file locks."""
+    for attempt in range(5):
+        try:
+            return save_checkpoint(*args, **kwargs)
+        except PermissionError:
+            if attempt == 4:
+                raise
+            time.sleep(0.2 * (attempt + 1))
+
+
 def train_curriculum(
     config: ExperimentConfig,
     curriculum: CurriculumData,
@@ -256,9 +267,13 @@ def train_curriculum(
                 "prior": prior, "beta": beta, "gamma": gamma, "positive_weights": EVIDENCE_WEIGHTS,
                 "optimizer_state_policy": "reset_each_stage_model_weights_warm_started",
             }
-            save_checkpoint(stage_dir, model, stage_epoch, metrics, is_best=False, extra=extra)
+            _save_checkpoint_with_windows_retry(
+                save_checkpoint, stage_dir, model, stage_epoch, metrics, is_best=False, extra=extra
+            )
             if is_best:
-                save_checkpoint(stage_dir, model, stage_epoch, metrics, is_best=True, extra=extra)
+                _save_checkpoint_with_windows_retry(
+                    save_checkpoint, stage_dir, model, stage_epoch, metrics, is_best=True, extra=extra
+                )
             global_epoch += 1
             if stale >= plateau_patience:
                 break
