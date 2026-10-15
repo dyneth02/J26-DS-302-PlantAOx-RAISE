@@ -396,6 +396,17 @@ five-fold curriculum experiments remain unimplemented.
 
 **Model/demo evidence attachments:** configurations, checkpoints, training logs, test outputs, initial results table, presentation slides, demo video/screenshots, report and traceability matrix.
 
+### PP1 research implementation freeze — 2026-10-16
+
+Component 02's accepted Tasks 4.1–4.6 and the methodological audit are assembled under freeze
+ID `c2_pp1_freeze_v1`; see `C2_PP1_FREEZE_REPORT.md`, `C2_PP1_HANDOVER.md`, and the machine-readable
+`C2_PP1_FREEZE_MANIFEST.json`. All 170 inventory entries are locally available and verified, including
+the authoritative FR1/FR2 freezes and accepted fold-0 checkpoints. All 56 essential ignored artifacts
+also match the owner-supplied external data copy. Status is **FROZEN — READY WITH LIMITATIONS** under
+the dedicated commit and annotated tag `c2-pp1-v1`; no remote push was performed. This note does not close the PP1 technical-report
+or presentation tasks above, and does not mark FR6/RNIS, multi-fold validation, or biological validation
+complete.
+
 ---
 
 # Bucket 5 — Ongoing Progress and Quality Control

@@ -1695,6 +1695,69 @@
   surrogate risks use a fixed C1 sampling model, pools differ by source, and this is one fold. Apparent
   pool-score changes are not validated biological reliability improvements.
 
+### PP1 pre-freeze methodological audit (Task 4.6 follow-up)
+
+**Status: COMPLETE — READY WITH LIMITATIONS (2026-10-15).** The dated audit is
+`FR4_PP1_PRE_FREEZE_METHOD_AUDIT.md`; the three-row comparison and figure are
+`fr4_pp1_matched_curriculum_fold0.csv` and `fr4_pp1_matched_curriculum_fold0.svg`.
+
+- C3 `best_epoch=0` is zero-based and **post-update**: 63 C3 optimizer steps occurred before validation
+  and saving. All six parameter tensors differ from the selected C2 parent (maximum absolute element
+  change 0.0307472). The selected C3 model therefore contains one complete C3 training epoch; the five
+  later epochs did not beat its fixed C1-based validation surrogate. This clarifies the Task 4.6 report
+  without replacing any checkpoint or summary.
+- Stage C1 already satisfies the matched weighted C1-only reference requirements: same 604 E1+E2
+  training positives, E1/E2 weights 1.0/0.5, 3,220 C1 training rows, corrective nnPU objective and
+  settings, frozen fold-0 features, fresh seed-42 initialization, and fixed 106-positive/568-C1
+  validation rule. Its existing best checkpoint, SHA-256
+  `f566c06314e1b243124abf49e660b3979f3d086e51b19ad9f2d1b0929494f7d4`, is labeled
+  `weighted_c1_only_curriculum_reference` for comparison; no control was retrained. The accepted
+  stand-alone corrective baseline used unweighted E1/E2 and patience 10 and remains historical context.
+- Mathematical audit verified normalized E1/E2 weights in both positive risks, an independent C1/C2/C3
+  unlabeled group mean, one prior factor per positive term, correct normal/corrective branch losses,
+  and a separate nonnegative reported risk. Independent float64 reference and gradient tests passed.
+- Parent hashes, actual state tensors, stage JSONL histories, checkpoint metadata, exact recalculated
+  full-validation risks, fold-0 C3 membership, cached scaler identity, and no-overlap checks agree.
+  External scores were obtained after each stage's best checkpoint had been selected, but before later
+  stages finished; they were never used for training or selection. This corrects the chronological
+  wording of the earlier decision-log entry below without changing its leakage conclusion.
+- Matched positive recovery was 59.68% after weighted C1, 38.71% after C2, and 67.74% after C3.
+  External-control MCC remained negative (`-0.2929`, `-0.1641`, `-0.2338`). The 38 controls are
+  assay-specific and small; C1/C2/C3 remain unlabeled. No biological improvement is claimed.
+- Focused relevant regression: **160 passed, 0 failed**. All 10 PP1 and 28 PP2 frozen-file checksums
+  passed; FR3 manifest/scaler, accepted Task 4.5/4.6 summaries, and all six stage checkpoint hashes
+  remained unchanged. No real fold-0 model was retrained.
+
+### Component 02 — PP1 Research Implementation Freeze
+
+**Status: FROZEN — READY WITH LIMITATIONS (2026-10-16).** Freeze ID `c2_pp1_freeze_v1` was finalized
+against verified implementation revision `31d95224dd07dea7f9908c83f7cb1ba65edaa404`; annotated tag
+`c2-pp1-v1` identifies the dedicated freeze commit. The machine-readable record is
+`data/processed/c2_pu/C2_PP1_FREEZE_MANIFEST.json`, with the 170-file checksum inventory at
+`C2_PP1_ARTIFACT_INVENTORY.csv` and handover reports `C2_PP1_FREEZE_REPORT.md` / `C2_PP1_HANDOVER.md`.
+
+- All **170** in-scope artifacts are locally present and match recorded size/SHA-256; PP1's 10 and PP2's
+  28 frozen files separately pass their authoritative manifests. The inventory covers 106 tracked and 64
+  ignored files. The ignored set totals 452,510,034 bytes; 56 files / 39,103,768 bytes are essential
+  accepted demo/checkpoint/run bytes, while eight larger source/cache files are regenerable through the
+  documented pipelines.
+- Read-only offline verification passed: fold-0 cache `9356×495 float32`, fold-specific C3 2,000 of the
+  2,325-row union, zero external-control overlap with positive partitions, and finite bounded `8×1`
+  inference after compatibility-checked reload of the accepted PN, weighted Stage-C1, and selected
+  Stage-C3 checkpoints. No training, scaler fit, embedding computation, or historical-output write ran.
+- The owner-supplied external data copy at `C:\Users\metal\Documents\SLIIT Research\Data\C2-PP1-baseline-data`
+  passed independent verification for all 56 essential ignored artifacts (39,103,768 bytes): no files
+  were missing and every byte-size/SHA-256 value matched the release inventory. No additional archive
+  was created and the existing backup was not modified.
+- The project `.venv` now resolves its existing repository-local Python 3.11.14 runtime; focused freeze
+  tests pass through `.venv/Scripts/python.exe`.
+- The accepted negative evidence remains locked: Task 4.5 MCC is negative and AUROC below 0.5 for every
+  model; no matched curriculum stage reliably discriminates the 38 controls. Technical reproducibility
+  is accepted; biological reliability and supervisor sign-off are not.
+- The release commit/tag and external byte preservation are complete locally. No remote push was
+  performed. Tasks 4.1–4.6 retain their historical PASS statuses; FR6/RNIS, five-fold evaluation,
+  calibration, biological validation, and the recorded supervisor approvals remain unstarted or pending.
+
 ## 🔄 Current work in progress
 
 *(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
@@ -1968,5 +2031,11 @@ tasks below.)*
 | 2026-10-15 | Curriculum stages carry selected model weights C1→C2→C3 but reset Adam state at each transition; all stages use the same fixed positive+C1 surrogate validation boundary with plateau patience 5 | Weight transfer implements staged learning while optimizer reset keeps each stage's moments from encoding the preceding pool. The fixed validation boundary supplies one pre-specified selection rule without inventing labels for C2/C3 or consulting held-out positives/external controls. |
 | 2026-10-15 | Held-out positives and assay-inactive controls are scored only after all stage checkpoints have been selected | They are evaluation-only under Tasks 4.5/4.6 and cannot inform transitions, early stopping, or hyperparameters. The resulting external-control metrics are reported faithfully even though none resolves the earlier negative finding. |
 | 2026-10-15 | A bounded retry surrounds curriculum checkpoint atomic replacement on Windows | The first genuine scratch run hit a transient `PermissionError` when `os.replace` attempted to replace `checkpoint_last.pt`. The run was marked failed. Retrying the same atomic replacement addresses a filesystem-lock race only; it does not change data, objective, optimizer, seed, or selection behavior. |
+| 2026-10-15 | PP1 pre-freeze audit designates the existing Stage-C1 best checkpoint `weighted_c1_only_curriculum_reference` | It is the fresh, evidence-weighted C1 starting condition of the same sequential run, with the same objective, membership, initialization, optimizer settings, and weighted validation rule as subsequent stages. Reusing its hash avoids redundant retraining. The accepted unweighted stand-alone corrective model remains historical context only. |
+| 2026-10-15 | PP1 audit classifies C3 `best_epoch=0` as post-update and retains the accepted checkpoint | Epoch zero contained 63 C3 optimizer steps before evaluation/save. Its six parameter tensors differ from the Stage-C2 parent; checkpoint payload, JSONL history, and recomputed validation risk agree. The dated report clarifies this numbering without rewriting the experimental result. |
+| 2026-10-15 | PP1 audit corrects the prior decision-log wording that said external scoring occurred only after **all** stage checkpoints were selected | Source code scores after **each stage's own** best checkpoint is selected, before later stages train. The scores are not used to choose any checkpoint, stage transition, or hyperparameter, so the evaluation-only boundary still holds. This is a chronology/documentation correction, not a new model-selection procedure. |
+| 2026-10-15 | PP1 readiness is `READY WITH LIMITATIONS` | Risk weighting and stage lineage passed focused mathematical and artifact checks; 160 relevant tests passed. The fixed C1 validation surrogate, provisional prior and E2 labels, source shift, one-fold scope, and weak results on 38 assay-inactive controls prevent claims of validated biological performance. |
+| 2026-10-16 | Prepared Component 02 release identity `c2_pp1_freeze_v1` against implementation revision `31d95224dd07dea7f9908c83f7cb1ba65edaa404`, with proposed tag `c2-pp1-v1`; status remains `FREEZE INCOMPLETE` pending owner-authorized commit/tag and external artifact backup | All 170 inventory entries and authoritative PP1/PP2 manifests verify locally, and the read-only offline checkpoint/cache smoke passes. A Git tag cannot preserve the 64 ignored files, including 39,103,768 bytes of essential accepted cache/checkpoint/run state. The task explicitly withheld automatic commit/tag operations and provided no backup destination, so claiming a finalized portable freeze would overstate the evidence. |
+| 2026-10-16 | Finalized Component 02 freeze `c2_pp1_freeze_v1` as `FROZEN — READY WITH LIMITATIONS`, with annotated tag `c2-pp1-v1` on the dedicated freeze commit | The owner supplied an external copied `data` tree. Read-only verification found all 56 essential ignored artifacts (39,103,768 bytes) with exact inventory sizes and SHA-256 values. The unrelated `.idea/modules.xml` was unstaged without changing its bytes, the project `.venv` was repaired to the existing local Python 3.11.14 runtime, and no accepted artifact or scientific result was changed. The tag and commit remain local pending separate push authorization. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
