@@ -112,3 +112,14 @@ def test_real_curriculum_membership_parent_chain_and_final_reload():
     assert info["extra"]["stage"] == "C3"
     assert np.isfinite(scores).all()
     assert ((scores >= 0) & (scores <= 1)).all()
+
+
+def test_cli_help_lists_diagnostic_and_curriculum_stages(capsys):
+    from plantaox.c2_pu.run import main
+
+    with pytest.raises(SystemExit) as stopped:
+        main(["--help"])
+    assert stopped.value.code == 0
+    help_text = capsys.readouterr().out
+    assert "fr4-external-control-diagnostic" in help_text
+    assert "fr4-curriculum" in help_text

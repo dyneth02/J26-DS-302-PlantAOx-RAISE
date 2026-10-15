@@ -4143,8 +4143,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
     sub.add_parser("fr1-positives", help="Build the conflict-resolved FR1 positive pool")
-    sub.add_parser("fr1-cluster", help="CD-HIT 90% identity clustering (Bucket 1.5)")
-    sub.add_parser("fr1-split", help="GraphPart 40% identity 5-fold split (Bucket 1.6)")
+    sub.add_parser("fr1-cluster", help="CD-HIT 90%% identity clustering (Bucket 1.5)")
+    sub.add_parser("fr1-split", help="GraphPart 40%% identity 5-fold split (Bucket 1.6)")
     sub.add_parser("fr1-freeze", help="Snapshot validated FR1 artifacts as a versioned baseline (Bucket 1.7)")
     sub.add_parser("fr2-c1-clean", help="Resolve C1/positive-pool leakage (Bucket 2.1 close-out)")
     sub.add_parser(
