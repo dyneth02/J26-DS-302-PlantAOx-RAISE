@@ -90,3 +90,25 @@ def test_real_diagnostic_preserves_label_orientation_and_alignment():
     assert diagnostic["feature_row_alignment_verified"]
     assert diagnostic["n_external_control"] == 38
     assert diagnostic["control_pattern"]["controls_above_0_5_in_all_five_models"] == 32
+
+
+def test_real_curriculum_membership_parent_chain_and_final_reload():
+    from plantaox.c2_pu.models import BinaryMlp, MlpArchitecture
+    from plantaox.c2_pu.run_recorder import load_checkpoint
+
+    summary = json.loads(Path("data/processed/c2_pu/fr4_curriculum_fold0_summary.json").read_text(encoding="utf-8"))
+    stages = summary["training"]["stages"]
+    assert [stage["stage"] for stage in stages] == ["C1", "C2", "C3"]
+    assert [stage["n_train_unlabeled"] for stage in stages] == [3220, 2000, 2000]
+    assert all(stage["n_train_positive"] == 604 for stage in stages)
+    assert all(stage["n_train_E1"] == 331 and stage["n_train_E2"] == 273 for stage in stages)
+    assert stages[1]["parent_checkpoint_sha256"] == stages[0]["best_checkpoint_sha256"]
+    assert stages[2]["parent_checkpoint_sha256"] == stages[1]["best_checkpoint_sha256"]
+    assert summary["leakage_report"]["overlap_found"] is False
+
+    model = BinaryMlp(MlpArchitecture(495, (128, 64)))
+    info = load_checkpoint(Path(stages[-1]["best_checkpoint"]), model)
+    scores = model.predict_proba(torch.zeros((3, 495))).detach().numpy()
+    assert info["extra"]["stage"] == "C3"
+    assert np.isfinite(scores).all()
+    assert ((scores >= 0) & (scores <= 1)).all()

@@ -344,3 +344,9 @@ data/interim/c2_pu/fr4_nnpu_corrective_runs/
 # they record are the durable, auditable artifacts.
 data/interim/c2_pu/fr4_two_step_pu_baseline_runs/
 data/interim/c2_pu/fr4_pu_bagging_baseline_runs/
+
+# Bucket 4.6 -- C1 -> C2 -> C3 curriculum run directories (resolved
+# configs, stage logs, and PyTorch checkpoints). The compact summary,
+# comparison CSV/SVG, and checkpoint hashes are committed; binary model
+# state remains local under the same policy as the other Bucket-4 runs.
+data/interim/c2_pu/fr4_curriculum_runs/
