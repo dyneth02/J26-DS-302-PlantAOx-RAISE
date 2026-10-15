@@ -1695,6 +1695,39 @@
   surrogate risks use a fixed C1 sampling model, pools differ by source, and this is one fold. Apparent
   pool-score changes are not validated biological reliability improvements.
 
+### PP1 pre-freeze methodological audit (Task 4.6 follow-up)
+
+**Status: COMPLETE — READY WITH LIMITATIONS (2026-10-15).** The dated audit is
+`FR4_PP1_PRE_FREEZE_METHOD_AUDIT.md`; the three-row comparison and figure are
+`fr4_pp1_matched_curriculum_fold0.csv` and `fr4_pp1_matched_curriculum_fold0.svg`.
+
+- C3 `best_epoch=0` is zero-based and **post-update**: 63 C3 optimizer steps occurred before validation
+  and saving. All six parameter tensors differ from the selected C2 parent (maximum absolute element
+  change 0.0307472). The selected C3 model therefore contains one complete C3 training epoch; the five
+  later epochs did not beat its fixed C1-based validation surrogate. This clarifies the Task 4.6 report
+  without replacing any checkpoint or summary.
+- Stage C1 already satisfies the matched weighted C1-only reference requirements: same 604 E1+E2
+  training positives, E1/E2 weights 1.0/0.5, 3,220 C1 training rows, corrective nnPU objective and
+  settings, frozen fold-0 features, fresh seed-42 initialization, and fixed 106-positive/568-C1
+  validation rule. Its existing best checkpoint, SHA-256
+  `f566c06314e1b243124abf49e660b3979f3d086e51b19ad9f2d1b0929494f7d4`, is labeled
+  `weighted_c1_only_curriculum_reference` for comparison; no control was retrained. The accepted
+  stand-alone corrective baseline used unweighted E1/E2 and patience 10 and remains historical context.
+- Mathematical audit verified normalized E1/E2 weights in both positive risks, an independent C1/C2/C3
+  unlabeled group mean, one prior factor per positive term, correct normal/corrective branch losses,
+  and a separate nonnegative reported risk. Independent float64 reference and gradient tests passed.
+- Parent hashes, actual state tensors, stage JSONL histories, checkpoint metadata, exact recalculated
+  full-validation risks, fold-0 C3 membership, cached scaler identity, and no-overlap checks agree.
+  External scores were obtained after each stage's best checkpoint had been selected, but before later
+  stages finished; they were never used for training or selection. This corrects the chronological
+  wording of the earlier decision-log entry below without changing its leakage conclusion.
+- Matched positive recovery was 59.68% after weighted C1, 38.71% after C2, and 67.74% after C3.
+  External-control MCC remained negative (`-0.2929`, `-0.1641`, `-0.2338`). The 38 controls are
+  assay-specific and small; C1/C2/C3 remain unlabeled. No biological improvement is claimed.
+- Focused relevant regression: **160 passed, 0 failed**. All 10 PP1 and 28 PP2 frozen-file checksums
+  passed; FR3 manifest/scaler, accepted Task 4.5/4.6 summaries, and all six stage checkpoint hashes
+  remained unchanged. No real fold-0 model was retrained.
+
 ## 🔄 Current work in progress
 
 *(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
@@ -1968,5 +2001,9 @@ tasks below.)*
 | 2026-10-15 | Curriculum stages carry selected model weights C1→C2→C3 but reset Adam state at each transition; all stages use the same fixed positive+C1 surrogate validation boundary with plateau patience 5 | Weight transfer implements staged learning while optimizer reset keeps each stage's moments from encoding the preceding pool. The fixed validation boundary supplies one pre-specified selection rule without inventing labels for C2/C3 or consulting held-out positives/external controls. |
 | 2026-10-15 | Held-out positives and assay-inactive controls are scored only after all stage checkpoints have been selected | They are evaluation-only under Tasks 4.5/4.6 and cannot inform transitions, early stopping, or hyperparameters. The resulting external-control metrics are reported faithfully even though none resolves the earlier negative finding. |
 | 2026-10-15 | A bounded retry surrounds curriculum checkpoint atomic replacement on Windows | The first genuine scratch run hit a transient `PermissionError` when `os.replace` attempted to replace `checkpoint_last.pt`. The run was marked failed. Retrying the same atomic replacement addresses a filesystem-lock race only; it does not change data, objective, optimizer, seed, or selection behavior. |
+| 2026-10-15 | PP1 pre-freeze audit designates the existing Stage-C1 best checkpoint `weighted_c1_only_curriculum_reference` | It is the fresh, evidence-weighted C1 starting condition of the same sequential run, with the same objective, membership, initialization, optimizer settings, and weighted validation rule as subsequent stages. Reusing its hash avoids redundant retraining. The accepted unweighted stand-alone corrective model remains historical context only. |
+| 2026-10-15 | PP1 audit classifies C3 `best_epoch=0` as post-update and retains the accepted checkpoint | Epoch zero contained 63 C3 optimizer steps before evaluation/save. Its six parameter tensors differ from the Stage-C2 parent; checkpoint payload, JSONL history, and recomputed validation risk agree. The dated report clarifies this numbering without rewriting the experimental result. |
+| 2026-10-15 | PP1 audit corrects the prior decision-log wording that said external scoring occurred only after **all** stage checkpoints were selected | Source code scores after **each stage's own** best checkpoint is selected, before later stages train. The scores are not used to choose any checkpoint, stage transition, or hyperparameter, so the evaluation-only boundary still holds. This is a chronology/documentation correction, not a new model-selection procedure. |
+| 2026-10-15 | PP1 readiness is `READY WITH LIMITATIONS` | Risk weighting and stage lineage passed focused mathematical and artifact checks; 160 relevant tests passed. The fixed C1 validation surrogate, provisional prior and E2 labels, source shift, one-fold scope, and weak results on 38 assay-inactive controls prevent claims of validated biological performance. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
