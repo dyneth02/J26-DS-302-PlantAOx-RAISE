@@ -346,19 +346,35 @@ save/reload reproducibility, full research-limitations section, and the explicit
 and a cross-baseline comparison table are Task 4.5's scope, not performed here.
 
 ## 4.5 — Initial Model Evaluation and Testing
-- [ ] Run reduced-data one-fold PN smoke test.
-- [ ] Run reduced-data one-fold nnPU smoke test.
-- [ ] Test additional PU baselines where implemented.
-- [ ] Verify MCC and AUPRC calculations on labeled/assumption-based sets as appropriate.
-- [ ] Check probability bounds, NaN/Inf, stability, and checkpoints.
-- [ ] Generate a clearly labeled preliminary comparison table.
+- [x] Run reduced-data one-fold PN smoke test.
+- [x] Run reduced-data one-fold nnPU smoke test.
+- [x] Test additional PU baselines where implemented.
+- [x] Verify MCC and AUPRC calculations on labeled/assumption-based sets as appropriate.
+- [x] Check probability bounds, NaN/Inf, stability, and checkpoints.
+- [x] Generate a clearly labeled preliminary comparison table.
+
+**Technical acceptance passed (PASS), 2026-10-15.** Existing Task 4.2–4.4 smoke/training evidence was
+reused and all five accepted best checkpoints were reloaded for a common, inference-only fold-0
+evaluation. The primary comparison uses 124 GraphPart-held-out positives and 38 assay-inactive external
+controls at a fixed 0.5 threshold. C1/C2/fold-0 C3 results remain separately labeled as unlabeled
+descriptions or assumed-negative proxies. Two-Step PU raw corrected scores are retained while bounded
+copies are used for threshold/Brier metrics. See `FR4_BASELINE_EVALUATION_REPORT.md`; no Task 4.6 work
+was performed.
 
 ## 4.6 — Optional FR4 Curriculum Prototype
-- [ ] Implement nnPU progression **C1 → C2 → C3**.
-- [ ] Transition on validation-loss plateau (**patience = 5**).
-- [ ] Apply E1 = 1.0 / E2 = 0.5; E3 excluded from labeled positives.
-- [ ] Log fold-specific transition epochs and stage-wise loss.
-- [ ] Demonstrate one reduced-data end-to-end curriculum run.
+- [x] Implement nnPU progression **C1 → C2 → C3**.
+- [x] Transition on validation-loss plateau (**patience = 5**).
+- [x] Apply E1 = 1.0 / E2 = 0.5; E3 excluded from labeled positives.
+- [x] Log fold-specific transition epochs and stage-wise loss.
+- [x] Demonstrate one reduced-data end-to-end curriculum run.
+
+**Technical prototype passed (PASS), 2026-10-15.** One seeded fold-0 corrective-nnPU model progressed
+through C1 (9 epochs; best epoch 3), C2 (14; best epoch 8), and fold-specific C3 (6; best epoch 0).
+Each transition loaded the preceding stage's best checkpoint; optimizer state reset while model weights
+continued. Selection used a fixed weighted E1+E2 / C1 PU surrogate with patience 5. Held-out positives
+and external controls were evaluated only after stage selection. See `FR4_CURRICULUM_PROTOTYPE_REPORT.md`.
+This is an engineering demonstration, not evidence of improved biological reliability; RNIS and
+five-fold curriculum experiments remain unimplemented.
 
 ## 4.7 — PP1 Technical Report
 - [ ] Document FR1 datasets, evidence tiers, splits, and validation.
