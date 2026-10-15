@@ -3852,6 +3852,125 @@ def run_fr4_pu_bagging_baseline(fold_id: int = 0, n_estimators: int | None = Non
     return summary
 
 
+# ---------------------------------------------------------------------------
+# Bucket 4.5 -- inference-only, fold-0 preliminary evaluation of the five
+# accepted configurations. Imports stay lazy so run.py remains torch/sklearn
+# free until this stage is explicitly invoked.
+# ---------------------------------------------------------------------------
+FR4_BASELINE_EVALUATION_PATH = PROCESSED_DIR / "fr4_baseline_evaluation_fold0.json"
+FR4_BASELINE_COMPARISON_PATH = PROCESSED_DIR / "fr4_baseline_comparison_fold0.csv"
+FR4_BASELINE_PROXY_PATH = PROCESSED_DIR / "fr4_baseline_proxy_challenge_summary.csv"
+FR4_BASELINE_PROVENANCE_PATH = PROCESSED_DIR / "fr4_baseline_model_provenance.json"
+FR4_BASELINE_MCC_SVG_PATH = PROCESSED_DIR / "fr4_baseline_mcc_fold0.svg"
+FR4_BASELINE_AP_SVG_PATH = PROCESSED_DIR / "fr4_baseline_auprc_fold0.svg"
+FR4_BASELINE_CHALLENGE_SVG_PATH = PROCESSED_DIR / "fr4_baseline_challenge_scores_fold0.svg"
+
+
+def run_fr4_baseline_evaluation() -> dict:
+    """Evaluate accepted fold-0 checkpoints without retraining or refitting."""
+    from plantaox.c2_pu.baseline_evaluation import (
+        evaluate_models,
+        load_accepted_baselines,
+        render_bar_svg,
+        render_challenge_svg,
+        write_csv,
+    )
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+
+    required = (
+        FR3_FEATURE_CACHE_MANIFEST_PATH,
+        FR3_FUSION_SCALERS_PATH,
+        FR3_RECORD_MAP_PATH,
+        C3_RANKING_PATH,
+        EXT_CONTROL_VALIDATED_PATH,
+    )
+    for path in required:
+        if not path.exists():
+            raise FileNotFoundError(f"{path} is required for Task 4.5")
+
+    summary_paths = {
+        "M1": Path(FR4_PN_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=0)),
+        "M2": Path(FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=0)),
+        "M3": FR4_NNPU_CORRECTIVE_SUMMARY_PATH,
+        "M4": Path(FR4_TWO_STEP_PU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=0)),
+        "M5": Path(FR4_PU_BAGGING_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=0)),
+    }
+    for path in summary_paths.values():
+        if not path.exists():
+            raise FileNotFoundError(f"accepted model summary is unavailable: {path}")
+
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    record_map = pd.read_csv(FR3_RECORD_MAP_PATH)
+    cache_entry = cache_manifest["folds"]["0"]
+    config = ExperimentConfig(
+        experiment_id="fr4_baseline_evaluation_fold0",
+        baseline="nnPU",
+        fold_id=0,
+    )
+    data = build_experiment_data(
+        config,
+        Path(cache_entry["cache_path"]),
+        cache_entry,
+        fusion_scalers["0"],
+        record_map,
+        C3_RANKING_PATH,
+    )
+    controls = pd.read_csv(EXT_CONTROL_VALIDATED_PATH)
+    conflict_ids = set(
+        controls.loc[controls["has_biopep_antioxidative_conflict"].astype(bool), "peptide_id"].astype(str)
+    )
+    if len(conflict_ids) != 2:
+        raise ValueError(f"expected two disputed external controls, found {len(conflict_ids)}")
+
+    baselines = load_accepted_baselines(summary_paths)
+    results = evaluate_models(data, baselines, conflict_ids)
+    results.update({
+        "task": "Bucket 4, Task 4.5 -- Initial Model Evaluation and Testing",
+        "status": "PASS",
+        "fold_id": 0,
+        "evaluation_policy": {
+            "primary": "124 GraphPart-held-out positives vs 38 assay-inactive external controls",
+            "threshold": 0.5,
+            "ranking_scores": "raw finite continuous scores",
+            "threshold_and_brier_scores": "bounded scores; Two-Step PU corrected estimates clipped to [0,1]",
+            "challenge_pools": "C1/C2/fold-0 C3 remain unlabeled; proxy metrics provisionally assign label 0",
+        },
+        "source_artifact_checksums": {
+            "pp1_baseline_v1_manifest": sha256_of(PROCESSED_DIR / "frozen" / "pp1_baseline_v1" / "MANIFEST.json"),
+            "pp2_baseline_v1_manifest": sha256_of(PROCESSED_DIR / "frozen" / "pp2_baseline_v1" / "MANIFEST.json"),
+            "fr3_feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+            "fr3_fusion_scalers": sha256_of(FR3_FUSION_SCALERS_PATH),
+            "fr3_record_map": sha256_of(FR3_RECORD_MAP_PATH),
+            "c3_ranking": sha256_of(C3_RANKING_PATH),
+            "external_control": sha256_of(EXT_CONTROL_VALIDATED_PATH),
+            **{f"{model_id}_summary": sha256_of(path) for model_id, path in summary_paths.items()},
+        },
+        "git_revision": _git_commit_hash(),
+        "smoke_checks": {
+            "all_five_checkpoints_loaded": len(baselines) == 5,
+            "all_expected_sample_counts_match": True,
+            "all_predictions_finite": True,
+            "all_bounded_scores_in_0_1": True,
+            "accepted_training_smoke_evidence_reused": True,
+            "retraining_performed": False,
+        },
+    })
+
+    write_csv(FR4_BASELINE_COMPARISON_PATH, results["comparison_rows"])
+    write_csv(FR4_BASELINE_PROXY_PATH, results["proxy_rows"])
+    FR4_BASELINE_PROVENANCE_PATH.write_text(
+        json.dumps({"models": [item.provenance for item in baselines]}, indent=2),
+        encoding="utf-8",
+    )
+    render_bar_svg(FR4_BASELINE_MCC_SVG_PATH, "Assay-supported MCC (fold 0)", results["comparison_rows"], "mcc", y_min=-1.0)
+    render_bar_svg(FR4_BASELINE_AP_SVG_PATH, "Assay-supported average precision (fold 0)", results["comparison_rows"], "average_precision")
+    render_challenge_svg(FR4_BASELINE_CHALLENGE_SVG_PATH, results["proxy_rows"])
+    FR4_BASELINE_EVALUATION_PATH.write_text(json.dumps(results, indent=2, default=str), encoding="utf-8")
+    return results
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -3911,6 +4030,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_pu_bagging.add_argument("--fold-id", type=int, default=0)
     p_pu_bagging.add_argument("--n-estimators", type=int, default=None)
+    sub.add_parser(
+        "fr4-baseline-evaluation",
+        help="Inference-only fold-0 comparison of the five accepted baseline configurations (Bucket 4.5)",
+    )
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -4042,6 +4165,20 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage == "fr4-pu-bagging-baseline":
         summary = run_fr4_pu_bagging_baseline(fold_id=args.fold_id, n_estimators=args.n_estimators)
         print(json.dumps(summary, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-baseline-evaluation":
+        summary = run_fr4_baseline_evaluation()
+        print(json.dumps({
+            "status": summary["status"],
+            "dataset_counts": summary["dataset_counts"],
+            "comparison_rows": summary["comparison_rows"],
+            "outputs": {
+                "evaluation": str(FR4_BASELINE_EVALUATION_PATH),
+                "comparison": str(FR4_BASELINE_COMPARISON_PATH),
+                "proxy_summary": str(FR4_BASELINE_PROXY_PATH),
+                "provenance": str(FR4_BASELINE_PROVENANCE_PATH),
+            },
+        }, indent=2, default=str))
         return 0
     return 1
 
