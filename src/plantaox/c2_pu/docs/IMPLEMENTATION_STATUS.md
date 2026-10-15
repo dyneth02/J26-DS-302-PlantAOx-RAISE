@@ -1687,7 +1687,7 @@
   `FR4_CURRICULUM_PROTOTYPE_REPORT.md`.
 - Validation: focused curriculum/evaluation/corrective tests initially passed (**13 passed**). The
   broader relevant regression command covering curriculum, evaluation, corrective/direct nnPU,
-  experiment data, models, recorder, feature cache, and C3 passed **153 tests, 0 failed** with one
+  experiment data, models, recorder, feature cache, C3, and CLI help passed **154 tests, 0 failed** with one
   non-functional pytest-cache permission warning. Task 4.5's prior full-suite evidence remains
   **650 passed, 2 skipped, 0 unresolved failures**; expensive upstream curation/embedding acceptance
   jobs were not rerun for this focused prototype.

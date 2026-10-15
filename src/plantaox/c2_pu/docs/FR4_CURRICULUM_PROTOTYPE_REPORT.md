@@ -70,7 +70,7 @@ The first attempted run was correctly recorded as failed when Windows transientl
 
 The focused curriculum/evaluation/corrective checks first passed 13 tests. A broader relevant regression
 run covering curriculum training, baseline evaluation, corrective and direct nnPU, experiment data,
-models, the run recorder, feature-cache handling, and C3 then passed **153 tests, 0 failed** in 5.75 s.
+models, the run recorder, feature-cache handling, C3, and CLI help then passed **154 tests, 0 failed** in 5.60 s.
 Pytest emitted one cache-write permission warning; it did not affect test collection or execution. The
 expensive upstream curation and embedding acceptance jobs were not repeated. Task 4.5's most recent
 full-suite evidence remains 650 passed, 2 skipped, with no unresolved failures.
