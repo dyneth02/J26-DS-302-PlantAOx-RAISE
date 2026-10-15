@@ -3864,6 +3864,12 @@ FR4_BASELINE_PROVENANCE_PATH = PROCESSED_DIR / "fr4_baseline_model_provenance.js
 FR4_BASELINE_MCC_SVG_PATH = PROCESSED_DIR / "fr4_baseline_mcc_fold0.svg"
 FR4_BASELINE_AP_SVG_PATH = PROCESSED_DIR / "fr4_baseline_auprc_fold0.svg"
 FR4_BASELINE_CHALLENGE_SVG_PATH = PROCESSED_DIR / "fr4_baseline_challenge_scores_fold0.svg"
+FR4_EXTERNAL_CONTROL_DIAGNOSTIC_PATH = PROCESSED_DIR / "fr4_external_control_diagnostic.json"
+FR4_EXTERNAL_CONTROL_SCORES_PATH = PROCESSED_DIR / "fr4_external_control_scores.csv"
+FR4_CURRICULUM_RUNS_DIR = INTERIM_DIR / "fr4_curriculum_runs"
+FR4_CURRICULUM_SUMMARY_PATH = PROCESSED_DIR / "fr4_curriculum_fold0_summary.json"
+FR4_CURRICULUM_COMPARISON_PATH = PROCESSED_DIR / "fr4_curriculum_stage_comparison.csv"
+FR4_CURRICULUM_TRAJECTORY_PATH = PROCESSED_DIR / "fr4_curriculum_score_trajectories.svg"
 
 
 def run_fr4_baseline_evaluation() -> dict:
@@ -3971,6 +3977,168 @@ def run_fr4_baseline_evaluation() -> dict:
     return results
 
 
+def _task45_summary_paths() -> dict[str, Path]:
+    return {
+        "M1": Path(FR4_PN_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=0)),
+        "M2": Path(FR4_NNPU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=0)),
+        "M3": FR4_NNPU_CORRECTIVE_SUMMARY_PATH,
+        "M4": Path(FR4_TWO_STEP_PU_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=0)),
+        "M5": Path(FR4_PU_BAGGING_BASELINE_SUMMARY_PATH_TEMPLATE.format(fold_id=0)),
+    }
+
+
+def _build_fold0_task4_data(config):
+    from plantaox.c2_pu.experiment_data import build_experiment_data
+    cache_manifest = json.loads(FR3_FEATURE_CACHE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    fusion_scalers = json.loads(FR3_FUSION_SCALERS_PATH.read_text(encoding="utf-8"))
+    return build_experiment_data(
+        config,
+        Path(cache_manifest["folds"]["0"]["cache_path"]),
+        cache_manifest["folds"]["0"],
+        fusion_scalers["0"],
+        pd.read_csv(FR3_RECORD_MAP_PATH),
+        C3_RANKING_PATH,
+    )
+
+
+def run_fr4_external_control_diagnostic() -> dict:
+    """Read-only Task 4.5 diagnostic; never trains or writes model artifacts."""
+    from plantaox.c2_pu.baseline_evaluation import load_accepted_baselines, write_csv
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.external_control_diagnostic import diagnose_external_controls
+
+    required = (FR3_FEATURE_CACHE_MANIFEST_PATH, FR3_FUSION_SCALERS_PATH, FR3_RECORD_MAP_PATH,
+                FR3_DESCRIPTOR_TABLE_PATH, C3_RANKING_PATH, EXT_CONTROL_VALIDATED_PATH)
+    for path in required:
+        if not path.exists():
+            raise FileNotFoundError(f"{path} is required for the external-control diagnostic")
+    config = ExperimentConfig(experiment_id="fr4_external_control_diagnostic", baseline="nnPU", fold_id=0)
+    data = _build_fold0_task4_data(config)
+    models = load_accepted_baselines(_task45_summary_paths())
+    summary, rows = diagnose_external_controls(
+        data, models, pd.read_parquet(FR3_DESCRIPTOR_TABLE_PATH), pd.read_csv(EXT_CONTROL_VALIDATED_PATH)
+    )
+    summary.update({
+        "task": "Task 4.5 follow-up external-control diagnostic",
+        "read_only": True,
+        "retraining_performed": False,
+        "threshold_optimization_performed": False,
+        "source_hashes": {
+            "task45_evaluation": sha256_of(FR4_BASELINE_EVALUATION_PATH),
+            "descriptor_table": sha256_of(FR3_DESCRIPTOR_TABLE_PATH),
+            "feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+            "external_control": sha256_of(EXT_CONTROL_VALIDATED_PATH),
+        },
+        "git_revision": _git_commit_hash(),
+    })
+    FR4_EXTERNAL_CONTROL_DIAGNOSTIC_PATH.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    write_csv(FR4_EXTERNAL_CONTROL_SCORES_PATH, rows)
+    return summary
+
+
+def run_fr4_curriculum() -> dict:
+    """Task 4.6: one corrective-nnPU C1 -> C2 -> fold-specific C3 prototype."""
+    from plantaox.c2_pu.baseline_evaluation import write_csv
+    from plantaox.c2_pu.curriculum_training import (
+        build_curriculum_data,
+        render_curriculum_trajectory_svg,
+        train_curriculum,
+    )
+    from plantaox.c2_pu.experiment_config import ExperimentConfig
+    from plantaox.c2_pu.run_recorder import RunContext, create_run_dir, write_resolved_config
+
+    if not FR4_EXTERNAL_CONTROL_DIAGNOSTIC_PATH.exists():
+        raise FileNotFoundError("run fr4-external-control-diagnostic before Task 4.6")
+    diagnostic = json.loads(FR4_EXTERNAL_CONTROL_DIAGNOSTIC_PATH.read_text(encoding="utf-8"))
+    if diagnostic["status"] != "NO_BLOCKING_IMPLEMENTATION_DEFECT_IDENTIFIED":
+        raise RuntimeError(f"external-control diagnostic blocks curriculum: {diagnostic['status']}")
+
+    accepted_run = json.loads(FR4_NNPU_CORRECTIVE_SUMMARY_PATH.read_text(encoding="utf-8"))["run_dir"]
+    accepted_config = json.loads((Path(accepted_run) / "resolved_config.json").read_text(encoding="utf-8"))
+    config = ExperimentConfig(
+        experiment_id="fr4_curriculum_fold0",
+        baseline="nnPU",
+        fold_id=0,
+        feature_representation=accepted_config["feature_representation"],
+        hidden_dims=tuple(accepted_config["hidden_dims"]),
+        optimizer=accepted_config["optimizer"],
+        learning_rate=accepted_config["learning_rate"],
+        weight_decay=accepted_config["weight_decay"],
+        batch_size=accepted_config["batch_size"],
+        max_epochs=accepted_config["max_epochs"],
+        train_seed=accepted_config["train_seed"],
+        eval_seed=accepted_config["eval_seed"],
+        validation_fraction=accepted_config["validation_fraction"],
+        device=accepted_config["device"],
+        checkpoint_dir=str(FR4_CURRICULUM_RUNS_DIR),
+    )
+    data = _build_fold0_task4_data(config)
+    curriculum = build_curriculum_data(data, config, C3_RANKING_PATH, prior=0.10)
+    run_dir = create_run_dir(FR4_CURRICULUM_RUNS_DIR, config.experiment_id)
+    resolved = config.to_dict() | {
+        "git_revision": _git_commit_hash(),
+        "curriculum": {
+            "stage_order": ["C1", "C2", "C3"], "plateau_patience": 5,
+            "positive_evidence_weights": {"E1": 1.0, "E2": 0.5},
+            "learner": "corrective_beta_gamma", "prior": 0.10, "beta": 0.0, "gamma": 1.0,
+            "optimizer_state_policy": "reset_each_stage_model_weights_warm_started",
+            "validation_policy": "fixed weighted E1+E2 validation positives plus fixed C1 validation unlabeled",
+        },
+        "source_hashes": {
+            "diagnostic": sha256_of(FR4_EXTERNAL_CONTROL_DIAGNOSTIC_PATH),
+            "accepted_corrective_summary": sha256_of(FR4_NNPU_CORRECTIVE_SUMMARY_PATH),
+            "feature_cache_manifest": sha256_of(FR3_FEATURE_CACHE_MANIFEST_PATH),
+            "c3_ranking": sha256_of(C3_RANKING_PATH),
+        },
+    }
+    with RunContext(run_dir):
+        write_resolved_config(run_dir, resolved)
+        training = train_curriculum(config, curriculum, data, run_dir, plateau_patience=5)
+
+    task45 = json.loads(FR4_BASELINE_EVALUATION_PATH.read_text(encoding="utf-8"))["models"]["M3"]
+    accepted_corrective = json.loads(FR4_NNPU_CORRECTIVE_SUMMARY_PATH.read_text(encoding="utf-8"))["training"]
+    comparison = [{
+        "condition": "Accepted corrective baseline", "training_epochs": accepted_corrective["executed_epochs"],
+        "positive_recovery": task45["positive_recovery"]["overall"]["fraction_gt_0_5"],
+        "c1_fraction_gt_0_5": task45["challenge_behavior"]["C1"]["bounded_score_summary"]["fraction_gt_0_5"],
+        "c2_fraction_gt_0_5": task45["challenge_behavior"]["C2"]["bounded_score_summary"]["fraction_gt_0_5"],
+        "c3_fraction_gt_0_5": task45["challenge_behavior"]["C3_fold0"]["bounded_score_summary"]["fraction_gt_0_5"],
+        "corrective_update_fraction": accepted_corrective["mean_corrective_branch_fraction"],
+        "validation_surrogate_risk": accepted_corrective["best_val_nnpu_risk"],
+        **{key: task45["external_assay_supported"][key] for key in ("mcc", "average_precision", "auroc", "recall")},
+        **task45["external_assay_supported"]["confusion_matrix"],
+    }]
+    for stage in training["stages"]:
+        metrics = stage["external_assay_supported_evaluation"]
+        comparison.append({
+            "condition": f"After {stage['stage']}", "training_epochs": stage["executed_epochs"],
+            "positive_recovery": stage["score_summaries"]["held_out_positive"]["fraction_gt_0_5"],
+            "c1_fraction_gt_0_5": stage["score_summaries"]["C1"]["fraction_gt_0_5"],
+            "c2_fraction_gt_0_5": stage["score_summaries"]["C2"]["fraction_gt_0_5"],
+            "c3_fraction_gt_0_5": stage["score_summaries"]["C3_fold0"]["fraction_gt_0_5"],
+            "corrective_update_fraction": stage["mean_corrective_branch_fraction"],
+            "validation_surrogate_risk": stage["best_val_nnpu_risk"],
+            **{key: metrics[key] for key in ("mcc", "average_precision", "auroc", "recall")},
+            **metrics["confusion_matrix"],
+        })
+    write_csv(FR4_CURRICULUM_COMPARISON_PATH, comparison)
+    render_curriculum_trajectory_svg(FR4_CURRICULUM_TRAJECTORY_PATH, comparison)
+    summary = {
+        "task": "Bucket 4, Task 4.6 -- Optional FR4 Curriculum Prototype",
+        "status": "PASS", "run_dir": str(run_dir), "resolved_config": resolved,
+        "training": training, "comparison": comparison,
+        "leakage_report": data.leakage_report,
+        "limitations": [
+            "C1/C2/C3 are unlabeled, not confirmed negatives.",
+            "External controls were evaluated only after every stage checkpoint had been selected.",
+            "pi=0.10 is provisional and E2 is provisional evidence.",
+            "Fold-0 score changes do not establish biological reliability or curriculum superiority.",
+        ],
+    }
+    FR4_CURRICULUM_SUMMARY_PATH.write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="PU-AOP (Component 02) CLI")
     sub = parser.add_subparsers(dest="stage", required=True)
@@ -4034,6 +4202,8 @@ def main(argv: list[str] | None = None) -> int:
         "fr4-baseline-evaluation",
         help="Inference-only fold-0 comparison of the five accepted baseline configurations (Bucket 4.5)",
     )
+    sub.add_parser("fr4-external-control-diagnostic", help="Read-only follow-up to Task 4.5 external-control results")
+    sub.add_parser("fr4-curriculum", help="Corrective-nnPU C1 -> C2 -> fold-specific C3 prototype (Bucket 4.6)")
     args = parser.parse_args(argv)
 
     if args.stage == "fr1-positives":
@@ -4179,6 +4349,15 @@ def main(argv: list[str] | None = None) -> int:
                 "provenance": str(FR4_BASELINE_PROVENANCE_PATH),
             },
         }, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-external-control-diagnostic":
+        summary = run_fr4_external_control_diagnostic()
+        print(json.dumps({k: v for k, v in summary.items() if k != "model_findings"}, indent=2, default=str))
+        return 0
+    if args.stage == "fr4-curriculum":
+        summary = run_fr4_curriculum()
+        print(json.dumps({"status": summary["status"], "run_dir": summary["run_dir"],
+                          "comparison": summary["comparison"]}, indent=2, default=str))
         return 0
     return 1
 

@@ -136,6 +136,12 @@ def load_accepted_baselines(summary_paths: dict[str, Path]) -> list[LoadedBaseli
                 return ScoreOutput(values, values.copy(), "sigmoid(BinaryMlp logits); already bounded")
         else:
             estimator = load_sklearn_checkpoint(checkpoint)["estimator"]
+            classes = getattr(estimator, "classes_", None)
+            if classes is None and hasattr(estimator, "estimator"):
+                classes = getattr(estimator.estimator, "classes_", None)
+            class_order = np.asarray(classes).tolist() if classes is not None else [0, 1]
+            if class_order != [0, 1]:
+                raise ValueError(f"{name}: expected probability columns [0, 1], got {class_order}")
             if kind == "two_step":
                 def predict(features: np.ndarray, estimator=estimator) -> ScoreOutput:
                     raw = np.asarray(estimator.predict_proba(features)[:, 1], dtype=np.float64)
@@ -152,6 +158,7 @@ def load_accepted_baselines(summary_paths: dict[str, Path]) -> list[LoadedBaseli
             "architecture": "BinaryMlp 495->128->64->1" if kind == "torch" else "pulearn + LogisticRegression",
             "positive_evidence_tiers": tiers, "unlabeled_training_pool": "C1" if model_id != "M1" else "C1 treated as assumed negative",
             "fold_id": 0, "feature_representation": "fused (495)", "positive_prior": prior,
+            "positive_score_convention": "column/class 1; higher means stronger positive/AOP model support",
             "score_transformation": "raw and bounded recorded separately" if kind == "two_step" else "none beyond model inference",
         }
         loaded.append(LoadedBaseline(model_id, name, predict, provenance))
