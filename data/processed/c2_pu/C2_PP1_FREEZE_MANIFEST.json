@@ -1,0 +1,244 @@
+{
+  "schema_version": "c2_pp1_freeze_manifest_v1",
+  "release": {
+    "id": "c2_pp1_freeze_v1",
+    "component": "C2 / PU-AOP",
+    "purpose": "PP1 technical demonstration and research baseline",
+    "freeze_date": "2026-10-16",
+    "created_at": "2026-10-16T00:21:56+05:30",
+    "status": "frozen_ready_with_limitations",
+    "decision": "FROZEN \u2014 READY WITH LIMITATIONS",
+    "methodological_audit_status": "READY WITH LIMITATIONS"
+  },
+  "source_control": {
+    "branch_at_preparation": "feat/c2-model-baselines-setup",
+    "verified_implementation_revision": "31d95224dd07dea7f9908c83f7cb1ba65edaa404",
+    "revision_convention": "This is the verified implementation parent revision. The release tag points to the later commit containing this manifest and the freeze documentation; resolving the tag identifies that release commit without self-referential manifest hashing.",
+    "release_tag": "c2-pp1-v1",
+    "tag_status": "annotated_tag_targets_containing_release_commit",
+    "preparation_initial_status": [
+      "A  .idea/modules.xml"
+    ],
+    "unrelated_worktree_policy": "pre-existing staged IDE file preserved and excluded from freeze changes"
+  },
+  "dependencies": {
+    "python_requirement": ">=3.11",
+    "recorded_environment": {
+      "numpy": "2.4.6",
+      "pandas": "3.0.5",
+      "pyarrow": "25.0.1",
+      "torch": "2.14.0+cpu",
+      "scikit-learn": "1.9.0",
+      "pulearn": "0.2.0",
+      "joblib": "1.6.0",
+      "pytest": "9.1.1"
+    },
+    "requirements_file": "requirements.txt",
+    "frozen_datasets": [
+      {
+        "version": "pp1_baseline_v1",
+        "manifest": "data/processed/c2_pu/frozen/pp1_baseline_v1/MANIFEST.json",
+        "sha256": "88f14bb9ba99209a5482a08c2f82baa86434a4af1808f2e373e109efd74c27f2"
+      },
+      {
+        "version": "pp2_baseline_v1",
+        "manifest": "data/processed/c2_pu/frozen/pp2_baseline_v1/MANIFEST.json",
+        "sha256": "dbd8755a69b6f29655c03f5dfa6af5d22b72de32c0708b98c944e6541744e2b4"
+      }
+    ],
+    "fr3": {
+      "descriptor_schema": "data/processed/c2_pu/fr3_descriptor_schema.json",
+      "fusion_schema": "data/processed/c2_pu/fr3_fusion_schema.json",
+      "fusion_scalers": "data/processed/c2_pu/fr3_fusion_scalers.json",
+      "feature_cache_manifest": "data/processed/c2_pu/fr3_feature_cache_manifest.json",
+      "feature_cache_manifest_sha256": "81c87075eec8643a3643a3b726268e35569a1a1f00b15f457d87e1ef3268d97a",
+      "fold0_feature_cache": "data/interim/c2_pu/fr3_fold0_scaled_features.npz",
+      "feature_dimension": 495
+    }
+  },
+  "accepted_models": [
+    {
+      "model_id": "M1",
+      "model": "PN",
+      "checkpoint_sha256": "1c5208ac97de0ecd6d29107b114cd9fd424593be725acaa8304465f4100cae1c",
+      "architecture": "BinaryMlp 495->128->64->1",
+      "positive_evidence_tiers": "E1",
+      "unlabeled_training_pool": "C1 treated as assumed negative",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": null,
+      "score_transformation": "none beyond model inference",
+      "checkpoint_path": "data/interim/c2_pu/fr4_pn_baseline_runs/fr4_pn_baseline_fold0__20261014T223957Z/checkpoint_best.pt",
+      "summary_path": "data/processed/c2_pu/fr4_pn_baseline_fold0_summary.json"
+    },
+    {
+      "model_id": "M2",
+      "model": "Direct-clamped nnPU",
+      "checkpoint_sha256": "37eb6840143a9eabe336ca5ff7ad5b08380132707fb2ce5b089ad6ab46e3f2bc",
+      "architecture": "BinaryMlp 495->128->64->1",
+      "positive_evidence_tiers": "E1+E2",
+      "unlabeled_training_pool": "C1",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": 0.1,
+      "score_transformation": "none beyond model inference",
+      "checkpoint_path": "data/interim/c2_pu/fr4_nnpu_baseline_runs/fr4_nnpu_baseline_fold0__20261014T223923Z/checkpoint_best.pt",
+      "summary_path": "data/processed/c2_pu/fr4_nnpu_baseline_fold0_summary.json"
+    },
+    {
+      "model_id": "M3",
+      "model": "Corrective nnPU",
+      "checkpoint_sha256": "d4446b4dff90b1d1ce3d2c03fa314bd0a65134e6621cf3c01f3a9332442307dd",
+      "architecture": "BinaryMlp 495->128->64->1",
+      "positive_evidence_tiers": "E1+E2",
+      "unlabeled_training_pool": "C1",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": 0.1,
+      "score_transformation": "none beyond model inference",
+      "checkpoint_path": "data/interim/c2_pu/fr4_nnpu_corrective_runs/fr4_nnpu_corrective_fold0__20261014T221912Z/checkpoint_best.pt",
+      "summary_path": "data/processed/c2_pu/fr4_nnpu_corrective_fold0_summary.json"
+    },
+    {
+      "model_id": "M4",
+      "model": "Two-Step PU",
+      "checkpoint_sha256": "975f1414e935f7080ea69005dea7a6a98a654efbd07559e9e2be635b94d65978",
+      "architecture": "pulearn + LogisticRegression",
+      "positive_evidence_tiers": "E1+E2",
+      "unlabeled_training_pool": "C1",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": null,
+      "score_transformation": "raw and bounded recorded separately",
+      "checkpoint_path": "data/interim/c2_pu/fr4_two_step_pu_baseline_runs/fr4_two_step_pu_baseline_fold0__20261014T224037Z/checkpoint_best.joblib",
+      "summary_path": "data/processed/c2_pu/fr4_two_step_pu_baseline_fold0_summary.json"
+    },
+    {
+      "model_id": "M5",
+      "model": "PU-Bagging",
+      "checkpoint_sha256": "2d11c0c0455122f8e52db0b9fc401d2dc5a14708c73858183f98bbf4f590aee5",
+      "architecture": "pulearn + LogisticRegression",
+      "positive_evidence_tiers": "E1+E2",
+      "unlabeled_training_pool": "C1",
+      "fold_id": 0,
+      "feature_representation": "fused (495)",
+      "positive_prior": null,
+      "score_transformation": "none beyond model inference",
+      "checkpoint_path": "data/interim/c2_pu/fr4_pu_bagging_baseline_runs/fr4_pu_bagging_baseline_fold0__20261014T224032Z/checkpoint_best.joblib",
+      "summary_path": "data/processed/c2_pu/fr4_pu_bagging_baseline_fold0_summary.json"
+    }
+  ],
+  "accepted_curriculum": {
+    "summary": "data/processed/c2_pu/fr4_curriculum_fold0_summary.json",
+    "summary_sha256": "cc1e0833df9a85f67aa0a2f46aa5d789d0e40470b67f5cf9a56cb804958c4ddf",
+    "matched_reference_alias": "weighted_c1_only_curriculum_reference",
+    "stages": [
+      {
+        "stage": "C1",
+        "best_checkpoint": "data/interim/c2_pu/fr4_curriculum_runs/fr4_curriculum_fold0__20261015T103556Z/stage_1_c1/checkpoint_best.pt",
+        "best_checkpoint_sha256": "f566c06314e1b243124abf49e660b3979f3d086e51b19ad9f2d1b0929494f7d4",
+        "last_checkpoint": "data/interim/c2_pu/fr4_curriculum_runs/fr4_curriculum_fold0__20261015T103556Z/stage_1_c1/checkpoint_last.pt",
+        "last_checkpoint_sha256": "2f9e50232fd752f98cd53b0cbb4e90c198500f32341d2aced1afdcaee0591ecd",
+        "parent_checkpoint_sha256": null
+      },
+      {
+        "stage": "C2",
+        "best_checkpoint": "data/interim/c2_pu/fr4_curriculum_runs/fr4_curriculum_fold0__20261015T103556Z/stage_2_c2/checkpoint_best.pt",
+        "best_checkpoint_sha256": "d5ccb8712d93876a0d7e67f43e8758761fcc4c921ac3823c3d574afaba6afd44",
+        "last_checkpoint": "data/interim/c2_pu/fr4_curriculum_runs/fr4_curriculum_fold0__20261015T103556Z/stage_2_c2/checkpoint_last.pt",
+        "last_checkpoint_sha256": "326b532ecb996be73d5787ce1a6483a563adc9370d796ced09cbce1fd0c628c3",
+        "parent_checkpoint_sha256": "f566c06314e1b243124abf49e660b3979f3d086e51b19ad9f2d1b0929494f7d4"
+      },
+      {
+        "stage": "C3",
+        "best_checkpoint": "data/interim/c2_pu/fr4_curriculum_runs/fr4_curriculum_fold0__20261015T103556Z/stage_3_c3/checkpoint_best.pt",
+        "best_checkpoint_sha256": "f2775fa2855454098b58e35431a18cbb6081f9c777bd7880720bb25dfd715aa6",
+        "last_checkpoint": "data/interim/c2_pu/fr4_curriculum_runs/fr4_curriculum_fold0__20261015T103556Z/stage_3_c3/checkpoint_last.pt",
+        "last_checkpoint_sha256": "82f323d60011ef5605b5e5be4da066e0f7013fb8c6b8a766801b24931e718118",
+        "parent_checkpoint_sha256": "d5ccb8712d93876a0d7e67f43e8758761fcc4c921ac3823c3d574afaba6afd44"
+      }
+    ]
+  },
+  "accepted_evidence": {
+    "task_4_5_evaluation": "data/processed/c2_pu/fr4_baseline_evaluation_fold0.json",
+    "external_control_diagnostic": "data/processed/c2_pu/fr4_external_control_diagnostic.json",
+    "matched_curriculum_comparison": "data/processed/c2_pu/fr4_pp1_matched_curriculum_fold0.csv",
+    "pre_freeze_audit": "src/plantaox/c2_pu/docs/FR4_PP1_PRE_FREEZE_METHOD_AUDIT.md"
+  },
+  "release_documents": {
+    "freeze_report": {
+      "path": "src/plantaox/c2_pu/docs/C2_PP1_FREEZE_REPORT.md",
+      "sha256": "4bde29224d6b8731bdd1c04030327fe3dcf69021eec780a2bbb7f3a456d25484"
+    },
+    "handover": {
+      "path": "src/plantaox/c2_pu/docs/C2_PP1_HANDOVER.md",
+      "sha256": "a31fe1892ea76b4d70259e7f8538a0f97a13b83b1b7a6c8f1c39321f2c92892a"
+    },
+    "read_only_verifier": "src/plantaox/c2_pu/pp1_freeze.py"
+  },
+  "artifact_inventory": {
+    "path": "data/processed/c2_pu/C2_PP1_ARTIFACT_INVENTORY.csv",
+    "sha256": "8df86f5865452d5453a7e4adee322a058918ea7999dbff932e4d88b322288ed2",
+    "record_count": 170,
+    "missing_count": 0,
+    "missing_paths": [],
+    "git_disposition_counts": {
+      "ignored": 64,
+      "tracked": 106
+    },
+    "retention_counts": {
+      "regenerable_using_documented_pipeline": 8,
+      "essential_to_retain_as_bytes": 162
+    },
+    "non_git_backup_status": "56 essential ignored artifacts independently verified in the owner-supplied external data copy"
+  },
+  "preservation": {
+    "status": "PASS",
+    "method": "existing owner-created data-directory copy; read-only size and SHA-256 verification",
+    "nonportable_backup_root": "C:\\Users\\metal\\Documents\\SLIIT Research\\Data\\C2-PP1-baseline-data",
+    "backup_layout": "data_directory_copy",
+    "artifact_count_expected": 56,
+    "artifact_count_verified": 56,
+    "verified_bytes": 39103768,
+    "failures": [],
+    "verified_at": "2026-10-15T20:23:22.806105Z"
+  },
+  "offline_smoke": {
+    "fold_id": 0,
+    "feature_cache_manifest": "data/processed/c2_pu/fr3_feature_cache_manifest.json",
+    "fusion_scalers": "data/processed/c2_pu/fr3_fusion_scalers.json",
+    "c3_ranking": "data/processed/c2_pu/c3_similarity_ranking.csv",
+    "baseline_checkpoint": "data/interim/c2_pu/fr4_pn_baseline_runs/fr4_pn_baseline_fold0__20261014T223957Z/checkpoint_best.pt",
+    "curriculum_stage_c1_best": "data/interim/c2_pu/fr4_curriculum_runs/fr4_curriculum_fold0__20261015T103556Z/stage_1_c1/checkpoint_best.pt",
+    "curriculum_stage_c3_best": "data/interim/c2_pu/fr4_curriculum_runs/fr4_curriculum_fold0__20261015T103556Z/stage_3_c3/checkpoint_best.pt",
+    "expected_shape": [
+      8,
+      1
+    ],
+    "command": "python -m plantaox.c2_pu.pp1_freeze verify --manifest data/processed/c2_pu/C2_PP1_FREEZE_MANIFEST.json"
+  },
+  "validation_status": {
+    "technical": "accepted and reproducible in the current local environment",
+    "scientific": "reliable antioxidant-activity discrimination not established",
+    "supervisor_approval": "pending where recorded in FR1/FR2 acceptance reports and IMPLEMENTATION_STATUS.md"
+  },
+  "known_limitations": [
+    "Task 4.5 assay-supported MCC values are negative and AUROC values are below 0.5 for all five configurations.",
+    "The external inactive-control set contains only 38 assay-specific peptides and two cross-database annotation conflicts.",
+    "E2 evidence is provisional and pi=0.10 is an assumed class prior.",
+    "Positive and unlabeled pools have source and descriptor distribution differences that may support shortcuts.",
+    "Curriculum checkpoint selection uses a C1-based surrogate even for C2 and C3 training stages.",
+    "Evaluation is fold-0 only and model scores are not calibrated biological probabilities.",
+    "Git-ignored checkpoint and cache bytes require both the verified external data copy and Git release references; the tag alone does not contain these bytes."
+  ],
+  "pending_decisions": [
+    "Supervisor confirmation of the SwissProt/UniProtKB-reviewed C1 source interpretation.",
+    "Supervisor review of the 179 positive/inactive label conflicts and the provisional E2 policy.",
+    "Project-owner confirmation of retaining and flagging the two BIOPEP-UWM/external-control conflicts."
+  ],
+  "verification_instructions": [
+    "Use .venv/Scripts/python.exe (Python 3.11.14) and set PYTHONPATH=src.",
+    "Run the offline_smoke.command from the repository root.",
+    "Run pytest tests/c2_pu/test_pp1_freeze.py -q for focused regression coverage."
+  ]
+}

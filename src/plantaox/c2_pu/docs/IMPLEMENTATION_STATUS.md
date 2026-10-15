@@ -1728,6 +1728,36 @@
   passed; FR3 manifest/scaler, accepted Task 4.5/4.6 summaries, and all six stage checkpoint hashes
   remained unchanged. No real fold-0 model was retrained.
 
+### Component 02 — PP1 Research Implementation Freeze
+
+**Status: FROZEN — READY WITH LIMITATIONS (2026-10-16).** Freeze ID `c2_pp1_freeze_v1` was finalized
+against verified implementation revision `31d95224dd07dea7f9908c83f7cb1ba65edaa404`; annotated tag
+`c2-pp1-v1` identifies the dedicated freeze commit. The machine-readable record is
+`data/processed/c2_pu/C2_PP1_FREEZE_MANIFEST.json`, with the 170-file checksum inventory at
+`C2_PP1_ARTIFACT_INVENTORY.csv` and handover reports `C2_PP1_FREEZE_REPORT.md` / `C2_PP1_HANDOVER.md`.
+
+- All **170** in-scope artifacts are locally present and match recorded size/SHA-256; PP1's 10 and PP2's
+  28 frozen files separately pass their authoritative manifests. The inventory covers 106 tracked and 64
+  ignored files. The ignored set totals 452,510,034 bytes; 56 files / 39,103,768 bytes are essential
+  accepted demo/checkpoint/run bytes, while eight larger source/cache files are regenerable through the
+  documented pipelines.
+- Read-only offline verification passed: fold-0 cache `9356×495 float32`, fold-specific C3 2,000 of the
+  2,325-row union, zero external-control overlap with positive partitions, and finite bounded `8×1`
+  inference after compatibility-checked reload of the accepted PN, weighted Stage-C1, and selected
+  Stage-C3 checkpoints. No training, scaler fit, embedding computation, or historical-output write ran.
+- The owner-supplied external data copy at `C:\Users\metal\Documents\SLIIT Research\Data\C2-PP1-baseline-data`
+  passed independent verification for all 56 essential ignored artifacts (39,103,768 bytes): no files
+  were missing and every byte-size/SHA-256 value matched the release inventory. No additional archive
+  was created and the existing backup was not modified.
+- The project `.venv` now resolves its existing repository-local Python 3.11.14 runtime; focused freeze
+  tests pass through `.venv/Scripts/python.exe`.
+- The accepted negative evidence remains locked: Task 4.5 MCC is negative and AUROC below 0.5 for every
+  model; no matched curriculum stage reliably discriminates the 38 controls. Technical reproducibility
+  is accepted; biological reliability and supervisor sign-off are not.
+- The release commit/tag and external byte preservation are complete locally. No remote push was
+  performed. Tasks 4.1–4.6 retain their historical PASS statuses; FR6/RNIS, five-fold evaluation,
+  calibration, biological validation, and the recorded supervisor approvals remain unstarted or pending.
+
 ## 🔄 Current work in progress
 
 *(Bucket 2, Task 2.1 and Bucket 3, Task 3.2's setup/smoke-test scope are both moved to Completed
@@ -2005,5 +2035,7 @@ tasks below.)*
 | 2026-10-15 | PP1 audit classifies C3 `best_epoch=0` as post-update and retains the accepted checkpoint | Epoch zero contained 63 C3 optimizer steps before evaluation/save. Its six parameter tensors differ from the Stage-C2 parent; checkpoint payload, JSONL history, and recomputed validation risk agree. The dated report clarifies this numbering without rewriting the experimental result. |
 | 2026-10-15 | PP1 audit corrects the prior decision-log wording that said external scoring occurred only after **all** stage checkpoints were selected | Source code scores after **each stage's own** best checkpoint is selected, before later stages train. The scores are not used to choose any checkpoint, stage transition, or hyperparameter, so the evaluation-only boundary still holds. This is a chronology/documentation correction, not a new model-selection procedure. |
 | 2026-10-15 | PP1 readiness is `READY WITH LIMITATIONS` | Risk weighting and stage lineage passed focused mathematical and artifact checks; 160 relevant tests passed. The fixed C1 validation surrogate, provisional prior and E2 labels, source shift, one-fold scope, and weak results on 38 assay-inactive controls prevent claims of validated biological performance. |
+| 2026-10-16 | Prepared Component 02 release identity `c2_pp1_freeze_v1` against implementation revision `31d95224dd07dea7f9908c83f7cb1ba65edaa404`, with proposed tag `c2-pp1-v1`; status remains `FREEZE INCOMPLETE` pending owner-authorized commit/tag and external artifact backup | All 170 inventory entries and authoritative PP1/PP2 manifests verify locally, and the read-only offline checkpoint/cache smoke passes. A Git tag cannot preserve the 64 ignored files, including 39,103,768 bytes of essential accepted cache/checkpoint/run state. The task explicitly withheld automatic commit/tag operations and provided no backup destination, so claiming a finalized portable freeze would overstate the evidence. |
+| 2026-10-16 | Finalized Component 02 freeze `c2_pp1_freeze_v1` as `FROZEN — READY WITH LIMITATIONS`, with annotated tag `c2-pp1-v1` on the dedicated freeze commit | The owner supplied an external copied `data` tree. Read-only verification found all 56 essential ignored artifacts (39,103,768 bytes) with exact inventory sizes and SHA-256 values. The unrelated `.idea/modules.xml` was unstaged without changing its bytes, the project `.venv` was repaired to the existing local Python 3.11.14 runtime, and no accepted artifact or scientific result was changed. The tag and commit remain local pending separate push authorization. |
 
 *(Add new rows here, do not delete old ones — this is a historical log.)*
