@@ -1,0 +1,304 @@
+{
+  "schema_version": "1.0",
+  "checked_on": "2026-10-19",
+  "integration_policy": "A predictor may be marked integrated only after a real sequence has produced a finite score through the C3 predictor interface and the score evidence has been retained.",
+  "environment_observations": {
+    "repository_branch": "feat/c3-AOP-BCS2",
+    "c3_adapters_present": [],
+    "public_repositories_inspected_as_temporary_shallow_clones": true,
+    "pu_aop_required_ignored_artifacts_present_in_current_checkout": false,
+    "pu_aop_documented_external_backup_present_at_recorded_path": false
+  },
+  "predictors": [
+    {
+      "predictor_id": "anoxpepred",
+      "display_name": "AnOxPePred",
+      "code_model_availability": {
+        "code": "Public GitHub notebooks and Python helper module are available.",
+        "model": "TensorFlow checkpoint prefix AnOxPePred_v1 is bundled as .index and .data files.",
+        "web_service": "The current DTU Health Tech submission page was reachable during this review.",
+        "inspected_revision": "b08bccaf5f8784f3b016cfab652e276dd323851b",
+        "summary": "Public source notebooks and bundled TensorFlow weights; current DTU submission page reachable."
+      },
+      "expected_input": {
+        "format": "Single- or multi-record FASTA; the notebook can also accept an in-memory sequence array.",
+        "constraints": "Peptides must be 2-30 residues for the published service; local preprocessing pads sequences to 30 and silently omits sequences longer than 30.",
+        "summary": "FASTA or sequence array; peptide length 2-30; one-hot encoded and padded to 30."
+      },
+      "output": {
+        "type": "Two sigmoid scores per peptide.",
+        "score_semantics": "FRS (free-radical scavenging) and Chel/Chelator scores.",
+        "summary": "Two numeric sigmoid outputs: FRS and chelation."
+      },
+      "batch_scoring": {
+        "possible": true,
+        "mode": "Multiple FASTA records are accepted and model.predict receives an array.",
+        "limit": "No numeric batch cap was found on the inspected submission page.",
+        "summary": "Yes; multi-record FASTA and array prediction are supported."
+      },
+      "license_access": {
+        "repository_license": "No LICENSE/COPYING/NOTICE file or explicit repository code licence was found.",
+        "limitations": "The public repository and public web form are accessible, but reuse/redistribution rights are unspecified and must not be assumed.",
+        "summary": "Public access, but no repository code licence was found; reuse terms are unspecified."
+      },
+      "integration": {
+        "status": "not_integrated",
+        "real_score_verified": false,
+        "score_evidence": null,
+        "summary": "No AnOxPePred adapter or retained real C3 score exists.",
+        "blockers": [
+          "Reproduce a compatible legacy TensorFlow environment or define a controlled web-service workflow.",
+          "Choose and document whether the C3 scalar score is FRS, Chelator, or a prespecified combination."
+        ]
+      },
+      "sources": [
+        {
+          "label": "Official source repository",
+          "location": "https://github.com/TobiasHeOl/AnOxPePred",
+          "observation": "Predictor notebook, helper module, data, and TensorFlow checkpoint files inspected."
+        },
+        {
+          "label": "Current DTU submission page",
+          "location": "https://services.healthtech.dtu.dk/services/AnOxPePred-1.0/1-Submission.php",
+          "observation": "Accepts pasted or uploaded FASTA and documents the inclusive 2-30-residue limit."
+        },
+        {
+          "label": "Primary publication",
+          "location": "https://www.nature.com/articles/s41598-020-78319-w",
+          "observation": "Describes the public web server and freely available source code."
+        }
+      ]
+    },
+    {
+      "predictor_id": "multi_aop",
+      "display_name": "Multi-AOP",
+      "code_model_availability": {
+        "code": "Public GitHub training, reproduction, data-loading, and prediction code is available.",
+        "model": "The repository bundles final_model/best_combined_model.pth and predict/model/best_model_Oct13.pth.",
+        "web_service": "No maintained public prediction service was documented in the inspected repository or paper.",
+        "inspected_revision": "24d2c4fc88b237ddc0daa7528e78ae68e572feb5",
+        "summary": "Public local inference code and bundled PyTorch checkpoints; no documented web service."
+      },
+      "expected_input": {
+        "format": "Multi-record FASTA converted by the supplied script to CSV columns name and SEQUENCE; label is added if absent.",
+        "constraints": "The supplied FASTA converter accepts standard amino acids and lengths 2-30; the data loader pads/truncates model input to 50.",
+        "summary": "FASTA converted to name/SEQUENCE CSV; standard amino acids; converter accepts length 2-30."
+      },
+      "output": {
+        "type": "CSV with continuous score and binary label columns.",
+        "score_semantics": "probs is the model's antioxidant-class output; preds applies a strict >0.5 threshold.",
+        "summary": "CSV columns probs and preds, with preds thresholded at >0.5."
+      },
+      "batch_scoring": {
+        "possible": true,
+        "mode": "The supplied DataLoader and prediction loop process all CSV rows.",
+        "limit": "The prediction script sets batch_size=500.",
+        "summary": "Yes; supplied local loop uses batches of 500."
+      },
+      "license_access": {
+        "repository_license": "No LICENSE/COPYING/NOTICE file or explicit repository code licence was found.",
+        "limitations": "Dependencies include PyTorch, PyTorch Geometric, RDKit, Biopython, and xLSTM; reuse/redistribution rights are unspecified.",
+        "summary": "Public access, but no repository code licence was found; dependency setup is substantial."
+      },
+      "integration": {
+        "status": "not_integrated",
+        "real_score_verified": false,
+        "score_evidence": null,
+        "summary": "No Multi-AOP adapter or retained real C3 score exists.",
+        "blockers": [
+          "Create and pin a compatible dependency environment.",
+          "Replace hard-coded paths and verify checkpoint/model compatibility before adapter work."
+        ]
+      },
+      "sources": [
+        {
+          "label": "Official source repository",
+          "location": "https://github.com/CaiJianxiu/Multi-AOP",
+          "observation": "Prediction code, two checkpoints, batch size, input filtering, and output columns inspected."
+        },
+        {
+          "label": "Primary publication",
+          "location": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12864603/",
+          "observation": "Describes the sequence and molecular-graph model and the final merged-dataset predictor."
+        }
+      ]
+    },
+    {
+      "predictor_id": "aopxsvm",
+      "display_name": "AOPxSVM",
+      "code_model_availability": {
+        "code": "Public GitHub feature extraction and prediction script is available.",
+        "model": "The repository bundles the fitted SVM, StandardScaler, and selected-feature table.",
+        "web_service": "The publication's FASTA submission page was reachable during this review.",
+        "inspected_revision": "c4c619b9ab7ab911c4475279f0d0a05bd4263768",
+        "summary": "Public inference code plus bundled scaler/SVM/features; live FASTA submission page reachable."
+      },
+      "expected_input": {
+        "format": "Single- or multi-record FASTA; the local script currently hard-codes AOPP.test.fasta.",
+        "constraints": "Feature extraction combines CTD and BLOSUM62, selects recorded feature columns, standardizes them, and sends the first 80 selected features to the SVM.",
+        "summary": "FASTA; CTD+BLOSUM62 features, saved selection/scaler, and 80-feature SVM input."
+      },
+      "output": {
+        "type": "CSV with predicted class and positive-class probability.",
+        "score_semantics": "pred_label is the SVM class; pred_proba is predict_proba[:,1]. The web publication describes activity and confidence.",
+        "summary": "CSV pred_label plus positive-class pred_proba."
+      },
+      "batch_scoring": {
+        "possible": true,
+        "mode": "The FASTA parser and vectorized SVM prediction process multiple records; the web page accepts pasted FASTA sequences or a FASTA upload.",
+        "limit": "No numeric batch cap was documented in the inspected source or web page.",
+        "summary": "Yes; local multi-FASTA inference and web FASTA upload are supported."
+      },
+      "license_access": {
+        "repository_license": "No LICENSE/COPYING/NOTICE file or explicit repository code licence was found.",
+        "limitations": "The supplied environment targets Python 3.7 and scikit-learn 1.0.2; pickle/joblib compatibility must be respected. Reuse rights are unspecified.",
+        "summary": "Public access, but no repository code licence was found; legacy joblib environment is required."
+      },
+      "integration": {
+        "status": "not_integrated",
+        "real_score_verified": false,
+        "score_evidence": null,
+        "summary": "No AOPxSVM adapter or retained real C3 score exists.",
+        "blockers": [
+          "Create a compatible Python 3.7/scikit-learn 1.0.2 environment for the serialized model.",
+          "Parameterize the hard-coded input/output paths and verify a real positive-class score."
+        ]
+      },
+      "sources": [
+        {
+          "label": "Official source repository",
+          "location": "https://github.com/yashdui/AOPxSVM",
+          "observation": "Prediction script, requirements, scaler, SVM, selected features, and FASTA parser inspected."
+        },
+        {
+          "label": "Primary publication",
+          "location": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12192177/",
+          "observation": "Documents FASTA input and antioxidant activity/confidence output."
+        },
+        {
+          "label": "Current web submission page",
+          "location": "https://inova.aibiochem.net/antioxpep/",
+          "observation": "Reachable page accepts pasted FASTA sequence(s) or FASTA upload."
+        }
+      ]
+    },
+    {
+      "predictor_id": "aop_drl",
+      "display_name": "AOP-DRL",
+      "code_model_availability": {
+        "code": "Public GitHub research/training scripts are available.",
+        "model": "No trained AOP-DRL checkpoint, tokenizer bundle, inference entry point, dataset, or requirements.txt is present in the inspected repository.",
+        "web_service": "The published hostname redirected to an unrelated National Protein Science Center instrument-login page during this review.",
+        "inspected_revision": "bbadf588a2be9c0f39f706926436cfb95c8b53b6",
+        "summary": "Public training-oriented scripts, but no trained checkpoint/inference package; published web endpoint is not serving AOP-DRL."
+      },
+      "expected_input": {
+        "format": "The paper describes pasted peptide sequences or .txt/.fasta uploads; repository scripts instead expect labelled CSV data and local pretrained-model paths.",
+        "constraints": "The paper states up to 500 peptide sequences, or one protein up to 500 residues for optional in-silico digestion.",
+        "summary": "Published UI: pasted sequence or TXT/FASTA, up to 500 peptides; repository: labelled CSV training input."
+      },
+      "output": {
+        "type": "The paper describes a downloadable report; training scripts emit predict_res.csv and metrics_res.csv.",
+        "score_semantics": "Prediction probability/score, predicted label, and reported physicochemical properties in the web workflow.",
+        "summary": "Published report contains prediction probabilities and physicochemical properties."
+      },
+      "batch_scoring": {
+        "possible": false,
+        "mode": "The paper documents up to 500 sequences, but neither the published service nor a complete local inference package was accessible in this review.",
+        "limit": "Documented limit is 500 peptide sequences; currently not operationally verified.",
+        "summary": "Documented for up to 500 peptides, but currently unavailable and therefore not operationally usable."
+      },
+      "license_access": {
+        "repository_license": "README states that AOP-DRL is for non-commercial use only; no standalone licence file was found.",
+        "limitations": "Non-commercial restriction; published training used 2x Tesla V100 GPUs and local absolute model/data paths.",
+        "summary": "Non-commercial use only; no standalone licence file; high-resource and missing-artifact constraints."
+      },
+      "integration": {
+        "status": "not_integrated",
+        "real_score_verified": false,
+        "score_evidence": null,
+        "summary": "No usable checkpoint/service, C3 adapter, or retained real C3 score exists.",
+        "blockers": [
+          "Obtain the trained checkpoint/tokenizer and a complete inference procedure from the authors, or restore the intended web service.",
+          "Clarify non-commercial terms for the planned use."
+        ]
+      },
+      "sources": [
+        {
+          "label": "Official source repository",
+          "location": "https://github.com/Zhouyongzhu/AOP_DRL",
+          "observation": "Training scripts and README inspected; checkpoint, inference entry point, dataset, and requirements file absent."
+        },
+        {
+          "label": "Primary publication",
+          "location": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12800373/",
+          "observation": "Documents web inputs, batch limit, probability/report output, architecture, and published endpoint."
+        },
+        {
+          "label": "Published web endpoint",
+          "location": "https://aop-drl.ncpsb.org.cn/",
+          "observation": "Redirected to /genee/, an unrelated instrument-management login page, on 2026-10-19."
+        }
+      ]
+    },
+    {
+      "predictor_id": "pu_aop",
+      "display_name": "PU-AOP (Component 2)",
+      "code_model_availability": {
+        "code": "Component 2 source, loaders, model definitions, manifests, reports, and prior score summaries exist in the team repository.",
+        "model": "Accepted checkpoint hashes and paths are documented, but the ignored checkpoint/cache files are absent from this checkout and the recorded external backup path is absent on this machine.",
+        "web_service": "No deployed PU-AOP service or C3-facing scoring API exists.",
+        "inspected_revision": "local feat/c3-AOP-BCS2 checkout on 2026-10-19",
+        "summary": "Internal source/manifests available; required accepted checkpoint and feature-cache bytes are missing locally."
+      },
+      "expected_input": {
+        "format": "Uppercase peptide sequences must first pass the Component 2 feature pipeline; the accepted model consumes fold-scaled 495-dimensional vectors.",
+        "constraints": "Each vector combines 480 ESM-2 embedding dimensions with 15 descriptors and must use the matching fold-specific scaler/model lineage.",
+        "summary": "Peptide sequence via C2 preprocessing to a fold-scaled 495D vector (480 ESM-2 + 15 descriptors)."
+      },
+      "output": {
+        "type": "Finite positive-class model score, generally bounded to [0,1] for the neural/bagging variants; Two-Step PU also records raw corrected scores.",
+        "score_semantics": "Higher means stronger model support for the AOP-positive class; existing documentation explicitly says scores are not calibrated biological probabilities.",
+        "summary": "Positive-class support score; not a calibrated biological probability."
+      },
+      "batch_scoring": {
+        "possible": true,
+        "mode": "Component 2 inference functions accept feature matrices and previously scored full evaluation pools.",
+        "limit": "No fixed batch maximum is declared; practical use depends on ESM-2 feature generation and checkpoint/cache recovery.",
+        "summary": "Yes in the upstream matrix-based pipeline, once the required model/cache artifacts are recovered."
+      },
+      "license_access": {
+        "repository_license": "No repository-level licence file was found.",
+        "limitations": "Internal team component; C3 requires a frozen-model handoff, exact checkpoint/scaler lineage, and access to ignored artifacts.",
+        "summary": "Internal team access; no repository licence; formal frozen-model handoff and missing artifacts are required."
+      },
+      "integration": {
+        "status": "not_integrated",
+        "real_score_verified": false,
+        "score_evidence": null,
+        "summary": "Upstream historical inference is documented, but no score has been produced through the C3 interface.",
+        "blockers": [
+          "Recover and hash-verify the accepted checkpoint, fold scaler, and feature resources.",
+          "Component 2 must identify the frozen PU-AOP model/version for C3 and provide a sequence-to-score handoff contract."
+        ]
+      },
+      "sources": [
+        {
+          "label": "Component 2 PP1 handover",
+          "location": "src/plantaox/c2_pu/docs/C2_PP1_HANDOVER.md",
+          "observation": "Documents accepted checkpoints, 495D features, prior inference, limitations, and the external backup path."
+        },
+        {
+          "label": "Component 2 freeze manifest",
+          "location": "data/processed/c2_pu/C2_PP1_FREEZE_MANIFEST.json",
+          "observation": "Records accepted model/checkpoint hashes and states that scores are not calibrated biological probabilities."
+        },
+        {
+          "label": "Component 2 evaluation implementation",
+          "location": "src/plantaox/c2_pu/baseline_evaluation.py",
+          "observation": "Shows checkpoint loading, matrix batch inference, positive-class score convention, and score validation."
+        }
+      ]
+    }
+  ]
+}

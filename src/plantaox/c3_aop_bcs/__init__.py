@@ -23,6 +23,10 @@ from .predictor_interface import (
     PredictorScoringError,
     PredictorUnavailableError,
 )
+from .predictor_access import (
+    load_predictor_access_registry,
+    render_predictor_access_table,
+)
 
 __all__ = [
     "ResearchConfig",
@@ -40,6 +44,8 @@ __all__ = [
     "PredictorDescriptor",
     "PredictorScoringError",
     "PredictorUnavailableError",
+    "load_predictor_access_registry",
+    "render_predictor_access_table",
     "load_blosum62",
     "build_cleaned_dataset",
     "build_cd_hit_dataset",
