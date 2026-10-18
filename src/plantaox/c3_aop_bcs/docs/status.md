@@ -100,13 +100,13 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.23 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.24: Prepare score normalization
+## Current work — Component 2 five-model handoff audit
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
-- document each integrated predictor's native output range and score semantics;
-- preserve native `[0,1]` probabilities where available and define any justified fixed mapping for other score types;
-- prohibit batch-wise min-max scaling that would distort original-versus-perturbed differences;
-- validate the usable score scale while continuing to keep dummy smoke-test values outside scientific results.
+- audit the frozen records for all five Component 2 baseline models without changing Component 2 files;
+- distinguish documented model contracts from artifacts that are actually available in this checkout;
+- identify missing or contradictory information that blocks verified C3 scoring;
+- preserve the findings as C3-owned handoff evidence before Task 3.24 begins.
