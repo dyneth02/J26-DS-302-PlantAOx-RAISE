@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
+
+import Bio
+from Bio.Align import substitution_matrices
 
 from plantaox.c3_aop_bcs.blosum62 import (
+    BLOSUM62_LOADER,
+    BLOSUM62_MATRIX_NAME,
     BLOSUM62_SUPPORT_VERSION,
     DEFAULT_MANIFEST_PATH,
-    DEFAULT_MATRIX_PATH,
     MATRIX_ALPHABET,
     MINIMUM_CONSERVATIVE_SCORE,
     TIE_BREAK_RULE,
@@ -43,6 +47,16 @@ class Blosum62Tests(unittest.TestCase):
         for left in MATRIX_ALPHABET:
             for right in MATRIX_ALPHABET:
                 self.assertEqual(self.matrix[(left, right)], self.matrix[(right, left)])
+
+    def test_matrix_is_loaded_through_biopython(self):
+        with patch(
+            "plantaox.c3_aop_bcs.blosum62.substitution_matrices.load",
+            wraps=substitution_matrices.load,
+        ) as mocked_loader:
+            matrix = load_blosum62()
+
+        mocked_loader.assert_called_once_with(BLOSUM62_MATRIX_NAME)
+        self.assertEqual(matrix[("D", "E")], 2)
 
     def test_candidates_apply_all_exclusions_and_minimum_score(self):
         for original in STANDARD_AMINO_ACIDS:
@@ -108,12 +122,19 @@ class Blosum62Tests(unittest.TestCase):
         self.assertEqual(committed, support_manifest())
         self.assertEqual(committed["support_version"], BLOSUM62_SUPPORT_VERSION)
         self.assertEqual(committed["dimensions"], [20, 20])
+        self.assertEqual(committed["matrix_provider"]["library"], "Biopython")
+        self.assertEqual(committed["matrix_provider"]["version"], Bio.__version__)
+        self.assertEqual(committed["matrix_provider"]["loader"], BLOSUM62_LOADER)
+        self.assertEqual(
+            committed["matrix_provider"]["matrix_identifier"],
+            BLOSUM62_MATRIX_NAME,
+        )
+        self.assertEqual(
+            committed["matrix_provider"]["library_alphabet"],
+            list(substitution_matrices.load(BLOSUM62_MATRIX_NAME).alphabet),
+        )
         self.assertEqual(committed["selection_rule"]["minimum_score"], 1)
         self.assertEqual(committed["selection_rule"]["tie_break"], TIE_BREAK_RULE)
-        self.assertEqual(
-            committed["resource_sha256"],
-            hashlib.sha256(DEFAULT_MATRIX_PATH.read_bytes()).hexdigest(),
-        )
 
         with tempfile.TemporaryDirectory(dir=TEST_DIRECTORY) as directory:
             first = write_support_manifest(Path(directory) / "first.json")

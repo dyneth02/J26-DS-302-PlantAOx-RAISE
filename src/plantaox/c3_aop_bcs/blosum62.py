@@ -1,21 +1,23 @@
-"""Load BLOSUM62 and select deterministic P2 substitution candidates."""
+"""Load Biopython's BLOSUM62 and select deterministic P2 candidates."""
 
 from __future__ import annotations
 
-import csv
 from dataclasses import dataclass
-import hashlib
 import json
 from pathlib import Path
 from typing import Mapping, Sequence
 
+import Bio
+from Bio.Align import substitution_matrices
+
 from .config import STANDARD_AMINO_ACIDS, load_research_config
 
 
-DEFAULT_MATRIX_PATH = Path(__file__).with_name("resources") / "blosum62_standard.tsv"
 DEFAULT_MANIFEST_PATH = Path(__file__).with_name("blosum62_support_v1.json")
 BLOSUM62_SOURCE_URL = "https://ftp.ncbi.nlm.nih.gov/blast/matrices/BLOSUM62"
 BLOSUM62_SUPPORT_VERSION = "c3_aop_bcs_blosum62_support_v1"
+BLOSUM62_MATRIX_NAME = "BLOSUM62"
+BLOSUM62_LOADER = "Bio.Align.substitution_matrices.load"
 MATRIX_ALPHABET = tuple("ARNDCQEGHILKMFPSTWYV")
 MINIMUM_CONSERVATIVE_SCORE = 1
 TIE_BREAK_RULE = "highest BLOSUM62 score, then alphabetical residue code ascending"
@@ -31,39 +33,26 @@ class SubstitutionCandidate:
     score: int
 
 
-def load_blosum62(path: str | Path = DEFAULT_MATRIX_PATH) -> Blosum62Matrix:
-    """Load and validate the project-pinned 20-amino-acid BLOSUM62 table."""
+def load_blosum62() -> Blosum62Matrix:
+    """Load BLOSUM62 with Biopython and return its standard-amino-acid subset."""
 
-    matrix_path = Path(path)
-    data_lines = [
-        line
-        for line in matrix_path.read_text(encoding="utf-8").splitlines()
-        if line and not line.startswith("#")
-    ]
-    reader = csv.reader(data_lines, delimiter="\t")
-    rows = list(reader)
-    if not rows or tuple(rows[0][1:]) != MATRIX_ALPHABET:
-        raise ValueError("BLOSUM62 column alphabet does not match the pinned matrix contract")
-    if len(rows) != len(MATRIX_ALPHABET) + 1:
-        raise ValueError("BLOSUM62 must contain exactly 20 standard-amino-acid rows")
+    library_matrix = substitution_matrices.load(BLOSUM62_MATRIX_NAME)
+    library_alphabet = set(library_matrix.alphabet)
+    missing_residues = STANDARD_AMINO_ACIDS - library_alphabet
+    if missing_residues:
+        missing = ", ".join(sorted(missing_residues))
+        raise ValueError(f"Biopython BLOSUM62 is missing standard residues: {missing}")
+    if set(MATRIX_ALPHABET) != STANDARD_AMINO_ACIDS:
+        raise RuntimeError("BLOSUM62 alphabet does not match the project amino-acid set")
 
     matrix: Blosum62Matrix = {}
-    observed_rows: list[str] = []
-    for row in rows[1:]:
-        if len(row) != len(MATRIX_ALPHABET) + 1:
-            raise ValueError("BLOSUM62 row has an invalid number of columns")
-        row_residue = row[0]
-        observed_rows.append(row_residue)
-        for column_residue, raw_score in zip(MATRIX_ALPHABET, row[1:]):
-            try:
-                matrix[(row_residue, column_residue)] = int(raw_score)
-            except ValueError as exc:
-                raise ValueError("BLOSUM62 contains a non-integer score") from exc
+    for left in MATRIX_ALPHABET:
+        for right in MATRIX_ALPHABET:
+            raw_score = float(library_matrix[left, right])
+            if not raw_score.is_integer():
+                raise ValueError(f"BLOSUM62 score is not an integer at {left}/{right}")
+            matrix[(left, right)] = int(raw_score)
 
-    if tuple(observed_rows) != MATRIX_ALPHABET:
-        raise ValueError("BLOSUM62 row alphabet does not match the column alphabet")
-    if set(MATRIX_ALPHABET) != STANDARD_AMINO_ACIDS:
-        raise RuntimeError("Pinned BLOSUM62 alphabet does not match the project amino-acid set")
     for left in MATRIX_ALPHABET:
         for right in MATRIX_ALPHABET:
             if matrix[(left, right)] != matrix[(right, left)]:
@@ -109,11 +98,11 @@ def select_conservative_substitution(
     return candidates[0] if candidates else None
 
 
-def support_manifest(matrix_path: str | Path = DEFAULT_MATRIX_PATH) -> dict[str, object]:
+def support_manifest() -> dict[str, object]:
     """Return provenance and frozen selection rules for Task 3.12."""
 
-    path = Path(matrix_path)
-    matrix = load_blosum62(path)
+    library_matrix = substitution_matrices.load(BLOSUM62_MATRIX_NAME)
+    matrix = load_blosum62()
     config = load_research_config()
     selectable_originals = sorted(STANDARD_AMINO_ACIDS - set(config.redox_residues))
     selections = {
@@ -133,8 +122,13 @@ def support_manifest(matrix_path: str | Path = DEFAULT_MATRIX_PATH) -> dict[str,
         "matrix_name": "BLOSUM62",
         "score_units": "half-bit log-odds scores",
         "source_url": BLOSUM62_SOURCE_URL,
-        "local_resource": str(path.relative_to(Path(__file__).parent).as_posix()),
-        "resource_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "matrix_provider": {
+            "library": "Biopython",
+            "version": Bio.__version__,
+            "loader": BLOSUM62_LOADER,
+            "matrix_identifier": BLOSUM62_MATRIX_NAME,
+            "library_alphabet": list(library_matrix.alphabet),
+        },
         "alphabet": list(MATRIX_ALPHABET),
         "dimensions": [len(MATRIX_ALPHABET), len(MATRIX_ALPHABET)],
         "selection_rule": {
@@ -161,7 +155,10 @@ def write_support_manifest(path: str | Path = DEFAULT_MANIFEST_PATH) -> Path:
 def main() -> None:
     matrix = load_blosum62()
     output_path = write_support_manifest()
-    print(f"Loaded {len(matrix)} BLOSUM62 scores and wrote {output_path}")
+    print(
+        f"Loaded {len(matrix)} BLOSUM62 scores with Biopython {Bio.__version__} "
+        f"and wrote {output_path}"
+    )
 
 
 if __name__ == "__main__":
