@@ -26,9 +26,9 @@
 
 ## Next task — Task 3.7: Apply 90% identity deduplication
 
-**Status:** Not started. No implementation task is currently in progress.
+**Status:** In progress.
 
-The next work will:
+Current work:
 
 - convert the cleaned sequences to FASTA;
 - run CD-HIT at the configured `0.90` identity threshold;
