@@ -70,6 +70,21 @@ class RandomSubstitutionChoice:
     derived_seed_sha256: str
 
 
+def random_substitution_metadata(choice: RandomSubstitutionChoice) -> str:
+    """Serialize the auditable P3 choice metadata in canonical JSON form."""
+
+    return json.dumps(
+        {
+            "candidate_count": choice.candidate_count,
+            "candidate_index": choice.candidate_index,
+            "derived_seed_sha256": choice.derived_seed_sha256,
+            "selection_algorithm": RANDOM_SELECTION_ALGORITHM,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
 def _validate_master_seed(master_seed: int) -> None:
     if (
         isinstance(master_seed, bool)
@@ -181,16 +196,7 @@ def generate_p3_records(
             master_seed,
         )
         perturbed = f"{sequence[: position - 1]}{choice.residue}{sequence[position:]}"
-        random_metadata = json.dumps(
-            {
-                "candidate_count": choice.candidate_count,
-                "candidate_index": choice.candidate_index,
-                "derived_seed_sha256": choice.derived_seed_sha256,
-                "selection_algorithm": RANDOM_SELECTION_ALGORITHM,
-            },
-            sort_keys=True,
-            separators=(",", ":"),
-        )
+        random_metadata = random_substitution_metadata(choice)
         records.append(
             PerturbationRecord(
                 schema_version=PERTURBATION_SCHEMA_VERSION,
