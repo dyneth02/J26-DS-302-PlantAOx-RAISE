@@ -53,11 +53,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.13 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.14: Implement P3 random-control substitutions
+## Current task — Task 3.14: Implement P3 random-control substitutions
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - generate valid one-position random-control substitutions;
 - derive reproducible per-sequence and per-position choices from the configured master seed;
