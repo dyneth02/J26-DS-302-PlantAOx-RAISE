@@ -12,7 +12,11 @@
 **Primary completion targets:** Function A (FR1 + FR2) and Function B (FR4 + FR7, running on dummy C1/C2/C3 signals)  
 **Stretch target:** Preliminary PDSS per plant (FR3), then real fold-0 PROB_C2 from the C2 owner
 
-> **Status convention:** All boxes begin unchecked. Check a subtask only once its output is verified. Mark an entire Planner task complete only when its documented acceptance evidence is available. This document is a plan, not a claim that any work is already completed.
+> **Status convention:** Check a subtask only once its output is verified. Mark an entire Planner task complete only when its documented acceptance evidence is available. This document is a plan, not a claim that any work is already completed.
+
+## Repository Status Audit — 19 October 2026
+
+The inventory was compared with the current repository on 19 October 2026. **No FR implementation/acceptance task is marked complete:** the required FR1/FR2/FR4/FR7 pipeline outputs and acceptance evidence are not present. The documentation architecture request is complete. Environment package availability and the GPU probe are now verified; CUDA is unavailable and ESM-2 weights have not loaded. The four taxonomy-filtered reviewed UniProt downloads and their record counts, release, URLs, sizes, and checksums are recorded in [`SCREEN_PP1_DATA_AND_OUTPUTS.md`](SCREEN_PP1_DATA_AND_OUTPUTS.md). Protein input acquisition does not establish peptide candidate generation or FR1 acceptance. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) for synchronized status and next actions.
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 
@@ -63,19 +67,19 @@
 **Definition of done:** Working environment, downloaded and checksummed inputs, written inter-component contracts, and logged design decisions.
 
 ## 1.1 — Environment and Repository Scaffold `[D1 AM · ~1 h]`
-- [ ] Verify PyTorch sees the local GPU; install `fair-esm`, `biopython`, `pyteomics`, `pandas`, `pyarrow`, `scikit-learn`, `pytest`.
-- [ ] **Start the `esm2_t33_650M_UR50D` weights download in the background** and verify it loads.
+- [x] Check CUDA availability in the project environment (result: `False`, 19 October 2026); verify `fair-esm`, `biopython`, `pyteomics`, `pandas`, `pyarrow`, `scikit-learn`, and `pytest` are installed. `requirements.txt` is generated from the active environment with `pip freeze` and records its installed versions.
+- [ ] **Start the `esm2_t33_650M_UR50D` weights download in the background** and verify it loads. The first-call download was initiated but has not completed; no model load is verified.
 - [ ] Create the package layout in the shared repository (e.g., `plantaox/c4_screen/` with `digest`, `filters`, `embed`, `ad`, `signals`, `score`, `cards`, `contracts`, `dummy`) and `tests/c4_screen/`.
 - [ ] Create `config.yaml`: plants, seed = 42, enzyme order, length filter, w1 = w2 = 0.5, SD multiplier = 1.0, `signals.source: dummy`.
 - [ ] Add a CLI entry point following the shared convention (`python -m plantaox.c4_screen.run <stage>`).
 - [ ] Reuse shared utilities (e.g., descriptor extraction, seeding) if the shared repository already provides them; do not duplicate.
 
 ## 1.2 — Plant Proteome Acquisition `[D1 AM · ~1 h]`
-- [ ] Download Swiss-Prot **reviewed** FASTA for Glycine max, Oryza sativa (japonica), Brassica napus, and Olea europaea (taxonomy 4146).
-- [ ] Record source URLs, access date, UniProt release, file sizes, and SHA-256 checksums.
-- [ ] Tabulate reviewed-protein counts per plant and compare against the proposal's 5K–50K candidate estimate.
+- [x] Download Swiss-Prot **reviewed** FASTA for Glycine max, Oryza sativa (japonica), Brassica napus, and Olea europaea using taxonomy-filtered `reviewed:true` UniProt queries. Downloaded files and exact URLs are in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
+- [x] Record source URLs, access date (19 October 2026, Asia/Colombo), UniProt release (`2026_03`, released 02 September 2026), file sizes, and SHA-256 checksums in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
+- [x] Count FASTA protein records: soybean 439; rice 4,197; rapeseed 159; olive 110. These are input protein counts and cannot be compared directly with the proposal's 5K–50K post-digestion peptide-candidate estimate; revisit the estimate after the FR1 funnel is measured.
 - [ ] Apply the input filters: drop proteins < 50 AA and sequences with non-standard residues; log exclusions.
-- [ ] Save unchanged raw files under versioned raw-data storage.
+- [x] Save unchanged UniProt response files under `data/raw/c4_screen/`; version their provenance with UniProt release, retrieval date, source query, and SHA-256 in `SCREEN_PP1_DATA_AND_OUTPUTS.md` and `SCREEN_PP1_CHECKSUMS.sha256`. Keep raw sequence files local and ignored by Git.
 
 ## 1.3 — Inter-Component Contract Sync `[D1 AM · ~45 min]`
 - [ ] C1 owner: confirm ESM-2 recipe (layer 33, mean-pool over residues excluding BOS/EOS), reference-cloud file format, and whether an interim AOP-BenchPos file exists.

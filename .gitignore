@@ -350,3 +350,8 @@ data/interim/c2_pu/fr4_pu_bagging_baseline_runs/
 # comparison CSV/SVG, and checkpoint hashes are committed; binary model
 # state remains local under the same policy as the other Bucket-4 runs.
 data/interim/c2_pu/fr4_curriculum_runs/
+
+# Raw source datasets and large NumPy embedding matrices are reproducible
+# inputs/artifacts; commit provenance and checksums instead of binary data.
+data/raw/
+*.npy
