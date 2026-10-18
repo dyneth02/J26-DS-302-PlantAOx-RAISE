@@ -44,11 +44,12 @@
 
 ## Next task — Task 3.12: Implement BLOSUM62 support for P2
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - load the BLOSUM62 substitution matrix using the selected project-compatible approach;
 - exclude the original residue, alanine, and W/Y/H/M/C candidates;
 - keep only candidates scoring at least `+1` and select the highest-scoring option;
-- define and test deterministic tie-breaking before P2 variant generation.
+- define and test deterministic tie-breaking before P2 variant generation;
+- preserve matrix provenance and validate the loaded standard-amino-acid score table.
