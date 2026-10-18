@@ -54,17 +54,23 @@
 - Generated 5,580 independently validated P3 variants across all 734 eligible peptides and stored the master seed plus canonical JSON metadata containing the selection algorithm, candidate index/count, and position-specific SHA-256 seed digest.
 - Exported `c3_aop_bcs_p3_random_control_v1` using the frozen perturbation schema and added a checksum-backed report pinning the source annotation, schema, master seed, seed derivation, counts, and output checksum.
 - Verified every P3 variant changes exactly one declared position, uses a valid standard amino acid different from the original, preserves sequence length, and reproduces byte-identical output for the same input and seed.
-- Confirmed all 55 current C3 tests pass with 43 subtests, including P3 same-seed reproducibility, input-order independence, different-seed behavior, committed-dataset coverage, metadata validation, P1/P2/P3 schema checks, and all prior dataset tests.
+- Implemented a unified Task 3.15 pipeline that accepts the annotated peptide dataset and runs the P1, P2, and P3 generators in a single deterministic workflow.
+- Added source-linked automatic validation that rechecks frozen-schema invariants and perturbation-specific P1, P2, and P3 semantics, including duplicate variant identifiers.
+- Added deterministic rejection handling: invalid generated variants are excluded from the accepted output and written with explicit reasons to a separate rejection ledger.
+- Generated `c3_aop_bcs_combined_perturbations_v1` with 10,036 accepted variants—1,180 P1, 3,276 P2, and 5,580 P3—and zero rejected variants from the verified production inputs.
+- Added a checksum-backed combined pipeline report recording the source annotations, complete research configuration, schema and generator versions, per-type generated/accepted/rejected counts, validation policy, and both output checksums.
+- Verified the combined CSV exactly matches the ordered union of the independently verified P1, P2, and P3 datasets and added tests proving deliberately invalid semantic records and duplicate IDs are rejected.
+- Confirmed all 59 current C3 tests pass with 43 subtests, covering the combined pipeline, rejection behavior, byte determinism, complete output reconciliation, all individual generators, and prior dataset preparation.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.14 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.15 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.15: Create a combined perturbation pipeline
+## Next task — Task 3.18: Create reproducibility checks
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- accept the annotated peptide dataset and generate P1, P2, and P3 variants in one run;
-- apply automatic validation and reject invalid variants;
-- export the combined accepted perturbation dataset using the frozen schema;
-- create an end-to-end report with per-type counts, provenance, and reproducibility checks.
+- run the complete perturbation pipeline twice from the same production input and configuration;
+- compare the accepted output, rejection ledger, counts, and checksums across runs;
+- confirm the P3 random-control records are identical under the fixed seed;
+- preserve explicit reproducibility evidence containing the configuration, versions, seed, and comparison results.

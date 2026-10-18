@@ -497,13 +497,13 @@
 ## Task 3.15 — Create a combined perturbation pipeline
 
 ### Subtasks
-- [ ] Accept the annotated peptide dataset as input.
-- [ ] Generate P1 variants.
-- [ ] Generate P2 variants.
-- [ ] Generate P3 variants.
-- [ ] Run automatic validation.
-- [ ] Reject invalid variants.
-- [ ] Export all accepted perturbations to CSV/Parquet/JSON as required by the repository.
+- [x] Accept the annotated peptide dataset as input.
+- [x] Generate P1 variants.
+- [x] Generate P2 variants.
+- [x] Generate P3 variants.
+- [x] Run automatic validation.
+- [x] Reject invalid variants.
+- [x] Export all accepted perturbations to CSV/Parquet/JSON as required by the repository.
 
 ### Deliverable
 - End-to-end perturbation-generation pipeline.
@@ -899,7 +899,7 @@
   - [x] `Implement P1 alanine scanning`
   - [x] `Implement P2 BLOSUM62 substitutions`
   - [x] `Implement P3 random controls`
-  - [ ] `Add perturbation validation tests`
+  - [x] `Add perturbation validation tests`
   - [ ] `Add behavioural metric calculations`
 - [ ] Push the C3 branch regularly.
 - [ ] Merge/update from `dev` using the team workflow.
@@ -1028,7 +1028,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] P2 generator works using BLOSUM62 >= +1.
 - [x] P3 random-control generator works.
 - [x] One-position mutation validation works.
-- [ ] Automated tests pass.
+- [x] Automated tests pass.
 - [ ] Common predictor interface exists.
 - [ ] Predictor-access status is documented.
 - [ ] At least one real predictor has been successfully scored if technically accessible.
