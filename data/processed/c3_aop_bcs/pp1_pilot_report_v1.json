@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "dataset_version": "c3_aop_bcs_pp1_pilot_v1",
+  "created_on": "2026-10-19",
+  "selection": {
+    "algorithm": "greedy_coverage_then_seeded_sha256_v1",
+    "master_seed": 42,
+    "configured_size": 20,
+    "tie_break": "ascending SHA-256 over algorithm, seed, sequence_id, and sequence",
+    "core_coverage": [
+      "all available fixed length bands",
+      "each configured redox residue",
+      "single-type and multiple-type redox patterns",
+      "all perturbation types available in the source"
+    ],
+    "secondary_diversity": [
+      "distinct exact redox-residue patterns",
+      "source datasets",
+      "evidence tiers",
+      "prefer E1 direct-assay evidence after coverage priorities"
+    ],
+    "row_order_independent": true,
+    "purpose": "small reproducible PP1 workflow demonstration, not final-study sampling"
+  },
+  "sources": {
+    "subjects": {
+      "path": "data/processed/c3_aop_bcs/redox_eligible_sequences_v1.csv",
+      "dataset_version": "c3_aop_bcs_redox_eligible_v1",
+      "record_count": 734,
+      "sha256": "debb9590166fd44e333b50bd6931c7e4ab0a585769abccbdd93f8a4727193a3d"
+    },
+    "perturbations": {
+      "path": "data/processed/c3_aop_bcs/combined_perturbations_v1.csv",
+      "dataset_version": "c3_aop_bcs_combined_perturbations_v1",
+      "record_count": 10036,
+      "sha256": "6799b3774c568facdf424dcd9006944c6f1e5fc287495eb00876ebb7dbfa141b"
+    }
+  },
+  "coverage": {
+    "selected_subject_count": 20,
+    "sequence_length_min": 3,
+    "sequence_length_max": 36,
+    "distinct_sequence_lengths": 12,
+    "length_band_counts": {
+      "short_3_10": 10,
+      "medium_11_20": 6,
+      "long_21_35": 3,
+      "very_long_36_50": 1
+    },
+    "redox_residue_subject_counts": {
+      "W": 7,
+      "Y": 10,
+      "H": 8,
+      "M": 9,
+      "C": 8
+    },
+    "redox_pattern_type_counts": {
+      "multiple_types": 15,
+      "single_type": 5
+    },
+    "distinct_redox_patterns": [
+      "C",
+      "H",
+      "HC",
+      "HM",
+      "HMC",
+      "M",
+      "MC",
+      "W",
+      "WC",
+      "WH",
+      "WY",
+      "WYH",
+      "WYM",
+      "WYMC",
+      "Y",
+      "YC",
+      "YH",
+      "YHM",
+      "YM",
+      "YMC"
+    ],
+    "source_counts": {
+      "AnOxPePred": 18,
+      "Multi-AOP:AOPP": 1,
+      "Multi-AOP:AnOxPP": 1
+    },
+    "evidence_tier_counts": {
+      "E1": 18,
+      "E2": 2
+    },
+    "perturbation_count": 449,
+    "perturbations_by_type": {
+      "P1": 54,
+      "P2": 150,
+      "P3": 245
+    }
+  },
+  "validation": {
+    "status": "PASS",
+    "size_within_10_to_30": true,
+    "configured_size_met": true,
+    "all_redox_residues_represented": true,
+    "multiple_length_bands_represented": true,
+    "single_and_multiple_redox_patterns_represented": true,
+    "all_three_perturbation_types_represented": true
+  },
+  "outputs": {
+    "subjects": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_subjects_v1.csv",
+      "record_count": 20,
+      "fields": [
+        "pilot_schema_version",
+        "pilot_dataset_version",
+        "selection_rank",
+        "selection_seed",
+        "selection_key_sha256",
+        "length_band",
+        "redox_pattern_type",
+        "new_core_coverage_at_selection",
+        "sequence_id",
+        "peptide_sequence",
+        "source",
+        "source_record_id",
+        "evidence_tier_candidate",
+        "evidence_basis",
+        "source_reference",
+        "source_label",
+        "frs",
+        "chelator",
+        "raw_file",
+        "raw_row_number",
+        "sequence_length",
+        "cd_hit_cluster_id",
+        "cd_hit_cluster_size",
+        "redox_residue_count",
+        "redox_residues_present"
+      ],
+      "sha256": "28de8c89c4b67404031858bdd0631b30049ce594789ad8e65e186852d5f469de"
+    },
+    "perturbations": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_perturbations_v1.csv",
+      "record_count": 449,
+      "fields": [
+        "schema_version",
+        "variant_id",
+        "sequence_id",
+        "original_sequence",
+        "position",
+        "original_residue",
+        "substituted_residue",
+        "perturbed_sequence",
+        "perturbation_type",
+        "blosum62_score",
+        "random_seed",
+        "random_metadata"
+      ],
+      "sha256": "ee7f2c78915187cdb5dc3701318bc4ba7ed94e7e77cff4e2f9c38fffbf62cb86"
+    }
+  }
+}
