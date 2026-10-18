@@ -1,0 +1,32 @@
+{
+  "interface_name": "c3_aop_bcs_predictor",
+  "interface_version": "1.0",
+  "operation": {
+    "signature": "score(sequence: str) -> float",
+    "cardinality": "one peptide sequence produces one predictor score"
+  },
+  "input_contract": {
+    "type": "string",
+    "non_empty": true,
+    "case": "uppercase",
+    "alphabet": "ACDEFGHIKLMNPQRSTVWY"
+  },
+  "output_contract": {
+    "type": "finite Python float",
+    "range": "predictor-native; normalization is a later pipeline concern",
+    "boolean_allowed": false,
+    "nan_or_infinity_allowed": false
+  },
+  "required_metadata": [
+    "predictor_id",
+    "display_name",
+    "version"
+  ],
+  "architecture_boundary": "downstream C3 code depends only on Predictor.descriptor and Predictor.score, never predictor-specific model internals",
+  "errors": {
+    "InvalidPredictorInputError": "input violates the sequence contract",
+    "PredictorUnavailableError": "model, service, or dependency is unavailable",
+    "PredictorScoringError": "an available predictor failed during scoring",
+    "InvalidPredictorScoreError": "result is non-numeric or non-finite"
+  }
+}

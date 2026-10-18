@@ -13,6 +13,16 @@ from .p2_conservative_substitutions import build_p2_dataset
 from .p3_random_controls import build_p3_dataset
 from .perturbation_pipeline import build_combined_perturbation_dataset
 from .reproducibility import create_reproducibility_evidence
+from .predictor_interface import (
+    BasePredictorAdapter,
+    CallablePredictorAdapter,
+    InvalidPredictorInputError,
+    InvalidPredictorScoreError,
+    Predictor,
+    PredictorDescriptor,
+    PredictorScoringError,
+    PredictorUnavailableError,
+)
 
 __all__ = [
     "ResearchConfig",
@@ -22,6 +32,14 @@ __all__ = [
     "build_p3_dataset",
     "build_combined_perturbation_dataset",
     "create_reproducibility_evidence",
+    "BasePredictorAdapter",
+    "CallablePredictorAdapter",
+    "InvalidPredictorInputError",
+    "InvalidPredictorScoreError",
+    "Predictor",
+    "PredictorDescriptor",
+    "PredictorScoringError",
+    "PredictorUnavailableError",
     "load_blosum62",
     "build_cleaned_dataset",
     "build_cd_hit_dataset",
