@@ -198,7 +198,8 @@ def build_standardized_dataset(
     }
 
     report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    with report_path.open("w", encoding="utf-8", newline="\n") as report_file:
+        report_file.write(json.dumps(report, indent=2) + "\n")
     return report
 
 
