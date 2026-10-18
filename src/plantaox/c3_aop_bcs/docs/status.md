@@ -1,6 +1,6 @@
 # Component 3 (AOP-BCS) Status
 
-**Last updated:** 2026-10-18
+**Last updated:** 2026-10-19
 
 ## Completed work
 
@@ -69,11 +69,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.18 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.19: Define the common predictor interface
+## Current task — Task 3.19: Define the common predictor interface
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - define a predictor-independent `sequence -> score` interface;
 - enforce a consistent finite numeric result contract for every predictor adapter;
