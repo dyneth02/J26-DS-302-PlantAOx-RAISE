@@ -2,7 +2,7 @@
 
 PlantAOP-Screen is the planned Component 4 of PlantAOx-RAISE. Its research objective is to generate plant digestome peptide candidates, characterize whether they fall within an antioxidant-peptide (AOP) applicability domain, and produce traceable, evidence-backed rankings that can abstain on out-of-domain candidates.
 
-> **Implementation status (19 October 2026):** this directory is documentation for the planned system, not evidence that the pipeline is implemented. The Python package currently contains only `src/plantaox/c4_screen/__init__.py`. No digestion, embedding, applicability-domain, scoring, evaluation, or card-generation commands are available. Four taxonomy-filtered, reviewed-only UniProt FASTA inputs are now recorded with release, source query, checksums, and protein counts; input filtering and candidate generation remain pending. See [PP1 deployment progress](SCREEN_PP1_Deployment_Progress.md).
+> **Implementation status (19 October 2026):** Gate 1 candidate generation is implemented and was run across the four reviewed UniProt proteomes. The package provides download/registry, sequential digestion, input exclusions, peptide filters, exact-sequence deduplication, provenance, descriptors, deterministic exports, and funnel reporting. The focused suite has five passing tests. ESM-2 embedding, applicability-domain tiers, scoring, evaluation, and cards remain unimplemented. See [PP1 deployment progress](SCREEN_PP1_Deployment_Progress.md) for observed counts and limitations.
 
 ## Scope
 
@@ -20,7 +20,12 @@ PDSS (FR3) is a stretch analysis. ARR (FR5) and held-out retrieval metrics inclu
 
 ```text
 src/plantaox/c4_screen/
-  __init__.py                 # package stub; no pipeline implementation yet
+  config.yaml                  # Gate 1 defaults and C4-provisional signal thresholds
+  digest.py                    # UniProt input handling and pepsin -> trypsin digestion
+  filters.py                   # peptide length, alphabet, and composition criteria
+  dedup.py                     # exact sequence deduplication and provenance aggregation
+  descriptors.py               # Biopython physicochemical descriptors
+  run.py                       # download, digest, and all CLI stages
   docs/
     README.md                 # this entry point
     SCREEN_PP1_ARCHITECTURE.md      # component boundaries and planned data flow
@@ -30,16 +35,12 @@ src/plantaox/c4_screen/
     SCREEN_PP1_Task_Inventory.md
     SCREEN_PP1_Deployment_Progress.md
 tests/c4_screen/
-  check_gpu.py                # CUDA availability probe; not an acceptance test
-data/raw/c4_screen/
-  soybean.txt
-  rice.txt
-  rapeseed.txt
-  olive.txt
-  uniprot_reviewed_3847_glycine_max.fasta
-  uniprot_reviewed_39947_oryza_sativa_japonica.fasta
-  uniprot_reviewed_3708_brassica_napus.fasta
-  uniprot_reviewed_4146_olea_europaea.fasta
+  test_candidate_generation.py # Gate 1 unit and mock contract tests
+  check_gpu.py                 # CUDA availability probe; not an acceptance test
+data/raw/<plant>.fasta         # unchanged local source FASTA files
+data/raw/c4_data_registry.csv  # query, retrieval, size, hash, and record counts
+data/raw/c4_protein_exclusions.csv
+data/interim/c4/               # regeneratable candidate outputs (Git-ignored)
 ```
 
 ## Documentation map
@@ -53,7 +54,16 @@ data/raw/c4_screen/
 
 ## Interfaces and execution
 
-No C4 command-line interface or configuration schema exists yet. Do not advertise or run a command such as `python -m plantaox.c4_screen.run` until its entry point is implemented and documented. Dependencies are listed in the repository's `requirements.txt`; their presence there does not prove installation, successful model loading, GPU availability, or runtime feasibility.
+Install the project in editable mode once, then use the Gate 1 CLI:
+
+```powershell
+python -m pip install --no-deps --no-build-isolation -e .
+python -m plantaox.c4_screen.run download
+python -m plantaox.c4_screen.run digest
+python -m plantaox.c4_screen.run all
+```
+
+`all` fetches reviewed FASTA inputs when they are absent (or reuses the already recorded exact-query files), validates and excludes short/non-standard proteins, digests, filters, deduplicates, computes descriptors, writes artifacts under `data/interim/c4/`, and prints the per-plant funnel. Dependencies are listed in the repository's `requirements.txt`; their presence there does not prove successful model loading, GPU availability, or runtime feasibility.
 
 With the project virtual environment active, install the C4 package set with:
 
