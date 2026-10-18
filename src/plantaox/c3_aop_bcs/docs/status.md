@@ -6,7 +6,7 @@
 
 **Legend:** `[x]` completed, `[~]` in progress, `[ ]` incomplete.
 
-The PP1 plan is organized into exactly three phases. Existing task numbers are preserved for traceability.
+The PP1 plan is organized into six phases. Phases 1 and 2 preserve the established structure through completed Task 3.6; Tasks 3.7–3.42 are divided into four proposal-aligned phases. Existing task numbers are preserved for traceability.
 
 # Phase 1 — Research Definition and Project Foundation
 
@@ -41,7 +41,7 @@ The PP1 plan is organized into exactly three phases. Existing task numbers are p
 **Completed:** The team repository and isolated `c3_aop_bcs` source, test, documentation, and data paths are in place. **Ongoing:** None. **Remaining:** None.
 
 ## [ ] Task 3.2 — Prepare the Python environment
-**Completed:** The repository interpreter runs the standard-library tests. **Ongoing:** None. **Remaining:** Install and verify all declared C3 dependencies and record versions. The current `.venv` lacks `pytest` and `PyYAML`, though they are listed in `requirements.txt`.
+**Completed:** Confirmed Python 3.13.7, an active project `.venv`, and import availability for pandas, NumPy, SciPy, scikit-learn, pytest, and joblib. The repository interpreter runs the complete C3 test suite. **Ongoing:** None. **Remaining:** Complete repository dependency installation; install/verify Biopython, PyYAML, tqdm, matplotlib, and SHAP when required; then record package versions.
 
 ## [x] Task 3.3 — Create the C3 research configuration
 **Completed:** Added versioned `research_config.toml`, dependency-free typed loading and strict validation, package exports, and five tests. It records seed `42`, length range `3–50`, redox residues, CD-HIT `0.90`, primary delta `0.05`, sensitivity deltas, and pilot size `20`. **Ongoing:** None. **Remaining:** None.
@@ -56,6 +56,8 @@ The PP1 plan is organized into exactly three phases. Existing task numbers are p
 
 ## [x] Task 3.6 — Validate and clean sequences
 **Completed:** Added deterministic cleaning with mutually exclusive missing, invalid-symbol, length, and duplicate rejection reasons. Exact duplicates retain E1 over E2, then the earliest input record. Generated `c3_aop_bcs_cleaned_v1`, its exclusion ledger, and a versioned report: 3,946 original; 0 missing; 0 invalid; 145 out of range; 2,328 exact duplicates; 1,473 retained. Four focused cleaning tests pass, and the complete C3 suite passes 18 tests. **Ongoing:** None. **Remaining:** None.
+
+# Phase 3 — Dataset Finalization, Perturbation Engine, and Validation
 
 ## [ ] Task 3.7 — Apply 90% identity deduplication
 **Completed:** None. **Ongoing:** None. **Remaining:** Produce FASTA, run CD-HIT at 90%, preserve clusters, and export representatives and counts.
@@ -84,8 +86,8 @@ The PP1 plan is organized into exactly three phases. Existing task numbers are p
 ## [ ] Task 3.15 — Create a combined perturbation pipeline
 **Completed:** None. **Ongoing:** None. **Remaining:** Combine P1/P2/P3 generation, validation, and export.
 
-## [ ] Task 3.16 — Create sequence-validation tests
-**Completed:** Task 3.6 added focused coverage for empty values, invalid symbols, inclusive length boundaries, exact duplicates, E1 retention, schemas, counts, hashes, and byte reproducibility. **Ongoing:** None. **Remaining:** Review and complete any additional dedicated sequence-validation cases required by Task 3.16.
+## [x] Task 3.16 — Create sequence-validation tests
+**Completed:** Task 3.6 added passing coverage for valid sequences, empty values, invalid symbols, inclusive minimum/maximum lengths, exact duplicate handling, E1 retention, schemas, counts, hashes, and byte reproducibility. All Task 3.16 checklist cases are verified. **Ongoing:** None. **Remaining:** None.
 
 ## [ ] Task 3.17 — Create P1/P2/P3 unit tests
 **Completed:** None. **Ongoing:** None. **Remaining:** Add the perturbation correctness and reproducibility tests in `tasks.md`.
@@ -93,7 +95,7 @@ The PP1 plan is organized into exactly three phases. Existing task numbers are p
 ## [ ] Task 3.18 — Create reproducibility checks
 **Completed:** Configuration and standardization artifacts are byte-reproducible. **Ongoing:** None. **Remaining:** Verify identical combined perturbations and record config/version/seed.
 
-# Phase 3 — Predictor Integration, Pilot Evaluation, and PP1 Delivery
+# Phase 4 — Predictor Integration and Pilot Scoring
 
 ## [ ] Task 3.19 — Define the common predictor interface
 **Completed:** None. **Ongoing:** None. **Remaining:** Define scoring, result, and error-handling contracts.
@@ -115,6 +117,8 @@ The PP1 plan is organized into exactly three phases. Existing task numbers are p
 
 ## [ ] Task 3.25 — Create the PP1 pilot subset
 **Completed:** None. **Ongoing:** None. **Remaining:** Select and version a representative seeded 10–30 peptide subset.
+
+# Phase 5 — Behavioural Metrics, Quality Control, and Reproducibility
 
 ## [ ] Task 3.26 — Calculate DeltaScore
 **Completed:** None. **Ongoing:** None. **Remaining:** Calculate signed/absolute changes and hand-check examples.
@@ -149,11 +153,13 @@ The PP1 plan is organized into exactly three phases. Existing task numbers are p
 ## [ ] Task 3.36 — Prepare the SHAP-faithfulness data structure
 **Completed:** The planned correlation is documented. **Ongoing:** None. **Remaining:** Define the SHAP/DeltaScore structure; full analysis remains post-PP1.
 
+# Phase 6 — PP1 Documentation, Evidence, and Delivery
+
 ## [ ] Task 3.37 — Update implementation documentation
 **Completed:** Task and status tracking reflect current implementation through Task 3.6. **Ongoing:** None. **Remaining:** Add final usage, schemas, assumptions, limitations, and architecture.
 
 ## [ ] Task 3.38 — Maintain Git history
-**Completed:** Tasks 3.3–3.5 and reproducibility corrections have focused descriptive commits. **Ongoing:** Commit every logical checkpoint. **Remaining:** Continue through PP1 and verify final history.
+**Completed:** Tasks 3.3–3.6, reproducibility corrections, and the earlier phase-tracking update have focused descriptive commits. **Ongoing:** Commit every logical checkpoint. **Remaining:** Push/update through the team workflow and verify final history.
 
 ## [ ] Task 3.39 — Update the research logbook
 **Completed:** Milestones are preserved in status records and Git history. **Ongoing:** None. **Remaining:** Transfer required evidence to the formal logbook.
