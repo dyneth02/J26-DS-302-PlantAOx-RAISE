@@ -1,0 +1,85 @@
+{
+  "provenance": {
+    "run_date": "2026-10-16",
+    "notebook": "STEP01_V2_Dataset_Curation_FINAL",
+    "git_AnOxPePred": "b08bccaf5f8784f3b016cfab652e276dd323851b",
+    "git_Multi-AOP": "24d2c4fc88b237ddc0daa7528e78ae68e572feb5",
+    "peptipedia_search_sha256": "f85b2fd6d96760186e6aebbcccf6925731f308e8500970a9479895c328d50ff0"
+  },
+  "counts": {
+    "S1_rows": 1455,
+    "S2_rows": 1389,
+    "labels": {
+      "GEN": 675,
+      "FRS": 565,
+      "FRS;MC": 86,
+      "MC": 63
+    },
+    "tier2_total": 149,
+    "mc_evidence": {
+      "validated": 104,
+      "candidate": 45
+    },
+    "inactive_rows": 213,
+    "excluded_by_primary_evidence": [
+      "FLQL"
+    ],
+    "near_duplicate_pairs_linked": 151,
+    "conflicts_with_anox_negatives": {
+      "policy": "exclude",
+      "retained_tier3_sequences": 184,
+      "raw_pool_sequences": 190
+    },
+    "clean_inactive_negatives": 27,
+    "homology_groups": 573,
+    "largest_homology_group": 27
+  },
+  "split_type": "homology-grouped, MC-stratified greedy 2-fold split (NOT leave-source-out; column name lso_fold kept for backward compatibility)",
+  "near_duplicate_rule": "identity >= 70% (1 - Levenshtein / longer length), at least one sequence >= 4 aa (our own normalised-edit rule, not AnOxPePred's alignment identity); plus CD-HIT 40% (shorter-sequence denominator) for >= 10 aa",
+  "split_audit": {
+    "cross_fold_ge70_len_ge4": 0,
+    "cross_fold_1sub_tripeptide_pairs": 862,
+    "tripeptide_fraction": 0.3627,
+    "table": [
+      {
+        "class": "3 aa",
+        "n": 135,
+        "median": 0.667,
+        "ge_70": 0,
+        "ge_60": 118,
+        "ge_50": 124
+      },
+      {
+        "class": "4-9 aa",
+        "n": 175,
+        "median": 0.5,
+        "ge_70": 0,
+        "ge_60": 26,
+        "ge_50": 99
+      },
+      {
+        "class": ">=10 aa",
+        "n": 47,
+        "median": 0.318,
+        "ge_70": 0,
+        "ge_60": 0,
+        "ge_50": 1
+      }
+    ]
+  },
+  "strict_evidence_counts": {
+    "strict_sequences": 669,
+    "candidate_sequences": 45,
+    "strict_MC_active": 104
+  },
+  "s2_fingerprint": "47d9c2a2fff63eb1",
+  "sha256": {
+    "AOP-BenchPos.csv": "527a02126fe9f58e49247186a933416668bda38973ad498277d383bfdf7d85e8",
+    "AOP-BenchPos_S2.csv": "b116ddc72cbaeee1e1271855169c5b32a2e14ad802979d214d8eedb7a298c4e4",
+    "AOP-Inactive.csv": "f9ff51bbba5aaf9d9431a3352eef24479c6c9541e41de6dd55e7445e4289b8fa",
+    "AOP-Provenance.csv": "32aa3e5d26e265bff62e91a9fa600c436315c0e36d194d111af1bd225a6a5ba2",
+    "AOP-Conflicts.csv": "b9e506be172e097dcefda56309035667a90652fb0288c6ea2fe267773a212f98",
+    "excluded_by_primary_evidence.csv": "2b4df1120ec1cabbb21be4513cab2539a8ccf950d3b46bf4cb93bf6a05c9fb4c",
+    "merged_raw.csv": "c3314d08d233817e52215a17266bd2f831e6e14a7968a6d52e7b1317aa8870a8"
+  }
+}

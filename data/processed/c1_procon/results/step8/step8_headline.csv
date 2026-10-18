@@ -1,0 +1,29 @@
+question,result
+SOURCE only (strict),"0.640 [0.592, 0.701]"
+LENGTH only (strict),"0.608 [0.556, 0.681]"
+AAC-20 (strict),"0.606 [0.557, 0.735]"
+AAC+LEN+SRC (strict),"0.699 [0.648, 0.825]"
+ESM-2 650M (strict),"0.601 [0.549, 0.729]"
+ESM-2 150M (strict),"0.652 [0.599, 0.752]"
+RANDOM noise seed 0 (strict),"0.386 [0.352, 0.457]"
+"NULL band, 20 noise seeds (strict): mean [2.5 %, 97.5 %]","0.512 [0.430, 0.568]"
+ESM-2 650M (AnOxPePred only),"0.653 [0.604, 0.748]"
+ESM-2 150M (AnOxPePred only),"0.668 [0.609, 0.751]"
+AAC+LEN (AnOxPePred only),"0.603 [0.550, 0.720]"
+"NULL band, 20 noise seeds (AnOxPePred only)","0.505 [0.413, 0.585]"
+dAUROC ESM-2 35M + AAC+LEN+SRC - AAC+LEN+SRC (strict),"+0.031 [-0.044, +0.062] no difference detected"
+dAUROC ESM-2 35M + AAC+LEN - AAC+LEN (AnOxPePred only),"+0.076 [-0.017, +0.120] no difference detected"
+dAUROC ESM-2 150M + AAC+LEN+SRC - AAC+LEN+SRC (strict),"+0.043 [-0.028, +0.078] no difference detected"
+dAUROC ESM-2 150M + AAC+LEN - AAC+LEN (AnOxPePred only),"+0.068 [-0.019, +0.117] no difference detected"
+dAUROC ESM-2 650M + AAC+LEN+SRC - AAC+LEN+SRC (strict),"+0.001 [-0.040, +0.036] no difference detected"
+dAUROC ESM-2 650M + AAC+LEN - AAC+LEN (AnOxPePred only),"+0.050 [-0.007, +0.088] no difference detected"
+dAUROC ESM-2 3B + AAC+LEN+SRC - AAC+LEN+SRC (strict),"-0.043 [-0.100, -0.000] reference better"
+dAUROC ESM-2 3B + AAC+LEN - AAC+LEN (AnOxPePred only),"+0.010 [-0.069, +0.055] no difference detected"
+length-matched strict: LENGTH,+0.410 (draws +0.368 .. +0.445)
+length-matched strict: AAC+LEN+SRC,+0.688 (draws +0.641 .. +0.726)
+length-matched strict: ESM-2 650M,+0.576 (draws +0.527 .. +0.642)
+length-matched strict: DELTA ESM-2 650M + AAC+LEN+SRC - AAC+LEN+SRC,-0.061 (draws -0.094 .. -0.016)
+"length-matched strict, AnOxPePred only: LENGTH",+0.392 (draws +0.357 .. +0.427)
+"length-matched strict, AnOxPePred only: AAC+LEN",+0.597 (draws +0.540 .. +0.636)
+"length-matched strict, AnOxPePred only: ESM-2 650M",+0.584 (draws +0.520 .. +0.635)
+"length-matched strict, AnOxPePred only: DELTA ESM-2 650M + AAC+LEN - AAC+LEN",-0.013 (draws -0.064 .. +0.041)

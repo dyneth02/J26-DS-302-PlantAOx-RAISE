@@ -1,0 +1,16 @@
+model,file,variant,pair_mode,epoch,guard,saved,FRS-GEN,FRS-MC,GEN-MC,ari_at_ckpt,mean_cos,eff_rank,criterion_met
+Primary,model_primary.pt,all,strict,14,0.6151,0.0002,0.0002,1.8302,1.841,,0.9962,4.13,True
+HP1-Random,model_hp1_random.pt,random,strict,15,0.5509,0.0,0.0,1.8507,1.8529,,0.9997,77.76,True
+HP2-Fusion,model_hp2_fusion.pt,fusion,strict,11,0.6185,0.0007,0.0007,1.8291,1.8477,,0.9886,2.92,True
+Primary-Balanced,model_primary_balanced.pt,all,strict,14,0.612,0.0011,0.0011,1.826,1.8515,,0.9962,4.73,True
+ARI-Checkpoint-Only,model_ari_checkpoint_only.pt,all,strict,9,0.1399,0.0004,0.0004,1.9553,1.9626,0.20708498989447144,0.998,15.27,True
+k-NN-Pairing,model_knn_pairing.pt,knn,strict,8,0.6162,0.0018,0.0018,1.8089,1.8367,,0.9824,6.39,True
+k-NN+ARI-Checkpoint,model_knn_ari_checkpoint.pt,knn,strict,2,0.0369,0.0099,0.0099,1.9711,1.989,0.04534203314521684,0.9911,31.35,True
+Primary-150M,model_primary_150m.pt,all,strict,12,0.5903,0.0015,0.0015,1.8225,1.8521,,0.9949,12.88,True
+k-NN-150M,model_knn_150m.pt,knn,strict,7,0.5099,0.0034,0.0034,1.8064,1.845,,0.9761,12.19,True
+ARI-Checkpoint-Floored,model_ari_checkpoint_floored.pt,all,strict,0,0.0102,0.1702,0.1702,1.812,1.9982,-0.048252026661202575,0.9673,11.08,False
+Primary-Extended,model_primary_extended.pt,extended,extended,10,0.5006,0.0002,0.0002,1.8485,1.8567,,0.9977,12.71,True
+Primary-StrictGE4,model_primary_strict_ge4.pt,strict_ge4,strict_ge4,21,0.5555,0.0005,0.0005,1.8315,1.848,,0.9934,4.21,True
+Primary-MechEqual,model_primary_mechequal.pt,mech_equal,strict,0,0.984,0.7775,1.4577,0.984,0.7775,,0.9216,6.21,True
+Primary-MaxSpread,model_primary_maxspread.pt,max_spread,strict,39,1.0441,0.0838,0.0838,1.0441,1.3904,,0.3359,7.28,True
+MechEqual-MaxSpread,model_mechequal_maxspread.pt,mech_equal_max_spread,strict,16,1.0363,0.1463,0.1463,1.0363,1.1931,,0.1301,11.38,True

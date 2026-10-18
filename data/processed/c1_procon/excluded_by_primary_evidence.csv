@@ -1,0 +1,2 @@
+sequence,tier,source_db,reason,rows_removed
+FLQL,Tier2,MungBeanMeal_MCP_Sonklin2021,"no detectable FRS or MC activity in the cited assays (all ND, trace FRAP only); excluded from the mechanism-labelled benchmark",1

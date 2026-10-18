@@ -1,0 +1,128 @@
+{
+  "build": "v4 (mode-specific pair construction)",
+  "run_date": "2026-10-18",
+  "s2_fingerprint": "47d9c2a2fff63eb1",
+  "s2_rows": 1389,
+  "descriptors_sha256": "182a4e5144931a411c2b888f2be56e1c77973a2233a0526653d4bf2dce26dd9b",
+  "primary_mode": "strict",
+  "modes": {
+    "strict": {
+      "strict": true,
+      "ge4": false
+    },
+    "extended": {
+      "strict": false,
+      "ge4": false
+    },
+    "strict_ge4": {
+      "strict": true,
+      "ge4": true
+    }
+  },
+  "parameters": {
+    "percentile": 10,
+    "k": 8,
+    "fit_fold": 0,
+    "seed": 42,
+    "d_gt_0_rule": true,
+    "pairs_inside_fold": true,
+    "direction": "train fold 0 / validate fold 1 only"
+  },
+  "pool_sizes": {
+    "strict": {
+      "FRS": {
+        "0": 338,
+        "1": 313
+      },
+      "MC": {
+        "0": 55,
+        "1": 49
+      }
+    },
+    "extended": {
+      "FRS": {
+        "0": 338,
+        "1": 313
+      },
+      "MC": {
+        "0": 74,
+        "1": 75
+      }
+    },
+    "strict_ge4": {
+      "FRS": {
+        "0": 214,
+        "1": 179
+      },
+      "MC": {
+        "0": 45,
+        "1": 42
+      }
+    }
+  },
+  "thresholds_fold0_fit": {
+    "strict": {
+      "FRS": 3.096916602682281,
+      "MC": 2.6535453787652514,
+      "ANY": 3.096916602682281
+    },
+    "extended": {
+      "FRS": 3.096916602682281,
+      "MC": 2.8533617590723943,
+      "ANY": 3.0786110304475267
+    },
+    "strict_ge4": {
+      "FRS": 3.212597291957664,
+      "MC": 2.6379100415181713,
+      "ANY": 3.212597291957664
+    }
+  },
+  "pair_counts": {
+    "strict": {
+      "positive_pairs": 10195,
+      "knn_pairs_k8": 6040,
+      "ablation_random_pairs": 10195,
+      "ablation_physchem_only_pairs": 10765
+    },
+    "extended": {
+      "positive_pairs": 10456,
+      "knn_pairs_k8": 6400,
+      "ablation_random_pairs": 10456,
+      "ablation_physchem_only_pairs": 12079
+    },
+    "strict_ge4": {
+      "positive_pairs": 3788,
+      "knn_pairs_k8": 3840,
+      "ablation_random_pairs": 3788,
+      "ablation_physchem_only_pairs": 3957
+    }
+  },
+  "sha256": {
+    "strict/positive_pairs.csv": "913b8252b9034a3869a07ee0c0e038673e05e5632b40e0661a451407fb627664",
+    "strict/knn_pairs_k8.csv": "671eeb0089f38b3fb61cfff6ee03405187e71aca9d3857f21e56720869484874",
+    "strict/ablation_random_pairs.csv": "775e71fd67ca5fd9b053924bdfa3306e8117fb0211ec431aed88edf8a4f1115f",
+    "strict/ablation_physchem_only_pairs.csv": "811caf235d0e04c3711a61bcf9ca8c6e500118a9801c475402cca9979846620b",
+    "extended/positive_pairs.csv": "0561a150cdc9195996457102200b59f4e95ee575e9750996b88488a7c2ea0791",
+    "extended/knn_pairs_k8.csv": "64e86ef38467667b7b4156ea0555cae9f7c74d4061d4f1866180e9ef7fb3bc25",
+    "extended/ablation_random_pairs.csv": "b97e8e9307d346433a8cb4b21b6e7564fac0ff709ff8c3be4207fe5557e737d1",
+    "extended/ablation_physchem_only_pairs.csv": "dd10afb855a18fd9a9c8b4caaa5cb11aa0dcbaba153bff94237b7d600dc6f118",
+    "strict_ge4/positive_pairs.csv": "cf92754de0fcadf8e316a9feb2cd934e8d6502e035c56938e32f2bc7d7012823",
+    "strict_ge4/knn_pairs_k8.csv": "57383fd5316f260bdfa512caa0d0171b8b0941f661b937851124f720fcd5585e",
+    "strict_ge4/ablation_random_pairs.csv": "24d897b33f50a6cc1ca5d7a607bfbc0b37056dd0556d91209f39256267ca8b96",
+    "strict_ge4/ablation_physchem_only_pairs.csv": "7978b9c7c9b82dc7252ffba432b3404f0ef2644696e8d3e536540ddaf844e1d8"
+  },
+  "files_moved_to_previous": [
+    "flat positive_pairs.csv",
+    "flat knn_pairs_k8.csv",
+    "flat ablation_random_pairs.csv",
+    "flat ablation_physchem_only_pairs.csv",
+    "flat pair_fold_accounting.csv"
+  ],
+  "versions": {
+    "python": "3.13.16",
+    "numpy": "2.1.3",
+    "pandas": "2.2.3",
+    "scipy": "1.16.3",
+    "scikit-learn": "1.6.1"
+  }
+}
