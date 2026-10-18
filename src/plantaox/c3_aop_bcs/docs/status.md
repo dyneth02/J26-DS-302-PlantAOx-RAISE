@@ -44,17 +44,22 @@
 - Implemented deterministic selection by highest BLOSUM62 score followed by alphabetical residue code, returning no selection when the frozen rule has no eligible candidate.
 - Updated the versioned `c3_aop_bcs_blosum62_support_v1` manifest to record the Biopython version, loader API, matrix identifier, library alphabet, standard-amino-acid dimensions, selection rules, and selected substitution for every non-redox original residue.
 - Removed the obsolete bundled BLOSUM62 TSV so the implementation has one unambiguous matrix source through Biopython.
-- Confirmed all 45 current C3 tests pass with 43 subtests, including direct verification that the matrix is loaded through Biopython, complete symmetric matrix validation, exhaustive exclusion enforcement, minimum-score filtering, deterministic selection, no-candidate behavior, provider provenance, and byte-reproducible metadata.
+- Implemented deterministic P2 generation over the 4,400 annotated non-redox positions, applying the frozen Biopython BLOSUM62 selection rule independently at each position.
+- Generated 3,276 validated P2 variants across 695 peptides; the remaining 1,124 non-redox positions were explicitly skipped because F, G, or P had no eligible substitution under the frozen exclusions and `>= +1` threshold.
+- Exported `c3_aop_bcs_p2_conservative_v1` using the frozen perturbation schema, including one-based mutation positions, original and substituted residues, perturbed sequences, and selected BLOSUM62 scores.
+- Added a checksum-backed P2 report pinning the residue-annotation source, perturbation schema, Biopython BLOSUM62 support manifest, selection rules, reconciled counts, per-residue summaries, and output checksum.
+- Verified every P2 record changes exactly one non-redox position, preserves sequence length, excludes alanine and W/Y/H/M/C as replacements, and has a BLOSUM62 score of at least `+1`.
+- Confirmed all 49 current C3 tests pass with 43 subtests, including committed-dataset coverage, deterministic byte output, skipped-position accounting, Biopython matrix loading, candidate exclusions, minimum-score filtering, deterministic selection, and perturbation-schema validation.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.12 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.13 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.13: Implement P2 conservative substitutions
+## Next task — Task 3.14: Implement P3 random-control substitutions
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- process only annotated non-redox positions;
-- apply the frozen BLOSUM62 selection rule and skip positions with no eligible candidate;
-- replace one position at a time while storing the selected BLOSUM62 score and mutation metadata;
-- export and validate deterministic P2 variants with complete count and provenance reporting.
+- generate valid one-position random-control substitutions;
+- derive reproducible per-sequence and per-position choices from the configured master seed;
+- store the random seed and canonical random-control metadata;
+- export and validate deterministic P3 variants with complete count and provenance reporting.

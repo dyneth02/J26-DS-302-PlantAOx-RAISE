@@ -454,19 +454,19 @@
 ## Task 3.13 — Implement P2 conservative substitutions
 
 ### Subtasks
-- [ ] Process only non-redox positions.
-- [ ] Apply the frozen BLOSUM62 selection rule.
-- [ ] Replace one position at a time.
-- [ ] Store the selected BLOSUM62 score.
-- [ ] Store mutation metadata.
+- [x] Process only non-redox positions.
+- [x] Apply the frozen BLOSUM62 selection rule.
+- [x] Replace one position at a time.
+- [x] Store the selected BLOSUM62 score.
+- [x] Store mutation metadata.
 
 ### Required validation
-- [ ] exactly one position changed;
-- [ ] original position is non-redox;
-- [ ] new residue is not alanine;
-- [ ] new residue is not in `R_redox`;
-- [ ] BLOSUM62 score is >= +1;
-- [ ] sequence length is unchanged.
+- [x] exactly one position changed;
+- [x] original position is non-redox;
+- [x] new residue is not alanine;
+- [x] new residue is not in `R_redox`;
+- [x] BLOSUM62 score is >= +1;
+- [x] sequence length is unchanged.
 
 ### Deliverable
 - Working P2 generator.
@@ -897,7 +897,7 @@
   - [x] `Implement AOP sequence cleaning`
   - [x] `Add redox residue annotation`
   - [x] `Implement P1 alanine scanning`
-  - [ ] `Implement P2 BLOSUM62 substitutions`
+  - [x] `Implement P2 BLOSUM62 substitutions`
   - [ ] `Implement P3 random controls`
   - [ ] `Add perturbation validation tests`
   - [ ] `Add behavioural metric calculations`
@@ -1025,7 +1025,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] Redox filter `{W,Y,H,M,C}` applied.
 - [x] Residue annotation works.
 - [x] P1 generator works.
-- [ ] P2 generator works using BLOSUM62 >= +1.
+- [x] P2 generator works using BLOSUM62 >= +1.
 - [ ] P3 random-control generator works.
 - [x] One-position mutation validation works.
 - [ ] Automated tests pass.
