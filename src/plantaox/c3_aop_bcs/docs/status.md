@@ -110,9 +110,9 @@
 
 ## Next task — Task 3.24: Prepare score normalization
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - document each integrated predictor's native output range and score semantics;
 - preserve native `[0,1]` probabilities where available and define any justified fixed mapping for other score types;
