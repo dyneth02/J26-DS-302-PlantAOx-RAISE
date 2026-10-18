@@ -252,7 +252,7 @@
   - [x] numpy
   - [x] scipy
   - [x] scikit-learn
-  - [ ] Biopython
+  - [x] Biopython
   - [ ] PyYAML
   - [x] pytest
   - [ ] tqdm

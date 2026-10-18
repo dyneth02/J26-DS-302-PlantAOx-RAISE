@@ -8,7 +8,8 @@
 - Prepared the isolated `c3_aop_bcs` repository structure for source code, tests, documentation, and data artifacts.
 - Created the versioned C3 research configuration containing random seed `42`, sequence length range `3–50`, redox residues `{W,Y,H,M,C}`, CD-HIT threshold `0.90`, primary delta `0.05`, sensitivity deltas `0.02`, `0.05`, and `0.10`, and pilot size `20`.
 - Added a dependency-free typed configuration loader with strict validation and focused tests.
-- Verified Python 3.13.7 and the project `.venv`; pandas, NumPy, SciPy, scikit-learn, pytest, and joblib currently import successfully.
+- Verified Python 3.13.7 and the project `.venv`; pandas, NumPy, SciPy, scikit-learn, pytest, joblib, and Biopython currently import successfully.
+- Installed Biopython `1.88` in the project `.venv` and verified `Bio.Align.substitution_matrices.load("BLOSUM62")`, including the expected D-to-E score of `2.0`.
 - Acquired and preserved four original C3 source datasets under `data/raw/c3_aop_bcs/` without manually editing them.
 - Added the versioned `c3_aop_bcs_raw_v1` provenance manifest with source locations, schemas, row counts, acquisition information, evidence notes, byte counts, and SHA-256 hashes.
 - Verified the acquired source data: 917 AnOxPePred assay records and 1,404, 2,120, and 3,022 records from the three Multi-AOP benchmarks.
