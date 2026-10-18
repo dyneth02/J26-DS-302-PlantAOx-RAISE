@@ -58,11 +58,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.14 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.15: Create a combined perturbation pipeline
+## Current task — Task 3.15: Create a combined perturbation pipeline
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - accept the annotated peptide dataset and generate P1, P2, and P3 variants in one run;
 - apply automatic validation and reject invalid variants;
