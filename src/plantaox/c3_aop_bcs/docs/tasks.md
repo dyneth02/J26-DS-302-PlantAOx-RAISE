@@ -577,20 +577,20 @@
 ## Task 3.20 — Track predictor accessibility
 
 ### Subtasks
-- [ ] Check implementation/access status for:
-  - [ ] AnOxPePred
-  - [ ] Multi-AOP
-  - [ ] AOPxSVM
-  - [ ] AOP-DRL
-  - [ ] PU-AOP
-- [ ] Record:
-  - [ ] code/model availability;
-  - [ ] expected input format;
-  - [ ] output type;
-  - [ ] whether batch scoring is possible;
-  - [ ] license/access limitations;
-  - [ ] current integration status.
-- [ ] Do not claim a predictor is integrated until a real score has been verified.
+- [x] Check implementation/access status for:
+  - [x] AnOxPePred
+  - [x] Multi-AOP
+  - [x] AOPxSVM
+  - [x] AOP-DRL
+  - [x] PU-AOP
+- [x] Record:
+  - [x] code/model availability;
+  - [x] expected input format;
+  - [x] output type;
+  - [x] whether batch scoring is possible;
+  - [x] license/access limitations;
+  - [x] current integration status.
+- [x] Do not claim a predictor is integrated until a real score has been verified.
 
 ### Deliverable
 - Predictor-access/status table.

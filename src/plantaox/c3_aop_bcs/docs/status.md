@@ -71,16 +71,23 @@
 - Defined distinct errors for invalid sequence input, unavailable predictor resources, predictor execution failures, and non-numeric or non-finite returned scores.
 - Added a deterministic machine-readable `predictor_interface_v1.json` contract documenting the input/output boundary, required metadata, architecture isolation rule, and error semantics.
 - Confirmed all 69 current C3 tests pass with 54 subtests, including interface conformance across different adapter shapes, invalid input/score rejection, failure normalization, deterministic contract generation, and all prior C3 behavior.
+- Completed a source-backed accessibility review of AnOxPePred, Multi-AOP, AOPxSVM, AOP-DRL, and Component 2's PU-AOP using current public repositories, primary publications/services, and the local repository state.
+- Added the versioned `predictor_access_status_v1.json` registry with inspected repository revisions, code/model/service availability, expected inputs, output semantics, batch support, licence/access limits, evidence locations, blockers, and C3 integration state.
+- Added a generated human-readable predictor access table and a validator that refuses an `integrated` status unless a real finite score and retained score evidence are both recorded.
+- Confirmed AnOxPePred, Multi-AOP, and AOPxSVM provide public model artifacts; AOP-DRL lacks a public trained checkpoint/inference package and its published endpoint currently redirects to an unrelated login page.
+- Confirmed PU-AOP source and manifests are present, but its required ignored checkpoint/cache artifacts and documented external backup are absent from this checkout.
+- Kept all five predictors explicitly `not_integrated` because none has yet produced a retained real score through the C3 predictor interface.
+- Confirmed all 73 current C3 tests pass with 64 subtests, including registry completeness, operational limitations, integration-claim enforcement, and deterministic Markdown rendering.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.19 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.20 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.20: Track predictor accessibility
+## Next task — Task 3.21: Prioritize the minimum viable predictor set
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- investigate AnOxPePred, Multi-AOP, AOPxSVM, AOP-DRL, and PU-AOP access using verifiable sources and local repository state;
-- record code/model availability, required input format, output type, batch-scoring capability, and license/access constraints;
-- distinguish confirmed integration evidence from unverified or unavailable implementations;
-- create a versioned predictor-access status artifact without claiming successful scoring until a real score is verified.
+- prioritize AnOxPePred, AOPxSVM, and PU-AOP for the minimum viable PP1 predictor set using the Task 3.20 evidence;
+- coordinate the frozen PU-AOP model/scaler/cache handoff with Component 2;
+- treat Multi-AOP and AOP-DRL as secondary where their environment, licensing, or missing-artifact constraints prevent timely verified scoring;
+- document every unresolved access issue and keep integration claims tied to retained real-score evidence.
