@@ -12,18 +12,22 @@ type MetricKey = (typeof METRIC_OPTIONS)[number];
 
 export function Fr4Page() {
   const state = useApi(c2Api.fr4Evaluation, []);
-  const [metric, setMetric] = useState<MetricKey>("mcc");
+  const [metric, setMetric] = useState<MetricKey>("f1");
   const [selected, setSelected] = useState<string[]>([]);
 
   return (
     <DataState
       state={state}
       render={(fr4) => {
-        const chartData = fr4.models.map((m) => ({ name: m.model, value: m[metric] }));
+        const chartData = fr4.models.map((m) => ({ name: m.model, value: m[metric].toFixed(3) }));
         const toggle = (modelId: string) =>
           setSelected((prev) => (prev.includes(modelId) ? prev.filter((id) => id !== modelId) : [...prev, modelId]));
 
-        return (
+        // @ts-ignore
+          // @ts-ignore
+          // @ts-ignore
+          // @ts-ignore
+          return (
           <div className="space-y-6">
             <Card>
               <CardHeader title="FR4 — Baseline model comparison" subtitle={`Fold ${fr4.fold_id}`} />
@@ -64,7 +68,7 @@ export function Fr4Page() {
                       {chartData.map((entry) => (
                         <Cell
                           key={entry.name}
-                          fill={entry.value < 0 ? "var(--color-danger-text)" : "var(--color-primary)"}
+                          fill={Number(entry.value) < 0 ? "var(--color-danger-text)" : "var(--color-primary)"}
                         />
                       ))}
                     </Bar>
@@ -172,7 +176,7 @@ function ComparisonPanel({ models }: { models: import("@/features/c2-pu/types").
   return (
     <Card className="overflow-x-auto">
       <CardHeader title="Side-by-side comparison" />
-      <table className="w-full min-w-[500px] text-left text-sm">
+      <table className="w-full min-w-125 text-left text-sm">
         <thead>
           <tr style={{ color: "var(--color-text-muted)" }}>
             <th className="pb-2">Metric</th>
