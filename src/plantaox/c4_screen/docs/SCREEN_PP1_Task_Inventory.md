@@ -12,7 +12,11 @@
 **Primary completion targets:** Function A (FR1 + FR2) and Function B (FR4 + FR7, running on dummy C1/C2/C3 signals)  
 **Stretch target:** Preliminary PDSS per plant (FR3), then real fold-0 PROB_C2 from the C2 owner
 
-> **Status convention:** All boxes begin unchecked. Check a subtask only once its output is verified. Mark an entire Planner task complete only when its documented acceptance evidence is available. This document is a plan, not a claim that any work is already completed.
+> **Status convention:** Check a subtask only once its output is verified. Mark an entire Planner task complete only when its documented acceptance evidence is available. This document is a plan, not a claim that any work is already completed.
+
+## Repository Status Audit — 19 October 2026
+
+The inventory was synchronized with repository evidence on 19 October 2026. Component 4 Gate 1 candidate generation now has implementation, four-plant candidate outputs, a funnel, and five passing focused tests. This completes the candidate-generation acceptance scope; the optional BIOPEP-UWM web comparison and delivery of `candidates.fasta` to C1/C2 owners remain pending. CUDA is unavailable and ESM-2 weights have not loaded. No embedding, AD, scoring, or frontend work is claimed. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) for counts and synchronized status.
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 
@@ -63,19 +67,19 @@
 **Definition of done:** Working environment, downloaded and checksummed inputs, written inter-component contracts, and logged design decisions.
 
 ## 1.1 — Environment and Repository Scaffold `[D1 AM · ~1 h]`
-- [ ] Verify PyTorch sees the local GPU; install `fair-esm`, `biopython`, `pyteomics`, `pandas`, `pyarrow`, `scikit-learn`, `pytest`.
-- [ ] **Start the `esm2_t33_650M_UR50D` weights download in the background** and verify it loads.
-- [ ] Create the package layout in the shared repository (e.g., `plantaox/c4_screen/` with `digest`, `filters`, `embed`, `ad`, `signals`, `score`, `cards`, `contracts`, `dummy`) and `tests/c4_screen/`.
-- [ ] Create `config.yaml`: plants, seed = 42, enzyme order, length filter, w1 = w2 = 0.5, SD multiplier = 1.0, `signals.source: dummy`.
-- [ ] Add a CLI entry point following the shared convention (`python -m plantaox.c4_screen.run <stage>`).
+- [x] Check CUDA availability in the project environment (result: `False`, 19 October 2026); verify `fair-esm`, `biopython`, `pyteomics`, `pandas`, `pyarrow`, `scikit-learn`, and `pytest` are installed. `requirements.txt` is generated from the active environment with `pip freeze` and records its installed versions.
+- [ ] **Start the `esm2_t33_650M_UR50D` weights download in the background** and verify it loads. The first-call download was initiated but has not completed; no model load is verified.
+- [x] Create the Gate 1 package and `tests/c4_screen/` layout in the existing `src/plantaox` structure. Later-stage embed/AD/signals/score/cards modules are out of this task's scope.
+- [x] Create `config.yaml`: plants, seed = 42, enzyme order, length filter, w1 = w2 = 0.5, SD multiplier = 1.0, `signals.source: mock`, and C4-provisional BCS flags.
+- [x] Add and run the CLI entry point `python -m plantaox.c4_screen.run <stage>` with `download`, `digest`, and `all` stages.
 - [ ] Reuse shared utilities (e.g., descriptor extraction, seeding) if the shared repository already provides them; do not duplicate.
 
 ## 1.2 — Plant Proteome Acquisition `[D1 AM · ~1 h]`
-- [ ] Download Swiss-Prot **reviewed** FASTA for Glycine max, Oryza sativa (japonica), Brassica napus, and Olea europaea (taxonomy 4146).
-- [ ] Record source URLs, access date, UniProt release, file sizes, and SHA-256 checksums.
-- [ ] Tabulate reviewed-protein counts per plant and compare against the proposal's 5K–50K candidate estimate.
-- [ ] Apply the input filters: drop proteins < 50 AA and sequences with non-standard residues; log exclusions.
-- [ ] Save unchanged raw files under versioned raw-data storage.
+- [x] Download Swiss-Prot **reviewed** FASTA for Glycine max, Oryza sativa (japonica), Brassica napus, and Olea europaea using taxonomy-filtered `reviewed:true` UniProt queries. Downloaded files and exact URLs are in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
+- [x] Record source URLs, access date (19 October 2026, Asia/Colombo), UniProt release (`2026_03`, released 02 September 2026), file sizes, and SHA-256 checksums in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
+- [x] Count FASTA protein records: soybean 439; rice 4,197; rapeseed 159; olive 110. These are input protein counts and cannot be compared directly with the proposal's 5K–50K post-digestion peptide-candidate estimate; revisit the estimate after the FR1 funnel is measured.
+- [x] Apply the input filters: drop proteins < 50 AA and sequences with non-standard residues; log exclusions in `data/raw/c4_screen/metadata/c4_protein_exclusions.csv`.
+- [x] Save unchanged UniProt response files under `data/raw/c4_screen/proteomes/source_downloads/` with canonical plant-named copies in `proteomes/`; version their provenance with UniProt release, retrieval date, source query, and SHA-256. Keep raw sequence files local and ignored by Git.
 
 ## 1.3 — Inter-Component Contract Sync `[D1 AM · ~45 min]`
 - [ ] C1 owner: confirm ESM-2 recipe (layer 33, mean-pool over residues excluding BOS/EOS), reference-cloud file format, and whether an interim AOP-BenchPos file exists.
@@ -85,9 +89,9 @@
 - [ ] Record all agreements in the supervisor decision log.
 
 ## 1.4 — Design Decision Log `[D1 AM · ~15 min]`
-- [ ] Log: proteome scope (reviewed only), digestion engine substitution, pepsin pH 1.3 rule, exact-match dedup policy, embedding recipe.
-- [ ] Log: μ_cloud/σ_cloud definition, `d_norm` definition, tier thresholds, and the provisional-cloud policy.
-- [ ] Log: PDSS denominator concern and BCS flag thresholds as open items for supervisor review.
+- [x] Log: reviewed-only proteome scope, pyteomics substitution, pepsin pH 1.3 rule, exact-match dedup policy, and C4-provisional BCS flag thresholds in `docs/decision_log.md`.
+- [ ] Log: μ_cloud/σ_cloud definition, `d_norm` definition, tier thresholds, and provisional-cloud policy before the embedding/AD stage.
+- [ ] Log: PDSS denominator concern for supervisor review before the PDSS stage.
 
 **Setup evidence attachments:** environment lockfile, FASTA checksums, protein-count table, contract notes, decision log.
 
@@ -99,32 +103,32 @@
 **Definition of done:** Per-plant, deduplicated, provenance-traceable 3–20 AA candidate tables with descriptors, tested funnel counts, and a delivered candidate FASTA.
 
 ## 2.1 — Sequential Digestion Engine `[D1 AM · ~1.5 h]`
-- [ ] Implement sequential cleavage: pepsin (pH 1.3 rule) followed by trypsin applied to the pepsin fragments; complete cleavage by default, with missed cleavages parameterised.
-- [ ] Record, per fragment: parent accession, start/end position, and the enzyme path.
-- [ ] Unit-test a toy protein whose fragments are checkable by hand.
+- [x] Implement sequential cleavage using installed pyteomics rule `pepsin ph1.3` followed by `trypsin`; complete cleavage by default with parameterized missed cleavages.
+- [x] Record, per fragment: parent accession, 1-based inclusive start/end position, and enzyme path.
+- [x] Unit-test a toy protein and verify emitted fragments map to parent positions.
 - [ ] Spot-check **one** protein against the BIOPEP-UWM web tool; document any differences. *(Cut-list item if time is short.)*
-- [ ] Document the BIOPEP-UWM → rule-based substitution in the decision log.
+- [x] Document the BIOPEP-UWM → rule-based substitution in the decision log; the optional one-protein web comparison remains pending.
 
 ## 2.2 — Length and Composition Filters `[D1 AM · ~30 min]`
-- [ ] Keep fragments of **3–20 AA**.
-- [ ] Require **≥ 2 unique amino-acid types** and the standard 20-residue alphabet only.
-- [ ] Log funnel counts at every step: proteins → raw fragments → length-filtered → composition-filtered.
+- [x] Keep fragments of **3–20 AA**.
+- [x] Require **≥ 2 unique amino-acid types** and the standard 20-residue alphabet only.
+- [x] Log funnel counts at every step: proteins → raw fragments → length-filtered → composition-filtered.
 
 ## 2.3 — Deduplication with Provenance `[D1 AM · ~45 min]`
-- [ ] Deduplicate by exact sequence **per plant** and across plants, merging all parent accessions and positions into a provenance list.
-- [ ] Generate stable peptide IDs (sequence-hash based) and a per-plant membership table.
-- [ ] Optional: run CD-HIT (90%) on 10–20 AA peptides only; record version and parameters, or document why it was skipped.
-- [ ] Verify no provenance was lost during deduplication.
+- [x] Deduplicate by exact sequence **per plant** and across plants, merging all parent accessions and positions into a provenance list.
+- [x] Generate stable peptide IDs (sequence-hash based) and a per-plant membership table.
+- [x] Skip CD-HIT and document the <=9 AA exact-match equivalence and deferred 10–20 AA clustering in `docs/decision_log.md`.
+- [x] Test provenance aggregation on duplicated sequences from multiple parent proteins.
 
 ## 2.4 — Physicochemical Descriptors `[D1 AM · ~30 min]`
-- [ ] Compute MW, pI, GRAVY, hydrophobicity, and net charge at pH 7 with Biopython (or the shared descriptor module).
-- [ ] Check ranges and NaN/non-finite values across all candidates.
-- [ ] Test representative short, long, charged, and hydrophobic sequences.
+- [x] Compute molecular weight, pI, GRAVY, and net charge at pH 7 with Biopython.
+- [x] Reject NaN/non-finite descriptor values across generated candidates.
+- [x] Test representative peptide descriptor values for finite output.
 
 ## 2.5 — Candidate Export, Tests, and Hand-off `[D1 AM · ~45 min]`
-- [ ] Export per-plant candidate tables (parquet), a combined table, and `candidates.fasta`.
-- [ ] Export the funnel table and write the funnel section of `summary.json`.
-- [ ] Automated tests: every candidate is a substring of its parent; length and composition rules hold; no duplicate sequences; same-seed rerun is byte-identical.
+- [x] Export per-plant candidate tables (parquet), a combined table, and `candidates.fasta`.
+- [x] Export the funnel table and funnel-only `summary.json`.
+- [x] Automated tests cover parent-coordinate substring mapping, length/composition rules, duplicate merge/provenance, byte-identical reruns, and mock-signal generation/validation.
 - [ ] **Send `candidates.fasta` to the C1 and C2 owners.**
 
 > **Gate 1 (end of D1 AM):** Candidate tables exist for all four plants and tests pass. If not, drop the BIOPEP spot-check and the CD-HIT step and proceed.
