@@ -1,10 +1,17 @@
 [project]
-name = "demo"
+name = "plantaox-raise"
 version = "0.1.0"
-description = "Add your description here"
+description = "PlantAOx-RAISE research components"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

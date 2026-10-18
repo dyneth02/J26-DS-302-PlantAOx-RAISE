@@ -1,0 +1,32 @@
+seed: 42
+plants:
+  soybean:
+    scientific_name: Glycine max
+    taxonomy_id: 3847
+  rice:
+    scientific_name: Oryza sativa japonica
+    taxonomy_id: 39947
+  rapeseed:
+    scientific_name: Brassica napus
+    taxonomy_id: 3708
+  olive:
+    scientific_name: Olea europaea
+    taxonomy_id: 4146
+enzyme_order:
+  - pepsin ph1.3
+  - trypsin
+missed_cleavages: 0
+length:
+  min: 3
+  max: 20
+min_unique_amino_acids: 2
+weights:
+  w1: 0.5
+  w2: 0.5
+sd_multiplier: 1.0
+signals:
+  source: mock
+bcs_flag:
+  low_below: 0.5
+  high_at_or_above: 0.7
+  status: C4-provisional

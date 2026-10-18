@@ -354,4 +354,10 @@ data/interim/c2_pu/fr4_curriculum_runs/
 # Raw source datasets and large NumPy embedding matrices are reproducible
 # inputs/artifacts; commit provenance and checksums instead of binary data.
 data/raw/
+data/interim/
+.pytest_work_tmp/
 *.npy
+*.pt
+# fair-esm / PyTorch checkpoint caches (model weights are fetched on demand).
+*.pth
+*.ckpt
