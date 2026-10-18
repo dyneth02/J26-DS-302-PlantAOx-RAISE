@@ -27,6 +27,11 @@ from .predictor_access import (
     load_predictor_access_registry,
     render_predictor_access_table,
 )
+from .predictor_priority import (
+    load_predictor_priority_plan,
+    render_predictor_priority_report,
+    render_pu_aop_handoff_request,
+)
 
 __all__ = [
     "ResearchConfig",
@@ -46,6 +51,9 @@ __all__ = [
     "PredictorUnavailableError",
     "load_predictor_access_registry",
     "render_predictor_access_table",
+    "load_predictor_priority_plan",
+    "render_predictor_priority_report",
+    "render_pu_aop_handoff_request",
     "load_blosum62",
     "build_cleaned_dataset",
     "build_cd_hit_dataset",
