@@ -41,7 +41,7 @@ def run_digest(config: dict, raw_dir: Path, out_dir: Path) -> dict:
     all_filtered, funnel = [], []
     exclusions_by_plant = {}
     for plant in config["plants"]:
-        path = raw_dir / f"{plant}.fasta"
+        path = raw_dir / "proteomes" / f"{plant}.fasta"
         proteins, exclusions = load_proteins(path, plant)
         exclusions_by_plant[plant] = exclusions
         fragments = [fragment for protein in proteins
@@ -68,7 +68,7 @@ def run_digest(config: dict, raw_dir: Path, out_dir: Path) -> dict:
         row["deduplicated"] = int(membership_counts.get(row["plant"], 0))
     _write_csv(out_dir / "funnel_summary.csv", funnel)
     exclusion_rows = [item for group in exclusions_by_plant.values() for item in group]
-    _write_csv(raw_dir / "c4_protein_exclusions.csv", exclusion_rows)
+    _write_csv(raw_dir / "metadata" / "c4_protein_exclusions.csv", exclusion_rows)
     # Record the exact-match policy and short-peptide equivalence without invoking CD-HIT.
     summary = {"funnel": funnel}
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -80,14 +80,13 @@ def main(argv: list[str] | None = None) -> None:
     parser_cli = argparse.ArgumentParser(description=__doc__)
     parser_cli.add_argument("stage", choices=("download", "digest", "all"))
     parser_cli.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
-    parser_cli.add_argument("--raw-dir", type=Path, default=ROOT / "data" / "raw")
-    parser_cli.add_argument("--out-dir", type=Path, default=ROOT / "data" / "interim" / "c4")
+    parser_cli.add_argument("--raw-dir", type=Path, default=ROOT / "data" / "raw" / "c4_screen")
+    parser_cli.add_argument("--out-dir", type=Path, default=ROOT / "data" / "interim" / "c4_screen")
     args = parser_cli.parse_args(argv)
     config = yaml.safe_load(args.config.read_text(encoding="utf-8"))
     raw_dir = args.raw_dir
     if args.stage in {"download", "all"}:
         records = download_proteomes(raw_dir, config["plants"])
-        pd.DataFrame(records).to_csv(raw_dir / "c4_data_registry.csv", index=False)
         print(pd.DataFrame(records)[["plant", "protein_count_downloaded", "protein_count_retained",
                                      "protein_count_excluded"]].to_string(index=False))
     if args.stage in {"digest", "all"}:

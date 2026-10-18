@@ -40,19 +40,24 @@ def download_proteomes(raw_dir: str | Path, plants: dict) -> list[dict]:
     """Fetch reviewed UniProt records and emit registry plus exclusion ledger."""
     raw_dir = Path(raw_dir)
     raw_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir = raw_dir / "metadata"
+    proteome_dir = raw_dir / "proteomes"
+    downloads_dir = proteome_dir / "source_downloads"
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    proteome_dir.mkdir(parents=True, exist_ok=True)
     prior_registry = {}
-    prior_path = raw_dir / "c4_data_registry.csv"
+    prior_path = metadata_dir / "c4_data_registry.csv"
     if prior_path.exists():
         with prior_path.open("r", encoding="utf-8", newline="") as handle:
             prior_registry = {row.get("plant", ""): row for row in csv.DictReader(handle)}
     registry, exclusions = [], []
     for plant, spec in plants.items():
         url = UNIPROT_URL.format(taxid=spec["taxonomy_id"])
-        path = raw_dir / f"{plant}.fasta"
+        path = proteome_dir / f"{plant}.fasta"
         release = prior_registry.get(plant, {}).get("uniprot_release", "unknown")
         access_date = prior_registry.get(plant, {}).get("access_date", date.today().isoformat())
         if not path.exists():
-            verified_source = raw_dir / "c4_screen" / LOCAL_VERIFIED_INPUTS[plant]
+            verified_source = downloads_dir / LOCAL_VERIFIED_INPUTS[plant]
             if verified_source.exists():
                 source_hash = hashlib.sha256(verified_source.read_bytes()).hexdigest()
                 if source_hash != LOCAL_VERIFIED_SHA256[plant]:
@@ -83,8 +88,8 @@ def download_proteomes(raw_dir: str | Path, plants: dict) -> list[dict]:
                          "protein_count_downloaded": len(records), "protein_count_retained": len(kept),
                          "protein_count_excluded": len(records) - len(kept),
                          "uniprot_release": release})
-    _write_csv(raw_dir / "c4_data_registry.csv", registry)
-    _write_csv(raw_dir / "c4_protein_exclusions.csv", exclusions)
+    _write_csv(metadata_dir / "c4_data_registry.csv", registry)
+    _write_csv(metadata_dir / "c4_protein_exclusions.csv", exclusions)
     return registry
 
 

@@ -64,10 +64,10 @@ def test_two_digest_runs_are_byte_identical(tmp_path):
     from Bio import SeqIO
 
     raw = tmp_path / "raw"
-    raw.mkdir()
+    (raw / "proteomes").mkdir(parents=True)
     plant = "toy"
     records = [SeqRecord(Seq(toy_protein()["sequence"]), id="sp|P00001|TOY", description="")]
-    with (raw / "toy.fasta").open("w") as handle:
+    with (raw / "proteomes" / "toy.fasta").open("w") as handle:
         SeqIO.write(records, handle, "fasta")
     config = {"plants": {plant: {}}, "missed_cleavages": 0,
               "length": {"min": 3, "max": 20}, "min_unique_amino_acids": 2}
