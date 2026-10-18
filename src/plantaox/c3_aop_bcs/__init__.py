@@ -6,9 +6,11 @@ from .standardization import build_standardized_dataset, normalize_sequence
 from .identity_deduplication import build_cd_hit_dataset
 from .redox_eligibility import build_redox_eligible_dataset
 from .residue_annotation import build_residue_annotation_dataset
+from .perturbation_schema import PerturbationRecord
 
 __all__ = [
     "ResearchConfig",
+    "PerturbationRecord",
     "build_cleaned_dataset",
     "build_cd_hit_dataset",
     "build_redox_eligible_dataset",
