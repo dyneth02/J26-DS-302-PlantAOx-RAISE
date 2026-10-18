@@ -267,7 +267,7 @@
 
 ---
 
-## Task 3.3 — Create the C3 research configuration
+## Task 3.3 — Create the C3 research configuration ✅
 
 ### Subtasks
 - Add configuration for:
@@ -289,7 +289,7 @@
 
 # 3B — Audit Dataset Preparation
 
-## Task 3.4 — Acquire the perturbation subject sequences
+## Task 3.4 — Acquire the perturbation subject sequences ✅
 
 ### Subtasks
 - Obtain the C3 audit sequences specified by the project design.
@@ -303,7 +303,7 @@
 
 ---
 
-## Task 3.5 — Standardize sequence records
+## Task 3.5 — Standardize sequence records ✅
 
 ### Subtasks
 - Create a common data schema containing at least:
@@ -1014,7 +1014,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 ## Must be working by PP1
 - [ ] Team repository cloned and C3 branch created.
 - [ ] C3 environment/configuration works.
-- [ ] Audit sequences acquired.
+- [x] Audit sequences acquired.
 - [ ] Sequences standardized and validated.
 - [ ] 3–50 AA filter applied.
 - [ ] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.

@@ -4,8 +4,9 @@
 
 - **Task 3.3 — Create the C3 research configuration:** Completed on 2026-10-18.
 - **Task 3.4 — Acquire the perturbation subject sequences:** Completed on 2026-10-18.
-- **Task 3.5 — Standardize sequence records:** Not started.
-- The acquired source records remain byte-for-byte unchanged; no Task 3.5 standardization has been performed.
+- **Task 3.5 — Standardize sequence records:** Completed on 2026-10-18.
+- **Task 3.6 — Validate and clean sequences:** Not started.
+- The standardized dataset intentionally retains invalid, out-of-range, duplicate, and cross-source-conflict candidates for explicit handling in Task 3.6.
 
 ## Completed
 
@@ -28,6 +29,15 @@
 - Added `PROVENANCE.json` as the machine-readable `c3_aop_bcs_raw_v1` manifest, recording acquisition date, authoritative repository/path, schema, row counts, byte counts, evidence notes, and SHA-256 version pins.
 - Documented the later-selection policy: prefer AnOxPePred direct assay-positive records, retain Multi-AOP positive records as candidates, and defer standardization/filtering/conflict resolution to Tasks 3.5–3.8.
 - Added four acquisition-integrity tests covering source traceability, raw byte hashes, CSV schemas, row counts, and label/assay counts; the complete C3 suite now passes 9 tests.
+- Added a deterministic standardization module that selects acquired candidate-positive records, converts sequences to uppercase, removes sequence whitespace, and preserves raw-file/row mappings.
+- Created `c3_aop_bcs_standardized_v1` with 3,946 intermediate records:
+  - 699 AnOxPePred direct assay-positive candidates (`E1` candidate tier);
+  - 676 Multi-AOP AnOxPePred positive candidates;
+  - 1,060 Multi-AOP AnOxPP positive candidates;
+  - 1,511 Multi-AOP AOPP positive candidates.
+- The common schema contains stable sequence ID, peptide sequence, source, original source identifier, evidence tier/basis, source reference, original label/assay fields, raw file, and raw row number.
+- Added a standardization report with the source/output dataset versions, normalization and selection rules, deferred cleaning operations, output count, and SHA-256 checksum.
+- Added five focused standardization tests for normalization, deterministic generation, schema/source mapping, counts, committed-artifact reproducibility, and the Task 3.6 boundary; the complete C3 suite now passes 14 tests.
 
 ## Environment note
 
