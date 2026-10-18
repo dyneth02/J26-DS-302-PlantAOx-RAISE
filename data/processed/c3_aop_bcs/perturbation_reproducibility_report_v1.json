@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.0",
+  "evidence_version": "c3_aop_bcs_perturbation_reproducibility_v1",
+  "created_on": "2026-10-18",
+  "result": "PASS",
+  "input": {
+    "path": "data/processed/c3_aop_bcs/residue_annotations_v1.csv",
+    "byte_count": 1218422,
+    "sha256": "03d043cf0856a5584f19022b696b982b36071e85bdff80bf0f563e2b416a5938"
+  },
+  "configuration": {
+    "source": "src/plantaox/c3_aop_bcs/research_config.toml",
+    "sha256": "fbb67e474a9677be7c354c38c029d0d561b9ea0dede0a36111edeb305fb50702",
+    "values": {
+      "random_seed": 42,
+      "sequence_min_length": 3,
+      "sequence_max_length": 50,
+      "redox_residues": [
+        "W",
+        "Y",
+        "H",
+        "M",
+        "C"
+      ],
+      "cd_hit_identity_threshold": 0.9,
+      "primary_delta": 0.05,
+      "sensitivity_deltas": [
+        0.02,
+        0.05,
+        0.1
+      ],
+      "pilot_dataset_size": 20
+    }
+  },
+  "software_versions": {
+    "python": "3.13.7",
+    "python_implementation": "CPython",
+    "biopython": "1.88",
+    "pipeline": "c3_aop_bcs_perturbation_pipeline_v1",
+    "combined_dataset": "c3_aop_bcs_combined_perturbations_v1",
+    "perturbation_schema": "1.0",
+    "generators": {
+      "P1": "c3_aop_bcs_p1_alanine_v1",
+      "P2": "c3_aop_bcs_p2_conservative_v1",
+      "P3": "c3_aop_bcs_p3_random_control_v1"
+    }
+  },
+  "support_artifacts": {
+    "blosum62_manifest": {
+      "path": "src/plantaox/c3_aop_bcs/blosum62_support_v1.json",
+      "sha256": "457725719b90125c948a035efea487a75bba1583d9bbd49b6bc46c0d39c61e96"
+    }
+  },
+  "run_count": 2,
+  "runs": [
+    {
+      "run_id": "run_1",
+      "configuration": {
+        "random_seed": 42,
+        "sequence_min_length": 3,
+        "sequence_max_length": 50,
+        "redox_residues": [
+          "W",
+          "Y",
+          "H",
+          "M",
+          "C"
+        ],
+        "cd_hit_identity_threshold": 0.9,
+        "primary_delta": 0.05,
+        "sensitivity_deltas": [
+          0.02,
+          0.05,
+          0.1
+        ],
+        "pilot_dataset_size": 20
+      },
+      "versions": {
+        "pipeline": "c3_aop_bcs_perturbation_pipeline_v1",
+        "combined_dataset": "c3_aop_bcs_combined_perturbations_v1",
+        "perturbation_schema": "1.0",
+        "generators": {
+          "P1": "c3_aop_bcs_p1_alanine_v1",
+          "P2": "c3_aop_bcs_p2_conservative_v1",
+          "P3": "c3_aop_bcs_p3_random_control_v1"
+        }
+      },
+      "counts": {
+        "input_peptide_count": 734,
+        "input_annotation_count": 5580,
+        "generated_variant_count": 10036,
+        "generated_by_perturbation_type": {
+          "P1": 1180,
+          "P2": 3276,
+          "P3": 5580
+        },
+        "accepted_variant_count": 10036,
+        "accepted_by_perturbation_type": {
+          "P1": 1180,
+          "P2": 3276,
+          "P3": 5580
+        },
+        "rejected_variant_count": 0,
+        "rejected_by_perturbation_type": {
+          "P1": 0,
+          "P2": 0,
+          "P3": 0
+        }
+      },
+      "artifacts": {
+        "accepted_perturbations": {
+          "record_count": 10036,
+          "byte_count": 1906725,
+          "sha256": "6799b3774c568facdf424dcd9006944c6f1e5fc287495eb00876ebb7dbfa141b"
+        },
+        "rejected_perturbations": {
+          "record_count": 0,
+          "byte_count": 199,
+          "sha256": "419353fa4ae5c559cabb4d79be2744a2b4041e45adc6144a52785a3624de6708"
+        },
+        "p3_random_controls": {
+          "record_count": 5580,
+          "byte_count": 1526227,
+          "sha256": "f93a8e4021a30a2bb55b2e30bb20fa02f044e0cd28a7d5bafb5f2d5f0a7cc4cf"
+        }
+      }
+    },
+    {
+      "run_id": "run_2",
+      "configuration": {
+        "random_seed": 42,
+        "sequence_min_length": 3,
+        "sequence_max_length": 50,
+        "redox_residues": [
+          "W",
+          "Y",
+          "H",
+          "M",
+          "C"
+        ],
+        "cd_hit_identity_threshold": 0.9,
+        "primary_delta": 0.05,
+        "sensitivity_deltas": [
+          0.02,
+          0.05,
+          0.1
+        ],
+        "pilot_dataset_size": 20
+      },
+      "versions": {
+        "pipeline": "c3_aop_bcs_perturbation_pipeline_v1",
+        "combined_dataset": "c3_aop_bcs_combined_perturbations_v1",
+        "perturbation_schema": "1.0",
+        "generators": {
+          "P1": "c3_aop_bcs_p1_alanine_v1",
+          "P2": "c3_aop_bcs_p2_conservative_v1",
+          "P3": "c3_aop_bcs_p3_random_control_v1"
+        }
+      },
+      "counts": {
+        "input_peptide_count": 734,
+        "input_annotation_count": 5580,
+        "generated_variant_count": 10036,
+        "generated_by_perturbation_type": {
+          "P1": 1180,
+          "P2": 3276,
+          "P3": 5580
+        },
+        "accepted_variant_count": 10036,
+        "accepted_by_perturbation_type": {
+          "P1": 1180,
+          "P2": 3276,
+          "P3": 5580
+        },
+        "rejected_variant_count": 0,
+        "rejected_by_perturbation_type": {
+          "P1": 0,
+          "P2": 0,
+          "P3": 0
+        }
+      },
+      "artifacts": {
+        "accepted_perturbations": {
+          "record_count": 10036,
+          "byte_count": 1906725,
+          "sha256": "6799b3774c568facdf424dcd9006944c6f1e5fc287495eb00876ebb7dbfa141b"
+        },
+        "rejected_perturbations": {
+          "record_count": 0,
+          "byte_count": 199,
+          "sha256": "419353fa4ae5c559cabb4d79be2744a2b4041e45adc6144a52785a3624de6708"
+        },
+        "p3_random_controls": {
+          "record_count": 5580,
+          "byte_count": 1526227,
+          "sha256": "f93a8e4021a30a2bb55b2e30bb20fa02f044e0cd28a7d5bafb5f2d5f0a7cc4cf"
+        }
+      }
+    }
+  ],
+  "comparisons": {
+    "accepted_perturbations_byte_identical": true,
+    "rejection_ledgers_byte_identical": true,
+    "p3_random_controls_byte_identical": true,
+    "counts_identical": true,
+    "configuration_identical": true,
+    "versions_identical": true,
+    "master_seed_identical": true,
+    "all_checks_passed": true
+  }
+}

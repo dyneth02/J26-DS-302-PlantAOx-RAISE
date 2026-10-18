@@ -12,6 +12,7 @@ from .blosum62 import load_blosum62, select_conservative_substitution
 from .p2_conservative_substitutions import build_p2_dataset
 from .p3_random_controls import build_p3_dataset
 from .perturbation_pipeline import build_combined_perturbation_dataset
+from .reproducibility import create_reproducibility_evidence
 
 __all__ = [
     "ResearchConfig",
@@ -20,6 +21,7 @@ __all__ = [
     "build_p2_dataset",
     "build_p3_dataset",
     "build_combined_perturbation_dataset",
+    "create_reproducibility_evidence",
     "load_blosum62",
     "build_cleaned_dataset",
     "build_cd_hit_dataset",
