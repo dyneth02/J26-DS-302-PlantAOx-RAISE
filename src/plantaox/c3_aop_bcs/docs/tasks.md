@@ -8,20 +8,22 @@
 > This task plan is derived from the Component 3 proposal report, especially the objectives, methodology, validation strategy, functional/non-functional requirements, development phases, WBS/Gantt structure, and the C3 task definition.  
 > The PP1 implementation target is a **working and validated pilot audit pipeline**, not the complete final multi-predictor statistical/SHAP study.
 
+> Every subtask is tracked independently. In Markdown Preview, `- [x]` displays a checked box (✓) for verified work and `- [ ]` displays an unchecked box for incomplete work.
+
 ---
 
-# Phase 1 — Group Registration and Initial Research Setup
+# Phase 1 — Research Definition and Project Foundation
 
 ## Task 1.1 — Confirm Component 3 responsibility
 
 ### Subtasks
-- Confirm Component 3 research title: **AOP-BCS**.
-- Confirm the individual responsibility boundary of Component 3.
-- Confirm how C3 connects to:
-  - Component 2: receives the PU-AOP predictor for auditing.
-  - Component 4: provides predictor-level reliability evidence.
-- Confirm that C3 is an **audit framework**, not a new AOP classifier.
-- Record the component scope in the project documentation and logbook.
+- [x] Confirm Component 3 research title: **AOP-BCS**.
+- [x] Confirm the individual responsibility boundary of Component 3.
+- [x] Confirm how C3 connects to:
+  - [x] Component 2: receives the PU-AOP predictor for auditing.
+  - [x] Component 4: provides predictor-level reliability evidence.
+- [x] Confirm that C3 is an **audit framework**, not a new AOP classifier.
+- [x] Record the component scope in the project documentation and logbook.
 
 ### Deliverable
 - Confirmed C3 scope and responsibility statement.
@@ -31,24 +33,24 @@
 ## Task 1.2 — Initial literature study
 
 ### Subtasks
-- Study existing AOP predictors:
-  - AnOxPePred
-  - Multi-AOP
-  - AOPxSVM
-  - AOP-DRL
-  - PU-AOP from Component 2
-- Study antioxidant-relevant amino-acid chemistry.
-- Study evidence supporting the fixed redox residue set:
-  - W — Tryptophan
-  - Y — Tyrosine
-  - H — Histidine
-  - M — Methionine
-  - C — Cysteine
-- Study alanine scanning.
-- Study BLOSUM62 conservative substitutions.
-- Study perturbation-based faithfulness testing.
-- Study SHAP and explanation faithfulness.
-- Study reliability evaluation beyond AUROC/MCC/accuracy.
+- [x] Study existing AOP predictors:
+  - [x] AnOxPePred
+  - [x] Multi-AOP
+  - [x] AOPxSVM
+  - [x] AOP-DRL
+  - [x] PU-AOP from Component 2
+- [x] Study antioxidant-relevant amino-acid chemistry.
+- [x] Study evidence supporting the fixed redox residue set:
+  - [x] W — Tryptophan
+  - [x] Y — Tyrosine
+  - [x] H — Histidine
+  - [x] M — Methionine
+  - [x] C — Cysteine
+- [x] Study alanine scanning.
+- [x] Study BLOSUM62 conservative substitutions.
+- [x] Study perturbation-based faithfulness testing.
+- [x] Study SHAP and explanation faithfulness.
+- [x] Study reliability evaluation beyond AUROC/MCC/accuracy.
 
 ### Deliverable
 - Initial C3 literature review notes and verified references.
@@ -58,31 +60,31 @@
 ## Task 1.3 — Define the research problem and gap
 
 ### Subtasks
-- Document that existing AOP predictors are mainly evaluated using accuracy-oriented metrics.
-- Identify the lack of controlled physicochemical perturbation testing.
-- Identify the lack of a formal behavioural-consistency metric for AOP predictors.
-- Identify the gap between post-hoc explanation and actual prediction response.
-- Define how AOP-BCS addresses these gaps.
+- [x] Document that existing AOP predictors are mainly evaluated using accuracy-oriented metrics.
+- [x] Identify the lack of controlled physicochemical perturbation testing.
+- [x] Identify the lack of a formal behavioural-consistency metric for AOP predictors.
+- [x] Identify the gap between post-hoc explanation and actual prediction response.
+- [x] Define how AOP-BCS addresses these gaps.
 
 ### Deliverable
 - Finalized research problem and research gap.
 
 ---
 
-# Phase 2 — Project Proposal and Research Design
+## Research design workstream
 
 ## Task 2.1 — Finalize research objectives
 
 ### Subtasks
-- Finalize the main objective.
-- Finalize specific objectives:
-  - curate the audit dataset;
-  - develop the perturbation framework;
-  - audit multiple predictors;
-  - compute behavioural metrics;
-  - test SHAP faithfulness;
-  - compare behavioural reliability with conventional model performance.
-- Check that the objectives match the research gap.
+- [x] Finalize the main objective.
+- [x] Finalize specific objectives:
+  - [x] curate the audit dataset;
+  - [x] develop the perturbation framework;
+  - [x] audit multiple predictors;
+  - [x] compute behavioural metrics;
+  - [x] test SHAP faithfulness;
+  - [x] compare behavioural reliability with conventional model performance.
+- [x] Check that the objectives match the research gap.
 
 ### Deliverable
 - Approved C3 objective set.
@@ -92,15 +94,15 @@
 ## Task 2.2 — Finalize research questions and hypotheses
 
 ### Subtasks
-- Finalize research questions concerning:
-  - conservative-edit invariance;
-  - redox-disruption sensitivity;
-  - BCS differences across predictors;
-  - SHAP faithfulness;
-  - relationship between BCS and conventional accuracy.
-- Finalize hypothesis pairs.
-- Define the statistical test associated with each hypothesis.
-- Keep the BCS-vs-AUROC comparison exploratory because of the small number of predictor-level observations.
+- [x] Finalize research questions concerning:
+  - [x] conservative-edit invariance;
+  - [x] redox-disruption sensitivity;
+  - [x] BCS differences across predictors;
+  - [x] SHAP faithfulness;
+  - [x] relationship between BCS and conventional accuracy.
+- [x] Finalize hypothesis pairs.
+- [x] Define the statistical test associated with each hypothesis.
+- [x] Keep the BCS-vs-AUROC comparison exploratory because of the small number of predictor-level observations.
 
 ### Deliverable
 - Research-question and hypothesis table.
@@ -110,29 +112,29 @@
 ## Task 2.3 — Freeze the primary experimental protocol
 
 ### Subtasks
-- Freeze the redox-relevant set:
+- [x] Freeze the redox-relevant set:
 
   `R_redox = {W, Y, H, M, C}`
 
-- Freeze sequence-length requirement:
+- [x] Freeze sequence-length requirement:
 
   `3–50 amino acids`
 
-- Freeze the primary perturbation schemes:
-  - **P1:** Alanine scanning of redox residues.
-  - **P2:** BLOSUM62-conservative substitution at non-redox positions.
-  - **P3:** Random substitution control.
-- Freeze the P2 BLOSUM62 rule:
-  - score **>= +1**;
-  - exclude the original residue;
-  - exclude alanine;
-  - exclude members of `R_redox`;
-  - choose the highest-scoring eligible alternative.
-- Freeze the main threshold:
+- [x] Freeze the primary perturbation schemes:
+  - [x] **P1:** Alanine scanning of redox residues.
+  - [x] **P2:** BLOSUM62-conservative substitution at non-redox positions.
+  - [x] **P3:** Random substitution control.
+- [x] Freeze the P2 BLOSUM62 rule:
+  - [x] score **>= +1**;
+  - [x] exclude the original residue;
+  - [x] exclude alanine;
+  - [x] exclude members of `R_redox`;
+  - [x] choose the highest-scoring eligible alternative.
+- [x] Freeze the main threshold:
 
   `delta = 0.05`
 
-- Freeze sensitivity-analysis thresholds:
+- [x] Freeze sensitivity-analysis thresholds:
 
   `delta = {0.02, 0.05, 0.10}`
 
@@ -144,19 +146,19 @@
 ## Task 2.4 — Finalize evaluation metrics
 
 ### Subtasks
-- Define `DeltaScore` for every single-residue perturbation.
-- Define Prediction Flip Rate (PFR).
-- Define Invariance Rate (IR).
-- Define False Sensitivity Rate (FSR).
-- Define:
+- [x] Define `DeltaScore` for every single-residue perturbation.
+- [x] Define Prediction Flip Rate (PFR).
+- [x] Define Invariance Rate (IR).
+- [x] Define False Sensitivity Rate (FSR).
+- [x] Define:
 
   `BCS = IR × (1 - FSR)`
 
-- Document interpretation:
-  - higher IR is better;
-  - lower FSR is better;
-  - higher BCS is better.
-- Define the later SHAP-faithfulness measure:
+- [x] Document interpretation:
+  - [x] higher IR is better;
+  - [x] lower FSR is better;
+  - [x] higher BCS is better.
+- [x] Define the later SHAP-faithfulness measure:
 
   `r(|SHAP_i|, |DeltaScore_i|)`
 
@@ -168,22 +170,22 @@
 ## Task 2.5 — Finalize the methodology and validation plan
 
 ### Subtasks
-- Define the study as an in-silico computational experiment.
-- Define sequence validation rules.
-- Define perturbation validation rules.
-- Define predictor-score normalization requirements.
-- Define reproducibility requirements.
-- Define random-seed control.
-- Define caching/resume requirements for predictor scoring.
-- Define score/result schemas.
-- Define later statistical analysis:
-  - Kruskal-Wallis;
-  - Dunn post-hoc with Bonferroni correction;
-  - McNemar;
-  - one-tailed Wilcoxon;
-  - Pearson correlation;
-  - Fisher r-to-z;
-  - Shapiro-Wilk where relevant.
+- [x] Define the study as an in-silico computational experiment.
+- [x] Define sequence validation rules.
+- [x] Define perturbation validation rules.
+- [x] Define predictor-score normalization requirements.
+- [x] Define reproducibility requirements.
+- [x] Define random-seed control.
+- [x] Define caching/resume requirements for predictor scoring.
+- [x] Define score/result schemas.
+- [x] Define later statistical analysis:
+  - [x] Kruskal-Wallis;
+  - [x] Dunn post-hoc with Bonferroni correction;
+  - [x] McNemar;
+  - [x] one-tailed Wilcoxon;
+  - [x] Pearson correlation;
+  - [x] Fisher r-to-z;
+  - [x] Shapiro-Wilk where relevant.
 
 ### Deliverable
 - Final C3 methodology section.
@@ -193,48 +195,46 @@
 ## Task 2.6 — Complete proposal documentation
 
 ### Subtasks
-- Complete literature review.
-- Complete research gap.
-- Complete objectives.
-- Complete methodology.
-- Complete architecture.
-- Complete user requirements.
-- Complete functional requirements.
-- Complete non-functional requirements.
-- Complete commercialization plan.
-- Complete budget.
-- Complete WBS.
-- Complete Gantt chart.
-- Complete references.
-- Complete appendices.
-- Review the proposal with supervisors.
-- Submit/present the proposal.
+- [x] Complete literature review.
+- [x] Complete research gap.
+- [x] Complete objectives.
+- [x] Complete methodology.
+- [x] Complete architecture.
+- [x] Complete user requirements.
+- [x] Complete functional requirements.
+- [x] Complete non-functional requirements.
+- [x] Complete commercialization plan.
+- [x] Complete budget.
+- [x] Complete WBS.
+- [x] Complete Gantt chart.
+- [x] Complete references.
+- [x] Complete appendices.
+- [x] Review the proposal with supervisors.
+- [x] Submit/present the proposal.
 
 ### Deliverable
 - Completed Component 3 proposal.
 
 ---
 
-# Phase 3 — PP1 Implementation Stage
-
-# 3A — Development Environment and Repository Setup
+## Repository and environment workstream
 
 ## Task 3.1 — Prepare the team repository
 
 ### Subtasks
-- Clone the team GitHub repository.
-- Use the team `dev` branch as the base branch.
-- Create a Component 3 working branch, for example:
+- [x] Clone the team GitHub repository.
+- [x] Use the team `dev` branch as the base branch.
+- [x] Create a Component 3 working branch, for example:
 
   `c3-aop-bcs`
 
-- Confirm the existing repository conventions before adding new files.
-- Create C3 folders following the team structure, for example:
-  - `src/plantaoX/c3_aop_bcs/`
-  - `tests/c3_aop_bcs/`
-  - `data/processed/c3_aop_bcs/`
-- Avoid duplicating root-level files that already exist.
-- Confirm `.venv/` and other temporary files are ignored by Git.
+- [x] Confirm the existing repository conventions before adding new files.
+- [x] Create C3 folders following the team structure, for example:
+  - [x] `src/plantaoX/c3_aop_bcs/`
+  - [x] `tests/c3_aop_bcs/`
+  - [x] `data/processed/c3_aop_bcs/`
+- [x] Avoid duplicating root-level files that already exist.
+- [x] Confirm `.venv/` and other temporary files are ignored by Git.
 
 ### Deliverable
 - Clean C3 branch and repository structure.
@@ -244,23 +244,23 @@
 ## Task 3.2 — Prepare the Python environment
 
 ### Subtasks
-- Confirm the Python version used by the team.
-- Create/activate a virtual environment if required.
-- Install the repository dependencies.
-- Install C3-specific dependencies only if missing:
-  - pandas
-  - numpy
-  - scipy
-  - scikit-learn
-  - Biopython
-  - PyYAML
-  - pytest
-  - tqdm
-  - joblib
-  - matplotlib
-  - SHAP, if required for later preparation
-- Confirm packages import correctly.
-- Record package versions.
+- [x] Confirm the Python version used by the team.
+- [x] Create/activate a virtual environment if required.
+- [ ] Install the repository dependencies.
+- [ ] Install C3-specific dependencies only if missing:
+  - [x] pandas
+  - [x] numpy
+  - [x] scipy
+  - [x] scikit-learn
+  - [ ] Biopython
+  - [ ] PyYAML
+  - [x] pytest
+  - [ ] tqdm
+  - [x] joblib
+  - [ ] matplotlib
+  - [ ] SHAP, if required for later preparation
+- [ ] Confirm packages import correctly.
+- [ ] Record package versions.
 
 ### Deliverable
 - Reproducible local Python environment.
@@ -270,33 +270,33 @@
 ## Task 3.3 — Create the C3 research configuration
 
 ### Subtasks
-- Add configuration for:
-  - random seed;
-  - sequence minimum/maximum lengths;
-  - redox residues;
-  - CD-HIT threshold;
-  - primary delta;
-  - sensitivity deltas;
-  - pilot dataset size.
-- Create a configuration loader.
-- Test that the configuration loads correctly.
-- Avoid hard-coding research constants in many files.
+- [x] Add configuration for:
+  - [x] random seed;
+  - [x] sequence minimum/maximum lengths;
+  - [x] redox residues;
+  - [x] CD-HIT threshold;
+  - [x] primary delta;
+  - [x] sensitivity deltas;
+  - [x] pilot dataset size.
+- [x] Create a configuration loader.
+- [x] Test that the configuration loads correctly.
+- [x] Avoid hard-coding research constants in many files.
 
 ### Deliverable
 - Working C3 configuration file and loader.
 
 ---
 
-# 3B — Audit Dataset Preparation
+# Phase 2 — Audit Dataset and Perturbation Pipeline
 
 ## Task 3.4 — Acquire the perturbation subject sequences
 
 ### Subtasks
-- Obtain the C3 audit sequences specified by the project design.
-- Prefer the E1/high-evidence AOP subject set where available.
-- Preserve the original source/provenance.
-- Store original files without manually editing them.
-- Record dataset version and acquisition date.
+- [x] Obtain the C3 audit sequences specified by the project design.
+- [x] Prefer the E1/high-evidence AOP subject set where available.
+- [x] Preserve the original source/provenance.
+- [x] Store original files without manually editing them.
+- [x] Record dataset version and acquisition date.
 
 ### Deliverable
 - Raw/source audit sequences with provenance.
@@ -306,14 +306,14 @@
 ## Task 3.5 — Standardize sequence records
 
 ### Subtasks
-- Create a common data schema containing at least:
-  - sequence ID;
-  - peptide sequence;
-  - source;
-  - evidence/source information where available.
-- Convert sequences to uppercase.
-- Remove accidental whitespace.
-- Preserve the original source mapping.
+- [x] Create a common data schema containing at least:
+  - [x] sequence ID;
+  - [x] peptide sequence;
+  - [x] source;
+  - [x] evidence/source information where available.
+- [x] Convert sequences to uppercase.
+- [x] Remove accidental whitespace.
+- [x] Preserve the original source mapping.
 
 ### Deliverable
 - Standardized intermediate dataset.
@@ -323,34 +323,36 @@
 ## Task 3.6 — Validate and clean sequences
 
 ### Subtasks
-- Reject missing sequences.
-- Reject invalid/non-standard amino-acid symbols.
-- Keep only standard peptide amino acids.
-- Enforce the 3–50 AA length range.
-- Remove exact duplicates.
-- Produce a cleaning report:
-  - original count;
-  - invalid count;
-  - out-of-range count;
-  - exact-duplicate count;
-  - retained count.
+- [x] Reject missing sequences.
+- [x] Reject invalid/non-standard amino-acid symbols.
+- [x] Keep only standard peptide amino acids.
+- [x] Enforce the 3–50 AA length range.
+- [x] Remove exact duplicates.
+- [x] Produce a cleaning report:
+  - [x] original count;
+  - [x] invalid count;
+  - [x] out-of-range count;
+  - [x] exact-duplicate count;
+  - [x] retained count.
 
 ### Deliverable
 - Validated and cleaned sequence dataset.
 
 ---
 
+# Phase 3 — Dataset Finalization, Perturbation Engine, and Validation
+
 ## Task 3.7 — Apply 90% identity deduplication
 
 ### Subtasks
-- Convert cleaned sequences to FASTA.
-- Run CD-HIT at 90% identity.
-- Preserve the CD-HIT cluster output.
-- Convert representative sequences back to the working table format.
-- Record:
-  - input count;
-  - representative count;
-  - cluster count.
+- [x] Convert cleaned sequences to FASTA.
+- [x] Run CD-HIT at 90% identity.
+- [x] Preserve the CD-HIT cluster output.
+- [x] Convert representative sequences back to the working table format.
+- [x] Record:
+  - [x] input count;
+  - [x] representative count;
+  - [x] cluster count.
 
 ### Deliverable
 - 90%-deduplicated audit dataset.
@@ -360,13 +362,13 @@
 ## Task 3.8 — Apply the redox-residue eligibility filter
 
 ### Subtasks
-- Detect whether each sequence contains at least one member of:
+- [x] Detect whether each sequence contains at least one member of:
 
   `{W, Y, H, M, C}`
 
-- Keep eligible sequences for the primary P1 audit.
-- Record the number rejected because no redox residue is present.
-- Keep source/provenance information.
+- [x] Keep eligible sequences for the primary P1 audit.
+- [x] Record the number rejected because no redox residue is present.
+- [x] Keep source/provenance information.
 
 ### Deliverable
 - Final primary perturbation subject set for pilot testing.
@@ -376,35 +378,35 @@
 ## Task 3.9 — Annotate residue positions
 
 ### Subtasks
-- Number peptide positions from 1 to sequence length.
-- Record the residue at each position.
-- Mark each position as:
-  - redox;
-  - non-redox.
-- Store redox-position counts per peptide.
-- Export a residue-level annotation table.
+- [x] Number peptide positions from 1 to sequence length.
+- [x] Record the residue at each position.
+- [x] Mark each position as:
+  - [x] redox;
+  - [x] non-redox.
+- [x] Store redox-position counts per peptide.
+- [x] Export a residue-level annotation table.
 
 ### Deliverable
 - Position-level residue annotation file.
 
 ---
 
-# 3C — Perturbation Engine
+## Perturbation engine workstream
 
 ## Task 3.10 — Define the perturbation output schema
 
 ### Subtasks
-- Store for every generated variant:
-  - sequence ID;
-  - original sequence;
-  - position;
-  - original residue;
-  - substituted residue;
-  - perturbed sequence;
-  - perturbation type;
-  - BLOSUM62 score where applicable;
-  - random seed/metadata where applicable.
-- Ensure one record corresponds to one one-position edit.
+- [ ] Store for every generated variant:
+  - [ ] sequence ID;
+  - [ ] original sequence;
+  - [ ] position;
+  - [ ] original residue;
+  - [ ] substituted residue;
+  - [ ] perturbed sequence;
+  - [ ] perturbation type;
+  - [ ] BLOSUM62 score where applicable;
+  - [ ] random seed/metadata where applicable.
+- [ ] Ensure one record corresponds to one one-position edit.
 
 ### Deliverable
 - Frozen perturbation-data schema.
@@ -414,17 +416,17 @@
 ## Task 3.11 — Implement P1 alanine scanning
 
 ### Subtasks
-- Find every W/Y/H/M/C position.
-- Replace one redox residue at a time with alanine.
-- Preserve sequence length.
-- Generate one independent sequence per edited position.
-- Store mutation metadata.
+- [ ] Find every W/Y/H/M/C position.
+- [ ] Replace one redox residue at a time with alanine.
+- [ ] Preserve sequence length.
+- [ ] Generate one independent sequence per edited position.
+- [ ] Store mutation metadata.
 
 ### Required validation
-- exactly one position changed;
-- original residue belongs to `R_redox`;
-- replacement residue is `A`;
-- length does not change.
+- [ ] exactly one position changed;
+- [ ] original residue belongs to `R_redox`;
+- [ ] replacement residue is `A`;
+- [ ] length does not change.
 
 ### Deliverable
 - Working P1 generator.
@@ -434,15 +436,15 @@
 ## Task 3.12 — Implement BLOSUM62 support for P2
 
 ### Subtasks
-- Load the BLOSUM62 matrix using the selected library.
-- Create a function that evaluates candidate substitutions.
-- Exclude:
-  - the original amino acid;
-  - alanine;
-  - W/Y/H/M/C.
-- Keep only substitutions with BLOSUM62 score >= +1.
-- Select the highest-scoring eligible replacement.
-- Implement a deterministic tie-breaking rule.
+- [ ] Load the BLOSUM62 matrix using the selected library.
+- [ ] Create a function that evaluates candidate substitutions.
+- [ ] Exclude:
+  - [ ] the original amino acid;
+  - [ ] alanine;
+  - [ ] W/Y/H/M/C.
+- [ ] Keep only substitutions with BLOSUM62 score >= +1.
+- [ ] Select the highest-scoring eligible replacement.
+- [ ] Implement a deterministic tie-breaking rule.
 
 ### Deliverable
 - Tested BLOSUM62 substitution-selection function.
@@ -452,19 +454,19 @@
 ## Task 3.13 — Implement P2 conservative substitutions
 
 ### Subtasks
-- Process only non-redox positions.
-- Apply the frozen BLOSUM62 selection rule.
-- Replace one position at a time.
-- Store the selected BLOSUM62 score.
-- Store mutation metadata.
+- [ ] Process only non-redox positions.
+- [ ] Apply the frozen BLOSUM62 selection rule.
+- [ ] Replace one position at a time.
+- [ ] Store the selected BLOSUM62 score.
+- [ ] Store mutation metadata.
 
 ### Required validation
-- exactly one position changed;
-- original position is non-redox;
-- new residue is not alanine;
-- new residue is not in `R_redox`;
-- BLOSUM62 score is >= +1;
-- sequence length is unchanged.
+- [ ] exactly one position changed;
+- [ ] original position is non-redox;
+- [ ] new residue is not alanine;
+- [ ] new residue is not in `R_redox`;
+- [ ] BLOSUM62 score is >= +1;
+- [ ] sequence length is unchanged.
 
 ### Deliverable
 - Working P2 generator.
@@ -474,18 +476,18 @@
 ## Task 3.14 — Implement P3 random-control substitutions
 
 ### Subtasks
-- Generate random valid single-residue substitutions.
-- Never replace a residue with itself.
-- Use a fixed master random seed.
-- Derive deterministic/reproducible random choices for each sequence/position.
-- Store random-control metadata.
+- [ ] Generate random valid single-residue substitutions.
+- [ ] Never replace a residue with itself.
+- [ ] Use a fixed master random seed.
+- [ ] Derive deterministic/reproducible random choices for each sequence/position.
+- [ ] Store random-control metadata.
 
 ### Required validation
-- exactly one position changed;
-- replacement is a valid amino acid;
-- replacement differs from the original;
-- sequence length is unchanged;
-- same input + same seed produces the same output.
+- [ ] exactly one position changed;
+- [ ] replacement is a valid amino acid;
+- [ ] replacement differs from the original;
+- [ ] sequence length is unchanged;
+- [ ] same input + same seed produces the same output.
 
 ### Deliverable
 - Working P3 generator.
@@ -495,29 +497,29 @@
 ## Task 3.15 — Create a combined perturbation pipeline
 
 ### Subtasks
-- Accept the annotated peptide dataset as input.
-- Generate P1 variants.
-- Generate P2 variants.
-- Generate P3 variants.
-- Run automatic validation.
-- Reject invalid variants.
-- Export all accepted perturbations to CSV/Parquet/JSON as required by the repository.
+- [ ] Accept the annotated peptide dataset as input.
+- [ ] Generate P1 variants.
+- [ ] Generate P2 variants.
+- [ ] Generate P3 variants.
+- [ ] Run automatic validation.
+- [ ] Reject invalid variants.
+- [ ] Export all accepted perturbations to CSV/Parquet/JSON as required by the repository.
 
 ### Deliverable
 - End-to-end perturbation-generation pipeline.
 
 ---
 
-# 3D — Automated Validation and Testing
+## Automated validation workstream
 
 ## Task 3.16 — Create sequence-validation tests
 
 ### Subtasks
-- Test valid sequences.
-- Test invalid amino acids.
-- Test empty values.
-- Test minimum/maximum length rules.
-- Test duplicate handling.
+- [x] Test valid sequences.
+- [x] Test invalid amino acids.
+- [x] Test empty values.
+- [x] Test minimum/maximum length rules.
+- [x] Test duplicate handling.
 
 ### Deliverable
 - Passing sequence-validation unit tests.
@@ -527,14 +529,14 @@
 ## Task 3.17 — Create P1/P2/P3 unit tests
 
 ### Subtasks
-- Test one-position-only changes.
-- Test P1 residue eligibility.
-- Test P1 alanine replacement.
-- Test P2 exclusion rules.
-- Test the BLOSUM62 >= +1 rule.
-- Test P2 deterministic selection.
-- Test P3 reproducibility.
-- Test unchanged sequence length.
+- [ ] Test one-position-only changes.
+- [ ] Test P1 residue eligibility.
+- [ ] Test P1 alanine replacement.
+- [ ] Test P2 exclusion rules.
+- [ ] Test the BLOSUM62 >= +1 rule.
+- [ ] Test P2 deterministic selection.
+- [ ] Test P3 reproducibility.
+- [ ] Test unchanged sequence length.
 
 ### Deliverable
 - Passing perturbation unit tests.
@@ -544,28 +546,28 @@
 ## Task 3.18 — Create reproducibility checks
 
 ### Subtasks
-- Run the same input twice using the same config.
-- Confirm identical perturbations.
-- Confirm identical random-control variants.
-- Record config/version/seed in each experimental run.
+- [ ] Run the same input twice using the same config.
+- [ ] Confirm identical perturbations.
+- [ ] Confirm identical random-control variants.
+- [ ] Record config/version/seed in each experimental run.
 
 ### Deliverable
 - Reproducibility evidence for PP1.
 
 ---
 
-# 3E — Predictor Integration and Pilot Scoring
+# Phase 4 — Predictor Integration and Pilot Scoring
 
 ## Task 3.19 — Define the common predictor interface
 
 ### Subtasks
-- Define a common operation such as:
+- [ ] Define a common operation such as:
 
   `sequence -> predictor score`
 
-- Ensure every predictor adapter returns a consistent numeric result.
-- Design adapters so the rest of C3 does not depend on predictor architecture.
-- Define error handling for unavailable/failed scores.
+- [ ] Ensure every predictor adapter returns a consistent numeric result.
+- [ ] Design adapters so the rest of C3 does not depend on predictor architecture.
+- [ ] Define error handling for unavailable/failed scores.
 
 ### Deliverable
 - Common predictor-adapter interface.
@@ -575,20 +577,20 @@
 ## Task 3.20 — Track predictor accessibility
 
 ### Subtasks
-- Check implementation/access status for:
-  - AnOxPePred
-  - Multi-AOP
-  - AOPxSVM
-  - AOP-DRL
-  - PU-AOP
-- Record:
-  - code/model availability;
-  - expected input format;
-  - output type;
-  - whether batch scoring is possible;
-  - license/access limitations;
-  - current integration status.
-- Do not claim a predictor is integrated until a real score has been verified.
+- [ ] Check implementation/access status for:
+  - [ ] AnOxPePred
+  - [ ] Multi-AOP
+  - [ ] AOPxSVM
+  - [ ] AOP-DRL
+  - [ ] PU-AOP
+- [ ] Record:
+  - [ ] code/model availability;
+  - [ ] expected input format;
+  - [ ] output type;
+  - [ ] whether batch scoring is possible;
+  - [ ] license/access limitations;
+  - [ ] current integration status.
+- [ ] Do not claim a predictor is integrated until a real score has been verified.
 
 ### Deliverable
 - Predictor-access/status table.
@@ -598,13 +600,13 @@
 ## Task 3.21 — Prioritize the minimum viable predictor set
 
 ### Subtasks
-- Prioritize:
-  - AnOxPePred;
-  - AOPxSVM;
-  - PU-AOP.
-- Coordinate with Component 2 for the PU-AOP frozen-model handoff.
-- Treat Multi-AOP and AOP-DRL as secondary if access/reproduction is not ready before PP1.
-- Document any unresolved access issue.
+- [ ] Prioritize:
+  - [ ] AnOxPePred;
+  - [ ] AOPxSVM;
+  - [ ] PU-AOP.
+- [ ] Coordinate with Component 2 for the PU-AOP frozen-model handoff.
+- [ ] Treat Multi-AOP and AOP-DRL as secondary if access/reproduction is not ready before PP1.
+- [ ] Document any unresolved access issue.
 
 ### Deliverable
 - Realistic PP1 predictor-integration scope.
@@ -614,12 +616,12 @@
 ## Task 3.22 — Build a non-experimental dummy/smoke-test predictor
 
 ### Subtasks
-- Implement a simple deterministic scoring function only for pipeline testing.
-- Clearly label it as:
-  - software testing only;
-  - not a scientific AOP predictor;
-  - not part of experimental results.
-- Use it to verify the scoring/metric pipeline before real models are ready.
+- [ ] Implement a simple deterministic scoring function only for pipeline testing.
+- [ ] Clearly label it as:
+  - [ ] software testing only;
+  - [ ] not a scientific AOP predictor;
+  - [ ] not part of experimental results.
+- [ ] Use it to verify the scoring/metric pipeline before real models are ready.
 
 ### Deliverable
 - End-to-end software smoke-test capability.
@@ -629,12 +631,12 @@
 ## Task 3.23 — Implement predictor scoring
 
 ### Subtasks
-- Score each original peptide.
-- Score every P1/P2/P3 variant.
-- Cache original scores to avoid repeated calls.
-- Cache completed perturbed scores where allowed.
-- Add restart/resume behavior where practical.
-- Record predictor version and scoring method.
+- [ ] Score each original peptide.
+- [ ] Score every P1/P2/P3 variant.
+- [ ] Cache original scores to avoid repeated calls.
+- [ ] Cache completed perturbed scores where allowed.
+- [ ] Add restart/resume behavior where practical.
+- [ ] Record predictor version and scoring method.
 
 ### Deliverable
 - Original/perturbed score table for the pilot.
@@ -644,26 +646,26 @@
 ## Task 3.24 — Prepare score normalization
 
 ### Subtasks
-- Check each predictor's native output range.
-- Use native [0,1] probability scores where available.
-- Define/document any required score mapping for predictors that do not output probabilities.
-- Avoid batch-wise min-max scaling that would distort perturbation differences.
-- Confirm normalized/usable scores fall in the expected scale.
+- [ ] Check each predictor's native output range.
+- [ ] Use native [0,1] probability scores where available.
+- [ ] Define/document any required score mapping for predictors that do not output probabilities.
+- [ ] Avoid batch-wise min-max scaling that would distort perturbation differences.
+- [ ] Confirm normalized/usable scores fall in the expected scale.
 
 ### Deliverable
 - Comparable predictor-score representation.
 
 ---
 
-# 3F — Pilot Behavioural Metrics
+## Pilot behavioural-metrics workstream
 
 ## Task 3.25 — Create the PP1 pilot subset
 
 ### Subtasks
-- Select a reproducible small subset of the audit dataset.
-- Use a fixed random seed.
-- Ensure multiple redox residues and sequence lengths are represented.
-- Use enough peptides to demonstrate the full workflow without running the final study.
+- [ ] Select a reproducible small subset of the audit dataset.
+- [ ] Use a fixed random seed.
+- [ ] Ensure multiple redox residues and sequence lengths are represented.
+- [ ] Use enough peptides to demonstrate the full workflow without running the final study.
 
 ### Suggested PP1 scale
 - approximately 10–30 peptides, depending on scoring cost and predictor access.
@@ -673,18 +675,20 @@
 
 ---
 
+# Phase 5 — Behavioural Metrics, Quality Control, and Reproducibility
+
 ## Task 3.26 — Calculate DeltaScore
 
 ### Subtasks
-- For each perturbation compute:
+- [ ] For each perturbation compute:
 
   `DeltaScore_i = Score(original) - Score(perturbed_i)`
 
-- Also store:
+- [ ] Also store:
 
   `|DeltaScore_i|`
 
-- Verify calculations using hand-checked examples.
+- [ ] Verify calculations using hand-checked examples.
 
 ### Deliverable
 - Per-position DeltaScore results.
@@ -694,11 +698,11 @@
 ## Task 3.27 — Detect prediction flips and calculate PFR
 
 ### Subtasks
-- Define/record the decision threshold used by each predictor.
-- Determine the original class.
-- Determine the perturbed class.
-- Record whether a flip occurs.
-- Compute PFR for the required groups.
+- [ ] Define/record the decision threshold used by each predictor.
+- [ ] Determine the original class.
+- [ ] Determine the perturbed class.
+- [ ] Record whether a flip occurs.
+- [ ] Compute PFR for the required groups.
 
 ### Deliverable
 - Prediction-flip results.
@@ -708,12 +712,12 @@
 ## Task 3.28 — Calculate Invariance Rate (IR)
 
 ### Subtasks
-- Restrict the calculation to P2 variants.
-- Using the primary threshold `delta = 0.05`, mark a conservative edit invariant when:
+- [ ] Restrict the calculation to P2 variants.
+- [ ] Using the primary threshold `delta = 0.05`, mark a conservative edit invariant when:
 
   `|DeltaScore| < delta`
 
-- Calculate the fraction of invariant P2 edits.
+- [ ] Calculate the fraction of invariant P2 edits.
 
 ### Deliverable
 - Preliminary IR for each working pilot predictor.
@@ -723,12 +727,12 @@
 ## Task 3.29 — Calculate False Sensitivity Rate (FSR)
 
 ### Subtasks
-- Restrict the calculation to P1 variants.
-- Using `delta = 0.05`, mark insufficient response when:
+- [ ] Restrict the calculation to P1 variants.
+- [ ] Using `delta = 0.05`, mark insufficient response when:
 
   `|DeltaScore| < delta`
 
-- Calculate the fraction of P1 edits showing insufficient response.
+- [ ] Calculate the fraction of P1 edits showing insufficient response.
 
 ### Deliverable
 - Preliminary FSR for each working pilot predictor.
@@ -738,13 +742,13 @@
 ## Task 3.30 — Calculate preliminary BCS
 
 ### Subtasks
-- Compute:
+- [ ] Compute:
 
   `BCS = IR × (1 - FSR)`
 
-- Check that BCS falls in the expected range.
-- Verify the formula with small manually calculated examples.
-- Report PP1 values as **preliminary pilot values**, not final conclusions.
+- [ ] Check that BCS falls in the expected range.
+- [ ] Verify the formula with small manually calculated examples.
+- [ ] Report PP1 values as **preliminary pilot values**, not final conclusions.
 
 ### Deliverable
 - Preliminary pilot BCS.
@@ -754,29 +758,29 @@
 ## Task 3.31 — Prepare delta-sensitivity support
 
 ### Subtasks
-- Ensure the metric code can accept:
-  - 0.02;
-  - 0.05;
-  - 0.10.
-- Use `0.05` as the primary PP1 result.
-- If time permits, demonstrate that the pipeline can rerun the other thresholds.
-- Leave the full robustness interpretation for the later study.
+- [ ] Ensure the metric code can accept:
+  - [ ] 0.02;
+  - [ ] 0.05;
+  - [ ] 0.10.
+- [ ] Use `0.05` as the primary PP1 result.
+- [ ] If time permits, demonstrate that the pipeline can rerun the other thresholds.
+- [ ] Leave the full robustness interpretation for the later study.
 
 ### Deliverable
 - Configurable threshold-analysis code.
 
 ---
 
-# 3G — Pilot Results, Quality Checks and Evidence
+## Pilot quality and evidence workstream
 
 ## Task 3.32 — Review perturbation counts
 
 ### Subtasks
-- Count P1 variants.
-- Count P2 variants.
-- Count P3 variants.
-- Check for unexpected zero-variant cases.
-- Check whether any sequence dominates the generated dataset.
+- [ ] Count P1 variants.
+- [ ] Count P2 variants.
+- [ ] Count P3 variants.
+- [ ] Check for unexpected zero-variant cases.
+- [ ] Check whether any sequence dominates the generated dataset.
 
 ### Deliverable
 - Perturbation summary table.
@@ -786,15 +790,15 @@
 ## Task 3.33 — Manually inspect example variants
 
 ### Subtasks
-- Select representative P1 examples.
-- Select representative P2 examples.
-- Select representative P3 examples.
-- Verify:
-  - mutation position;
-  - original/new residue;
-  - resulting sequence;
-  - BLOSUM62 score for P2;
-  - original and perturbed predictor scores.
+- [ ] Select representative P1 examples.
+- [ ] Select representative P2 examples.
+- [ ] Select representative P3 examples.
+- [ ] Verify:
+  - [ ] mutation position;
+  - [ ] original/new residue;
+  - [ ] resulting sequence;
+  - [ ] BLOSUM62 score for P2;
+  - [ ] original and perturbed predictor scores.
 
 ### Deliverable
 - Hand-verified examples for PP1 slides/demo.
@@ -804,13 +808,13 @@
 ## Task 3.34 — Create preliminary visualizations
 
 ### Subtasks
-- Create simple plots/tables such as:
-  - P1/P2/P3 `|DeltaScore|` distributions;
-  - original vs perturbed score examples;
-  - preliminary IR/FSR/BCS table;
-  - prediction-flip comparison.
-- Use only actual generated results.
-- Mark results as pilot/preliminary.
+- [ ] Create simple plots/tables such as:
+  - [ ] P1/P2/P3 `|DeltaScore|` distributions;
+  - [ ] original vs perturbed score examples;
+  - [ ] preliminary IR/FSR/BCS table;
+  - [ ] prediction-flip comparison.
+- [ ] Use only actual generated results.
+- [ ] Mark results as pilot/preliminary.
 
 ### Deliverable
 - PP1-ready preliminary figures.
@@ -820,63 +824,63 @@
 ## Task 3.35 — Create run manifests and provenance records
 
 ### Subtasks
-- Record:
-  - dataset version;
-  - predictor version;
-  - code commit;
-  - random seed;
-  - redox set;
-  - BLOSUM62 rule;
-  - delta threshold;
-  - peptide count;
-  - perturbation counts;
-  - failures/missing scores;
-  - run date.
-- Keep result files versioned and traceable.
+- [ ] Record:
+  - [ ] dataset version;
+  - [ ] predictor version;
+  - [ ] code commit;
+  - [ ] random seed;
+  - [ ] redox set;
+  - [ ] BLOSUM62 rule;
+  - [ ] delta threshold;
+  - [ ] peptide count;
+  - [ ] perturbation counts;
+  - [ ] failures/missing scores;
+  - [ ] run date.
+- [ ] Keep result files versioned and traceable.
 
 ### Deliverable
 - Reproducible run manifest.
 
 ---
 
-# 3H — SHAP Preparation Before PP1
+## SHAP preparation workstream
 
 ## Task 3.36 — Prepare the SHAP-faithfulness data structure
 
 ### Subtasks
-- Define fields for:
-  - sequence ID;
-  - predictor;
-  - residue position;
-  - residue;
-  - SHAP value;
-  - absolute SHAP;
-  - P1 DeltaScore;
-  - absolute DeltaScore.
-- Confirm the later analysis will compare:
+- [ ] Define fields for:
+  - [ ] sequence ID;
+  - [ ] predictor;
+  - [ ] residue position;
+  - [ ] residue;
+  - [ ] SHAP value;
+  - [ ] absolute SHAP;
+  - [ ] P1 DeltaScore;
+  - [ ] absolute DeltaScore.
+- [ ] Confirm the later analysis will compare:
 
   `|SHAP_i|` vs `|DeltaScore_i|`
 
-- Prepare the code/module boundary for KernelSHAP.
-- Do not make the complete SHAP experiment a blocker for PP1.
+- [ ] Prepare the code/module boundary for KernelSHAP.
+- [ ] Do not make the complete SHAP experiment a blocker for PP1.
 
 ### Deliverable
 - SHAP-faithfulness implementation plan/schema.
 
 ---
 
-# 3I — PP1 Documentation and Presentation
+# Phase 6 — PP1 Documentation, Evidence, and Delivery
 
 ## Task 3.37 — Update implementation documentation
 
 ### Subtasks
-- Update the architecture diagram to match the real implementation.
-- Document the actual repository structure.
-- Document dataset-preparation steps.
-- Document P1/P2/P3 rules.
-- Document predictor-integration status.
-- Document current limitations.
-- Update README/configuration instructions.
+- [ ] Update the architecture diagram to match the real implementation.
+- [ ] Document the actual repository structure.
+- [ ] Document dataset-preparation steps.
+- [ ] Document P1/P2/P3 rules.
+- [ ] Document predictor-integration status.
+- [ ] Document current limitations.
+- [ ] Update README/configuration instructions.
 
 ### Deliverable
 - Up-to-date implementation documentation.
@@ -886,19 +890,19 @@
 ## Task 3.38 — Maintain Git history
 
 ### Subtasks
-- Commit work in logical units.
-- Use clear commit messages, for example:
-  - `Initialize Component 3 AOP-BCS structure`
-  - `Add C3 research configuration`
-  - `Implement AOP sequence cleaning`
-  - `Add redox residue annotation`
-  - `Implement P1 alanine scanning`
-  - `Implement P2 BLOSUM62 substitutions`
-  - `Implement P3 random controls`
-  - `Add perturbation validation tests`
-  - `Add behavioural metric calculations`
-- Push the C3 branch regularly.
-- Merge/update from `dev` using the team workflow.
+- [x] Commit work in logical units.
+- [x] Use clear commit messages, for example:
+  - [x] `Initialize Component 3 AOP-BCS structure`
+  - [x] `Add C3 research configuration`
+  - [x] `Implement AOP sequence cleaning`
+  - [x] `Add redox residue annotation`
+  - [ ] `Implement P1 alanine scanning`
+  - [ ] `Implement P2 BLOSUM62 substitutions`
+  - [ ] `Implement P3 random controls`
+  - [ ] `Add perturbation validation tests`
+  - [ ] `Add behavioural metric calculations`
+- [ ] Push the C3 branch regularly.
+- [ ] Merge/update from `dev` using the team workflow.
 
 ### Deliverable
 - Traceable implementation history.
@@ -909,20 +913,20 @@
 
 ### Subtasks
 Record major milestones rather than every minor coding action:
-- repository/environment setup;
-- dataset acquisition;
-- cleaning and CD-HIT;
-- residue annotation;
-- P1 implementation;
-- P2 implementation;
-- P3 implementation;
-- automated validation;
-- predictor access investigation;
-- predictor integration;
-- pilot experiment;
-- preliminary metrics;
-- PP1 preparation;
-- supervisor meetings and feedback.
+- [ ] repository/environment setup;
+- [ ] dataset acquisition;
+- [ ] cleaning and CD-HIT;
+- [ ] residue annotation;
+- [ ] P1 implementation;
+- [ ] P2 implementation;
+- [ ] P3 implementation;
+- [ ] automated validation;
+- [ ] predictor access investigation;
+- [ ] predictor integration;
+- [ ] pilot experiment;
+- [ ] preliminary metrics;
+- [ ] PP1 preparation;
+- [ ] supervisor meetings and feedback.
 
 ### Deliverable
 - Updated signed/verified logbook as required.
@@ -933,24 +937,24 @@ Record major milestones rather than every minor coding action:
 
 ### Subtasks
 Capture evidence of:
-- repository and branch;
-- environment;
-- raw/processed dataset;
-- cleaning report;
-- CD-HIT result;
-- redox annotations;
-- P1 variants;
-- P2 variants;
-- P3 variants;
-- unit-test output;
-- real predictor scoring;
-- result table;
-- DeltaScore;
-- preliminary IR;
-- preliminary FSR;
-- preliminary BCS;
-- figures;
-- Git commits.
+- [ ] repository and branch;
+- [ ] environment;
+- [ ] raw/processed dataset;
+- [ ] cleaning report;
+- [ ] CD-HIT result;
+- [ ] redox annotations;
+- [ ] P1 variants;
+- [ ] P2 variants;
+- [ ] P3 variants;
+- [ ] unit-test output;
+- [ ] real predictor scoring;
+- [ ] result table;
+- [ ] DeltaScore;
+- [ ] preliminary IR;
+- [ ] preliminary FSR;
+- [ ] preliminary BCS;
+- [ ] figures;
+- [ ] Git commits.
 
 ### Deliverable
 - Organized PP1 evidence folder.
@@ -959,24 +963,24 @@ Capture evidence of:
 
 ## Task 3.41 — Prepare the PP1 presentation
 
-### Suggested C3 presentation flow
-1. Component title.
-2. Problem.
-3. Research gap.
-4. Objective.
-5. AOP-BCS concept.
-6. Audit dataset.
-7. Fixed redox set.
-8. P1/P2/P3 methodology.
-9. Implemented architecture.
-10. Dataset-preparation progress.
-11. Perturbation-engine progress.
-12. Predictor-integration status.
-13. Pilot experiment.
-14. Preliminary DeltaScore/PFR/IR/FSR/BCS results.
-15. Validation/reproducibility evidence.
-16. Challenges and unresolved dependencies.
-17. Work planned after PP1.
+### Subtasks
+- [ ] Add the component title.
+- [ ] Explain the problem.
+- [ ] Explain the research gap.
+- [ ] Present the objective.
+- [ ] Explain the AOP-BCS concept.
+- [ ] Present the audit dataset.
+- [ ] Present the fixed redox set.
+- [ ] Explain the P1/P2/P3 methodology.
+- [ ] Present the implemented architecture.
+- [ ] Present dataset-preparation progress.
+- [ ] Present perturbation-engine progress.
+- [ ] Present predictor-integration status.
+- [ ] Present the pilot experiment.
+- [ ] Present preliminary DeltaScore/PFR/IR/FSR/BCS results.
+- [ ] Present validation and reproducibility evidence.
+- [ ] Explain challenges and unresolved dependencies.
+- [ ] Present work planned after PP1.
 
 ### Deliverable
 - Final PP1 slide deck and speaking notes.
@@ -986,21 +990,21 @@ Capture evidence of:
 ## Task 3.42 — PP1 rehearsal and final verification
 
 ### Subtasks
-- Run the pilot pipeline again from a clean configuration.
-- Confirm generated files are reproducible.
-- Confirm all unit tests pass.
-- Confirm presentation figures match the latest result files.
-- Confirm no dummy predictor result is presented as scientific evidence.
-- Confirm predictor-access limitations are stated accurately.
-- Practice explaining:
-  - why C3 is an audit rather than a classifier;
-  - why W/Y/H/M/C were fixed;
-  - why P1, P2 and P3 are needed;
-  - why P2 uses BLOSUM62 >= +1;
-  - what IR means;
-  - what FSR means;
-  - why `BCS = IR × (1 - FSR)`;
-  - what remains after PP1.
+- [ ] Run the pilot pipeline again from a clean configuration.
+- [ ] Confirm generated files are reproducible.
+- [ ] Confirm all unit tests pass.
+- [ ] Confirm presentation figures match the latest result files.
+- [ ] Confirm no dummy predictor result is presented as scientific evidence.
+- [ ] Confirm predictor-access limitations are stated accurately.
+- [ ] Practice explaining:
+  - [ ] why C3 is an audit rather than a classifier;
+  - [ ] why W/Y/H/M/C were fixed;
+  - [ ] why P1, P2 and P3 are needed;
+  - [ ] why P2 uses BLOSUM62 >= +1;
+  - [ ] what IR means;
+  - [ ] what FSR means;
+  - [ ] why `BCS = IR × (1 - FSR)`;
+  - [ ] what remains after PP1.
 
 ### Deliverable
 - PP1-ready Component 3 implementation and presentation.
@@ -1012,14 +1016,14 @@ Capture evidence of:
 Before considering the PP1 implementation stage complete, verify the following.
 
 ## Must be working by PP1
-- [ ] Team repository cloned and C3 branch created.
+- [x] Team repository cloned and C3 branch created.
 - [ ] C3 environment/configuration works.
-- [ ] Audit sequences acquired.
-- [ ] Sequences standardized and validated.
-- [ ] 3–50 AA filter applied.
-- [ ] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.
-- [ ] Redox filter `{W,Y,H,M,C}` applied.
-- [ ] Residue annotation works.
+- [x] Audit sequences acquired.
+- [x] Sequences standardized and validated.
+- [x] 3–50 AA filter applied.
+- [x] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.
+- [x] Redox filter `{W,Y,H,M,C}` applied.
+- [x] Residue annotation works.
 - [ ] P1 generator works.
 - [ ] P2 generator works using BLOSUM62 >= +1.
 - [ ] P3 random-control generator works.
