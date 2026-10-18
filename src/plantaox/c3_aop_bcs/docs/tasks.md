@@ -436,15 +436,15 @@
 ## Task 3.12 — Implement BLOSUM62 support for P2
 
 ### Subtasks
-- [ ] Load the BLOSUM62 matrix using the selected library.
-- [ ] Create a function that evaluates candidate substitutions.
-- [ ] Exclude:
-  - [ ] the original amino acid;
-  - [ ] alanine;
-  - [ ] W/Y/H/M/C.
-- [ ] Keep only substitutions with BLOSUM62 score >= +1.
-- [ ] Select the highest-scoring eligible replacement.
-- [ ] Implement a deterministic tie-breaking rule.
+- [x] Load the BLOSUM62 matrix using the selected library.
+- [x] Create a function that evaluates candidate substitutions.
+- [x] Exclude:
+  - [x] the original amino acid;
+  - [x] alanine;
+  - [x] W/Y/H/M/C.
+- [x] Keep only substitutions with BLOSUM62 score >= +1.
+- [x] Select the highest-scoring eligible replacement.
+- [x] Implement a deterministic tie-breaking rule.
 
 ### Deliverable
 - Tested BLOSUM62 substitution-selection function.
@@ -532,9 +532,9 @@
 - [x] Test one-position-only changes.
 - [x] Test P1 residue eligibility.
 - [x] Test P1 alanine replacement.
-- [ ] Test P2 exclusion rules.
-- [ ] Test the BLOSUM62 >= +1 rule.
-- [ ] Test P2 deterministic selection.
+- [x] Test P2 exclusion rules.
+- [x] Test the BLOSUM62 >= +1 rule.
+- [x] Test P2 deterministic selection.
 - [ ] Test P3 reproducibility.
 - [x] Test unchanged sequence length.
 

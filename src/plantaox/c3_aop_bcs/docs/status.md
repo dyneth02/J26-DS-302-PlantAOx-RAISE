@@ -38,18 +38,21 @@
 - Generated 1,180 independently validated P1 variants across all 734 eligible peptides: 189 W, 398 Y, 303 H, 176 M, and 114 C substitutions to alanine.
 - Exported `c3_aop_bcs_p1_alanine_v1` using the frozen perturbation schema, with stable variant identifiers and a report pinning the source annotation and schema checksums, rule, counts, and output checksum.
 - Verified every P1 variant changes exactly one declared redox position to alanine, preserves sequence length, contains no P2/P3 metadata, and covers every annotated redox position exactly once.
-- Confirmed all 39 current C3 tests pass, including P1 eligibility, alanine replacement, independent mutations, complete coverage, invalid annotation rejection, schema validation, reconciled counts, checksum verification, and byte-reproducible generation.
+- Added a project-pinned 20×20 BLOSUM62 standard-amino-acid score resource sourced from the NCBI BLAST matrix distribution, with SHA-256 provenance and a dependency-free validated loader.
+- Implemented P2 candidate evaluation that excludes the original residue, alanine, and W/Y/H/M/C, then keeps only substitutions scoring at least `+1`.
+- Implemented deterministic selection by highest BLOSUM62 score followed by alphabetical residue code, returning no selection when the frozen rule has no eligible candidate.
+- Added a versioned `c3_aop_bcs_blosum62_support_v1` manifest recording matrix provenance, dimensions, score units, exclusions, threshold, tie-break rule, and the selected substitution for every non-redox original residue.
+- Confirmed all 44 current C3 tests pass, including complete symmetric matrix validation, exhaustive exclusion enforcement across all amino acids, minimum-score filtering, highest-score choice, deterministic ties, no-candidate behavior, checksum provenance, and byte-reproducible metadata.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.11 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.12 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.12: Implement BLOSUM62 support for P2
+## Next task — Task 3.13: Implement P2 conservative substitutions
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- load the BLOSUM62 substitution matrix using the selected project-compatible approach;
-- exclude the original residue, alanine, and W/Y/H/M/C candidates;
-- keep only candidates scoring at least `+1` and select the highest-scoring option;
-- define and test deterministic tie-breaking before P2 variant generation;
-- preserve matrix provenance and validate the loaded standard-amino-acid score table.
+- process only annotated non-redox positions;
+- apply the frozen BLOSUM62 selection rule and skip positions with no eligible candidate;
+- replace one position at a time while storing the selected BLOSUM62 score and mutation metadata;
+- export and validate deterministic P2 variants with complete count and provenance reporting.
