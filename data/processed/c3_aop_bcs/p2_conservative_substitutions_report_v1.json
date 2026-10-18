@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "dataset_version": "c3_aop_bcs_p2_conservative_v1",
+  "created_on": "2026-10-18",
+  "source_dataset_version": "c3_aop_bcs_residue_annotations_v1",
+  "source": {
+    "path": "data/processed/c3_aop_bcs/residue_annotations_v1.csv",
+    "sha256": "03d043cf0856a5584f19022b696b982b36071e85bdff80bf0f563e2b416a5938"
+  },
+  "perturbation_schema": {
+    "version": "1.0",
+    "path": "src/plantaox/c3_aop_bcs/perturbation_schema_v1.json",
+    "sha256": "1c08ec68cf91ef6decb6547c1e9b42871e20ddaa53248a523350842f1cbeb318"
+  },
+  "blosum62_support": {
+    "path": "src/plantaox/c3_aop_bcs/blosum62_support_v1.json",
+    "sha256": "457725719b90125c948a035efea487a75bba1583d9bbd49b6bc46c0d39c61e96"
+  },
+  "p2_rule": {
+    "eligible_position_class": "non_redox",
+    "minimum_blosum62_score": 1,
+    "excluded_substitutions": [
+      "original_residue",
+      "A",
+      "W",
+      "Y",
+      "H",
+      "M",
+      "C"
+    ],
+    "tie_break": "highest BLOSUM62 score, then alphabetical residue code ascending",
+    "no_candidate_action": "skip_position",
+    "one_position_per_variant": true,
+    "preserve_sequence_length": true
+  },
+  "counts": {
+    "input_peptide_count": 734,
+    "input_annotation_count": 5580,
+    "input_non_redox_position_count": 4400,
+    "peptides_with_variants": 695,
+    "peptides_without_variants": 39,
+    "generated_variant_count": 3276,
+    "skipped_no_candidate_position_count": 1124,
+    "variants_by_original_residue": {
+      "A": 368,
+      "D": 230,
+      "E": 297,
+      "I": 184,
+      "K": 248,
+      "L": 456,
+      "N": 204,
+      "Q": 244,
+      "R": 235,
+      "S": 264,
+      "T": 214,
+      "V": 332
+    },
+    "variants_by_substituted_residue": {
+      "D": 501,
+      "E": 474,
+      "I": 788,
+      "K": 235,
+      "N": 264,
+      "R": 248,
+      "S": 582,
+      "V": 184
+    },
+    "skipped_no_candidate_by_original_residue": {
+      "F": 220,
+      "G": 413,
+      "P": 491
+    }
+  },
+  "outputs": {
+    "p2_variants": {
+      "path": "data/processed/c3_aop_bcs/p2_conservative_variants_v1.csv",
+      "record_count": 3276,
+      "sha256": "f17b9f2a3535e4cd70a6d7ccf8ca27f27bc459e74f57ea01b3992979d8058673"
+    }
+  }
+}
