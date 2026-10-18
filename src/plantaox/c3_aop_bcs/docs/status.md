@@ -8,7 +8,8 @@
 - Prepared the isolated `c3_aop_bcs` repository structure for source code, tests, documentation, and data artifacts.
 - Created the versioned C3 research configuration containing random seed `42`, sequence length range `3–50`, redox residues `{W,Y,H,M,C}`, CD-HIT threshold `0.90`, primary delta `0.05`, sensitivity deltas `0.02`, `0.05`, and `0.10`, and pilot size `20`.
 - Added a dependency-free typed configuration loader with strict validation and focused tests.
-- Verified Python 3.13.7 and the project `.venv`; pandas, NumPy, SciPy, scikit-learn, pytest, and joblib currently import successfully.
+- Verified Python 3.13.7 and the project `.venv`; pandas, NumPy, SciPy, scikit-learn, pytest, joblib, and Biopython currently import successfully.
+- Installed Biopython `1.88` in the project `.venv` and verified `Bio.Align.substitution_matrices.load("BLOSUM62")`, including the expected D-to-E score of `2.0`.
 - Acquired and preserved four original C3 source datasets under `data/raw/c3_aop_bcs/` without manually editing them.
 - Added the versioned `c3_aop_bcs_raw_v1` provenance manifest with source locations, schemas, row counts, acquisition information, evidence notes, byte counts, and SHA-256 hashes.
 - Verified the acquired source data: 917 AnOxPePred assay records and 1,404, 2,120, and 3,022 records from the three Multi-AOP benchmarks.
@@ -30,16 +31,51 @@
 - Expanded all 734 eligible peptides into 5,580 deterministic one-based residue annotations: 1,180 redox positions and 4,400 non-redox positions.
 - Recorded each position's residue and `redox`/`non_redox` classification, repeated the validated peptide-level redox-position count, and preserved every Task 3.8 provenance field.
 - Generated the versioned `c3_aop_bcs_residue_annotations_v1` table and a reproducibility report containing the annotation rule, configured redox set, source checksum, reconciled counts, and output checksum.
-- Confirmed all 30 current C3 tests pass, including complete position coverage, exact sequence reconstruction, class correctness, peptide-level count validation, provenance preservation, checksum validation, and byte-reproducible generation.
+- Froze perturbation schema version `1.0` with ordered fields for schema and variant identifiers, sequence linkage, original and perturbed sequences, one-based position, original and substituted residues, perturbation type, BLOSUM62 score, random seed, and random metadata.
+- Added an immutable perturbation-record model with strict construction and CSV mapping, standard-amino-acid validation, same-length enforcement, and proof that each record contains exactly one edit at its declared position.
+- Defined explicit metadata applicability: P1 carries no P2/P3 metadata, P2 requires a BLOSUM62 score, and P3 requires a random seed plus canonical JSON metadata.
+- Added a deterministic machine-readable `perturbation_schema_v1.json` contract shared by the future P1, P2, and P3 generators.
+- Implemented deterministic P1 alanine scanning over every configured W/Y/H/M/C position in the residue annotation dataset.
+- Generated 1,180 independently validated P1 variants across all 734 eligible peptides: 189 W, 398 Y, 303 H, 176 M, and 114 C substitutions to alanine.
+- Exported `c3_aop_bcs_p1_alanine_v1` using the frozen perturbation schema, with stable variant identifiers and a report pinning the source annotation and schema checksums, rule, counts, and output checksum.
+- Verified every P1 variant changes exactly one declared redox position to alanine, preserves sequence length, contains no P2/P3 metadata, and covers every annotated redox position exactly once.
+- Reimplemented Task 3.12 using Biopython `1.88`: BLOSUM62 is loaded through `Bio.Align.substitution_matrices.load("BLOSUM62")`, then restricted to the project's 20 standard amino acids and validated for integral, symmetric scores.
+- Implemented P2 candidate evaluation that excludes the original residue, alanine, and W/Y/H/M/C, then keeps only substitutions scoring at least `+1`.
+- Implemented deterministic selection by highest BLOSUM62 score followed by alphabetical residue code, returning no selection when the frozen rule has no eligible candidate.
+- Updated the versioned `c3_aop_bcs_blosum62_support_v1` manifest to record the Biopython version, loader API, matrix identifier, library alphabet, standard-amino-acid dimensions, selection rules, and selected substitution for every non-redox original residue.
+- Removed the obsolete bundled BLOSUM62 TSV so the implementation has one unambiguous matrix source through Biopython.
+- Implemented deterministic P2 generation over the 4,400 annotated non-redox positions, applying the frozen Biopython BLOSUM62 selection rule independently at each position.
+- Generated 3,276 validated P2 variants across 695 peptides; the remaining 1,124 non-redox positions were explicitly skipped because F, G, or P had no eligible substitution under the frozen exclusions and `>= +1` threshold.
+- Exported `c3_aop_bcs_p2_conservative_v1` using the frozen perturbation schema, including one-based mutation positions, original and substituted residues, perturbed sequences, and selected BLOSUM62 scores.
+- Added a checksum-backed P2 report pinning the residue-annotation source, perturbation schema, Biopython BLOSUM62 support manifest, selection rules, reconciled counts, per-residue summaries, and output checksum.
+- Verified every P2 record changes exactly one non-redox position, preserves sequence length, excludes alanine and W/Y/H/M/C as replacements, and has a BLOSUM62 score of at least `+1`.
+- Implemented P3 random-control generation for every annotated residue position using the configured master seed `42` and a versioned SHA-256 modulo selection rule over the 19 alphabetically ordered alternatives that exclude the original residue.
+- Derived every P3 choice independently from the master seed, sequence ID, original sequence, one-based position, and original residue, making choices reproducible and independent of input row order.
+- Generated 5,580 independently validated P3 variants across all 734 eligible peptides and stored the master seed plus canonical JSON metadata containing the selection algorithm, candidate index/count, and position-specific SHA-256 seed digest.
+- Exported `c3_aop_bcs_p3_random_control_v1` using the frozen perturbation schema and added a checksum-backed report pinning the source annotation, schema, master seed, seed derivation, counts, and output checksum.
+- Verified every P3 variant changes exactly one declared position, uses a valid standard amino acid different from the original, preserves sequence length, and reproduces byte-identical output for the same input and seed.
+- Implemented a unified Task 3.15 pipeline that accepts the annotated peptide dataset and runs the P1, P2, and P3 generators in a single deterministic workflow.
+- Added source-linked automatic validation that rechecks frozen-schema invariants and perturbation-specific P1, P2, and P3 semantics, including duplicate variant identifiers.
+- Added deterministic rejection handling: invalid generated variants are excluded from the accepted output and written with explicit reasons to a separate rejection ledger.
+- Generated `c3_aop_bcs_combined_perturbations_v1` with 10,036 accepted variants—1,180 P1, 3,276 P2, and 5,580 P3—and zero rejected variants from the verified production inputs.
+- Added a checksum-backed combined pipeline report recording the source annotations, complete research configuration, schema and generator versions, per-type generated/accepted/rejected counts, validation policy, and both output checksums.
+- Verified the combined CSV exactly matches the ordered union of the independently verified P1, P2, and P3 datasets and added tests proving deliberately invalid semantic records and duplicate IDs are rejected.
+- Implemented a Task 3.18 reproducibility runner that executes the complete production perturbation workflow twice from the same 5,580-position annotation input and the same research configuration.
+- Confirmed both production runs generated the same 10,036 accepted variants and zero rejections, with byte-identical accepted outputs and rejection ledgers.
+- Confirmed the 5,580 P3 random-control records are byte-identical across both runs under master seed `42`.
+- Added the versioned `c3_aop_bcs_perturbation_reproducibility_v1` evidence report with a `PASS` result, per-run counts, byte sizes, SHA-256 hashes, full configuration snapshots, seed, Python/Biopython versions, pipeline/schema/generator versions, and BLOSUM62-support checksum.
+- Added tests verifying deterministic evidence generation on repeated complete runs and confirming the production evidence matches the committed combined and P3 outputs.
+- Confirmed all 61 current C3 tests pass with 43 subtests, covering full-workflow reproducibility and all prior dataset, perturbation, validation, and pipeline behavior.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.9 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.18 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.10: Define the perturbation output schema
+## Next task — Task 3.19: Define the common predictor interface
 
 **Status:** Not started.
 
 Next work:
 
-- define the required original-sequence, mutation-position, residue, perturbed-sequence, perturbation-type, BLOSUM62-score, and random-metadata fields;
-- ensure one output record represents exactly one one-position edit;
-- freeze and test the shared schema before implementing P1, P2, and P3 generators.
+- define a predictor-independent `sequence -> score` interface;
+- enforce a consistent finite numeric result contract for every predictor adapter;
+- isolate downstream C3 scoring code from predictor-specific architectures;
+- define explicit error handling for invalid inputs and unavailable or failed predictor scores.

@@ -1,0 +1,1 @@
+schema_version,variant_id,sequence_id,original_sequence,position,original_residue,substituted_residue,perturbed_sequence,perturbation_type,blosum62_score,random_seed,random_metadata,rejection_reason

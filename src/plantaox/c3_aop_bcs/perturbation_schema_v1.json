@@ -1,0 +1,99 @@
+{
+  "schema_name": "c3_aop_bcs_perturbation_record",
+  "schema_version": "1.0",
+  "record_semantics": "one record represents exactly one one-position substitution",
+  "fields": [
+    {
+      "name": "schema_version",
+      "type": "string",
+      "nullable": false
+    },
+    {
+      "name": "variant_id",
+      "type": "string",
+      "nullable": false
+    },
+    {
+      "name": "sequence_id",
+      "type": "string",
+      "nullable": false
+    },
+    {
+      "name": "original_sequence",
+      "type": "string",
+      "nullable": false
+    },
+    {
+      "name": "position",
+      "type": "integer",
+      "nullable": false
+    },
+    {
+      "name": "original_residue",
+      "type": "amino_acid",
+      "nullable": false
+    },
+    {
+      "name": "substituted_residue",
+      "type": "amino_acid",
+      "nullable": false
+    },
+    {
+      "name": "perturbed_sequence",
+      "type": "string",
+      "nullable": false
+    },
+    {
+      "name": "perturbation_type",
+      "type": "enum:P1|P2|P3",
+      "nullable": false
+    },
+    {
+      "name": "blosum62_score",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "name": "random_seed",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "name": "random_metadata",
+      "type": "json_object",
+      "nullable": true
+    }
+  ],
+  "position_index_base": 1,
+  "standard_amino_acids": "ACDEFGHIKLMNPQRSTVWY",
+  "perturbation_types": {
+    "P1": "alanine scan at a redox residue",
+    "P2": "BLOSUM62-conservative substitution at a non-redox residue",
+    "P3": "seeded random single-residue substitution control"
+  },
+  "conditional_metadata": {
+    "P1": {
+      "blosum62_score": "must_be_null",
+      "random_seed": "must_be_null",
+      "random_metadata": "must_be_null"
+    },
+    "P2": {
+      "blosum62_score": "required",
+      "random_seed": "must_be_null",
+      "random_metadata": "must_be_null"
+    },
+    "P3": {
+      "blosum62_score": "must_be_null",
+      "random_seed": "required",
+      "random_metadata": "required_json_object"
+    }
+  },
+  "invariants": [
+    "original_sequence and perturbed_sequence have equal non-zero length",
+    "position is one-based and within original_sequence",
+    "original_residue matches original_sequence at position",
+    "substituted_residue matches perturbed_sequence at position",
+    "original_residue and substituted_residue differ",
+    "original_sequence and perturbed_sequence differ only at position"
+  ]
+}

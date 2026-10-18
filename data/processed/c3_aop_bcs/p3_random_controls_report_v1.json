@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "dataset_version": "c3_aop_bcs_p3_random_control_v1",
+  "created_on": "2026-10-18",
+  "source_dataset_version": "c3_aop_bcs_residue_annotations_v1",
+  "source": {
+    "path": "data/processed/c3_aop_bcs/residue_annotations_v1.csv",
+    "sha256": "03d043cf0856a5584f19022b696b982b36071e85bdff80bf0f563e2b416a5938"
+  },
+  "perturbation_schema": {
+    "version": "1.0",
+    "path": "src/plantaox/c3_aop_bcs/perturbation_schema_v1.json",
+    "sha256": "1c08ec68cf91ef6decb6547c1e9b42871e20ddaa53248a523350842f1cbeb318"
+  },
+  "p3_rule": {
+    "master_random_seed": 42,
+    "selection_algorithm": "sha256_modulo_v1",
+    "seed_material_fields": [
+      "algorithm",
+      "master_seed",
+      "sequence_id",
+      "original_sequence",
+      "position",
+      "original_residue"
+    ],
+    "seed_material_encoding": "canonical sorted-key compact JSON encoded as UTF-8",
+    "candidate_order": "alphabetical standard amino acids excluding original residue",
+    "candidate_count_per_position": 19,
+    "one_position_per_variant": true,
+    "preserve_sequence_length": true
+  },
+  "counts": {
+    "input_peptide_count": 734,
+    "input_annotation_count": 5580,
+    "peptides_with_variants": 734,
+    "generated_variant_count": 5580,
+    "variants_by_original_residue": {
+      "A": 368,
+      "C": 114,
+      "D": 230,
+      "E": 297,
+      "F": 220,
+      "G": 413,
+      "H": 303,
+      "I": 184,
+      "K": 248,
+      "L": 456,
+      "M": 176,
+      "N": 204,
+      "P": 491,
+      "Q": 244,
+      "R": 235,
+      "S": 264,
+      "T": 214,
+      "V": 332,
+      "W": 189,
+      "Y": 398
+    },
+    "variants_by_substituted_residue": {
+      "A": 285,
+      "C": 312,
+      "D": 286,
+      "E": 294,
+      "F": 256,
+      "G": 269,
+      "H": 284,
+      "I": 290,
+      "K": 278,
+      "L": 258,
+      "M": 278,
+      "N": 276,
+      "P": 269,
+      "Q": 273,
+      "R": 280,
+      "S": 263,
+      "T": 279,
+      "V": 276,
+      "W": 279,
+      "Y": 295
+    }
+  },
+  "outputs": {
+    "p3_variants": {
+      "path": "data/processed/c3_aop_bcs/p3_random_control_variants_v1.csv",
+      "record_count": 5580,
+      "sha256": "f93a8e4021a30a2bb55b2e30bb20fa02f044e0cd28a7d5bafb5f2d5f0a7cc4cf"
+    }
+  }
+}

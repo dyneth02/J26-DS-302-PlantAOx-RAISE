@@ -252,7 +252,7 @@
   - [x] numpy
   - [x] scipy
   - [x] scikit-learn
-  - [ ] Biopython
+  - [x] Biopython
   - [ ] PyYAML
   - [x] pytest
   - [ ] tqdm
@@ -396,17 +396,17 @@
 ## Task 3.10 — Define the perturbation output schema
 
 ### Subtasks
-- [ ] Store for every generated variant:
-  - [ ] sequence ID;
-  - [ ] original sequence;
-  - [ ] position;
-  - [ ] original residue;
-  - [ ] substituted residue;
-  - [ ] perturbed sequence;
-  - [ ] perturbation type;
-  - [ ] BLOSUM62 score where applicable;
-  - [ ] random seed/metadata where applicable.
-- [ ] Ensure one record corresponds to one one-position edit.
+- [x] Store for every generated variant:
+  - [x] sequence ID;
+  - [x] original sequence;
+  - [x] position;
+  - [x] original residue;
+  - [x] substituted residue;
+  - [x] perturbed sequence;
+  - [x] perturbation type;
+  - [x] BLOSUM62 score where applicable;
+  - [x] random seed/metadata where applicable.
+- [x] Ensure one record corresponds to one one-position edit.
 
 ### Deliverable
 - Frozen perturbation-data schema.
@@ -416,17 +416,17 @@
 ## Task 3.11 — Implement P1 alanine scanning
 
 ### Subtasks
-- [ ] Find every W/Y/H/M/C position.
-- [ ] Replace one redox residue at a time with alanine.
-- [ ] Preserve sequence length.
-- [ ] Generate one independent sequence per edited position.
-- [ ] Store mutation metadata.
+- [x] Find every W/Y/H/M/C position.
+- [x] Replace one redox residue at a time with alanine.
+- [x] Preserve sequence length.
+- [x] Generate one independent sequence per edited position.
+- [x] Store mutation metadata.
 
 ### Required validation
-- [ ] exactly one position changed;
-- [ ] original residue belongs to `R_redox`;
-- [ ] replacement residue is `A`;
-- [ ] length does not change.
+- [x] exactly one position changed;
+- [x] original residue belongs to `R_redox`;
+- [x] replacement residue is `A`;
+- [x] length does not change.
 
 ### Deliverable
 - Working P1 generator.
@@ -436,15 +436,15 @@
 ## Task 3.12 — Implement BLOSUM62 support for P2
 
 ### Subtasks
-- [ ] Load the BLOSUM62 matrix using the selected library.
-- [ ] Create a function that evaluates candidate substitutions.
-- [ ] Exclude:
-  - [ ] the original amino acid;
-  - [ ] alanine;
-  - [ ] W/Y/H/M/C.
-- [ ] Keep only substitutions with BLOSUM62 score >= +1.
-- [ ] Select the highest-scoring eligible replacement.
-- [ ] Implement a deterministic tie-breaking rule.
+- [x] Load the BLOSUM62 matrix using the selected library.
+- [x] Create a function that evaluates candidate substitutions.
+- [x] Exclude:
+  - [x] the original amino acid;
+  - [x] alanine;
+  - [x] W/Y/H/M/C.
+- [x] Keep only substitutions with BLOSUM62 score >= +1.
+- [x] Select the highest-scoring eligible replacement.
+- [x] Implement a deterministic tie-breaking rule.
 
 ### Deliverable
 - Tested BLOSUM62 substitution-selection function.
@@ -454,19 +454,19 @@
 ## Task 3.13 — Implement P2 conservative substitutions
 
 ### Subtasks
-- [ ] Process only non-redox positions.
-- [ ] Apply the frozen BLOSUM62 selection rule.
-- [ ] Replace one position at a time.
-- [ ] Store the selected BLOSUM62 score.
-- [ ] Store mutation metadata.
+- [x] Process only non-redox positions.
+- [x] Apply the frozen BLOSUM62 selection rule.
+- [x] Replace one position at a time.
+- [x] Store the selected BLOSUM62 score.
+- [x] Store mutation metadata.
 
 ### Required validation
-- [ ] exactly one position changed;
-- [ ] original position is non-redox;
-- [ ] new residue is not alanine;
-- [ ] new residue is not in `R_redox`;
-- [ ] BLOSUM62 score is >= +1;
-- [ ] sequence length is unchanged.
+- [x] exactly one position changed;
+- [x] original position is non-redox;
+- [x] new residue is not alanine;
+- [x] new residue is not in `R_redox`;
+- [x] BLOSUM62 score is >= +1;
+- [x] sequence length is unchanged.
 
 ### Deliverable
 - Working P2 generator.
@@ -476,18 +476,18 @@
 ## Task 3.14 — Implement P3 random-control substitutions
 
 ### Subtasks
-- [ ] Generate random valid single-residue substitutions.
-- [ ] Never replace a residue with itself.
-- [ ] Use a fixed master random seed.
-- [ ] Derive deterministic/reproducible random choices for each sequence/position.
-- [ ] Store random-control metadata.
+- [x] Generate random valid single-residue substitutions.
+- [x] Never replace a residue with itself.
+- [x] Use a fixed master random seed.
+- [x] Derive deterministic/reproducible random choices for each sequence/position.
+- [x] Store random-control metadata.
 
 ### Required validation
-- [ ] exactly one position changed;
-- [ ] replacement is a valid amino acid;
-- [ ] replacement differs from the original;
-- [ ] sequence length is unchanged;
-- [ ] same input + same seed produces the same output.
+- [x] exactly one position changed;
+- [x] replacement is a valid amino acid;
+- [x] replacement differs from the original;
+- [x] sequence length is unchanged;
+- [x] same input + same seed produces the same output.
 
 ### Deliverable
 - Working P3 generator.
@@ -497,13 +497,13 @@
 ## Task 3.15 — Create a combined perturbation pipeline
 
 ### Subtasks
-- [ ] Accept the annotated peptide dataset as input.
-- [ ] Generate P1 variants.
-- [ ] Generate P2 variants.
-- [ ] Generate P3 variants.
-- [ ] Run automatic validation.
-- [ ] Reject invalid variants.
-- [ ] Export all accepted perturbations to CSV/Parquet/JSON as required by the repository.
+- [x] Accept the annotated peptide dataset as input.
+- [x] Generate P1 variants.
+- [x] Generate P2 variants.
+- [x] Generate P3 variants.
+- [x] Run automatic validation.
+- [x] Reject invalid variants.
+- [x] Export all accepted perturbations to CSV/Parquet/JSON as required by the repository.
 
 ### Deliverable
 - End-to-end perturbation-generation pipeline.
@@ -529,14 +529,14 @@
 ## Task 3.17 — Create P1/P2/P3 unit tests
 
 ### Subtasks
-- [ ] Test one-position-only changes.
-- [ ] Test P1 residue eligibility.
-- [ ] Test P1 alanine replacement.
-- [ ] Test P2 exclusion rules.
-- [ ] Test the BLOSUM62 >= +1 rule.
-- [ ] Test P2 deterministic selection.
-- [ ] Test P3 reproducibility.
-- [ ] Test unchanged sequence length.
+- [x] Test one-position-only changes.
+- [x] Test P1 residue eligibility.
+- [x] Test P1 alanine replacement.
+- [x] Test P2 exclusion rules.
+- [x] Test the BLOSUM62 >= +1 rule.
+- [x] Test P2 deterministic selection.
+- [x] Test P3 reproducibility.
+- [x] Test unchanged sequence length.
 
 ### Deliverable
 - Passing perturbation unit tests.
@@ -546,10 +546,10 @@
 ## Task 3.18 — Create reproducibility checks
 
 ### Subtasks
-- [ ] Run the same input twice using the same config.
-- [ ] Confirm identical perturbations.
-- [ ] Confirm identical random-control variants.
-- [ ] Record config/version/seed in each experimental run.
+- [x] Run the same input twice using the same config.
+- [x] Confirm identical perturbations.
+- [x] Confirm identical random-control variants.
+- [x] Record config/version/seed in each experimental run.
 
 ### Deliverable
 - Reproducibility evidence for PP1.
@@ -896,10 +896,10 @@
   - [x] `Add C3 research configuration`
   - [x] `Implement AOP sequence cleaning`
   - [x] `Add redox residue annotation`
-  - [ ] `Implement P1 alanine scanning`
-  - [ ] `Implement P2 BLOSUM62 substitutions`
-  - [ ] `Implement P3 random controls`
-  - [ ] `Add perturbation validation tests`
+  - [x] `Implement P1 alanine scanning`
+  - [x] `Implement P2 BLOSUM62 substitutions`
+  - [x] `Implement P3 random controls`
+  - [x] `Add perturbation validation tests`
   - [ ] `Add behavioural metric calculations`
 - [ ] Push the C3 branch regularly.
 - [ ] Merge/update from `dev` using the team workflow.
@@ -1024,11 +1024,11 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.
 - [x] Redox filter `{W,Y,H,M,C}` applied.
 - [x] Residue annotation works.
-- [ ] P1 generator works.
-- [ ] P2 generator works using BLOSUM62 >= +1.
-- [ ] P3 random-control generator works.
-- [ ] One-position mutation validation works.
-- [ ] Automated tests pass.
+- [x] P1 generator works.
+- [x] P2 generator works using BLOSUM62 >= +1.
+- [x] P3 random-control generator works.
+- [x] One-position mutation validation works.
+- [x] Automated tests pass.
 - [ ] Common predictor interface exists.
 - [ ] Predictor-access status is documented.
 - [ ] At least one real predictor has been successfully scored if technically accessible.
@@ -1038,7 +1038,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [ ] IR is computed.
 - [ ] FSR is computed.
 - [ ] Preliminary BCS is computed.
-- [ ] Run configuration/seed/version information is recorded.
+- [x] Run configuration/seed/version information is recorded.
 - [ ] PP1 evidence and screenshots are prepared.
 - [ ] PP1 slides are prepared.
 
