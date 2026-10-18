@@ -24,18 +24,20 @@
 - Converted all 1,473 cleaned sequences to deterministic FASTA, retained 1,046 representative sequences across 1,046 clusters, and removed 427 sequences at the configured 0.90 identity threshold.
 - Preserved the native CD-HIT representative FASTA and `.clstr` output, and generated traceable representative and cluster-membership CSV tables.
 - Added a versioned `c3_aop_bcs_cd_hit_90_v1` report containing the source checksum, exact CD-HIT command and parameters, tool/runtime version, counts, and SHA-256 checksums for every generated artifact.
-- Confirmed all 22 current C3 tests pass, including deterministic FASTA generation, native cluster parsing, representative-table reconstruction, complete cluster membership, schemas, counts, checksums, and repeat-run reproducibility.
+- Applied the configured `{W,Y,H,M,C}` redox-residue eligibility rule to all 1,046 CD-HIT representatives, retaining 734 primary P1 audit subjects and rejecting 312 sequences with no redox residue.
+- Generated the versioned `c3_aop_bcs_redox_eligible_v1` subject table, a complete exclusion ledger using the reason `no_redox_residue`, and a report containing the rule, input checksum, reconciled counts, and output checksums.
+- Preserved every Task 3.7 source, evidence, raw-record, and CD-HIT provenance field in both eligible and excluded records, while adding redox occurrence counts and the configured residues present.
+- Confirmed all 26 current C3 tests pass, including redox detection, deterministic filtering, provenance preservation, eligibility/exclusion assertions, schemas, counts, and artifact checksums.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.7 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.8 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.8: Apply the redox-residue eligibility filter
+## Next task — Task 3.9: Annotate residue positions
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- detect whether each representative sequence contains at least one residue from `{W,Y,H,M,C}`;
-- retain eligible sequences for the primary P1 audit;
-- record the number rejected because no redox residue is present;
-- preserve all source and provenance information;
-- verify deterministic outputs and synchronize the task checklist after validation.
+- number peptide positions from 1 through sequence length;
+- record the residue at each position and classify it as redox or non-redox;
+- store the redox-position count for every peptide;
+- export a residue-level annotation table while preserving sequence provenance.

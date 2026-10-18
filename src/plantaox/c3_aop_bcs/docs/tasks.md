@@ -362,13 +362,13 @@
 ## Task 3.8 — Apply the redox-residue eligibility filter
 
 ### Subtasks
-- [ ] Detect whether each sequence contains at least one member of:
+- [x] Detect whether each sequence contains at least one member of:
 
   `{W, Y, H, M, C}`
 
-- [ ] Keep eligible sequences for the primary P1 audit.
-- [ ] Record the number rejected because no redox residue is present.
-- [ ] Keep source/provenance information.
+- [x] Keep eligible sequences for the primary P1 audit.
+- [x] Record the number rejected because no redox residue is present.
+- [x] Keep source/provenance information.
 
 ### Deliverable
 - Final primary perturbation subject set for pilot testing.
@@ -1022,7 +1022,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] Sequences standardized and validated.
 - [x] 3–50 AA filter applied.
 - [x] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.
-- [ ] Redox filter `{W,Y,H,M,C}` applied.
+- [x] Redox filter `{W,Y,H,M,C}` applied.
 - [ ] Residue annotation works.
 - [ ] P1 generator works.
 - [ ] P2 generator works using BLOSUM62 >= +1.
