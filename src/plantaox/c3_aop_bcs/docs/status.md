@@ -40,11 +40,12 @@
 
 ## Next task — Task 3.11: Implement P1 alanine scanning
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - find every configured W/Y/H/M/C position in the eligible peptides;
 - replace one redox residue at a time with alanine while preserving sequence length;
 - emit one independently validated P1 schema record per edited position;
-- export the P1 variants and record deterministic counts and provenance.
+- export the P1 variants and record deterministic counts and provenance;
+- verify complete redox-position coverage, schema compliance, and reproducibility.
