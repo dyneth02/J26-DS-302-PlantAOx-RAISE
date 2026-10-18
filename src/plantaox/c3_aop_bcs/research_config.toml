@@ -1,0 +1,9 @@
+[research]
+random_seed = 42
+sequence_min_length = 3
+sequence_max_length = 50
+redox_residues = ["W", "Y", "H", "M", "C"]
+cd_hit_identity_threshold = 0.90
+primary_delta = 0.05
+sensitivity_deltas = [0.02, 0.05, 0.10]
+pilot_dataset_size = 20
