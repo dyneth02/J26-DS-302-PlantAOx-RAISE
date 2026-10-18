@@ -416,17 +416,17 @@
 ## Task 3.11 — Implement P1 alanine scanning
 
 ### Subtasks
-- [ ] Find every W/Y/H/M/C position.
-- [ ] Replace one redox residue at a time with alanine.
-- [ ] Preserve sequence length.
-- [ ] Generate one independent sequence per edited position.
-- [ ] Store mutation metadata.
+- [x] Find every W/Y/H/M/C position.
+- [x] Replace one redox residue at a time with alanine.
+- [x] Preserve sequence length.
+- [x] Generate one independent sequence per edited position.
+- [x] Store mutation metadata.
 
 ### Required validation
-- [ ] exactly one position changed;
-- [ ] original residue belongs to `R_redox`;
-- [ ] replacement residue is `A`;
-- [ ] length does not change.
+- [x] exactly one position changed;
+- [x] original residue belongs to `R_redox`;
+- [x] replacement residue is `A`;
+- [x] length does not change.
 
 ### Deliverable
 - Working P1 generator.
@@ -529,14 +529,14 @@
 ## Task 3.17 — Create P1/P2/P3 unit tests
 
 ### Subtasks
-- [ ] Test one-position-only changes.
-- [ ] Test P1 residue eligibility.
-- [ ] Test P1 alanine replacement.
+- [x] Test one-position-only changes.
+- [x] Test P1 residue eligibility.
+- [x] Test P1 alanine replacement.
 - [ ] Test P2 exclusion rules.
 - [ ] Test the BLOSUM62 >= +1 rule.
 - [ ] Test P2 deterministic selection.
 - [ ] Test P3 reproducibility.
-- [ ] Test unchanged sequence length.
+- [x] Test unchanged sequence length.
 
 ### Deliverable
 - Passing perturbation unit tests.
@@ -896,7 +896,7 @@
   - [x] `Add C3 research configuration`
   - [x] `Implement AOP sequence cleaning`
   - [x] `Add redox residue annotation`
-  - [ ] `Implement P1 alanine scanning`
+  - [x] `Implement P1 alanine scanning`
   - [ ] `Implement P2 BLOSUM62 substitutions`
   - [ ] `Implement P3 random controls`
   - [ ] `Add perturbation validation tests`
@@ -1024,10 +1024,10 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.
 - [x] Redox filter `{W,Y,H,M,C}` applied.
 - [x] Residue annotation works.
-- [ ] P1 generator works.
+- [x] P1 generator works.
 - [ ] P2 generator works using BLOSUM62 >= +1.
 - [ ] P3 random-control generator works.
-- [ ] One-position mutation validation works.
+- [x] One-position mutation validation works.
 - [ ] Automated tests pass.
 - [ ] Common predictor interface exists.
 - [ ] Predictor-access status is documented.

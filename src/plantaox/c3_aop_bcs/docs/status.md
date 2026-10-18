@@ -34,18 +34,21 @@
 - Added an immutable perturbation-record model with strict construction and CSV mapping, standard-amino-acid validation, same-length enforcement, and proof that each record contains exactly one edit at its declared position.
 - Defined explicit metadata applicability: P1 carries no P2/P3 metadata, P2 requires a BLOSUM62 score, and P3 requires a random seed plus canonical JSON metadata.
 - Added a deterministic machine-readable `perturbation_schema_v1.json` contract shared by the future P1, P2, and P3 generators.
-- Confirmed all 35 current C3 tests pass, including schema/field stability, all-type CSV round trips, exact one-position-edit rejection cases, conditional metadata rules, strict mapping, and byte-reproducible schema generation.
+- Implemented deterministic P1 alanine scanning over every configured W/Y/H/M/C position in the residue annotation dataset.
+- Generated 1,180 independently validated P1 variants across all 734 eligible peptides: 189 W, 398 Y, 303 H, 176 M, and 114 C substitutions to alanine.
+- Exported `c3_aop_bcs_p1_alanine_v1` using the frozen perturbation schema, with stable variant identifiers and a report pinning the source annotation and schema checksums, rule, counts, and output checksum.
+- Verified every P1 variant changes exactly one declared redox position to alanine, preserves sequence length, contains no P2/P3 metadata, and covers every annotated redox position exactly once.
+- Confirmed all 39 current C3 tests pass, including P1 eligibility, alanine replacement, independent mutations, complete coverage, invalid annotation rejection, schema validation, reconciled counts, checksum verification, and byte-reproducible generation.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.10 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.11 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.11: Implement P1 alanine scanning
+## Next task — Task 3.12: Implement BLOSUM62 support for P2
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- find every configured W/Y/H/M/C position in the eligible peptides;
-- replace one redox residue at a time with alanine while preserving sequence length;
-- emit one independently validated P1 schema record per edited position;
-- export the P1 variants and record deterministic counts and provenance;
-- verify complete redox-position coverage, schema compliance, and reproducibility.
+- load the BLOSUM62 substitution matrix using the selected project-compatible approach;
+- exclude the original residue, alanine, and W/Y/H/M/C candidates;
+- keep only candidates scoring at least `+1` and select the highest-scoring option;
+- define and test deterministic tie-breaking before P2 variant generation.
