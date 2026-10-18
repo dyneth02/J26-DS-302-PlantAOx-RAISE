@@ -36,10 +36,11 @@
 
 ## Next task — Task 3.10: Define the perturbation output schema
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - define the required original-sequence, mutation-position, residue, perturbed-sequence, perturbation-type, BLOSUM62-score, and random-metadata fields;
 - ensure one output record represents exactly one one-position edit;
-- freeze and test the shared schema before implementing P1, P2, and P3 generators.
+- freeze a versioned machine-readable schema shared by P1, P2, and P3;
+- implement strict record construction, serialization, and validation tests without generating perturbations yet.
