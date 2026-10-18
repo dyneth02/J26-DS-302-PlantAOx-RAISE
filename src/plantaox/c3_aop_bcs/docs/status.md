@@ -33,11 +33,12 @@
 
 ## Next task — Task 3.9: Annotate residue positions
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - number peptide positions from 1 through sequence length;
 - record the residue at each position and classify it as redox or non-redox;
 - store the redox-position count for every peptide;
-- export a residue-level annotation table while preserving sequence provenance.
+- export a residue-level annotation table while preserving sequence provenance;
+- verify complete one-based positional coverage and deterministic output.
