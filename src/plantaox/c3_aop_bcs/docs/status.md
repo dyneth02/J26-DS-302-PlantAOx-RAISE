@@ -97,16 +97,24 @@
 - Recorded the dummy predictor ID, display name, version `1.0.0`, scoring method, testing-only classification, source/output/cache checksums, counts, and checkpoint policy in `dummy_predictor_scoring_report_v1.json`.
 - Preserved the Task 3.22 safety boundary in every scoring row: these dummy scores are software-testing evidence only and are not scientific AOP predictions or experimental results.
 - Confirmed all 88 current C3 tests pass with 68 subtests, including full production-artifact counts, schema, provenance, checksum, caching, interruption, and resume verification.
+- Completed a read-only audit of all five Component 2 models accepted by the `c2_pp1_freeze_v1` manifest: PN, Direct-clamped nnPU, Corrective nnPU, Two-Step PU, and PU-Bagging.
+- Added the checksum-pinned `c3_pu_aop_five_model_audit_v1` record and reproducible human-readable audit report without modifying any Component 2 file.
+- Confirmed that the five configurations share the frozen fold-0 495-feature contract, while preserving their distinct score semantics—especially Two-Step PU's raw corrected values that can exceed 1.
+- Verified that all five checkpoint binaries and the fold-0 scaled feature cache are absent from the current checkout, the documented external backup path is unavailable on this machine, and no per-model numerical reference-score fixture exists.
+- Identified the accepted PU-Bagging run's `n_estimators=10` versus Component 2 planning/status documentation's `n_estimators=100` as a handoff contradiction requiring Component 2 confirmation.
+- Recorded ten blocking, high-priority, decision, or scientific handoff findings covering artifacts, reference fixtures, `fair-esm` and ESM-2 weight provenance, inference entry point, naming/selection, runtime policy, authorization, and validation limitations.
+- Kept all five models `not_integrated`: their assay-supported fold-0 results have negative MCC and AUROC below 0.5, and no real score can be reproduced in C3 until the missing handoff requirements are resolved.
+- Confirmed all 93 current C3 tests pass with 68 subtests, including source-evidence checksum verification, exact five-model coverage, integration-gate enforcement, PU-Bagging discrepancy retention, and deterministic report generation.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.23 and the associated documentation and reproducibility updates.
 
-## Current work — Component 2 five-model handoff audit
+## Next task — Task 3.24: Prepare score normalization
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- audit the frozen records for all five Component 2 baseline models without changing Component 2 files;
-- distinguish documented model contracts from artifacts that are actually available in this checkout;
-- identify missing or contradictory information that blocks verified C3 scoring;
-- preserve the findings as C3-owned handoff evidence before Task 3.24 begins.
+- document each integrated predictor's native output range and score semantics;
+- preserve native `[0,1]` probabilities where available and define any justified fixed mapping for other score types;
+- prohibit batch-wise min-max scaling that would distort original-versus-perturbed differences;
+- validate the usable score scale while continuing to keep dummy smoke-test values outside scientific results.
