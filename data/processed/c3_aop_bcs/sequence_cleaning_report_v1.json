@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "dataset_version": "c3_aop_bcs_cleaned_v1",
+  "created_on": "2026-10-18",
+  "source_dataset_version": "c3_aop_bcs_standardized_v1",
+  "source": {
+    "path": "data/interim/c3_aop_bcs/standardized_aop_candidates_v1.csv",
+    "sha256": "dae5f4a4525042ae03cd491dbd820e81e2a9cb55dcac0fb471da7b6409fefa05"
+  },
+  "validation": {
+    "standard_amino_acids": "ACDEFGHIKLMNPQRSTVWY",
+    "minimum_length": 3,
+    "maximum_length": 50,
+    "rejection_order": [
+      "missing_sequence",
+      "invalid_amino_acid",
+      "length_out_of_range",
+      "exact_duplicate"
+    ],
+    "counts_are_mutually_exclusive": true
+  },
+  "exact_duplicate_policy": "group by exact standardized peptide_sequence; retain E1 over E2, then the earliest standardized input record",
+  "counts": {
+    "original_count": 3946,
+    "missing_count": 0,
+    "invalid_count": 0,
+    "out_of_range_count": 145,
+    "exact_duplicate_count": 2328,
+    "retained_count": 1473
+  },
+  "outputs": {
+    "cleaned": {
+      "path": "data/processed/c3_aop_bcs/cleaned_aop_sequences_v1.csv",
+      "record_count": 1473,
+      "sha256": "65b585f5d5464a177d41b9229fe645d9beb7b32249b3cd5c5c479700237a60ee"
+    },
+    "exclusions": {
+      "path": "data/processed/c3_aop_bcs/sequence_cleaning_exclusions_v1.csv",
+      "record_count": 2473,
+      "sha256": "9117c197607c775bc5ca2504ef928e5b14c83912c38fa8728104e82fa8062cd3"
+    }
+  }
+}

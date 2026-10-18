@@ -2,9 +2,9 @@
 
 **Last updated:** 2026-10-18
 
-**Current implementation task:** Task 3.6 — Validate and clean sequences
+**Current implementation state:** Task 3.6 complete; Task 3.7 is next and not started
 
-**Legend:** `[x]` completed, `[~]` in progress, `[ ]` remaining.
+**Legend:** `[x]` completed, `[~]` in progress, `[ ]` incomplete.
 
 The PP1 plan is organized into exactly three phases. Existing task numbers are preserved for traceability.
 
@@ -54,8 +54,8 @@ The PP1 plan is organized into exactly three phases. Existing task numbers are p
 ## [x] Task 3.5 — Standardize sequence records
 **Completed:** Added deterministic standardization, five focused tests, and `c3_aop_bcs_standardized_v1` with 3,946 candidates: 699 direct assay-positive E1 plus 676, 1,060, and 1,511 positive Multi-AOP records. Source mapping is preserved; SHA-256 is `dae5f4a4525042ae03cd491dbd820e81e2a9cb55dcac0fb471da7b6409fefa05`. **Ongoing:** None. **Remaining:** Cleaning is delegated to Task 3.6.
 
-## [~] Task 3.6 — Validate and clean sequences
-**Completed:** Requirements and rejection order were confirmed against the research configuration. **Ongoing:** Implement missing/invalid/length validation, exact deduplication, deterministic outputs, report, and tests. **Remaining:** Generate and verify artifacts, record counts, and close the task.
+## [x] Task 3.6 — Validate and clean sequences
+**Completed:** Added deterministic cleaning with mutually exclusive missing, invalid-symbol, length, and duplicate rejection reasons. Exact duplicates retain E1 over E2, then the earliest input record. Generated `c3_aop_bcs_cleaned_v1`, its exclusion ledger, and a versioned report: 3,946 original; 0 missing; 0 invalid; 145 out of range; 2,328 exact duplicates; 1,473 retained. Four focused cleaning tests pass, and the complete C3 suite passes 18 tests. **Ongoing:** None. **Remaining:** None.
 
 ## [ ] Task 3.7 — Apply 90% identity deduplication
 **Completed:** None. **Ongoing:** None. **Remaining:** Produce FASTA, run CD-HIT at 90%, preserve clusters, and export representatives and counts.
@@ -85,7 +85,7 @@ The PP1 plan is organized into exactly three phases. Existing task numbers are p
 **Completed:** None. **Ongoing:** None. **Remaining:** Combine P1/P2/P3 generation, validation, and export.
 
 ## [ ] Task 3.16 — Create sequence-validation tests
-**Completed:** Focused validation coverage is being introduced with Task 3.6. **Ongoing:** None. **Remaining:** Complete the dedicated validation-test deliverable after cleaning is stable.
+**Completed:** Task 3.6 added focused coverage for empty values, invalid symbols, inclusive length boundaries, exact duplicates, E1 retention, schemas, counts, hashes, and byte reproducibility. **Ongoing:** None. **Remaining:** Review and complete any additional dedicated sequence-validation cases required by Task 3.16.
 
 ## [ ] Task 3.17 — Create P1/P2/P3 unit tests
 **Completed:** None. **Ongoing:** None. **Remaining:** Add the perturbation correctness and reproducibility tests in `tasks.md`.
@@ -150,7 +150,7 @@ The PP1 plan is organized into exactly three phases. Existing task numbers are p
 **Completed:** The planned correlation is documented. **Ongoing:** None. **Remaining:** Define the SHAP/DeltaScore structure; full analysis remains post-PP1.
 
 ## [ ] Task 3.37 — Update implementation documentation
-**Completed:** Task and status tracking reflect current implementation. **Ongoing:** Documentation is updated with each task. **Remaining:** Add final usage, schemas, assumptions, limitations, and architecture.
+**Completed:** Task and status tracking reflect current implementation through Task 3.6. **Ongoing:** None. **Remaining:** Add final usage, schemas, assumptions, limitations, and architecture.
 
 ## [ ] Task 3.38 — Maintain Git history
 **Completed:** Tasks 3.3–3.5 and reproducibility corrections have focused descriptive commits. **Ongoing:** Commit every logical checkpoint. **Remaining:** Continue through PP1 and verify final history.

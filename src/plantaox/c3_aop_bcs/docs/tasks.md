@@ -318,7 +318,7 @@
 
 ---
 
-## [ ] Task 3.6 — Validate and clean sequences
+## [x] Task 3.6 — Validate and clean sequences
 
 ### Subtasks
 - Reject missing sequences.
@@ -1010,11 +1010,11 @@ Capture evidence of:
 Before considering the PP1 implementation stage complete, verify the following.
 
 ## Must be working by PP1
-- [ ] Team repository cloned and C3 branch created.
+- [x] Team repository cloned and C3 branch created.
 - [ ] C3 environment/configuration works.
 - [x] Audit sequences acquired.
-- [ ] Sequences standardized and validated.
-- [ ] 3–50 AA filter applied.
+- [x] Sequences standardized and validated.
+- [x] 3–50 AA filter applied.
 - [ ] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.
 - [ ] Redox filter `{W,Y,H,M,C}` applied.
 - [ ] Residue annotation works.
