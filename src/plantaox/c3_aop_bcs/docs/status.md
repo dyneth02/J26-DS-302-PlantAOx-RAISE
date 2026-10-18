@@ -39,21 +39,22 @@
 - Generated 1,180 independently validated P1 variants across all 734 eligible peptides: 189 W, 398 Y, 303 H, 176 M, and 114 C substitutions to alanine.
 - Exported `c3_aop_bcs_p1_alanine_v1` using the frozen perturbation schema, with stable variant identifiers and a report pinning the source annotation and schema checksums, rule, counts, and output checksum.
 - Verified every P1 variant changes exactly one declared redox position to alanine, preserves sequence length, contains no P2/P3 metadata, and covers every annotated redox position exactly once.
-- Added a project-pinned 20×20 BLOSUM62 standard-amino-acid score resource sourced from the NCBI BLAST matrix distribution, with SHA-256 provenance and a dependency-free validated loader.
+- Reimplemented Task 3.12 using Biopython `1.88`: BLOSUM62 is loaded through `Bio.Align.substitution_matrices.load("BLOSUM62")`, then restricted to the project's 20 standard amino acids and validated for integral, symmetric scores.
 - Implemented P2 candidate evaluation that excludes the original residue, alanine, and W/Y/H/M/C, then keeps only substitutions scoring at least `+1`.
 - Implemented deterministic selection by highest BLOSUM62 score followed by alphabetical residue code, returning no selection when the frozen rule has no eligible candidate.
-- Added a versioned `c3_aop_bcs_blosum62_support_v1` manifest recording matrix provenance, dimensions, score units, exclusions, threshold, tie-break rule, and the selected substitution for every non-redox original residue.
-- Confirmed all 44 current C3 tests pass, including complete symmetric matrix validation, exhaustive exclusion enforcement across all amino acids, minimum-score filtering, highest-score choice, deterministic ties, no-candidate behavior, checksum provenance, and byte-reproducible metadata.
+- Updated the versioned `c3_aop_bcs_blosum62_support_v1` manifest to record the Biopython version, loader API, matrix identifier, library alphabet, standard-amino-acid dimensions, selection rules, and selected substitution for every non-redox original residue.
+- Removed the obsolete bundled BLOSUM62 TSV so the implementation has one unambiguous matrix source through Biopython.
+- Confirmed all 45 current C3 tests pass with 43 subtests, including direct verification that the matrix is loaded through Biopython, complete symmetric matrix validation, exhaustive exclusion enforcement, minimum-score filtering, deterministic selection, no-candidate behavior, provider provenance, and byte-reproducible metadata.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.12 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.12: Reimplement BLOSUM62 support using Biopython
+## Next task — Task 3.13: Implement P2 conservative substitutions
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- replace the bundled-TSV parser with Biopython's BLOSUM62 loader;
-- preserve the frozen 20-standard-amino-acid selection rules and deterministic tie-breaking;
-- update provenance metadata and tests to verify the Biopython source;
-- rerun the complete C3 test suite before restoring Task 3.12 completion.
+- process only annotated non-redox positions;
+- apply the frozen BLOSUM62 selection rule and skip positions with no eligible candidate;
+- replace one position at a time while storing the selected BLOSUM62 score and mutation metadata;
+- export and validate deterministic P2 variants with complete count and provenance reporting.

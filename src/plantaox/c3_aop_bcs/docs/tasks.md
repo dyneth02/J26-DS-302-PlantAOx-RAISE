@@ -436,8 +436,8 @@
 ## Task 3.12 — Implement BLOSUM62 support for P2
 
 ### Subtasks
-- [ ] Load the BLOSUM62 matrix using the selected library.
-- [ ] Create a function that evaluates candidate substitutions.
+- [x] Load the BLOSUM62 matrix using the selected library.
+- [x] Create a function that evaluates candidate substitutions.
 - [x] Exclude:
   - [x] the original amino acid;
   - [x] alanine;
