@@ -13,6 +13,27 @@ from .p2_conservative_substitutions import build_p2_dataset
 from .p3_random_controls import build_p3_dataset
 from .perturbation_pipeline import build_combined_perturbation_dataset
 from .reproducibility import create_reproducibility_evidence
+from .predictor_interface import (
+    BasePredictorAdapter,
+    CallablePredictorAdapter,
+    InvalidPredictorInputError,
+    InvalidPredictorScoreError,
+    Predictor,
+    PredictorDescriptor,
+    PredictorScoringError,
+    PredictorUnavailableError,
+)
+from .dummy_predictor import DUMMY_SCORING_METHOD, DummySmokeTestPredictor
+from .predictor_scoring import build_scored_perturbation_dataset
+from .predictor_access import (
+    load_predictor_access_registry,
+    render_predictor_access_table,
+)
+from .predictor_priority import (
+    load_predictor_priority_plan,
+    render_predictor_priority_report,
+    render_pu_aop_handoff_request,
+)
 
 __all__ = [
     "ResearchConfig",
@@ -22,6 +43,22 @@ __all__ = [
     "build_p3_dataset",
     "build_combined_perturbation_dataset",
     "create_reproducibility_evidence",
+    "BasePredictorAdapter",
+    "CallablePredictorAdapter",
+    "InvalidPredictorInputError",
+    "InvalidPredictorScoreError",
+    "Predictor",
+    "PredictorDescriptor",
+    "PredictorScoringError",
+    "PredictorUnavailableError",
+    "DummySmokeTestPredictor",
+    "DUMMY_SCORING_METHOD",
+    "build_scored_perturbation_dataset",
+    "load_predictor_access_registry",
+    "render_predictor_access_table",
+    "load_predictor_priority_plan",
+    "render_predictor_priority_report",
+    "render_pu_aop_handoff_request",
     "load_blosum62",
     "build_cleaned_dataset",
     "build_cd_hit_dataset",

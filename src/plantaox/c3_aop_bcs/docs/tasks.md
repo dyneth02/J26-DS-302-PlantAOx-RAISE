@@ -561,13 +561,13 @@
 ## Task 3.19 — Define the common predictor interface
 
 ### Subtasks
-- [ ] Define a common operation such as:
+- [x] Define a common operation such as:
 
   `sequence -> predictor score`
 
-- [ ] Ensure every predictor adapter returns a consistent numeric result.
-- [ ] Design adapters so the rest of C3 does not depend on predictor architecture.
-- [ ] Define error handling for unavailable/failed scores.
+- [x] Ensure every predictor adapter returns a consistent numeric result.
+- [x] Design adapters so the rest of C3 does not depend on predictor architecture.
+- [x] Define error handling for unavailable/failed scores.
 
 ### Deliverable
 - Common predictor-adapter interface.
@@ -577,20 +577,20 @@
 ## Task 3.20 — Track predictor accessibility
 
 ### Subtasks
-- [ ] Check implementation/access status for:
-  - [ ] AnOxPePred
-  - [ ] Multi-AOP
-  - [ ] AOPxSVM
-  - [ ] AOP-DRL
-  - [ ] PU-AOP
-- [ ] Record:
-  - [ ] code/model availability;
-  - [ ] expected input format;
-  - [ ] output type;
-  - [ ] whether batch scoring is possible;
-  - [ ] license/access limitations;
-  - [ ] current integration status.
-- [ ] Do not claim a predictor is integrated until a real score has been verified.
+- [x] Check implementation/access status for:
+  - [x] AnOxPePred
+  - [x] Multi-AOP
+  - [x] AOPxSVM
+  - [x] AOP-DRL
+  - [x] PU-AOP
+- [x] Record:
+  - [x] code/model availability;
+  - [x] expected input format;
+  - [x] output type;
+  - [x] whether batch scoring is possible;
+  - [x] license/access limitations;
+  - [x] current integration status.
+- [x] Do not claim a predictor is integrated until a real score has been verified.
 
 ### Deliverable
 - Predictor-access/status table.
@@ -600,13 +600,13 @@
 ## Task 3.21 — Prioritize the minimum viable predictor set
 
 ### Subtasks
-- [ ] Prioritize:
-  - [ ] AnOxPePred;
-  - [ ] AOPxSVM;
-  - [ ] PU-AOP.
-- [ ] Coordinate with Component 2 for the PU-AOP frozen-model handoff.
-- [ ] Treat Multi-AOP and AOP-DRL as secondary if access/reproduction is not ready before PP1.
-- [ ] Document any unresolved access issue.
+- [x] Prioritize:
+  - [x] AnOxPePred;
+  - [x] AOPxSVM;
+  - [x] PU-AOP.
+- [x] Coordinate with Component 2 for the PU-AOP frozen-model handoff.
+- [x] Treat Multi-AOP and AOP-DRL as secondary if access/reproduction is not ready before PP1.
+- [x] Document any unresolved access issue.
 
 ### Deliverable
 - Realistic PP1 predictor-integration scope.
@@ -616,12 +616,12 @@
 ## Task 3.22 — Build a non-experimental dummy/smoke-test predictor
 
 ### Subtasks
-- [ ] Implement a simple deterministic scoring function only for pipeline testing.
-- [ ] Clearly label it as:
-  - [ ] software testing only;
-  - [ ] not a scientific AOP predictor;
-  - [ ] not part of experimental results.
-- [ ] Use it to verify the scoring/metric pipeline before real models are ready.
+- [x] Implement a simple deterministic scoring function only for pipeline testing.
+- [x] Clearly label it as:
+  - [x] software testing only;
+  - [x] not a scientific AOP predictor;
+  - [x] not part of experimental results.
+- [x] Use it to verify the scoring/metric pipeline before real models are ready.
 
 ### Deliverable
 - End-to-end software smoke-test capability.
@@ -631,12 +631,12 @@
 ## Task 3.23 — Implement predictor scoring
 
 ### Subtasks
-- [ ] Score each original peptide.
-- [ ] Score every P1/P2/P3 variant.
-- [ ] Cache original scores to avoid repeated calls.
-- [ ] Cache completed perturbed scores where allowed.
-- [ ] Add restart/resume behavior where practical.
-- [ ] Record predictor version and scoring method.
+- [x] Score each original peptide.
+- [x] Score every P1/P2/P3 variant.
+- [x] Cache original scores to avoid repeated calls.
+- [x] Cache completed perturbed scores where allowed.
+- [x] Add restart/resume behavior where practical.
+- [x] Record predictor version and scoring method.
 
 ### Deliverable
 - Original/perturbed score table for the pilot.
@@ -1029,8 +1029,8 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] P3 random-control generator works.
 - [x] One-position mutation validation works.
 - [x] Automated tests pass.
-- [ ] Common predictor interface exists.
-- [ ] Predictor-access status is documented.
+- [x] Common predictor interface exists.
+- [x] Predictor-access status is documented.
 - [ ] At least one real predictor has been successfully scored if technically accessible.
 - [ ] Pilot original/perturbed scores are stored.
 - [ ] DeltaScore is computed.

@@ -1,6 +1,6 @@
 # Component 3 (AOP-BCS) Status
 
-**Last updated:** 2026-10-18
+**Last updated:** 2026-10-19
 
 ## Completed work
 
@@ -65,17 +65,48 @@
 - Confirmed the 5,580 P3 random-control records are byte-identical across both runs under master seed `42`.
 - Added the versioned `c3_aop_bcs_perturbation_reproducibility_v1` evidence report with a `PASS` result, per-run counts, byte sizes, SHA-256 hashes, full configuration snapshots, seed, Python/Biopython versions, pipeline/schema/generator versions, and BLOSUM62-support checksum.
 - Added tests verifying deterministic evidence generation on repeated complete runs and confirming the production evidence matches the committed combined and P3 outputs.
-- Confirmed all 61 current C3 tests pass with 43 subtests, covering full-workflow reproducibility and all prior dataset, perturbation, validation, and pipeline behavior.
+- Defined the versioned Task 3.19 common predictor contract with the operation `score(sequence: str) -> float`, stable predictor identity/display-name/version metadata, and a runtime-checkable protocol for downstream C3 code.
+- Added an architecture-neutral base adapter that validates uppercase standard-amino-acid inputs, invokes predictor-specific scoring behind a protected boundary, and always returns a finite built-in `float`.
+- Added a generic callable adapter capable of wrapping functions, object methods, local models, scripts, or service clients without exposing their internal architecture to the C3 scoring pipeline.
+- Defined distinct errors for invalid sequence input, unavailable predictor resources, predictor execution failures, and non-numeric or non-finite returned scores.
+- Added a deterministic machine-readable `predictor_interface_v1.json` contract documenting the input/output boundary, required metadata, architecture isolation rule, and error semantics.
+- Confirmed all 69 current C3 tests pass with 54 subtests, including interface conformance across different adapter shapes, invalid input/score rejection, failure normalization, deterministic contract generation, and all prior C3 behavior.
+- Completed a source-backed accessibility review of AnOxPePred, Multi-AOP, AOPxSVM, AOP-DRL, and Component 2's PU-AOP using current public repositories, primary publications/services, and the local repository state.
+- Added the versioned `predictor_access_status_v1.json` registry with inspected repository revisions, code/model/service availability, expected inputs, output semantics, batch support, licence/access limits, evidence locations, blockers, and C3 integration state.
+- Added a generated human-readable predictor access table and a validator that refuses an `integrated` status unless a real finite score and retained score evidence are both recorded.
+- Confirmed AnOxPePred, Multi-AOP, and AOPxSVM provide public model artifacts; AOP-DRL lacks a public trained checkpoint/inference package and its published endpoint currently redirects to an unrelated login page.
+- Confirmed PU-AOP source and manifests are present, but its required ignored checkpoint/cache artifacts and documented external backup are absent from this checkout.
+- Kept all five predictors explicitly `not_integrated` because none has yet produced a retained real score through the C3 predictor interface.
+- Confirmed all 73 current C3 tests pass with 64 subtests, including registry completeness, operational limitations, integration-claim enforcement, and deterministic Markdown rendering.
+- Froze the Task 3.21 PP1 primary predictor set as AOPxSVM, AnOxPePred, and PU-AOP, with readiness-based integration order AOPxSVM first, AnOxPePred second, and PU-AOP third conditional on its frozen handoff.
+- Defined a truthful PP1 floor of at least one verified real predictor and a target of at least two; a one-predictor result must be labelled a single-predictor pilot, and the Task 3.22 dummy can never satisfy the real-predictor floor.
+- Classified Multi-AOP and AOP-DRL as secondary: Multi-AOP is deferred for dependency, input-semantics, and licence risks, while AOP-DRL remains blocked by missing inference assets, an unavailable published service, and non-commercial restrictions.
+- Added the versioned `predictor_priority_v1.json` decision record and deterministic `predictor_priority_scope.md` report, with ranked rationale, next actions, and explicit activation rules.
+- Prepared `pu_aop_handoff_request.md` as the Component 2 coordination contract covering frozen model selection, checkpoint/hash, feature schema, fold scaler, ESM-2 and descriptor contracts, read-only inference, score semantics, reference fixture, batching/failures, and use authorization.
+- Recorded that the PU-AOP handoff request is prepared but the handoff itself remains pending; C3 will not guess among Component 2's accepted models or claim integration without the binary artifacts and a reproduced reference score.
+- Documented seven unresolved access issues across all five predictors, each with severity, state, and a measurable exit criterion.
+- Confirmed all 78 current C3 tests pass with 64 subtests, including priority-set enforcement, Task 3.20 status synchronization, PU-AOP handoff readiness gating, issue coverage, and deterministic report generation.
+- Implemented the Task 3.22 `DummySmokeTestPredictor` behind the Task 3.19 common predictor interface, using a deterministic position-weighted alphabetical residue-rank checksum with a finite `[0,1]` output.
+- Labelled the dummy in both runtime attributes and the versioned `dummy_predictor_v1.json` contract as software-testing only, not a scientific AOP predictor, and prohibited from experimental results, predictor comparisons, biological interpretation, or satisfying the PP1 real-predictor requirement.
+- Verified that the dummy produces reproducible scores, rejects invalid inputs through the common interface, and exposes score changes for single-residue variants suitable for future scoring/metric pipeline smoke tests.
+- Confirmed all 83 current C3 tests pass with 68 subtests, including deterministic dummy-definition reproduction and non-experimental safety-label enforcement.
+- Implemented the Task 3.23 predictor-independent scoring pipeline, which validates the frozen perturbation input and exports one traceable score row per variant with original and perturbed scores.
+- Added sequence-level caching that scores each unique original or perturbed sequence once, binds reuse to the score schema, predictor identity/version, scoring method, testing classification, and sequence SHA-256, and rejects conflicting or non-finite cached values.
+- Added atomic cache checkpoints and restart/resume behavior; verified both fully cached reruns with zero predictor calls and recovery after a simulated interrupted run.
+- Completed the full non-experimental dummy smoke run over 734 original peptides and 10,036 variants: 1,180 P1, 3,276 P2, and 5,580 P3 records, covering 10,255 unique sequences.
+- Recorded the dummy predictor ID, display name, version `1.0.0`, scoring method, testing-only classification, source/output/cache checksums, counts, and checkpoint policy in `dummy_predictor_scoring_report_v1.json`.
+- Preserved the Task 3.22 safety boundary in every scoring row: these dummy scores are software-testing evidence only and are not scientific AOP predictions or experimental results.
+- Confirmed all 88 current C3 tests pass with 68 subtests, including full production-artifact counts, schema, provenance, checksum, caching, interruption, and resume verification.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.18 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.23 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.19: Define the common predictor interface
+## Next task — Task 3.24: Prepare score normalization
 
 **Status:** Not started.
 
 Next work:
 
-- define a predictor-independent `sequence -> score` interface;
-- enforce a consistent finite numeric result contract for every predictor adapter;
-- isolate downstream C3 scoring code from predictor-specific architectures;
-- define explicit error handling for invalid inputs and unavailable or failed predictor scores.
+- document each integrated predictor's native output range and score semantics;
+- preserve native `[0,1]` probabilities where available and define any justified fixed mapping for other score types;
+- prohibit batch-wise min-max scaling that would distort original-versus-perturbed differences;
+- validate the usable score scale while continuing to keep dummy smoke-test values outside scientific results.

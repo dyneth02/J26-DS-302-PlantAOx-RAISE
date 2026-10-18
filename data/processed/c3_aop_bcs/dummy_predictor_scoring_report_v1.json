@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "pipeline_version": "c3_aop_bcs_predictor_scoring_v1",
+  "dataset_version": "c3_aop_bcs_dummy_scored_perturbations_v1",
+  "created_on": "2026-10-19",
+  "source_dataset_version": "c3_aop_bcs_combined_perturbations_v1",
+  "source": {
+    "path": "data/processed/c3_aop_bcs/combined_perturbations_v1.csv",
+    "sha256": "6799b3774c568facdf424dcd9006944c6f1e5fc287495eb00876ebb7dbfa141b"
+  },
+  "predictor": {
+    "predictor_id": "c3_software_smoke_test_dummy",
+    "display_name": "C3 software smoke-test dummy (NON-EXPERIMENTAL)",
+    "version": "1.0.0",
+    "scoring_method": "position_weighted_alphabetical_residue_rank_checksum",
+    "software_testing_only": true
+  },
+  "counts": {
+    "original_peptide_count": 734,
+    "unique_original_sequence_count": 734,
+    "perturbation_count": 10036,
+    "perturbations_by_type": {
+      "P1": 1180,
+      "P2": 3276,
+      "P3": 5580
+    },
+    "unique_perturbed_sequence_count": 9620,
+    "unique_sequence_count": 10255
+  },
+  "cache": {
+    "path": "data/processed/c3_aop_bcs/dummy_sequence_score_cache_v1.csv",
+    "checkpoint_interval": 100,
+    "initial_entries": 0,
+    "requested_unique_sequences": 10255,
+    "cache_hits": 0,
+    "scores_computed": 10255,
+    "final_entries": 10255,
+    "resume_supported": true,
+    "provenance_validation": "schema, predictor identity, predictor version, scoring method, testing classification, sequence hash, and finite score",
+    "sha256": "d903d1fdcb97a80185bb60d60371b08fa6451e274dadb5669e086534580b9ee7"
+  },
+  "output": {
+    "path": "data/processed/c3_aop_bcs/dummy_scored_perturbations_v1.csv",
+    "record_count": 10036,
+    "fields": [
+      "score_schema_version",
+      "predictor_id",
+      "predictor_display_name",
+      "predictor_version",
+      "scoring_method",
+      "software_testing_only",
+      "schema_version",
+      "variant_id",
+      "sequence_id",
+      "original_sequence",
+      "position",
+      "original_residue",
+      "substituted_residue",
+      "perturbed_sequence",
+      "perturbation_type",
+      "blosum62_score",
+      "random_seed",
+      "random_metadata",
+      "original_score",
+      "perturbed_score"
+    ],
+    "sha256": "b60356473370d9376701488548cb7a2075c885ec6274c7c997f763a4a034f13e"
+  }
+}

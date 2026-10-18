@@ -1,0 +1,237 @@
+{
+  "schema_version": "1.0",
+  "decided_on": "2026-10-19",
+  "source_access_registry": {
+    "path": "src/plantaox/c3_aop_bcs/predictor_access_status_v1.json",
+    "schema_version": "1.0",
+    "checked_on": "2026-10-19"
+  },
+  "pp1_scope_policy": {
+    "primary_predictors": [
+      "aopxsvm",
+      "anoxpepred",
+      "pu_aop"
+    ],
+    "secondary_predictors": [
+      "multi_aop",
+      "aop_drl"
+    ],
+    "demonstration_floor": "At least one primary predictor must produce retained real scores through the C3 interface; otherwise PP1 may demonstrate only the software pipeline and must not claim a predictor audit.",
+    "comparison_target": "Integrate at least two primary predictors if both pass environment reproduction, score-semantic review, and a retained real-score smoke test before the PP1 cutoff.",
+    "single_predictor_label": "If only one real predictor is ready, label the result a single-predictor pilot and do not present cross-predictor conclusions.",
+    "secondary_activation_rule": "Do not spend PP1 critical-path time on Multi-AOP or AOP-DRL unless the primary path is blocked and the secondary candidate first becomes fully reproducible and licence-compatible.",
+    "integration_evidence_rule": "A predictor remains not_integrated until its adapter produces a finite real score and the sequence, predictor version, score, runtime, and artifact hashes are retained.",
+    "dummy_counts_as_real_predictor": false
+  },
+  "priorities": [
+    {
+      "predictor_id": "aopxsvm",
+      "display_name": "AOPxSVM",
+      "tier": "primary",
+      "integration_order": 1,
+      "readiness": "best_first-integration_candidate",
+      "integration_status": "not_integrated",
+      "rationale": "The public repository bundles the SVM, scaler, selected-feature table, and inference code; it exposes one unambiguous positive-class probability and has a reachable web form. Its main risk is reproducing the legacy Python 3.7/scikit-learn 1.0.2 joblib environment.",
+      "next_actions": [
+        "Create an isolated environment matching the published serialized-model dependencies.",
+        "Parameterize the hard-coded paths behind a C3 adapter.",
+        "Retain one real sequence, positive-class probability, model hashes, and environment versions."
+      ]
+    },
+    {
+      "predictor_id": "anoxpepred",
+      "display_name": "AnOxPePred",
+      "tier": "primary",
+      "integration_order": 2,
+      "readiness": "model-available_semantics-decision-needed",
+      "integration_status": "not_integrated",
+      "rationale": "Public source and TensorFlow checkpoint files are available and the DTU service is reachable, but the legacy TensorFlow environment must be reproduced and the two-output FRS/Chelator model requires a frozen scalar-score choice for C3.",
+      "next_actions": [
+        "Freeze FRS, Chelator, or a prespecified combination as the C3 scalar before experimental scoring.",
+        "Reproduce local checkpoint inference or document a controlled service workflow.",
+        "Retain one real score with checkpoint/service version evidence."
+      ]
+    },
+    {
+      "predictor_id": "pu_aop",
+      "display_name": "PU-AOP (Component 2)",
+      "tier": "primary",
+      "integration_order": 3,
+      "readiness": "conditional_on_frozen_handoff",
+      "integration_status": "not_integrated",
+      "rationale": "PU-AOP is scientifically central to the project and local source/manifests exist, but Component 2 must select the frozen model and provide the ignored checkpoint, compatible feature resources, runtime contract, and reference score before C3 integration.",
+      "next_actions": [
+        "Complete the Component 2 handoff checklist in this decision record.",
+        "Hash-verify the selected checkpoint and preprocessing lineage.",
+        "Verify the supplied reference score through the C3 adapter before marking integration."
+      ]
+    },
+    {
+      "predictor_id": "multi_aop",
+      "display_name": "Multi-AOP",
+      "tier": "secondary",
+      "integration_order": 4,
+      "readiness": "deferred_environment-and-licence-risk",
+      "integration_status": "not_integrated",
+      "rationale": "Code and checkpoints exist, but the PyTorch Geometric/RDKit/xLSTM environment, hard-coded paths, 2-30 versus 50-residue behavior, and missing repository licence create more PP1 risk than the primary candidates.",
+      "next_actions": [
+        "Defer until the primary set has at least one verified real integration.",
+        "Resolve dependency versions, input-length semantics, and reuse permission before activation."
+      ]
+    },
+    {
+      "predictor_id": "aop_drl",
+      "display_name": "AOP-DRL",
+      "tier": "secondary",
+      "integration_order": 5,
+      "readiness": "blocked_missing-inference-assets",
+      "integration_status": "not_integrated",
+      "rationale": "The public repository lacks a trained checkpoint and complete inference package, the published endpoint is not serving AOP-DRL, and the stated non-commercial restriction requires clarification.",
+      "next_actions": [
+        "Keep outside the PP1 critical path.",
+        "Reconsider only after obtaining an author-supplied checkpoint/inference procedure or a restored service and clarifying permitted use."
+      ]
+    }
+  ],
+  "pu_aop_handoff": {
+    "predictor_id": "pu_aop",
+    "requesting_component": "Component 3 (AOP-BCS)",
+    "providing_component": "Component 2 (PU-AOP)",
+    "status": "request_prepared_handoff_pending",
+    "ready_for_c3_integration": false,
+    "acceptance_gate": "Every required item must be marked verified_for_handoff, all supplied hashes must match, and the supplied reference sequence must reproduce its expected finite score through the C3 predictor interface within the declared tolerance.",
+    "scientific_limitation": "Component 2 reports weak assay-supported discrimination and states that model scores are not calibrated biological probabilities; C3 must preserve this limitation in every result.",
+    "requirements": [
+      {
+        "requirement_id": "frozen_model_selection",
+        "required": true,
+        "status": "decision_required_from_component_2",
+        "evidence_or_request": "Identify exactly one frozen PU-AOP model/version for the audit; the existing freeze manifest contains five baseline models and a three-stage curriculum, so C3 will not guess."
+      },
+      {
+        "requirement_id": "checkpoint_binary",
+        "required": true,
+        "status": "missing_from_current_checkout",
+        "evidence_or_request": "Provide the selected checkpoint binary. Existing accepted checkpoint paths point under ignored data/interim/c2_pu run directories that are absent here."
+      },
+      {
+        "requirement_id": "checkpoint_sha256",
+        "required": true,
+        "status": "pending_model_selection",
+        "evidence_or_request": "Provide the selected checkpoint SHA-256 and confirm it against data/processed/c2_pu/C2_PP1_FREEZE_MANIFEST.json."
+      },
+      {
+        "requirement_id": "feature_schema",
+        "required": true,
+        "status": "verified_in_repository_not_yet_handed_off",
+        "evidence_or_request": "data/processed/c2_pu/fr3_fusion_schema.json; SHA-256 397d0aaeacd3133271c08809fe5158f05dfa2a8abcc2fdb6c8f928419af1f17d; fusion_v1, 495 dimensions."
+      },
+      {
+        "requirement_id": "fold_scaler",
+        "required": true,
+        "status": "verified_in_repository_not_yet_handed_off",
+        "evidence_or_request": "Confirm the selected model's fold and scaler from data/processed/c2_pu/fr3_fusion_scalers.json; file SHA-256 83a414b29e1ba057e36a9de4fb1efb5858933ae2feb2c75713555fddcbb90169."
+      },
+      {
+        "requirement_id": "embedding_contract",
+        "required": true,
+        "status": "verified_in_repository_not_yet_handed_off",
+        "evidence_or_request": "Confirm esm2_t12_35M_UR50D, representation layer 12, 480-dimensional residue-mean embedding, exact dependency/runtime, and model-weight provenance."
+      },
+      {
+        "requirement_id": "descriptor_contract",
+        "required": true,
+        "status": "verified_in_repository_not_yet_handed_off",
+        "evidence_or_request": "Confirm descriptors_v1, all 15 ordered descriptor names, implementation commit, and any dependency versions."
+      },
+      {
+        "requirement_id": "inference_entry_point",
+        "required": true,
+        "status": "request_required_from_component_2",
+        "evidence_or_request": "Provide a read-only sequence-to-score command/function or exact steps that do not retrain, refit a scaler, or rewrite accepted Component 2 artifacts."
+      },
+      {
+        "requirement_id": "score_semantics",
+        "required": true,
+        "status": "partially_documented_confirmation_required",
+        "evidence_or_request": "Confirm positive-class orientation, native range, threshold if applicable, whether any clipping occurs, and the required statement that the score is not a calibrated biological probability."
+      },
+      {
+        "requirement_id": "reference_score_fixture",
+        "required": true,
+        "status": "request_required_from_component_2",
+        "evidence_or_request": "Provide at least one valid peptide sequence, expected native score, numerical tolerance, model/scaler/checkpoint hashes, and runtime versions for cross-component verification."
+      },
+      {
+        "requirement_id": "batch_and_failure_contract",
+        "required": true,
+        "status": "request_required_from_component_2",
+        "evidence_or_request": "Specify supported sequence lengths/alphabet, practical batch size, deterministic settings, and failure behavior for invalid or unscorable inputs."
+      },
+      {
+        "requirement_id": "use_authorization",
+        "required": true,
+        "status": "request_required_from_component_2",
+        "evidence_or_request": "Confirm internal research use, redistribution/storage rules for ignored model artifacts, and the approved handoff location."
+      }
+    ]
+  },
+  "unresolved_access_issues": [
+    {
+      "issue_id": "AOPX-ENV-001",
+      "predictor_id": "aopxsvm",
+      "severity": "high",
+      "status": "open",
+      "description": "Serialized sklearn artifacts require their legacy environment.",
+      "exit_criterion": "A pinned environment loads the scaler and model and reproduces one retained finite positive-class probability."
+    },
+    {
+      "issue_id": "AOPX-LIC-001",
+      "predictor_id": "aopxsvm",
+      "severity": "medium",
+      "status": "open",
+      "description": "No repository code licence was found.",
+      "exit_criterion": "Permitted research use is documented or supervisor approval records the accepted limitation."
+    },
+    {
+      "issue_id": "ANOX-SEM-001",
+      "predictor_id": "anoxpepred",
+      "severity": "high",
+      "status": "open",
+      "description": "The two-output model has no frozen C3 scalar-score choice.",
+      "exit_criterion": "The protocol identifies FRS, Chelator, or a prespecified combination before any experimental scores are generated."
+    },
+    {
+      "issue_id": "ANOX-ENV-001",
+      "predictor_id": "anoxpepred",
+      "severity": "high",
+      "status": "open",
+      "description": "Legacy TensorFlow checkpoint compatibility has not been reproduced.",
+      "exit_criterion": "Local or controlled-service inference returns and retains one versioned finite score."
+    },
+    {
+      "issue_id": "PU-HANDOFF-001",
+      "predictor_id": "pu_aop",
+      "severity": "blocking",
+      "status": "open",
+      "description": "Frozen model selection and required ignored artifacts have not been handed off.",
+      "exit_criterion": "Every required PU-AOP handoff item is verified_for_handoff and the reference score reproduces through C3."
+    },
+    {
+      "issue_id": "MULTI-ENV-001",
+      "predictor_id": "multi_aop",
+      "severity": "medium",
+      "status": "deferred",
+      "description": "Complex dependency stack, hard-coded paths, input-length ambiguity, and unspecified licence remain unresolved.",
+      "exit_criterion": "A pinned, licensed environment produces a retained real score with frozen input semantics."
+    },
+    {
+      "issue_id": "DRL-ASSET-001",
+      "predictor_id": "aop_drl",
+      "severity": "blocking",
+      "status": "deferred",
+      "description": "No public checkpoint/complete inference package is available and the published service is not operational.",
+      "exit_criterion": "A permitted checkpoint plus complete inference procedure or restored service produces a retained real score."
+    }
+  ]
+}
