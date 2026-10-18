@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "dataset_version": "c3_aop_bcs_redox_eligible_v1",
+  "created_on": "2026-10-18",
+  "source_dataset_version": "c3_aop_bcs_cd_hit_90_v1",
+  "source": {
+    "path": "data/processed/c3_aop_bcs/cd_hit_representatives_90_v1.csv",
+    "sha256": "80a201c7b5e46d2846a2f2c916cf914cd08ac6738256d96f64039f75a8915a24"
+  },
+  "eligibility_rule": {
+    "redox_residues": [
+      "W",
+      "Y",
+      "H",
+      "M",
+      "C"
+    ],
+    "minimum_required_occurrences": 1,
+    "rejection_reason": "no_redox_residue"
+  },
+  "counts": {
+    "input_count": 1046,
+    "eligible_count": 734,
+    "rejected_no_redox_residue_count": 312
+  },
+  "outputs": {
+    "eligible": {
+      "path": "data/processed/c3_aop_bcs/redox_eligible_sequences_v1.csv",
+      "record_count": 734,
+      "sha256": "debb9590166fd44e333b50bd6931c7e4ab0a585769abccbdd93f8a4727193a3d"
+    },
+    "exclusions": {
+      "path": "data/processed/c3_aop_bcs/redox_eligibility_exclusions_v1.csv",
+      "record_count": 312,
+      "sha256": "b44cbd2d67ad3d364c974dee23c909251d156e0cd878bfaefa20b98074ce532f"
+    }
+  }
+}
