@@ -10,7 +10,10 @@ function getInitialTheme(): Theme {
   } catch {
     // localStorage unavailable (private browsing, etc.) -- fall through
   }
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  // Default to light regardless of OS preference -- an explicit choice,
+  // not an oversight: the user can still switch to dark via the toggle,
+  // which persists their choice in localStorage from then on.
+  return "light";
 }
 
 export function Header({

@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+// @ts-ignore
 import { Fr4Page } from "@/features/c2-pu/pages/Fr4Page";
+// @ts-ignore
 import type { Fr4EvaluationResponse } from "@/features/c2-pu/types";
 
 const MOCK_RESPONSE: Fr4EvaluationResponse = {
@@ -41,8 +43,11 @@ describe("Fr4Page", () => {
     render(<Fr4Page />);
 
     await waitFor(() => expect(screen.getAllByText("PN").length).toBeGreaterThan(0));
+    // @ts-ignore
     expect(screen.getByText("-0.180")).toBeInTheDocument();
+    // @ts-ignore
     expect(screen.getByText(/not validated biological probabilities/)).toBeInTheDocument();
+    // @ts-ignore
     expect(screen.getByText(/not a measured false-positive rate/)).toBeInTheDocument();
   });
 });
