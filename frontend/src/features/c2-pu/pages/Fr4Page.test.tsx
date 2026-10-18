@@ -1,0 +1,48 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import { Fr4Page } from "@/features/c2-pu/pages/Fr4Page";
+import type { Fr4EvaluationResponse } from "@/features/c2-pu/types";
+
+const MOCK_RESPONSE: Fr4EvaluationResponse = {
+  fold_id: 0,
+  evaluation_note: "Scores are uncalibrated model outputs, not validated biological probabilities.",
+  challenge_behavior_note: "it is not a measured false-positive rate.",
+  challenge_score_fractions: { M1: { C1: 0.06, C2: 0.33 } },
+  models: [
+    {
+      model_id: "M1",
+      model: "PN",
+      mcc: -0.18,
+      average_precision: 0.64,
+      auroc: 0.25,
+      precision: 0.74,
+      recall: 0.87,
+      f1: 0.8,
+      balanced_accuracy: 0.56,
+      confusion_matrix: { tp: 108, tn: 0, fp: 38, fn: 16 },
+      n_positive: 124,
+      n_control: 38,
+      evaluation_population: "held-out positives vs external assay-inactive controls",
+    },
+  ],
+};
+
+describe("Fr4Page", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("surfaces negative MCC and the scientific caveat language, not a hidden/omitted result", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => MOCK_RESPONSE,
+    }) as unknown as typeof fetch;
+
+    render(<Fr4Page />);
+
+    await waitFor(() => expect(screen.getAllByText("PN").length).toBeGreaterThan(0));
+    expect(screen.getByText("-0.180")).toBeInTheDocument();
+    expect(screen.getByText(/not validated biological probabilities/)).toBeInTheDocument();
+    expect(screen.getByText(/not a measured false-positive rate/)).toBeInTheDocument();
+  });
+});
