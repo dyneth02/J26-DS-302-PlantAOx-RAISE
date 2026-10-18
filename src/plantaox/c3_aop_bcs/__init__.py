@@ -8,11 +8,13 @@ from .redox_eligibility import build_redox_eligible_dataset
 from .residue_annotation import build_residue_annotation_dataset
 from .perturbation_schema import PerturbationRecord
 from .p1_alanine_scanning import build_p1_dataset
+from .blosum62 import load_blosum62, select_conservative_substitution
 
 __all__ = [
     "ResearchConfig",
     "PerturbationRecord",
     "build_p1_dataset",
+    "load_blosum62",
     "build_cleaned_dataset",
     "build_cd_hit_dataset",
     "build_redox_eligible_dataset",
@@ -21,5 +23,6 @@ __all__ = [
     "clean_records",
     "load_research_config",
     "normalize_sequence",
+    "select_conservative_substitution",
     "validate_sequence",
 ]

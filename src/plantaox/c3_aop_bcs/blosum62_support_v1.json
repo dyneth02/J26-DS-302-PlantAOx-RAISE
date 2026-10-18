@@ -1,0 +1,100 @@
+{
+  "support_version": "c3_aop_bcs_blosum62_support_v1",
+  "matrix_name": "BLOSUM62",
+  "score_units": "half-bit log-odds scores",
+  "source_url": "https://ftp.ncbi.nlm.nih.gov/blast/matrices/BLOSUM62",
+  "local_resource": "resources/blosum62_standard.tsv",
+  "resource_sha256": "1bc4c944eba86ba3e9cbac115d99a9ceefd2f86e1331afc68cb25811a3822426",
+  "alphabet": [
+    "A",
+    "R",
+    "N",
+    "D",
+    "C",
+    "Q",
+    "E",
+    "G",
+    "H",
+    "I",
+    "L",
+    "K",
+    "M",
+    "F",
+    "P",
+    "S",
+    "T",
+    "W",
+    "Y",
+    "V"
+  ],
+  "dimensions": [
+    20,
+    20
+  ],
+  "selection_rule": {
+    "minimum_score": 1,
+    "excluded_candidates": [
+      "original_residue",
+      "A",
+      "W",
+      "Y",
+      "H",
+      "M",
+      "C"
+    ],
+    "tie_break": "highest BLOSUM62 score, then alphabetical residue code ascending"
+  },
+  "selected_substitutions_for_non_redox_originals": {
+    "A": {
+      "residue": "S",
+      "score": 1
+    },
+    "D": {
+      "residue": "E",
+      "score": 2
+    },
+    "E": {
+      "residue": "D",
+      "score": 2
+    },
+    "F": null,
+    "G": null,
+    "I": {
+      "residue": "V",
+      "score": 3
+    },
+    "K": {
+      "residue": "R",
+      "score": 2
+    },
+    "L": {
+      "residue": "I",
+      "score": 2
+    },
+    "N": {
+      "residue": "D",
+      "score": 1
+    },
+    "P": null,
+    "Q": {
+      "residue": "E",
+      "score": 2
+    },
+    "R": {
+      "residue": "K",
+      "score": 2
+    },
+    "S": {
+      "residue": "N",
+      "score": 1
+    },
+    "T": {
+      "residue": "S",
+      "score": 1
+    },
+    "V": {
+      "residue": "I",
+      "score": 3
+    }
+  }
+}
