@@ -2,11 +2,26 @@
 
 **Last updated:** 2026-10-18
 
-**Current implementation state:** Task 3.6 complete; Task 3.7 is next and not started
-
 **Legend:** `[x]` completed, `[~]` in progress, `[ ]` incomplete.
 
 The PP1 plan is organized into six phases. Phases 1 and 2 preserve the established structure through completed Task 3.6; Tasks 3.7–3.42 are divided into four proposal-aligned phases. Existing task numbers are preserved for traceability.
+
+## Current project snapshot
+
+- **Latest completed pipeline task:** Task 3.6 — Validate and clean sequences.
+- **Other verified completed task:** Task 3.16 — Create sequence-validation tests, completed early through the Task 3.6 test implementation.
+- **Currently in progress:** No implementation task is active.
+- **Next implementation task:** Task 3.7 — Apply 90% identity deduplication; not started.
+- **Earlier incomplete task:** Task 3.2 — Prepare the Python environment; partially complete because several optional/later-stage dependencies and the version record remain outstanding.
+- **Current verification baseline:** 18 C3 tests passing after Task 3.6.
+
+## Status maintenance rule
+
+- At the start of implementation, change the relevant task status to `[~]` and record its active work under **Ongoing**.
+- After each subtask is completed and verified, tick the matching checkbox in `tasks.md` and update the task's **Completed** and **Remaining** records here.
+- Mark a task `[x]` only after its required subtasks and deliverable have been verified.
+- Preserve earlier task records and test/data evidence when adding new progress.
+- When no implementation is active, state that explicitly instead of presenting the next task as in progress.
 
 # Phase 1 — Research Definition and Project Foundation
 
