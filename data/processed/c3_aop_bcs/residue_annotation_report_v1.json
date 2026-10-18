@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "dataset_version": "c3_aop_bcs_residue_annotations_v1",
+  "created_on": "2026-10-18",
+  "source_dataset_version": "c3_aop_bcs_redox_eligible_v1",
+  "source": {
+    "path": "data/processed/c3_aop_bcs/redox_eligible_sequences_v1.csv",
+    "sha256": "debb9590166fd44e333b50bd6931c7e4ab0a585769abccbdd93f8a4727193a3d"
+  },
+  "annotation_rule": {
+    "position_index_base": 1,
+    "redox_residues": [
+      "W",
+      "Y",
+      "H",
+      "M",
+      "C"
+    ],
+    "redox_class": "redox",
+    "non_redox_class": "non_redox"
+  },
+  "counts": {
+    "peptide_count": 734,
+    "annotation_count": 5580,
+    "redox_position_count": 1180,
+    "non_redox_position_count": 4400
+  },
+  "outputs": {
+    "residue_annotations": {
+      "path": "data/processed/c3_aop_bcs/residue_annotations_v1.csv",
+      "record_count": 5580,
+      "sha256": "03d043cf0856a5584f19022b696b982b36071e85bdff80bf0f563e2b416a5938"
+    }
+  }
+}
