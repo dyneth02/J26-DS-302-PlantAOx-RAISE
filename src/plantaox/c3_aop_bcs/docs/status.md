@@ -105,16 +105,23 @@
 - Recorded ten blocking, high-priority, decision, or scientific handoff findings covering artifacts, reference fixtures, `fair-esm` and ESM-2 weight provenance, inference entry point, naming/selection, runtime policy, authorization, and validation limitations.
 - Kept all five models `not_integrated`: their assay-supported fold-0 results have negative MCC and AUROC below 0.5, and no real score can be reproduced in C3 until the missing handoff requirements are resolved.
 - Confirmed all 93 current C3 tests pass with 68 subtests, including source-evidence checksum verification, exact five-model coverage, integration-gate enforcement, PU-Bagging discrepancy retention, and deterministic report generation.
+- Completed Task 3.24 with the versioned `c3_aop_bcs_score_normalization_v1` registry covering AnOxPePred's two native channels, Multi-AOP, AOPxSVM, AOP-DRL, all five Component 2 PU-AOP configurations, and the non-experimental dummy.
+- Implemented fixed pointwise normalization that preserves documented native `[0,1]` scores unchanged, rejects non-finite and out-of-contract inputs, and guarantees usable values remain within `[0,1]`.
+- Prohibited batch-wise min-max scaling so a native score maps identically regardless of batch composition and original-versus-perturbed differences cannot change with unrelated samples.
+- Defined PU-AOP M4's evidence-supported exception: retain the raw Elkan-Noto corrected score and separately use fixed clipping to `[0,1]` for bounded comparisons; no fitted or batch-derived mapping is allowed.
+- Kept AnOxPePred's FRS and Chelator channels separate pending a prespecified scalar endpoint, and retained every real predictor mapping as operationally unverified until a real score is reproduced through C3.
+- Validated the normalization implementation over all 20,072 original/perturbed dummy score values from 10,036 rows: native and usable ranges were both `0.075–1.0`, with zero out-of-range or transformed values; this remains software-testing evidence only.
+- Confirmed all 100 current C3 tests pass with 74 subtests after one transient Windows/OneDrive cache-file lock on the first full-suite run and a clean complete rerun.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.23 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.24 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.24: Prepare score normalization
+## Next task — Task 3.25: Create the PP1 pilot subset
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- document each integrated predictor's native output range and score semantics;
-- preserve native `[0,1]` probabilities where available and define any justified fixed mapping for other score types;
-- prohibit batch-wise min-max scaling that would distort original-versus-perturbed differences;
-- validate the usable score scale while continuing to keep dummy smoke-test values outside scientific results.
+- select a reproducible pilot subset using the configured master seed;
+- represent multiple peptide lengths and redox-residue patterns;
+- keep the pilot within the planned 10–30 peptide PP1 scale;
+- version the selected records and preserve their source/provenance.
