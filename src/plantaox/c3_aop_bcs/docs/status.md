@@ -30,17 +30,21 @@
 - Expanded all 734 eligible peptides into 5,580 deterministic one-based residue annotations: 1,180 redox positions and 4,400 non-redox positions.
 - Recorded each position's residue and `redox`/`non_redox` classification, repeated the validated peptide-level redox-position count, and preserved every Task 3.8 provenance field.
 - Generated the versioned `c3_aop_bcs_residue_annotations_v1` table and a reproducibility report containing the annotation rule, configured redox set, source checksum, reconciled counts, and output checksum.
-- Confirmed all 30 current C3 tests pass, including complete position coverage, exact sequence reconstruction, class correctness, peptide-level count validation, provenance preservation, checksum validation, and byte-reproducible generation.
+- Froze perturbation schema version `1.0` with ordered fields for schema and variant identifiers, sequence linkage, original and perturbed sequences, one-based position, original and substituted residues, perturbation type, BLOSUM62 score, random seed, and random metadata.
+- Added an immutable perturbation-record model with strict construction and CSV mapping, standard-amino-acid validation, same-length enforcement, and proof that each record contains exactly one edit at its declared position.
+- Defined explicit metadata applicability: P1 carries no P2/P3 metadata, P2 requires a BLOSUM62 score, and P3 requires a random seed plus canonical JSON metadata.
+- Added a deterministic machine-readable `perturbation_schema_v1.json` contract shared by the future P1, P2, and P3 generators.
+- Confirmed all 35 current C3 tests pass, including schema/field stability, all-type CSV round trips, exact one-position-edit rejection cases, conditional metadata rules, strict mapping, and byte-reproducible schema generation.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.9 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.10 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.10: Define the perturbation output schema
+## Next task — Task 3.11: Implement P1 alanine scanning
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- define the required original-sequence, mutation-position, residue, perturbed-sequence, perturbation-type, BLOSUM62-score, and random-metadata fields;
-- ensure one output record represents exactly one one-position edit;
-- freeze a versioned machine-readable schema shared by P1, P2, and P3;
-- implement strict record construction, serialization, and validation tests without generating perturbations yet.
+- find every configured W/Y/H/M/C position in the eligible peptides;
+- replace one redox residue at a time with alanine while preserving sequence length;
+- emit one independently validated P1 schema record per edited position;
+- export the P1 variants and record deterministic counts and provenance.

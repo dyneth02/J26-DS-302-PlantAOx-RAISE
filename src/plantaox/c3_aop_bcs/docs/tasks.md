@@ -396,17 +396,17 @@
 ## Task 3.10 — Define the perturbation output schema
 
 ### Subtasks
-- [ ] Store for every generated variant:
-  - [ ] sequence ID;
-  - [ ] original sequence;
-  - [ ] position;
-  - [ ] original residue;
-  - [ ] substituted residue;
-  - [ ] perturbed sequence;
-  - [ ] perturbation type;
-  - [ ] BLOSUM62 score where applicable;
-  - [ ] random seed/metadata where applicable.
-- [ ] Ensure one record corresponds to one one-position edit.
+- [x] Store for every generated variant:
+  - [x] sequence ID;
+  - [x] original sequence;
+  - [x] position;
+  - [x] original residue;
+  - [x] substituted residue;
+  - [x] perturbed sequence;
+  - [x] perturbation type;
+  - [x] BLOSUM62 score where applicable;
+  - [x] random seed/metadata where applicable.
+- [x] Ensure one record corresponds to one one-position edit.
 
 ### Deliverable
 - Frozen perturbation-data schema.
