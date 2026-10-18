@@ -90,16 +90,23 @@
 - Labelled the dummy in both runtime attributes and the versioned `dummy_predictor_v1.json` contract as software-testing only, not a scientific AOP predictor, and prohibited from experimental results, predictor comparisons, biological interpretation, or satisfying the PP1 real-predictor requirement.
 - Verified that the dummy produces reproducible scores, rejects invalid inputs through the common interface, and exposes score changes for single-residue variants suitable for future scoring/metric pipeline smoke tests.
 - Confirmed all 83 current C3 tests pass with 68 subtests, including deterministic dummy-definition reproduction and non-experimental safety-label enforcement.
+- Implemented the Task 3.23 predictor-independent scoring pipeline, which validates the frozen perturbation input and exports one traceable score row per variant with original and perturbed scores.
+- Added sequence-level caching that scores each unique original or perturbed sequence once, binds reuse to the score schema, predictor identity/version, scoring method, testing classification, and sequence SHA-256, and rejects conflicting or non-finite cached values.
+- Added atomic cache checkpoints and restart/resume behavior; verified both fully cached reruns with zero predictor calls and recovery after a simulated interrupted run.
+- Completed the full non-experimental dummy smoke run over 734 original peptides and 10,036 variants: 1,180 P1, 3,276 P2, and 5,580 P3 records, covering 10,255 unique sequences.
+- Recorded the dummy predictor ID, display name, version `1.0.0`, scoring method, testing-only classification, source/output/cache checksums, counts, and checkpoint policy in `dummy_predictor_scoring_report_v1.json`.
+- Preserved the Task 3.22 safety boundary in every scoring row: these dummy scores are software-testing evidence only and are not scientific AOP predictions or experimental results.
+- Confirmed all 88 current C3 tests pass with 68 subtests, including full production-artifact counts, schema, provenance, checksum, caching, interruption, and resume verification.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.22 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.23 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.23: Implement predictor scoring
+## Next task — Task 3.24: Prepare score normalization
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- score each original peptide and every P1/P2/P3 variant through the common predictor interface;
-- cache original and completed perturbed scores and support safe restart/resume behavior where practical;
-- record predictor identity, version, and scoring method with every scoring run;
-- begin with the Task 3.22 dummy only as a software smoke test, while keeping real-predictor evidence and experimental results strictly separate.
+- document each integrated predictor's native output range and score semantics;
+- preserve native `[0,1]` probabilities where available and define any justified fixed mapping for other score types;
+- prohibit batch-wise min-max scaling that would distort original-versus-perturbed differences;
+- validate the usable score scale while continuing to keep dummy smoke-test values outside scientific results.

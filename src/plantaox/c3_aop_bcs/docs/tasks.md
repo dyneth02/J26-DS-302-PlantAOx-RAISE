@@ -631,12 +631,12 @@
 ## Task 3.23 — Implement predictor scoring
 
 ### Subtasks
-- [ ] Score each original peptide.
-- [ ] Score every P1/P2/P3 variant.
-- [ ] Cache original scores to avoid repeated calls.
-- [ ] Cache completed perturbed scores where allowed.
-- [ ] Add restart/resume behavior where practical.
-- [ ] Record predictor version and scoring method.
+- [x] Score each original peptide.
+- [x] Score every P1/P2/P3 variant.
+- [x] Cache original scores to avoid repeated calls.
+- [x] Cache completed perturbed scores where allowed.
+- [x] Add restart/resume behavior where practical.
+- [x] Record predictor version and scoring method.
 
 ### Deliverable
 - Original/perturbed score table for the pilot.
