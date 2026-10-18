@@ -7,10 +7,12 @@ from .identity_deduplication import build_cd_hit_dataset
 from .redox_eligibility import build_redox_eligible_dataset
 from .residue_annotation import build_residue_annotation_dataset
 from .perturbation_schema import PerturbationRecord
+from .p1_alanine_scanning import build_p1_dataset
 
 __all__ = [
     "ResearchConfig",
     "PerturbationRecord",
+    "build_p1_dataset",
     "build_cleaned_dataset",
     "build_cd_hit_dataset",
     "build_redox_eligible_dataset",
