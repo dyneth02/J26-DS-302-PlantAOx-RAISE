@@ -64,11 +64,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.15 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.18: Create reproducibility checks
+## Current task — Task 3.18: Create reproducibility checks
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - run the complete perturbation pipeline twice from the same production input and configuration;
 - compare the accepted output, rejection ledger, counts, and checksums across runs;
