@@ -95,9 +95,9 @@
 
 ## Next task — Task 3.23: Implement predictor scoring
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - score each original peptide and every P1/P2/P3 variant through the common predictor interface;
 - cache original and completed perturbed scores and support safe restart/resume behavior where practical;
