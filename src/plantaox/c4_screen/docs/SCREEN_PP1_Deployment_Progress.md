@@ -11,7 +11,7 @@
 | Repository scaffold | Done for Gate 1 | Implemented `digest.py`, `filters.py`, `dedup.py`, `descriptors.py`, `run.py`, `config.yaml`, and focused tests in the established `src/` and `tests/` layout. Embedding/AD/signal modules remain out of this scope. |
 | Proteome inputs | Done for Gate 1 | Four unchanged reviewed FASTAs are registered at `data/raw/<plant>.fasta`, with URL, access date, file size, SHA-256, release, downloaded/retained/excluded counts in `data/raw/c4_data_registry.csv`. Exclusions are logged in `data/raw/c4_protein_exclusions.csv`; raw inputs remain unchanged. |
 | Dependencies and environment | In Progress | The requested fair-esm, biopython, pyteomics, pandas, pyarrow, scikit-learn, and pytest packages are installed in `.venv`, and `requirements.txt` now records the environment via `pip freeze`. CUDA is unavailable (`False`); the ESM-2 download remains incomplete and model loading is not verified. `tests/c4_screen/check_gpu.py` is a probe, not a pipeline acceptance test. |
-| Candidate generation (FR1 / Gate 1) | Done | `python -m plantaox.c4_screen.run all` generated candidate Parquet/FASTA, membership, funnel, and funnel-only summary. Five focused tests pass. All 152,259 sequences are unique and all 266,361 parent-coordinate provenance links were checked against the source FASTAs. Optional BIOPEP web comparison and C1/C2 handoff remain pending. |
+| Candidate generation (FR1 / Gate 1) | Done | `python -m plantaox.c4_screen.run all` generated candidate Parquet/FASTA, membership, funnel, and funnel-only summary. Five focused tests pass. A repeated full run produced byte-identical SHA-256 values for all nine outputs. All 152,259 sequences are unique and all 266,361 parent-coordinate provenance links were checked against the source FASTAs. Optional BIOPEP web comparison and C1/C2 handoff remain pending. |
 | Embeddings and AD tiers (FR2) | Pending | No ESM-2 embedding pipeline, reference cloud, fitted parameters, tier table, diagnostics, or validation evidence is present. |
 | PDSS (FR3) | Pending | No implementation or results. Planned stretch/later analysis. |
 | Signal integration and combined score (FR4) | Pending | No C1/C2 signal contract, scoring, abstention, or dummy signal artifacts are present. |
@@ -53,7 +53,7 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 
 ## Current work session
 
-- **Done:** Gate 1 implementation, deterministic full run, actual protein exclusions/funnel counts, output integrity checks across every candidate provenance link, and focused tests (5 passed).
+- **Done:** Gate 1 implementation, deterministic full run (all nine artifacts byte-identical on repeat), actual protein exclusions/funnel counts, output integrity checks across every candidate provenance link, and focused tests (5 passed).
 - **Pending:** Optional one-protein BIOPEP-UWM comparison and delivery of `candidates.fasta` to C1/C2 owners. The planner and `C4_Interface_Spec_v0.1_PROVISIONAL.md` named in the request were not found in this clone.
 - **Out of scope / Pending:** ESM embeddings, AD tiers, scoring, and frontend. CUDA is unavailable and model weights remain unverified.
 
