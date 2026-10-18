@@ -1,6 +1,6 @@
 # Component 4 Methodology and Definitions
 
-This page documents the research design, not completed calculations. The formulas below require implementation, tests, and the validation evidence in [SCREEN_PP1_VALIDATION.md](SCREEN_PP1_VALIDATION.md) before they can support reported findings.
+This page documents the research design, not completed calculations. The formulas below require implementation, tests, and the validation evidence in [SCREEN_PP1_VALIDATION.md](SCREEN_PP1_Validation) before they can support reported findings.
 
 ## Candidate generation (FR1)
 

@@ -46,10 +46,10 @@ data/interim/c4_screen/         # regeneratable candidate outputs (Git-ignored)
 
 ## Documentation map
 
-- [Architecture](SCREEN_PP1_ARCHITECTURE.md) describes the planned stages, component handoffs, and lifecycle boundaries.
-- [Methodology](SCREEN_PP1_METHODOLOGY.md) defines the proposed digestion, embedding, AD, score, and metric contracts, including unresolved choices.
-- [Data and outputs](SCREEN_PP1_DATA_AND_OUTPUTS.md) describes required provenance, artifact properties, and file-level guarantees.
-- [Validation](SCREEN_PP1_VALIDATION.md) states what evidence is needed before marking a task Done or reporting a scientific result.
+- [Architecture](SCREEN_PP1_Architecture) describes the planned stages, component handoffs, and lifecycle boundaries.
+- [Methodology](SCREEN_PP1_Methodology) defines the proposed digestion, embedding, AD, score, and metric contracts, including unresolved choices.
+- [Data and outputs](SCREEN_PP1_Data_and_outputs) describes required provenance, artifact properties, and file-level guarantees.
+- [Validation](SCREEN_PP1_Validation) states what evidence is needed before marking a task Done or reporting a scientific result.
 - [PP1 task inventory](SCREEN_PP1_Task_Inventory.md) is the execution plan and functional-requirement map.
 - [PP1 deployment progress](SCREEN_PP1_Deployment_Progress.md) is the current evidence-based status snapshot.
 
