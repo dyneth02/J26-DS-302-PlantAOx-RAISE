@@ -378,13 +378,13 @@
 ## Task 3.9 — Annotate residue positions
 
 ### Subtasks
-- [ ] Number peptide positions from 1 to sequence length.
-- [ ] Record the residue at each position.
-- [ ] Mark each position as:
-  - [ ] redox;
-  - [ ] non-redox.
-- [ ] Store redox-position counts per peptide.
-- [ ] Export a residue-level annotation table.
+- [x] Number peptide positions from 1 to sequence length.
+- [x] Record the residue at each position.
+- [x] Mark each position as:
+  - [x] redox;
+  - [x] non-redox.
+- [x] Store redox-position counts per peptide.
+- [x] Export a residue-level annotation table.
 
 ### Deliverable
 - Position-level residue annotation file.
@@ -895,7 +895,7 @@
   - [x] `Initialize Component 3 AOP-BCS structure`
   - [x] `Add C3 research configuration`
   - [x] `Implement AOP sequence cleaning`
-  - [ ] `Add redox residue annotation`
+  - [x] `Add redox residue annotation`
   - [ ] `Implement P1 alanine scanning`
   - [ ] `Implement P2 BLOSUM62 substitutions`
   - [ ] `Implement P3 random controls`
@@ -1023,7 +1023,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] 3–50 AA filter applied.
 - [x] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.
 - [x] Redox filter `{W,Y,H,M,C}` applied.
-- [ ] Residue annotation works.
+- [x] Residue annotation works.
 - [ ] P1 generator works.
 - [ ] P2 generator works using BLOSUM62 >= +1.
 - [ ] P3 random-control generator works.

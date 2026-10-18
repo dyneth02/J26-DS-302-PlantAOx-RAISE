@@ -27,18 +27,19 @@
 - Applied the configured `{W,Y,H,M,C}` redox-residue eligibility rule to all 1,046 CD-HIT representatives, retaining 734 primary P1 audit subjects and rejecting 312 sequences with no redox residue.
 - Generated the versioned `c3_aop_bcs_redox_eligible_v1` subject table, a complete exclusion ledger using the reason `no_redox_residue`, and a report containing the rule, input checksum, reconciled counts, and output checksums.
 - Preserved every Task 3.7 source, evidence, raw-record, and CD-HIT provenance field in both eligible and excluded records, while adding redox occurrence counts and the configured residues present.
-- Confirmed all 26 current C3 tests pass, including redox detection, deterministic filtering, provenance preservation, eligibility/exclusion assertions, schemas, counts, and artifact checksums.
+- Expanded all 734 eligible peptides into 5,580 deterministic one-based residue annotations: 1,180 redox positions and 4,400 non-redox positions.
+- Recorded each position's residue and `redox`/`non_redox` classification, repeated the validated peptide-level redox-position count, and preserved every Task 3.8 provenance field.
+- Generated the versioned `c3_aop_bcs_residue_annotations_v1` table and a reproducibility report containing the annotation rule, configured redox set, source checksum, reconciled counts, and output checksum.
+- Confirmed all 30 current C3 tests pass, including complete position coverage, exact sequence reconstruction, class correctness, peptide-level count validation, provenance preservation, checksum validation, and byte-reproducible generation.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.8 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.9 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.9: Annotate residue positions
+## Next task — Task 3.10: Define the perturbation output schema
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- number peptide positions from 1 through sequence length;
-- record the residue at each position and classify it as redox or non-redox;
-- store the redox-position count for every peptide;
-- export a residue-level annotation table while preserving sequence provenance;
-- verify complete one-based positional coverage and deterministic output.
+- define the required original-sequence, mutation-position, residue, perturbed-sequence, perturbation-type, BLOSUM62-score, and random-metadata fields;
+- ensure one output record represents exactly one one-position edit;
+- freeze and test the shared schema before implementing P1, P2, and P3 generators.
