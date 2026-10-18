@@ -616,12 +616,12 @@
 ## Task 3.22 — Build a non-experimental dummy/smoke-test predictor
 
 ### Subtasks
-- [ ] Implement a simple deterministic scoring function only for pipeline testing.
-- [ ] Clearly label it as:
-  - [ ] software testing only;
-  - [ ] not a scientific AOP predictor;
-  - [ ] not part of experimental results.
-- [ ] Use it to verify the scoring/metric pipeline before real models are ready.
+- [x] Implement a simple deterministic scoring function only for pipeline testing.
+- [x] Clearly label it as:
+  - [x] software testing only;
+  - [x] not a scientific AOP predictor;
+  - [x] not part of experimental results.
+- [x] Use it to verify the scoring/metric pipeline before real models are ready.
 
 ### Deliverable
 - End-to-end software smoke-test capability.

@@ -86,16 +86,20 @@
 - Recorded that the PU-AOP handoff request is prepared but the handoff itself remains pending; C3 will not guess among Component 2's accepted models or claim integration without the binary artifacts and a reproduced reference score.
 - Documented seven unresolved access issues across all five predictors, each with severity, state, and a measurable exit criterion.
 - Confirmed all 78 current C3 tests pass with 64 subtests, including priority-set enforcement, Task 3.20 status synchronization, PU-AOP handoff readiness gating, issue coverage, and deterministic report generation.
+- Implemented the Task 3.22 `DummySmokeTestPredictor` behind the Task 3.19 common predictor interface, using a deterministic position-weighted alphabetical residue-rank checksum with a finite `[0,1]` output.
+- Labelled the dummy in both runtime attributes and the versioned `dummy_predictor_v1.json` contract as software-testing only, not a scientific AOP predictor, and prohibited from experimental results, predictor comparisons, biological interpretation, or satisfying the PP1 real-predictor requirement.
+- Verified that the dummy produces reproducible scores, rejects invalid inputs through the common interface, and exposes score changes for single-residue variants suitable for future scoring/metric pipeline smoke tests.
+- Confirmed all 83 current C3 tests pass with 68 subtests, including deterministic dummy-definition reproduction and non-experimental safety-label enforcement.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.21 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.22 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.22: Build a non-experimental dummy/smoke-test predictor
+## Next task — Task 3.23: Implement predictor scoring
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- implement one simple deterministic predictor behind the Task 3.19 common interface;
-- label it explicitly as software testing only, not a scientific AOP predictor, and excluded from experimental results;
-- use it to smoke-test the future scoring and metric pipeline without satisfying the Task 3.21 real-predictor requirement;
-- retain deterministic tests and provenance that prevent the dummy output from being mistaken for scientific evidence.
+- score each original peptide and every P1/P2/P3 variant through the common predictor interface;
+- cache original and completed perturbed scores and support safe restart/resume behavior where practical;
+- record predictor identity, version, and scoring method with every scoring run;
+- begin with the Task 3.22 dummy only as a software smoke test, while keeping real-predictor evidence and experimental results strictly separate.
