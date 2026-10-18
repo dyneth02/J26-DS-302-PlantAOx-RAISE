@@ -78,8 +78,8 @@ The inventory was synchronized with repository evidence on 19 October 2026. Comp
 - [x] Download Swiss-Prot **reviewed** FASTA for Glycine max, Oryza sativa (japonica), Brassica napus, and Olea europaea using taxonomy-filtered `reviewed:true` UniProt queries. Downloaded files and exact URLs are in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
 - [x] Record source URLs, access date (19 October 2026, Asia/Colombo), UniProt release (`2026_03`, released 02 September 2026), file sizes, and SHA-256 checksums in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
 - [x] Count FASTA protein records: soybean 439; rice 4,197; rapeseed 159; olive 110. These are input protein counts and cannot be compared directly with the proposal's 5K–50K post-digestion peptide-candidate estimate; revisit the estimate after the FR1 funnel is measured.
-- [x] Apply the input filters: drop proteins < 50 AA and sequences with non-standard residues; log exclusions in `data/raw/c4_protein_exclusions.csv`.
-- [x] Save unchanged UniProt response files under `data/raw/c4_screen/`; version their provenance with UniProt release, retrieval date, source query, and SHA-256 in `SCREEN_PP1_DATA_AND_OUTPUTS.md` and `SCREEN_PP1_CHECKSUMS.sha256`. Keep raw sequence files local and ignored by Git.
+- [x] Apply the input filters: drop proteins < 50 AA and sequences with non-standard residues; log exclusions in `data/raw/c4_screen/metadata/c4_protein_exclusions.csv`.
+- [x] Save unchanged UniProt response files under `data/raw/c4_screen/proteomes/source_downloads/` with canonical plant-named copies in `proteomes/`; version their provenance with UniProt release, retrieval date, source query, and SHA-256. Keep raw sequence files local and ignored by Git.
 
 ## 1.3 — Inter-Component Contract Sync `[D1 AM · ~45 min]`
 - [ ] C1 owner: confirm ESM-2 recipe (layer 33, mean-pool over residues excluding BOS/EOS), reference-cloud file format, and whether an interim AOP-BenchPos file exists.

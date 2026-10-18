@@ -37,10 +37,11 @@ src/plantaox/c4_screen/
 tests/c4_screen/
   test_candidate_generation.py # Gate 1 unit and mock contract tests
   check_gpu.py                 # CUDA availability probe; not an acceptance test
-data/raw/<plant>.fasta         # unchanged local source FASTA files
-data/raw/c4_data_registry.csv  # query, retrieval, size, hash, and record counts
-data/raw/c4_protein_exclusions.csv
-data/interim/c4/               # regeneratable candidate outputs (Git-ignored)
+data/raw/c4_screen/
+  proteomes/<plant>.fasta       # canonical unchanged input FASTAs
+  proteomes/source_downloads/   # originally named UniProt source files
+  metadata/                     # registry and protein exclusion log
+data/interim/c4_screen/         # regeneratable candidate outputs (Git-ignored)
 ```
 
 ## Documentation map
@@ -63,7 +64,7 @@ python -m plantaox.c4_screen.run digest
 python -m plantaox.c4_screen.run all
 ```
 
-`all` fetches reviewed FASTA inputs when they are absent (or reuses the already recorded exact-query files), validates and excludes short/non-standard proteins, digests, filters, deduplicates, computes descriptors, writes artifacts under `data/interim/c4/`, and prints the per-plant funnel. Dependencies are listed in the repository's `requirements.txt`; their presence there does not prove successful model loading, GPU availability, or runtime feasibility.
+`all` fetches reviewed FASTA inputs when they are absent (or reuses the already recorded exact-query files), validates and excludes short/non-standard proteins, digests, filters, deduplicates, computes descriptors, writes artifacts under `data/interim/c4_screen/`, and prints the per-plant funnel. Dependencies are listed in the repository's `requirements.txt`; their presence there does not prove successful model loading, GPU availability, or runtime feasibility.
 
 With the project virtual environment active, install the C4 package set with:
 

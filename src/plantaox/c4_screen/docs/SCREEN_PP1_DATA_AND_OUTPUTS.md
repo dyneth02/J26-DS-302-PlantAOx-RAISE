@@ -2,14 +2,14 @@
 
 ## Current input inventory
 
-The four official query results below were downloaded unchanged under `data/raw/c4_screen/` on 19 October 2026 (Asia/Colombo). Each query uses the plant taxonomy ID and `reviewed:true`. UniProt response headers confirmed release `2026_03` (release date 02 September 2026); the header checks for the four exact queries returned 18 October 2026 19:36–19:37 UTC. The count is the number of FASTA header lines (`>`), i.e. reviewed protein records, not generated peptide candidates.
+The four official query results below were downloaded unchanged on 19 October 2026 (Asia/Colombo) and are retained at `data/raw/c4_screen/proteomes/source_downloads/`. Canonical plant-named copies are at `data/raw/c4_screen/proteomes/<plant>.fasta`; these are byte-identical. Each query uses the plant taxonomy ID and `reviewed:true`. UniProt response headers confirmed release `2026_03` (release date 02 September 2026); the header checks for the four exact queries returned 18 October 2026 19:36–19:37 UTC. The count is the number of FASTA header lines (`>`), i.e. reviewed protein records, not generated peptide candidates.
 
 | File | Taxonomy/query | Protein records | Bytes | SHA-256 |
 |---|---|---:|---:|---|
-| `uniprot_reviewed_3847_glycine_max.fasta` | *Glycine max*, 3847 | 439 | 194,033 | `AD2C96C599CBD327A957BCB86ACE1C678A7F2EBC1D339ACEAA51FB79D48C24A7` |
-| `uniprot_reviewed_39947_oryza_sativa_japonica.fasta` | *Oryza sativa* subsp. *japonica*, 39947 | 4,197 | 2,480,333 | `D2D3939436DBD26CC328CF45145263AB67551F4D63279DB624477FB3A0A55FFB` |
-| `uniprot_reviewed_3708_brassica_napus.fasta` | *Brassica napus*, 3708 | 159 | 66,781 | `7C98D4D0CD93FBC25A75F8B76B8A43E6FE1BCAFA7443CFF8C2F57A4BC13160EF` |
-| `uniprot_reviewed_4146_olea_europaea.fasta` | *Olea europaea*, 4146 | 110 | 24,630 | `ECF93A4676A8AE137228B22C4D423211E79325E6ACB5C629CA0770E6D1407456` |
+| `proteomes/source_downloads/uniprot_reviewed_3847_glycine_max.fasta` | *Glycine max*, 3847 | 439 | 194,033 | `AD2C96C599CBD327A957BCB86ACE1C678A7F2EBC1D339ACEAA51FB79D48C24A7` |
+| `proteomes/source_downloads/uniprot_reviewed_39947_oryza_sativa_japonica.fasta` | *Oryza sativa* subsp. *japonica*, 39947 | 4,197 | 2,480,333 | `D2D3939436DBD26CC328CF45145263AB67551F4D63279DB624477FB3A0A55FFB` |
+| `proteomes/source_downloads/uniprot_reviewed_3708_brassica_napus.fasta` | *Brassica napus*, 3708 | 159 | 66,781 | `7C98D4D0CD93FBC25A75F8B76B8A43E6FE1BCAFA7443CFF8C2F57A4BC13160EF` |
+| `proteomes/source_downloads/uniprot_reviewed_4146_olea_europaea.fasta` | *Olea europaea*, 4146 | 110 | 24,630 | `ECF93A4676A8AE137228B22C4D423211E79325E6ACB5C629CA0770E6D1407456` |
 
 The exact query URLs are:
 

@@ -9,7 +9,7 @@
 |---|---|---|
 | Documentation architecture | Done | Component README, architecture, methodology, data/output contracts, and validation criteria are present in `src/plantaox/c4_screen/docs/`. They explicitly distinguish planned methodology from current implementation. |
 | Repository scaffold | Done for Gate 1 | Implemented `digest.py`, `filters.py`, `dedup.py`, `descriptors.py`, `run.py`, `config.yaml`, and focused tests in the established `src/` and `tests/` layout. Embedding/AD/signal modules remain out of this scope. |
-| Proteome inputs | Done for Gate 1 | Four unchanged reviewed FASTAs are registered at `data/raw/<plant>.fasta`, with URL, access date, file size, SHA-256, release, downloaded/retained/excluded counts in `data/raw/c4_data_registry.csv`. Exclusions are logged in `data/raw/c4_protein_exclusions.csv`; raw inputs remain unchanged. |
+| Proteome inputs | Done for Gate 1 | Four unchanged reviewed FASTAs are in `data/raw/c4_screen/proteomes/`; original UniProt-named downloads are retained under `source_downloads/`. URL, access date, file size, SHA-256, release, and counts are in `metadata/c4_data_registry.csv`; exclusions are in `metadata/c4_protein_exclusions.csv`. |
 | Dependencies and environment | In Progress | The requested fair-esm, biopython, pyteomics, pandas, pyarrow, scikit-learn, and pytest packages are installed in `.venv`, and `requirements.txt` now records the environment via `pip freeze`. CUDA is unavailable (`False`); the ESM-2 download remains incomplete and model loading is not verified. `tests/c4_screen/check_gpu.py` is a probe, not a pipeline acceptance test. |
 | Candidate generation (FR1 / Gate 1) | Done | `python -m plantaox.c4_screen.run all` generated candidate Parquet/FASTA, membership, funnel, and funnel-only summary. Five focused tests pass. A repeated full run produced byte-identical SHA-256 values for all nine outputs. All 152,259 sequences are unique and all 266,361 parent-coordinate provenance links were checked against the source FASTAs. Optional BIOPEP web comparison and C1/C2 handoff remain pending. |
 | Embeddings and AD tiers (FR2) | Pending | No ESM-2 embedding pipeline, reference cloud, fitted parameters, tier table, diagnostics, or validation evidence is present. |
@@ -60,7 +60,7 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 ## Next actions
 
 1. Optionally spot-check one protein against BIOPEP-UWM and record any observed differences.
-2. Share `data/interim/c4/candidates.fasta` with C1/C2 owners through the approved project workflow.
+2. Share `data/interim/c4_screen/candidates.fasta` with C1/C2 owners through the approved project workflow.
 3. Confirm the ESM-2 model/layer/pooling contract before starting embeddings/AD.
 4. Keep any future mock signal outputs labelled `source="mock"`; do not calculate evaluation metrics on them.
 
