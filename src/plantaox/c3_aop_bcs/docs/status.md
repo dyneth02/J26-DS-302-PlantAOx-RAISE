@@ -47,13 +47,13 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.12 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.13: Implement P2 conservative substitutions
+## Current task — Task 3.12: Reimplement BLOSUM62 support using Biopython
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
-- process only annotated non-redox positions;
-- apply the frozen BLOSUM62 selection rule and skip positions with no eligible candidate;
-- replace one position at a time while storing the selected BLOSUM62 score and mutation metadata;
-- export and validate deterministic P2 variants with complete count and provenance reporting.
+- replace the bundled-TSV parser with Biopython's BLOSUM62 loader;
+- preserve the frozen 20-standard-amino-acid selection rules and deterministic tie-breaking;
+- update provenance metadata and tests to verify the Biopython source;
+- rerun the complete C3 test suite before restoring Task 3.12 completion.
