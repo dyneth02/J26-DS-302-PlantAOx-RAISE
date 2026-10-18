@@ -30,11 +30,12 @@
 
 ## Next task — Task 3.8: Apply the redox-residue eligibility filter
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - detect whether each representative sequence contains at least one residue from `{W,Y,H,M,C}`;
 - retain eligible sequences for the primary P1 audit;
 - record the number rejected because no redox residue is present;
-- preserve all source and provenance information.
+- preserve all source and provenance information;
+- verify deterministic outputs and synchronize the task checklist after validation.
