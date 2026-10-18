@@ -48,11 +48,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.12 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.13: Implement P2 conservative substitutions
+## Current task — Task 3.13: Implement P2 conservative substitutions
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - process only annotated non-redox positions;
 - apply the frozen BLOSUM62 selection rule and skip positions with no eligible candidate;
