@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "dataset_version": "c3_aop_bcs_raw_v1",
+  "acquisition_date": "2026-10-18",
+  "acquisition_method": "User-supplied source files placed in the repository workspace",
+  "raw_files_immutable": true,
+  "scope": "Unmodified source inputs acquired for the Component 3 AOP-BCS perturbation audit",
+  "sources": [
+    {
+      "dataset": "AnOxPePred supplementary assay table",
+      "provider": "AnOxPePred",
+      "repository_url": "https://github.com/TobiasHeOl/AnOxPePred",
+      "upstream_path": "Data/Supplementary_Data_S1_Marcatili.csv",
+      "upstream_branch": "master",
+      "local_path": "data/raw/c3_aop_bcs/AnOxPePred/Supplementary_Data_S1_Marcatili.csv",
+      "sha256": "a985123d1fbf99b1f624d42dd86c647c855a61e8ec0adcce631fb16a086b5995",
+      "byte_count": 36770,
+      "data_row_count": 917,
+      "columns": ["", "Sequence", "Source", "FRS", "Chelator"],
+      "assay_activity_counts": {"positive": 699, "inactive": 218},
+      "evidence_note": "Contains per-sequence literature source identifiers and direct FRS/Chelator assay indicators; assay-positive records are the preferred high-evidence candidates for later standardization."
+    },
+    {
+      "dataset": "Multi-AOP AnOxPePred benchmark",
+      "provider": "Multi-AOP",
+      "repository_url": "https://github.com/CaiJianxiu/Multi-AOP",
+      "upstream_path": "data/AnOxPePred/AnOxPePred.csv",
+      "upstream_branch": "main",
+      "local_path": "data/raw/c3_aop_bcs/Multi-AOP/AnOxPePred.csv",
+      "sha256": "c8a5f78432f4a02f2854817f69418a7d7ece556f9bf975e67fad4b047b32cb29",
+      "byte_count": 34319,
+      "data_row_count": 1404,
+      "columns": ["name", "SEQUENCE", "label", "SEQUENCE_space"],
+      "label_counts": {"0": 728, "1": 676},
+      "evidence_note": "Benchmark labels are retained exactly as supplied; the table does not contain per-record assay citations."
+    },
+    {
+      "dataset": "Multi-AOP AnOxPP benchmark",
+      "provider": "Multi-AOP",
+      "repository_url": "https://github.com/CaiJianxiu/Multi-AOP",
+      "upstream_path": "data/AnOxPP/AnOxPP.csv",
+      "upstream_branch": "main",
+      "local_path": "data/raw/c3_aop_bcs/Multi-AOP/AnOxPP.csv",
+      "sha256": "e6f69d38f49dedbdce6bf8eeab6b1b078fa3bf643c6c1fba930ff51f160df9b4",
+      "byte_count": 69023,
+      "data_row_count": 2120,
+      "columns": ["name", "SEQUENCE", "label", "SEQUENCE_space"],
+      "label_counts": {"0": 1060, "1": 1060},
+      "evidence_note": "Benchmark labels are retained exactly as supplied; positive records are candidate audit subjects pending standardization and validation."
+    },
+    {
+      "dataset": "Multi-AOP AOPP benchmark",
+      "provider": "Multi-AOP",
+      "repository_url": "https://github.com/CaiJianxiu/Multi-AOP",
+      "upstream_path": "data/AOPP/AOPP.csv",
+      "upstream_branch": "main",
+      "local_path": "data/raw/c3_aop_bcs/Multi-AOP/AOPP.csv",
+      "sha256": "f6751aabe6a2dbadb22fcbd9587a6ed4cc4879deed87f7a6aec3a6592c57d9a7",
+      "byte_count": 119071,
+      "data_row_count": 3022,
+      "columns": ["name", "SEQUENCE", "label", "SEQUENCE_space"],
+      "label_counts": {"0": 1511, "1": 1511},
+      "evidence_note": "Benchmark labels are retained exactly as supplied; positive records are candidate audit subjects pending standardization and validation."
+    }
+  ],
+  "selection_policy_for_later_tasks": [
+    "Preserve every acquired source row unchanged in the raw tier.",
+    "Prefer AnOxPePred records with FRS=1 or Chelator=1 as high-evidence audit candidates.",
+    "Treat Multi-AOP label=1 rows as candidate positive subjects; do not use label=0 random controls as AOP audit subjects.",
+    "Resolve evidence tiers, cross-source conflicts, duplicates, length eligibility, and redox eligibility only in later processed tiers."
+  ],
+  "integrity_verification": {
+    "method": "Local byte count, CSV header/row count, label count where available, and SHA-256 checksum",
+    "upstream_line_counts_verified": true,
+    "verified_on": "2026-10-18"
+  },
+  "known_limitations": [
+    "The supplied files do not embed their original download timestamps or upstream commit hashes.",
+    "The local SHA-256 checksums are therefore the authoritative version pins for c3_aop_bcs_raw_v1.",
+    "Multi-AOP benchmark rows do not carry per-record literature citations, so their evidence tier must not be overstated."
+  ]
+}
