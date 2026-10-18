@@ -74,11 +74,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.19 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.20: Track predictor accessibility
+## Current task — Task 3.20: Track predictor accessibility
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - investigate AnOxPePred, Multi-AOP, AOPxSVM, AOP-DRL, and PU-AOP access using verifiable sources and local repository state;
 - record code/model availability, required input format, output type, batch-scoring capability, and license/access constraints;
