@@ -476,18 +476,18 @@
 ## Task 3.14 — Implement P3 random-control substitutions
 
 ### Subtasks
-- [ ] Generate random valid single-residue substitutions.
-- [ ] Never replace a residue with itself.
-- [ ] Use a fixed master random seed.
-- [ ] Derive deterministic/reproducible random choices for each sequence/position.
-- [ ] Store random-control metadata.
+- [x] Generate random valid single-residue substitutions.
+- [x] Never replace a residue with itself.
+- [x] Use a fixed master random seed.
+- [x] Derive deterministic/reproducible random choices for each sequence/position.
+- [x] Store random-control metadata.
 
 ### Required validation
-- [ ] exactly one position changed;
-- [ ] replacement is a valid amino acid;
-- [ ] replacement differs from the original;
-- [ ] sequence length is unchanged;
-- [ ] same input + same seed produces the same output.
+- [x] exactly one position changed;
+- [x] replacement is a valid amino acid;
+- [x] replacement differs from the original;
+- [x] sequence length is unchanged;
+- [x] same input + same seed produces the same output.
 
 ### Deliverable
 - Working P3 generator.
@@ -535,7 +535,7 @@
 - [x] Test P2 exclusion rules.
 - [x] Test the BLOSUM62 >= +1 rule.
 - [x] Test P2 deterministic selection.
-- [ ] Test P3 reproducibility.
+- [x] Test P3 reproducibility.
 - [x] Test unchanged sequence length.
 
 ### Deliverable
@@ -898,7 +898,7 @@
   - [x] `Add redox residue annotation`
   - [x] `Implement P1 alanine scanning`
   - [x] `Implement P2 BLOSUM62 substitutions`
-  - [ ] `Implement P3 random controls`
+  - [x] `Implement P3 random controls`
   - [ ] `Add perturbation validation tests`
   - [ ] `Add behavioural metric calculations`
 - [ ] Push the C3 branch regularly.
@@ -1026,7 +1026,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] Residue annotation works.
 - [x] P1 generator works.
 - [x] P2 generator works using BLOSUM62 >= +1.
-- [ ] P3 random-control generator works.
+- [x] P3 random-control generator works.
 - [x] One-position mutation validation works.
 - [ ] Automated tests pass.
 - [ ] Common predictor interface exists.

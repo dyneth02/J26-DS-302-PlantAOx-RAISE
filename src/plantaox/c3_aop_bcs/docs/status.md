@@ -49,17 +49,22 @@
 - Exported `c3_aop_bcs_p2_conservative_v1` using the frozen perturbation schema, including one-based mutation positions, original and substituted residues, perturbed sequences, and selected BLOSUM62 scores.
 - Added a checksum-backed P2 report pinning the residue-annotation source, perturbation schema, Biopython BLOSUM62 support manifest, selection rules, reconciled counts, per-residue summaries, and output checksum.
 - Verified every P2 record changes exactly one non-redox position, preserves sequence length, excludes alanine and W/Y/H/M/C as replacements, and has a BLOSUM62 score of at least `+1`.
-- Confirmed all 49 current C3 tests pass with 43 subtests, including committed-dataset coverage, deterministic byte output, skipped-position accounting, Biopython matrix loading, candidate exclusions, minimum-score filtering, deterministic selection, and perturbation-schema validation.
+- Implemented P3 random-control generation for every annotated residue position using the configured master seed `42` and a versioned SHA-256 modulo selection rule over the 19 alphabetically ordered alternatives that exclude the original residue.
+- Derived every P3 choice independently from the master seed, sequence ID, original sequence, one-based position, and original residue, making choices reproducible and independent of input row order.
+- Generated 5,580 independently validated P3 variants across all 734 eligible peptides and stored the master seed plus canonical JSON metadata containing the selection algorithm, candidate index/count, and position-specific SHA-256 seed digest.
+- Exported `c3_aop_bcs_p3_random_control_v1` using the frozen perturbation schema and added a checksum-backed report pinning the source annotation, schema, master seed, seed derivation, counts, and output checksum.
+- Verified every P3 variant changes exactly one declared position, uses a valid standard amino acid different from the original, preserves sequence length, and reproduces byte-identical output for the same input and seed.
+- Confirmed all 55 current C3 tests pass with 43 subtests, including P3 same-seed reproducibility, input-order independence, different-seed behavior, committed-dataset coverage, metadata validation, P1/P2/P3 schema checks, and all prior dataset tests.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.13 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.14 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.14: Implement P3 random-control substitutions
+## Next task — Task 3.15: Create a combined perturbation pipeline
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- generate valid one-position random-control substitutions;
-- derive reproducible per-sequence and per-position choices from the configured master seed;
-- store the random seed and canonical random-control metadata;
-- export and validate deterministic P3 variants with complete count and provenance reporting.
+- accept the annotated peptide dataset and generate P1, P2, and P3 variants in one run;
+- apply automatic validation and reject invalid variants;
+- export the combined accepted perturbation dataset using the frozen schema;
+- create an end-to-end report with per-type counts, provenance, and reproducibility checks.
