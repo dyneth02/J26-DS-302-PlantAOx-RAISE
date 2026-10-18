@@ -117,9 +117,9 @@
 
 ## Next task — Task 3.25: Create the PP1 pilot subset
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - select a reproducible pilot subset using the configured master seed;
 - represent multiple peptide lengths and redox-residue patterns;
