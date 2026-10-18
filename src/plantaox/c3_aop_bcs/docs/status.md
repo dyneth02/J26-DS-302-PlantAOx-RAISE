@@ -81,11 +81,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.20 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.21: Prioritize the minimum viable predictor set
+## Current task — Task 3.21: Prioritize the minimum viable predictor set
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - prioritize AnOxPePred, AOPxSVM, and PU-AOP for the minimum viable PP1 predictor set using the Task 3.20 evidence;
 - coordinate the frozen PU-AOP model/scaler/cache handoff with Component 2;
