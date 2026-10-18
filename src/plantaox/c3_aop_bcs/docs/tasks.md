@@ -10,9 +10,9 @@
 
 ---
 
-# Phase 1 — Group Registration and Initial Research Setup
+# Phase 1 — Research Definition and Project Foundation
 
-## Task 1.1 — Confirm Component 3 responsibility
+## [x] Task 1.1 — Confirm Component 3 responsibility
 
 ### Subtasks
 - Confirm Component 3 research title: **AOP-BCS**.
@@ -28,7 +28,7 @@
 
 ---
 
-## Task 1.2 — Initial literature study
+## [x] Task 1.2 — Initial literature study
 
 ### Subtasks
 - Study existing AOP predictors:
@@ -55,7 +55,7 @@
 
 ---
 
-## Task 1.3 — Define the research problem and gap
+## [x] Task 1.3 — Define the research problem and gap
 
 ### Subtasks
 - Document that existing AOP predictors are mainly evaluated using accuracy-oriented metrics.
@@ -69,9 +69,9 @@
 
 ---
 
-# Phase 2 — Project Proposal and Research Design
+## Research design workstream
 
-## Task 2.1 — Finalize research objectives
+## [x] Task 2.1 — Finalize research objectives
 
 ### Subtasks
 - Finalize the main objective.
@@ -89,7 +89,7 @@
 
 ---
 
-## Task 2.2 — Finalize research questions and hypotheses
+## [x] Task 2.2 — Finalize research questions and hypotheses
 
 ### Subtasks
 - Finalize research questions concerning:
@@ -107,7 +107,7 @@
 
 ---
 
-## Task 2.3 — Freeze the primary experimental protocol
+## [x] Task 2.3 — Freeze the primary experimental protocol
 
 ### Subtasks
 - Freeze the redox-relevant set:
@@ -141,7 +141,7 @@
 
 ---
 
-## Task 2.4 — Finalize evaluation metrics
+## [x] Task 2.4 — Finalize evaluation metrics
 
 ### Subtasks
 - Define `DeltaScore` for every single-residue perturbation.
@@ -165,7 +165,7 @@
 
 ---
 
-## Task 2.5 — Finalize the methodology and validation plan
+## [x] Task 2.5 — Finalize the methodology and validation plan
 
 ### Subtasks
 - Define the study as an in-silico computational experiment.
@@ -190,7 +190,7 @@
 
 ---
 
-## Task 2.6 — Complete proposal documentation
+## [x] Task 2.6 — Complete proposal documentation
 
 ### Subtasks
 - Complete literature review.
@@ -215,11 +215,9 @@
 
 ---
 
-# Phase 3 — PP1 Implementation Stage
+## Repository and environment workstream
 
-# 3A — Development Environment and Repository Setup
-
-## Task 3.1 — Prepare the team repository
+## [x] Task 3.1 — Prepare the team repository
 
 ### Subtasks
 - Clone the team GitHub repository.
@@ -241,7 +239,7 @@
 
 ---
 
-## Task 3.2 — Prepare the Python environment
+## [ ] Task 3.2 — Prepare the Python environment
 
 ### Subtasks
 - Confirm the Python version used by the team.
@@ -267,7 +265,7 @@
 
 ---
 
-## Task 3.3 — Create the C3 research configuration ✅
+## [x] Task 3.3 — Create the C3 research configuration
 
 ### Subtasks
 - Add configuration for:
@@ -287,9 +285,9 @@
 
 ---
 
-# 3B — Audit Dataset Preparation
+# Phase 2 — Audit Dataset and Perturbation Pipeline
 
-## Task 3.4 — Acquire the perturbation subject sequences ✅
+## [x] Task 3.4 — Acquire the perturbation subject sequences
 
 ### Subtasks
 - Obtain the C3 audit sequences specified by the project design.
@@ -303,7 +301,7 @@
 
 ---
 
-## Task 3.5 — Standardize sequence records ✅
+## [x] Task 3.5 — Standardize sequence records
 
 ### Subtasks
 - Create a common data schema containing at least:
@@ -320,7 +318,7 @@
 
 ---
 
-## Task 3.6 — Validate and clean sequences
+## [ ] Task 3.6 — Validate and clean sequences
 
 ### Subtasks
 - Reject missing sequences.
@@ -340,7 +338,7 @@
 
 ---
 
-## Task 3.7 — Apply 90% identity deduplication
+## [ ] Task 3.7 — Apply 90% identity deduplication
 
 ### Subtasks
 - Convert cleaned sequences to FASTA.
@@ -357,7 +355,7 @@
 
 ---
 
-## Task 3.8 — Apply the redox-residue eligibility filter
+## [ ] Task 3.8 — Apply the redox-residue eligibility filter
 
 ### Subtasks
 - Detect whether each sequence contains at least one member of:
@@ -373,7 +371,7 @@
 
 ---
 
-## Task 3.9 — Annotate residue positions
+## [ ] Task 3.9 — Annotate residue positions
 
 ### Subtasks
 - Number peptide positions from 1 to sequence length.
@@ -389,9 +387,9 @@
 
 ---
 
-# 3C — Perturbation Engine
+## Perturbation engine workstream
 
-## Task 3.10 — Define the perturbation output schema
+## [ ] Task 3.10 — Define the perturbation output schema
 
 ### Subtasks
 - Store for every generated variant:
@@ -411,7 +409,7 @@
 
 ---
 
-## Task 3.11 — Implement P1 alanine scanning
+## [ ] Task 3.11 — Implement P1 alanine scanning
 
 ### Subtasks
 - Find every W/Y/H/M/C position.
@@ -431,7 +429,7 @@
 
 ---
 
-## Task 3.12 — Implement BLOSUM62 support for P2
+## [ ] Task 3.12 — Implement BLOSUM62 support for P2
 
 ### Subtasks
 - Load the BLOSUM62 matrix using the selected library.
@@ -449,7 +447,7 @@
 
 ---
 
-## Task 3.13 — Implement P2 conservative substitutions
+## [ ] Task 3.13 — Implement P2 conservative substitutions
 
 ### Subtasks
 - Process only non-redox positions.
@@ -471,7 +469,7 @@
 
 ---
 
-## Task 3.14 — Implement P3 random-control substitutions
+## [ ] Task 3.14 — Implement P3 random-control substitutions
 
 ### Subtasks
 - Generate random valid single-residue substitutions.
@@ -492,7 +490,7 @@
 
 ---
 
-## Task 3.15 — Create a combined perturbation pipeline
+## [ ] Task 3.15 — Create a combined perturbation pipeline
 
 ### Subtasks
 - Accept the annotated peptide dataset as input.
@@ -508,9 +506,9 @@
 
 ---
 
-# 3D — Automated Validation and Testing
+## Automated validation workstream
 
-## Task 3.16 — Create sequence-validation tests
+## [ ] Task 3.16 — Create sequence-validation tests
 
 ### Subtasks
 - Test valid sequences.
@@ -524,7 +522,7 @@
 
 ---
 
-## Task 3.17 — Create P1/P2/P3 unit tests
+## [ ] Task 3.17 — Create P1/P2/P3 unit tests
 
 ### Subtasks
 - Test one-position-only changes.
@@ -541,7 +539,7 @@
 
 ---
 
-## Task 3.18 — Create reproducibility checks
+## [ ] Task 3.18 — Create reproducibility checks
 
 ### Subtasks
 - Run the same input twice using the same config.
@@ -554,9 +552,9 @@
 
 ---
 
-# 3E — Predictor Integration and Pilot Scoring
+# Phase 3 — Predictor Integration, Pilot Evaluation, and PP1 Delivery
 
-## Task 3.19 — Define the common predictor interface
+## [ ] Task 3.19 — Define the common predictor interface
 
 ### Subtasks
 - Define a common operation such as:
@@ -572,7 +570,7 @@
 
 ---
 
-## Task 3.20 — Track predictor accessibility
+## [ ] Task 3.20 — Track predictor accessibility
 
 ### Subtasks
 - Check implementation/access status for:
@@ -595,7 +593,7 @@
 
 ---
 
-## Task 3.21 — Prioritize the minimum viable predictor set
+## [ ] Task 3.21 — Prioritize the minimum viable predictor set
 
 ### Subtasks
 - Prioritize:
@@ -611,7 +609,7 @@
 
 ---
 
-## Task 3.22 — Build a non-experimental dummy/smoke-test predictor
+## [ ] Task 3.22 — Build a non-experimental dummy/smoke-test predictor
 
 ### Subtasks
 - Implement a simple deterministic scoring function only for pipeline testing.
@@ -626,7 +624,7 @@
 
 ---
 
-## Task 3.23 — Implement predictor scoring
+## [ ] Task 3.23 — Implement predictor scoring
 
 ### Subtasks
 - Score each original peptide.
@@ -641,7 +639,7 @@
 
 ---
 
-## Task 3.24 — Prepare score normalization
+## [ ] Task 3.24 — Prepare score normalization
 
 ### Subtasks
 - Check each predictor's native output range.
@@ -655,9 +653,9 @@
 
 ---
 
-# 3F — Pilot Behavioural Metrics
+## Pilot behavioural-metrics workstream
 
-## Task 3.25 — Create the PP1 pilot subset
+## [ ] Task 3.25 — Create the PP1 pilot subset
 
 ### Subtasks
 - Select a reproducible small subset of the audit dataset.
@@ -673,7 +671,7 @@
 
 ---
 
-## Task 3.26 — Calculate DeltaScore
+## [ ] Task 3.26 — Calculate DeltaScore
 
 ### Subtasks
 - For each perturbation compute:
@@ -691,7 +689,7 @@
 
 ---
 
-## Task 3.27 — Detect prediction flips and calculate PFR
+## [ ] Task 3.27 — Detect prediction flips and calculate PFR
 
 ### Subtasks
 - Define/record the decision threshold used by each predictor.
@@ -705,7 +703,7 @@
 
 ---
 
-## Task 3.28 — Calculate Invariance Rate (IR)
+## [ ] Task 3.28 — Calculate Invariance Rate (IR)
 
 ### Subtasks
 - Restrict the calculation to P2 variants.
@@ -720,7 +718,7 @@
 
 ---
 
-## Task 3.29 — Calculate False Sensitivity Rate (FSR)
+## [ ] Task 3.29 — Calculate False Sensitivity Rate (FSR)
 
 ### Subtasks
 - Restrict the calculation to P1 variants.
@@ -735,7 +733,7 @@
 
 ---
 
-## Task 3.30 — Calculate preliminary BCS
+## [ ] Task 3.30 — Calculate preliminary BCS
 
 ### Subtasks
 - Compute:
@@ -751,7 +749,7 @@
 
 ---
 
-## Task 3.31 — Prepare delta-sensitivity support
+## [ ] Task 3.31 — Prepare delta-sensitivity support
 
 ### Subtasks
 - Ensure the metric code can accept:
@@ -767,9 +765,9 @@
 
 ---
 
-# 3G — Pilot Results, Quality Checks and Evidence
+## Pilot quality and evidence workstream
 
-## Task 3.32 — Review perturbation counts
+## [ ] Task 3.32 — Review perturbation counts
 
 ### Subtasks
 - Count P1 variants.
@@ -783,7 +781,7 @@
 
 ---
 
-## Task 3.33 — Manually inspect example variants
+## [ ] Task 3.33 — Manually inspect example variants
 
 ### Subtasks
 - Select representative P1 examples.
@@ -801,7 +799,7 @@
 
 ---
 
-## Task 3.34 — Create preliminary visualizations
+## [ ] Task 3.34 — Create preliminary visualizations
 
 ### Subtasks
 - Create simple plots/tables such as:
@@ -817,7 +815,7 @@
 
 ---
 
-## Task 3.35 — Create run manifests and provenance records
+## [ ] Task 3.35 — Create run manifests and provenance records
 
 ### Subtasks
 - Record:
@@ -839,9 +837,9 @@
 
 ---
 
-# 3H — SHAP Preparation Before PP1
+## SHAP preparation workstream
 
-## Task 3.36 — Prepare the SHAP-faithfulness data structure
+## [ ] Task 3.36 — Prepare the SHAP-faithfulness data structure
 
 ### Subtasks
 - Define fields for:
@@ -865,9 +863,9 @@
 
 ---
 
-# 3I — PP1 Documentation and Presentation
+## PP1 documentation and presentation workstream
 
-## Task 3.37 — Update implementation documentation
+## [ ] Task 3.37 — Update implementation documentation
 
 ### Subtasks
 - Update the architecture diagram to match the real implementation.
@@ -883,7 +881,7 @@
 
 ---
 
-## Task 3.38 — Maintain Git history
+## [ ] Task 3.38 — Maintain Git history
 
 ### Subtasks
 - Commit work in logical units.
@@ -905,7 +903,7 @@
 
 ---
 
-## Task 3.39 — Update the research logbook
+## [ ] Task 3.39 — Update the research logbook
 
 ### Subtasks
 Record major milestones rather than every minor coding action:
@@ -929,7 +927,7 @@ Record major milestones rather than every minor coding action:
 
 ---
 
-## Task 3.40 — Prepare PP1 evidence
+## [ ] Task 3.40 — Prepare PP1 evidence
 
 ### Subtasks
 Capture evidence of:
@@ -957,7 +955,7 @@ Capture evidence of:
 
 ---
 
-## Task 3.41 — Prepare the PP1 presentation
+## [ ] Task 3.41 — Prepare the PP1 presentation
 
 ### Suggested C3 presentation flow
 1. Component title.
@@ -983,7 +981,7 @@ Capture evidence of:
 
 ---
 
-## Task 3.42 — PP1 rehearsal and final verification
+## [ ] Task 3.42 — PP1 rehearsal and final verification
 
 ### Subtasks
 - Run the pilot pipeline again from a clean configuration.
