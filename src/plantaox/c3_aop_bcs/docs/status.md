@@ -60,17 +60,22 @@
 - Generated `c3_aop_bcs_combined_perturbations_v1` with 10,036 accepted variants—1,180 P1, 3,276 P2, and 5,580 P3—and zero rejected variants from the verified production inputs.
 - Added a checksum-backed combined pipeline report recording the source annotations, complete research configuration, schema and generator versions, per-type generated/accepted/rejected counts, validation policy, and both output checksums.
 - Verified the combined CSV exactly matches the ordered union of the independently verified P1, P2, and P3 datasets and added tests proving deliberately invalid semantic records and duplicate IDs are rejected.
-- Confirmed all 59 current C3 tests pass with 43 subtests, covering the combined pipeline, rejection behavior, byte determinism, complete output reconciliation, all individual generators, and prior dataset preparation.
+- Implemented a Task 3.18 reproducibility runner that executes the complete production perturbation workflow twice from the same 5,580-position annotation input and the same research configuration.
+- Confirmed both production runs generated the same 10,036 accepted variants and zero rejections, with byte-identical accepted outputs and rejection ledgers.
+- Confirmed the 5,580 P3 random-control records are byte-identical across both runs under master seed `42`.
+- Added the versioned `c3_aop_bcs_perturbation_reproducibility_v1` evidence report with a `PASS` result, per-run counts, byte sizes, SHA-256 hashes, full configuration snapshots, seed, Python/Biopython versions, pipeline/schema/generator versions, and BLOSUM62-support checksum.
+- Added tests verifying deterministic evidence generation on repeated complete runs and confirming the production evidence matches the committed combined and P3 outputs.
+- Confirmed all 61 current C3 tests pass with 43 subtests, covering full-workflow reproducibility and all prior dataset, perturbation, validation, and pipeline behavior.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.15 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.18 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.18: Create reproducibility checks
+## Next task — Task 3.19: Define the common predictor interface
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- run the complete perturbation pipeline twice from the same production input and configuration;
-- compare the accepted output, rejection ledger, counts, and checksums across runs;
-- confirm the P3 random-control records are identical under the fixed seed;
-- preserve explicit reproducibility evidence containing the configuration, versions, seed, and comparison results.
+- define a predictor-independent `sequence -> score` interface;
+- enforce a consistent finite numeric result contract for every predictor adapter;
+- isolate downstream C3 scoring code from predictor-specific architectures;
+- define explicit error handling for invalid inputs and unavailable or failed predictor scores.

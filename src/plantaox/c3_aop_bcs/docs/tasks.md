@@ -546,10 +546,10 @@
 ## Task 3.18 — Create reproducibility checks
 
 ### Subtasks
-- [ ] Run the same input twice using the same config.
-- [ ] Confirm identical perturbations.
-- [ ] Confirm identical random-control variants.
-- [ ] Record config/version/seed in each experimental run.
+- [x] Run the same input twice using the same config.
+- [x] Confirm identical perturbations.
+- [x] Confirm identical random-control variants.
+- [x] Record config/version/seed in each experimental run.
 
 ### Deliverable
 - Reproducibility evidence for PP1.
@@ -1038,7 +1038,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [ ] IR is computed.
 - [ ] FSR is computed.
 - [ ] Preliminary BCS is computed.
-- [ ] Run configuration/seed/version information is recorded.
+- [x] Run configuration/seed/version information is recorded.
 - [ ] PP1 evidence and screenshots are prepared.
 - [ ] PP1 slides are prepared.
 
