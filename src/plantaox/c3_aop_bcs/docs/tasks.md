@@ -561,13 +561,13 @@
 ## Task 3.19 — Define the common predictor interface
 
 ### Subtasks
-- [ ] Define a common operation such as:
+- [x] Define a common operation such as:
 
   `sequence -> predictor score`
 
-- [ ] Ensure every predictor adapter returns a consistent numeric result.
-- [ ] Design adapters so the rest of C3 does not depend on predictor architecture.
-- [ ] Define error handling for unavailable/failed scores.
+- [x] Ensure every predictor adapter returns a consistent numeric result.
+- [x] Design adapters so the rest of C3 does not depend on predictor architecture.
+- [x] Define error handling for unavailable/failed scores.
 
 ### Deliverable
 - Common predictor-adapter interface.
@@ -1029,7 +1029,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] P3 random-control generator works.
 - [x] One-position mutation validation works.
 - [x] Automated tests pass.
-- [ ] Common predictor interface exists.
+- [x] Common predictor interface exists.
 - [ ] Predictor-access status is documented.
 - [ ] At least one real predictor has been successfully scored if technically accessible.
 - [ ] Pilot original/perturbed scores are stored.

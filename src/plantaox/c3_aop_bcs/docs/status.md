@@ -65,17 +65,22 @@
 - Confirmed the 5,580 P3 random-control records are byte-identical across both runs under master seed `42`.
 - Added the versioned `c3_aop_bcs_perturbation_reproducibility_v1` evidence report with a `PASS` result, per-run counts, byte sizes, SHA-256 hashes, full configuration snapshots, seed, Python/Biopython versions, pipeline/schema/generator versions, and BLOSUM62-support checksum.
 - Added tests verifying deterministic evidence generation on repeated complete runs and confirming the production evidence matches the committed combined and P3 outputs.
-- Confirmed all 61 current C3 tests pass with 43 subtests, covering full-workflow reproducibility and all prior dataset, perturbation, validation, and pipeline behavior.
+- Defined the versioned Task 3.19 common predictor contract with the operation `score(sequence: str) -> float`, stable predictor identity/display-name/version metadata, and a runtime-checkable protocol for downstream C3 code.
+- Added an architecture-neutral base adapter that validates uppercase standard-amino-acid inputs, invokes predictor-specific scoring behind a protected boundary, and always returns a finite built-in `float`.
+- Added a generic callable adapter capable of wrapping functions, object methods, local models, scripts, or service clients without exposing their internal architecture to the C3 scoring pipeline.
+- Defined distinct errors for invalid sequence input, unavailable predictor resources, predictor execution failures, and non-numeric or non-finite returned scores.
+- Added a deterministic machine-readable `predictor_interface_v1.json` contract documenting the input/output boundary, required metadata, architecture isolation rule, and error semantics.
+- Confirmed all 69 current C3 tests pass with 54 subtests, including interface conformance across different adapter shapes, invalid input/score rejection, failure normalization, deterministic contract generation, and all prior C3 behavior.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.18 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.19 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.19: Define the common predictor interface
+## Next task — Task 3.20: Track predictor accessibility
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- define a predictor-independent `sequence -> score` interface;
-- enforce a consistent finite numeric result contract for every predictor adapter;
-- isolate downstream C3 scoring code from predictor-specific architectures;
-- define explicit error handling for invalid inputs and unavailable or failed predictor scores.
+- investigate AnOxPePred, Multi-AOP, AOPxSVM, AOP-DRL, and PU-AOP access using verifiable sources and local repository state;
+- record code/model availability, required input format, output type, batch-scoring capability, and license/access constraints;
+- distinguish confirmed integration evidence from unverified or unavailable implementations;
+- create a versioned predictor-access status artifact without claiming successful scoring until a real score is verified.
