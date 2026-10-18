@@ -662,10 +662,10 @@
 ## Task 3.25 — Create the PP1 pilot subset
 
 ### Subtasks
-- [ ] Select a reproducible small subset of the audit dataset.
-- [ ] Use a fixed random seed.
-- [ ] Ensure multiple redox residues and sequence lengths are represented.
-- [ ] Use enough peptides to demonstrate the full workflow without running the final study.
+- [x] Select a reproducible small subset of the audit dataset.
+- [x] Use a fixed random seed.
+- [x] Ensure multiple redox residues and sequence lengths are represented.
+- [x] Use enough peptides to demonstrate the full workflow without running the final study.
 
 ### Suggested PP1 scale
 - approximately 10–30 peptides, depending on scoring cost and predictor access.

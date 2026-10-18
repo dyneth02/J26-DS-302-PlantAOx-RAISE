@@ -112,16 +112,23 @@
 - Kept AnOxPePred's FRS and Chelator channels separate pending a prespecified scalar endpoint, and retained every real predictor mapping as operationally unverified until a real score is reproduced through C3.
 - Validated the normalization implementation over all 20,072 original/perturbed dummy score values from 10,036 rows: native and usable ranges were both `0.075–1.0`, with zero out-of-range or transformed values; this remains software-testing evidence only.
 - Confirmed all 100 current C3 tests pass with 74 subtests after one transient Windows/OneDrive cache-file lock on the first full-suite run and a clean complete rerun.
+- Completed Task 3.25 by selecting the configured 20-peptide PP1 pilot from all 734 redox-eligible audit subjects using master seed `42` and the row-order-independent `greedy_coverage_then_seeded_sha256_v1` algorithm.
+- Versioned the selected subject table as `c3_aop_bcs_pp1_pilot_v1`, retaining original source, evidence, raw-record, CD-HIT, sequence-length, and redox-pattern provenance plus selection rank, seed, hash, stratum, and newly covered criteria.
+- Covered all four available length bands from 3 to 36 residues, 12 distinct lengths, every W/Y/H/M/C residue, five single-type and 15 multiple-type patterns, and 20 distinct exact redox patterns.
+- Preferred E1 direct-assay evidence after coverage requirements, yielding 18 E1 and 2 E2 subjects while retaining representation from AnOxPePred and both Multi-AOP source datasets.
+- Exported the exact 449 pilot-linked variants—54 P1, 150 P2, and 245 P3 records—in deterministic subject/type/position order for subsequent pilot scoring and behavioural metrics.
+- Added checksum-backed selection evidence and tests proving fixed-size selection, seed retention, required coverage, subject/variant linkage, source-order independence, and byte-identical regeneration.
+- Confirmed all 104 current C3 tests pass with 74 subtests.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.24 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.25 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.25: Create the PP1 pilot subset
+## Next task — Task 3.26: Calculate DeltaScore
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- select a reproducible pilot subset using the configured master seed;
-- represent multiple peptide lengths and redox-residue patterns;
-- keep the pilot within the planned 10–30 peptide PP1 scale;
-- version the selected records and preserve their source/provenance.
+- compute `DeltaScore = Score(original) - Score(perturbed)` for every pilot perturbation;
+- store the signed and absolute score differences;
+- verify calculations against independently hand-checked examples;
+- retain the non-experimental boundary while only dummy scores are available.
