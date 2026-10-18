@@ -20,19 +20,21 @@
 - Applied deterministic exact deduplication that retains E1 evidence over E2 evidence and otherwise keeps the earliest standardized record.
 - Generated `c3_aop_bcs_cleaned_v1` and its exclusion ledger: 3,946 original records, 0 missing, 0 invalid, 145 out of range, 2,328 exact duplicates, and 1,473 retained sequences.
 - Completed the sequence-validation checks originally listed under Task 3.16 through the Task 3.6 implementation: valid sequences, invalid symbols, empty values, minimum/maximum lengths, and duplicate handling.
-- Confirmed all 18 current C3 tests pass, including deterministic artifact, schema, count, checksum, and byte-reproducibility checks.
+- Applied reproducible 90% identity deduplication to the complete cleaned dataset using the real CD-HIT 4.8.1 executable at `/usr/bin/cd-hit` in the `Ubuntu-24.04` WSL distribution.
+- Converted all 1,473 cleaned sequences to deterministic FASTA, retained 1,046 representative sequences across 1,046 clusters, and removed 427 sequences at the configured 0.90 identity threshold.
+- Preserved the native CD-HIT representative FASTA and `.clstr` output, and generated traceable representative and cluster-membership CSV tables.
+- Added a versioned `c3_aop_bcs_cd_hit_90_v1` report containing the source checksum, exact CD-HIT command and parameters, tool/runtime version, counts, and SHA-256 checksums for every generated artifact.
+- Confirmed all 22 current C3 tests pass, including deterministic FASTA generation, native cluster parsing, representative-table reconstruction, complete cluster membership, schemas, counts, checksums, and repeat-run reproducibility.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.6 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.7 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.7: Apply 90% identity deduplication
+## Next task — Task 3.8: Apply the redox-residue eligibility filter
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- convert the cleaned sequences to FASTA;
-- run CD-HIT at the configured `0.90` identity threshold;
-- preserve the CD-HIT cluster output;
-- convert representative sequences back to the working table format;
-- record the input count, representative count, and cluster count;
-- verify the generated artifacts and update both `tasks.md` and this file immediately as each subtask is completed.
+- detect whether each representative sequence contains at least one residue from `{W,Y,H,M,C}`;
+- retain eligible sequences for the primary P1 audit;
+- record the number rejected because no redox residue is present;
+- preserve all source and provenance information.

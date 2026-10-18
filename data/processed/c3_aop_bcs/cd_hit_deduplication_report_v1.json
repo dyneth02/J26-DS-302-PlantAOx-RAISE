@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "dataset_version": "c3_aop_bcs_cd_hit_90_v1",
+  "created_on": "2026-10-18",
+  "source_dataset_version": "c3_aop_bcs_cleaned_v1",
+  "source": {
+    "path": "data/processed/c3_aop_bcs/cleaned_aop_sequences_v1.csv",
+    "sha256": "65b585f5d5464a177d41b9229fe645d9beb7b32249b3cd5c5c479700237a60ee"
+  },
+  "tool": {
+    "name": "CD-HIT",
+    "version": "4.8.1",
+    "runtime": "Ubuntu-24.04 WSL /usr/bin/cd-hit"
+  },
+  "parameters": {
+    "identity_threshold": 0.9,
+    "identity_definition": "CD-HIT global identity over the shorter sequence",
+    "word_length": 2,
+    "accurate_mode": true,
+    "throw_away_length": 2,
+    "minimum_retained_sequence_length": 3,
+    "description_length": 0,
+    "threads": 1,
+    "memory_megabytes": 800
+  },
+  "command": [
+    "wsl.exe",
+    "-d",
+    "Ubuntu-24.04",
+    "--",
+    "cd-hit",
+    "-i",
+    "/mnt/c/Users/savin/OneDrive/Desktop/SLIIT Research/J26-DS-302-PlantAOx-RAISE/data/processed/c3_aop_bcs/cd_hit_input_v1.fasta",
+    "-o",
+    "/mnt/c/Users/savin/OneDrive/Desktop/SLIIT Research/J26-DS-302-PlantAOx-RAISE/data/processed/c3_aop_bcs/cd_hit_representatives_90_v1.fasta",
+    "-c",
+    "0.90",
+    "-n",
+    "2",
+    "-G",
+    "1",
+    "-g",
+    "1",
+    "-l",
+    "2",
+    "-d",
+    "0",
+    "-T",
+    "1",
+    "-M",
+    "800"
+  ],
+  "counts": {
+    "input_count": 1473,
+    "representative_count": 1046,
+    "cluster_count": 1046,
+    "removed_at_90_percent_identity": 427
+  },
+  "outputs": {
+    "input_fasta": {
+      "path": "data/processed/c3_aop_bcs/cd_hit_input_v1.fasta",
+      "record_count": 1473,
+      "sha256": "143f70be2d8887c740b070631967b5875d4e25a2e0fafe2de13bac448e2508ca"
+    },
+    "representative_fasta": {
+      "path": "data/processed/c3_aop_bcs/cd_hit_representatives_90_v1.fasta",
+      "record_count": 1046,
+      "sha256": "6e373dfb5eba33f400114394408ddfe71336d926b9a4a0d3de9231916889b374"
+    },
+    "native_cluster_file": {
+      "path": "data/processed/c3_aop_bcs/cd_hit_representatives_90_v1.fasta.clstr",
+      "record_count": 1046,
+      "sha256": "e2ca8cbeb63d55fd9e4d64ffaf67e4ae2a4e1713b40d8adaf6ace7e0757cfca1"
+    },
+    "representative_table": {
+      "path": "data/processed/c3_aop_bcs/cd_hit_representatives_90_v1.csv",
+      "record_count": 1046,
+      "sha256": "80a201c7b5e46d2846a2f2c916cf914cd08ac6738256d96f64039f75a8915a24"
+    },
+    "cluster_membership_table": {
+      "path": "data/processed/c3_aop_bcs/cd_hit_clusters_90_v1.csv",
+      "record_count": 1473,
+      "sha256": "2cf154084189c5a1187bfd1fec889f2f37e0a719cd6ac2e50d6769f18ce6df9e"
+    }
+  }
+}

@@ -1,0 +1,2519 @@
+>Cluster 0
+0	3aa, >C3-ANOX-000390... at 100.00%
+1	36aa, >C3-ANOX-000467... *
+2	3aa, >C3-MAOP-ANOXPP-000719... at 100.00%
+>Cluster 1
+0	31aa, >C3-ANOX-000462... *
+>Cluster 2
+0	31aa, >C3-ANOX-000465... *
+1	3aa, >C3-MAOP-ANOXPP-000312... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000354... at 100.00%
+3	3aa, >C3-MAOP-ANOXPP-000619... at 100.00%
+4	3aa, >C3-MAOP-ANOXPP-000757... at 100.00%
+5	3aa, >C3-MAOP-ANOXPP-000939... at 100.00%
+>Cluster 3
+0	30aa, >C3-ANOX-000466... *
+1	3aa, >C3-MAOP-ANOXPP-000113... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000778... at 100.00%
+>Cluster 4
+0	3aa, >C3-ANOX-000015... at 100.00%
+1	3aa, >C3-ANOX-000127... at 100.00%
+2	26aa, >C3-ANOX-000459... *
+>Cluster 5
+0	3aa, >C3-ANOX-000151... at 100.00%
+1	26aa, >C3-ANOX-000461... *
+2	3aa, >C3-MAOP-AOPP-000242... at 100.00%
+>Cluster 6
+0	26aa, >C3-ANOX-000463... *
+>Cluster 7
+0	25aa, >C3-ANOX-000276... *
+1	3aa, >C3-ANOX-000611... at 100.00%
+>Cluster 8
+0	23aa, >C3-ANOX-000460... *
+1	3aa, >C3-MAOP-ANOXPP-000190... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000427... at 100.00%
+>Cluster 9
+0	22aa, >C3-ANOX-000316... *
+>Cluster 10
+0	22aa, >C3-ANOX-000655... *
+1	3aa, >C3-MAOP-ANOXPP-000218... at 100.00%
+>Cluster 11
+0	22aa, >C3-ANOX-000656... *
+>Cluster 12
+0	3aa, >C3-ANOX-000263... at 100.00%
+1	21aa, >C3-ANOX-000674... *
+>Cluster 13
+0	20aa, >C3-ANOX-000472... *
+1	3aa, >C3-MAOP-ANOXPP-000335... at 100.00%
+>Cluster 14
+0	3aa, >C3-ANOX-000602... at 100.00%
+1	4aa, >C3-ANOX-000603... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000844... at 100.00%
+3	20aa, >C3-MAOP-AOPP-001199... *
+>Cluster 15
+0	20aa, >C3-MAOP-AOPP-001200... *
+>Cluster 16
+0	3aa, >C3-ANOX-000046... at 100.00%
+1	20aa, >C3-MAOP-AOPP-001201... *
+>Cluster 17
+0	3aa, >C3-ANOX-000051... at 100.00%
+1	17aa, >C3-MAOP-AOPP-001185... at 100.00%
+2	20aa, >C3-MAOP-AOPP-001202... *
+>Cluster 18
+0	3aa, >C3-MAOP-ANOXPP-000055... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000579... at 100.00%
+2	4aa, >C3-MAOP-AOPP-000490... at 100.00%
+3	20aa, >C3-MAOP-AOPP-001203... *
+4	14aa, >C3-MAOP-AOPP-001486... at 92.86%
+>Cluster 19
+0	3aa, >C3-MAOP-ANOXPP-000667... at 100.00%
+1	19aa, >C3-MAOP-AOPP-001197... at 100.00%
+2	20aa, >C3-MAOP-AOPP-001510... *
+>Cluster 20
+0	3aa, >C3-MAOP-ANOXPP-000548... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000641... at 100.00%
+2	17aa, >C3-MAOP-AOPP-001181... at 94.12%
+3	20aa, >C3-MAOP-AOPP-001511... *
+>Cluster 21
+0	19aa, >C3-ANOX-000313... *
+>Cluster 22
+0	3aa, >C3-ANOX-000149... at 100.00%
+1	19aa, >C3-MAOP-AOPP-001195... *
+>Cluster 23
+0	3aa, >C3-MAOP-ANOXPP-000991... at 100.00%
+1	19aa, >C3-MAOP-AOPP-001196... *
+>Cluster 24
+0	14aa, >C3-MAOP-AOPP-001138... at 92.86%
+1	19aa, >C3-MAOP-AOPP-001508... *
+>Cluster 25
+0	19aa, >C3-MAOP-AOPP-001509... *
+>Cluster 26
+0	18aa, >C3-ANOX-000323... *
+>Cluster 27
+0	18aa, >C3-ANOX-000464... *
+>Cluster 28
+0	3aa, >C3-ANOX-000221... at 100.00%
+1	18aa, >C3-ANOX-000558... *
+2	3aa, >C3-MAOP-ANOXPP-000002... at 100.00%
+3	3aa, >C3-MAOP-ANOXPP-000215... at 100.00%
+4	3aa, >C3-MAOP-ANOXPP-000558... at 100.00%
+>Cluster 29
+0	3aa, >C3-MAOP-ANOXPP-000214... at 100.00%
+1	18aa, >C3-MAOP-ANOXPP-000465... *
+>Cluster 30
+0	18aa, >C3-MAOP-ANOXPP-000802... *
+1	17aa, >C3-MAOP-ANOXPP-000835... at 100.00%
+>Cluster 31
+0	3aa, >C3-MAOP-ANOXPP-000935... at 100.00%
+1	18aa, >C3-MAOP-AOPP-001191... *
+2	6aa, >C3-MAOP-AOPP-001404... at 100.00%
+3	11aa, >C3-MAOP-AOPP-001468... at 100.00%
+>Cluster 32
+0	17aa, >C3-MAOP-AOPP-001184... at 100.00%
+1	18aa, >C3-MAOP-AOPP-001192... *
+>Cluster 33
+0	3aa, >C3-MAOP-ANOXPP-000058... at 100.00%
+1	3aa, >C3-MAOP-AOPP-001294... at 100.00%
+2	18aa, >C3-MAOP-AOPP-001505... *
+>Cluster 34
+0	17aa, >C3-MAOP-AOPP-001183... at 100.00%
+1	18aa, >C3-MAOP-AOPP-001506... *
+>Cluster 35
+0	11aa, >C3-MAOP-AOPP-001036... at 100.00%
+1	13aa, >C3-MAOP-AOPP-001109... at 100.00%
+2	14aa, >C3-MAOP-AOPP-001136... at 100.00%
+3	18aa, >C3-MAOP-AOPP-001507... *
+>Cluster 36
+0	17aa, >C3-ANOX-000369... *
+>Cluster 37
+0	17aa, >C3-ANOX-000431... *
+1	3aa, >C3-MAOP-ANOXPP-000027... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000964... at 100.00%
+>Cluster 38
+0	17aa, >C3-ANOX-000473... *
+1	16aa, >C3-ANOX-000474... at 100.00%
+>Cluster 39
+0	10aa, >C3-ANOX-000047... at 100.00%
+1	4aa, >C3-ANOX-000399... at 100.00%
+2	8aa, >C3-ANOX-000400... at 100.00%
+3	17aa, >C3-ANOX-000698... *
+4	10aa, >C3-MAOP-AOPP-000983... at 100.00%
+5	12aa, >C3-MAOP-AOPP-001077... at 100.00%
+6	12aa, >C3-MAOP-AOPP-001079... at 100.00%
+7	13aa, >C3-MAOP-AOPP-001108... at 92.31%
+8	13aa, >C3-MAOP-AOPP-001110... at 100.00%
+9	14aa, >C3-MAOP-AOPP-001137... at 100.00%
+10	15aa, >C3-MAOP-AOPP-001155... at 100.00%
+11	16aa, >C3-MAOP-AOPP-001174... at 93.75%
+12	16aa, >C3-MAOP-AOPP-001177... at 100.00%
+13	17aa, >C3-MAOP-AOPP-001186... at 94.12%
+14	16aa, >C3-MAOP-AOPP-001496... at 93.75%
+15	16aa, >C3-MAOP-AOPP-001497... at 93.75%
+>Cluster 40
+0	3aa, >C3-ANOX-000166... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000117... at 100.00%
+2	17aa, >C3-MAOP-ANOXPP-000166... *
+3	3aa, >C3-MAOP-AOPP-000266... at 100.00%
+4	4aa, >C3-MAOP-AOPP-001349... at 100.00%
+>Cluster 41
+0	8aa, >C3-ANOX-000304... at 100.00%
+1	7aa, >C3-ANOX-000305... at 100.00%
+2	4aa, >C3-ANOX-000413... at 100.00%
+3	5aa, >C3-ANOX-000486... at 100.00%
+4	3aa, >C3-MAOP-ANOXPP-000021... at 100.00%
+5	5aa, >C3-MAOP-ANOXPP-000385... at 100.00%
+6	3aa, >C3-MAOP-AOPP-000275... at 100.00%
+7	7aa, >C3-MAOP-AOPP-000809... at 100.00%
+8	15aa, >C3-MAOP-AOPP-001159... at 100.00%
+9	17aa, >C3-MAOP-AOPP-001182... *
+>Cluster 42
+0	7aa, >C3-ANOX-000537... at 100.00%
+1	4aa, >C3-MAOP-ANOXPP-000430... at 100.00%
+2	17aa, >C3-MAOP-AOPP-001501... *
+>Cluster 43
+0	3aa, >C3-MAOP-ANOXPP-000746... at 100.00%
+1	17aa, >C3-MAOP-AOPP-001502... *
+>Cluster 44
+0	16aa, >C3-ANOX-000008... *
+1	3aa, >C3-ANOX-000266... at 100.00%
+2	4aa, >C3-ANOX-000396... at 100.00%
+3	3aa, >C3-MAOP-ANOXPP-000239... at 100.00%
+4	3aa, >C3-MAOP-ANOXPP-000573... at 100.00%
+>Cluster 45
+0	16aa, >C3-ANOX-000049... *
+1	7aa, >C3-ANOX-000050... at 100.00%
+2	3aa, >C3-ANOX-000439... at 100.00%
+3	3aa, >C3-ANOX-000440... at 100.00%
+4	4aa, >C3-ANOX-000531... at 100.00%
+5	5aa, >C3-ANOX-000532... at 100.00%
+6	7aa, >C3-ANOX-000536... at 100.00%
+7	6aa, >C3-ANOX-000549... at 100.00%
+8	5aa, >C3-MAOP-ANOXPP-000020... at 100.00%
+>Cluster 46
+0	16aa, >C3-ANOX-000061... *
+>Cluster 47
+0	16aa, >C3-ANOX-000321... *
+1	3aa, >C3-MAOP-ANOXPP-000798... at 100.00%
+>Cluster 48
+0	16aa, >C3-ANOX-000468... *
+>Cluster 49
+0	3aa, >C3-ANOX-000294... at 100.00%
+1	16aa, >C3-MAOP-ANOXPP-000093... *
+2	13aa, >C3-MAOP-ANOXPP-000390... at 100.00%
+3	10aa, >C3-MAOP-ANOXPP-000457... at 100.00%
+4	9aa, >C3-MAOP-ANOXPP-000686... at 100.00%
+>Cluster 50
+0	16aa, >C3-MAOP-ANOXPP-000483... *
+1	3aa, >C3-MAOP-AOPP-000268... at 100.00%
+>Cluster 51
+0	5aa, >C3-MAOP-ANOXPP-000346... at 100.00%
+1	16aa, >C3-MAOP-ANOXPP-000572... *
+>Cluster 52
+0	4aa, >C3-ANOX-000666... at 100.00%
+1	16aa, >C3-MAOP-AOPP-001168... *
+>Cluster 53
+0	16aa, >C3-MAOP-AOPP-001169... *
+>Cluster 54
+0	13aa, >C3-MAOP-AOPP-001103... at 92.31%
+1	16aa, >C3-MAOP-AOPP-001170... *
+>Cluster 55
+0	3aa, >C3-MAOP-AOPP-000130... at 100.00%
+1	16aa, >C3-MAOP-AOPP-001171... *
+>Cluster 56
+0	3aa, >C3-ANOX-000013... at 100.00%
+1	3aa, >C3-ANOX-000018... at 100.00%
+2	16aa, >C3-MAOP-AOPP-001172... *
+>Cluster 57
+0	16aa, >C3-MAOP-AOPP-001173... *
+>Cluster 58
+0	16aa, >C3-MAOP-AOPP-001175... *
+>Cluster 59
+0	16aa, >C3-MAOP-AOPP-001176... *
+>Cluster 60
+0	3aa, >C3-MAOP-ANOXPP-000273... at 100.00%
+1	16aa, >C3-MAOP-AOPP-001495... *
+>Cluster 61
+0	3aa, >C3-MAOP-ANOXPP-000185... at 100.00%
+1	16aa, >C3-MAOP-AOPP-001498... *
+>Cluster 62
+0	15aa, >C3-ANOX-000027... *
+1	3aa, >C3-ANOX-000109... at 100.00%
+>Cluster 63
+0	15aa, >C3-ANOX-000311... *
+>Cluster 64
+0	3aa, >C3-ANOX-000284... at 100.00%
+1	15aa, >C3-ANOX-000312... *
+2	4aa, >C3-MAOP-AOPP-000489... at 100.00%
+>Cluster 65
+0	15aa, >C3-ANOX-000479... *
+1	14aa, >C3-ANOX-000480... at 100.00%
+>Cluster 66
+0	15aa, >C3-ANOX-000494... *
+1	3aa, >C3-MAOP-AOPP-000267... at 100.00%
+>Cluster 67
+0	15aa, >C3-ANOX-000626... *
+>Cluster 68
+0	15aa, >C3-ANOX-000672... *
+>Cluster 69
+0	15aa, >C3-MAOP-ANOXPP-000016... *
+1	3aa, >C3-MAOP-AOPP-000187... at 100.00%
+>Cluster 70
+0	15aa, >C3-MAOP-ANOXPP-000319... *
+1	3aa, >C3-MAOP-ANOXPP-000493... at 100.00%
+>Cluster 71
+0	15aa, >C3-MAOP-ANOXPP-000426... *
+>Cluster 72
+0	15aa, >C3-MAOP-ANOXPP-000432... *
+>Cluster 73
+0	15aa, >C3-MAOP-ANOXPP-000646... *
+>Cluster 74
+0	3aa, >C3-MAOP-ANOXPP-000413... at 100.00%
+1	15aa, >C3-MAOP-ANOXPP-000858... *
+>Cluster 75
+0	15aa, >C3-MAOP-AOPP-001153... *
+>Cluster 76
+0	15aa, >C3-MAOP-AOPP-001154... *
+>Cluster 77
+0	3aa, >C3-ANOX-000155... at 100.00%
+1	10aa, >C3-MAOP-AOPP-000984... at 100.00%
+2	14aa, >C3-MAOP-AOPP-001130... at 100.00%
+3	14aa, >C3-MAOP-AOPP-001139... at 100.00%
+4	15aa, >C3-MAOP-AOPP-001156... *
+5	13aa, >C3-MAOP-AOPP-001482... at 100.00%
+>Cluster 78
+0	15aa, >C3-MAOP-AOPP-001157... *
+>Cluster 79
+0	9aa, >C3-MAOP-AOPP-000924... at 100.00%
+1	10aa, >C3-MAOP-AOPP-000982... at 100.00%
+2	15aa, >C3-MAOP-AOPP-001158... *
+>Cluster 80
+0	3aa, >C3-ANOX-000644... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000034... at 100.00%
+2	15aa, >C3-MAOP-AOPP-001491... *
+>Cluster 81
+0	3aa, >C3-MAOP-ANOXPP-000310... at 100.00%
+1	15aa, >C3-MAOP-AOPP-001492... *
+>Cluster 82
+0	14aa, >C3-ANOX-000059... *
+>Cluster 83
+0	14aa, >C3-ANOX-000060... *
+1	3aa, >C3-MAOP-ANOXPP-000042... at 100.00%
+>Cluster 84
+0	4aa, >C3-ANOX-000083... at 100.00%
+1	14aa, >C3-ANOX-000275... *
+2	3aa, >C3-MAOP-ANOXPP-000129... at 100.00%
+>Cluster 85
+0	14aa, >C3-ANOX-000315... *
+1	12aa, >C3-ANOX-000438... at 100.00%
+2	5aa, >C3-ANOX-000573... at 100.00%
+>Cluster 86
+0	14aa, >C3-ANOX-000452... *
+1	14aa, >C3-ANOX-000453... at 92.86%
+2	14aa, >C3-ANOX-000454... at 92.86%
+>Cluster 87
+0	14aa, >C3-ANOX-000455... *
+>Cluster 88
+0	14aa, >C3-ANOX-000456... *
+1	14aa, >C3-ANOX-000457... at 92.86%
+2	14aa, >C3-ANOX-000458... at 92.86%
+>Cluster 89
+0	14aa, >C3-ANOX-000469... *
+>Cluster 90
+0	14aa, >C3-ANOX-000497... *
+1	3aa, >C3-MAOP-ANOXPP-000450... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000502... at 100.00%
+>Cluster 91
+0	14aa, >C3-ANOX-000525... *
+1	3aa, >C3-ANOX-000631... at 100.00%
+2	3aa, >C3-MAOP-AOPP-001290... at 100.00%
+>Cluster 92
+0	14aa, >C3-ANOX-000526... *
+>Cluster 93
+0	14aa, >C3-ANOX-000606... *
+>Cluster 94
+0	14aa, >C3-MAOP-ANOXPP-000208... *
+>Cluster 95
+0	3aa, >C3-MAOP-ANOXPP-000052... at 100.00%
+1	14aa, >C3-MAOP-ANOXPP-000402... *
+>Cluster 96
+0	14aa, >C3-MAOP-ANOXPP-000481... *
+1	3aa, >C3-MAOP-ANOXPP-000851... at 100.00%
+>Cluster 97
+0	14aa, >C3-MAOP-ANOXPP-000545... *
+>Cluster 98
+0	14aa, >C3-MAOP-ANOXPP-000561... *
+>Cluster 99
+0	3aa, >C3-ANOX-000201... at 100.00%
+1	14aa, >C3-MAOP-ANOXPP-000585... *
+2	3aa, >C3-MAOP-AOPP-000244... at 100.00%
+>Cluster 100
+0	14aa, >C3-MAOP-ANOXPP-000829... *
+>Cluster 101
+0	14aa, >C3-MAOP-AOPP-001126... *
+>Cluster 102
+0	14aa, >C3-MAOP-AOPP-001127... *
+>Cluster 103
+0	7aa, >C3-ANOX-000562... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000330... at 100.00%
+2	14aa, >C3-MAOP-AOPP-001128... *
+>Cluster 104
+0	14aa, >C3-MAOP-AOPP-001129... *
+>Cluster 105
+0	4aa, >C3-ANOX-000543... at 100.00%
+1	4aa, >C3-ANOX-000544... at 100.00%
+2	14aa, >C3-MAOP-AOPP-001131... *
+>Cluster 106
+0	6aa, >C3-ANOX-000442... at 100.00%
+1	3aa, >C3-ANOX-000686... at 100.00%
+2	14aa, >C3-MAOP-AOPP-001132... *
+>Cluster 107
+0	14aa, >C3-MAOP-AOPP-001133... *
+>Cluster 108
+0	4aa, >C3-ANOX-000604... at 100.00%
+1	3aa, >C3-MAOP-AOPP-000264... at 100.00%
+2	14aa, >C3-MAOP-AOPP-001134... *
+>Cluster 109
+0	14aa, >C3-MAOP-AOPP-001135... *
+>Cluster 110
+0	14aa, >C3-MAOP-AOPP-001140... *
+>Cluster 111
+0	14aa, >C3-MAOP-AOPP-001485... *
+>Cluster 112
+0	13aa, >C3-ANOX-000055... *
+1	3aa, >C3-ANOX-000393... at 100.00%
+>Cluster 113
+0	13aa, >C3-ANOX-000063... *
+1	3aa, >C3-MAOP-ANOXPP-000540... at 100.00%
+>Cluster 114
+0	13aa, >C3-ANOX-000289... *
+1	3aa, >C3-MAOP-ANOXPP-000143... at 100.00%
+>Cluster 115
+0	13aa, >C3-MAOP-ANOXPP-000037... *
+>Cluster 116
+0	13aa, >C3-MAOP-ANOXPP-000219... *
+>Cluster 117
+0	13aa, >C3-MAOP-ANOXPP-000238... *
+>Cluster 118
+0	13aa, >C3-MAOP-ANOXPP-000294... *
+1	3aa, >C3-MAOP-ANOXPP-000763... at 100.00%
+>Cluster 119
+0	13aa, >C3-MAOP-ANOXPP-000297... *
+1	4aa, >C3-MAOP-ANOXPP-000443... at 100.00%
+>Cluster 120
+0	13aa, >C3-MAOP-ANOXPP-000306... *
+>Cluster 121
+0	13aa, >C3-MAOP-ANOXPP-000365... *
+1	3aa, >C3-MAOP-ANOXPP-000990... at 100.00%
+>Cluster 122
+0	13aa, >C3-MAOP-ANOXPP-000408... *
+>Cluster 123
+0	13aa, >C3-MAOP-ANOXPP-000495... *
+>Cluster 124
+0	13aa, >C3-MAOP-ANOXPP-000520... *
+1	3aa, >C3-MAOP-ANOXPP-000567... at 100.00%
+>Cluster 125
+0	3aa, >C3-MAOP-ANOXPP-000508... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000547... at 100.00%
+2	13aa, >C3-MAOP-ANOXPP-000609... *
+>Cluster 126
+0	3aa, >C3-ANOX-000545... at 100.00%
+1	13aa, >C3-MAOP-ANOXPP-000614... *
+2	3aa, >C3-MAOP-ANOXPP-000818... at 100.00%
+3	3aa, >C3-MAOP-AOPP-000211... at 100.00%
+>Cluster 127
+0	13aa, >C3-MAOP-ANOXPP-000643... *
+>Cluster 128
+0	13aa, >C3-MAOP-ANOXPP-000659... *
+>Cluster 129
+0	13aa, >C3-MAOP-ANOXPP-000690... *
+>Cluster 130
+0	13aa, >C3-MAOP-ANOXPP-000777... *
+>Cluster 131
+0	3aa, >C3-ANOX-000241... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000597... at 100.00%
+2	13aa, >C3-MAOP-ANOXPP-000787... *
+>Cluster 132
+0	13aa, >C3-MAOP-ANOXPP-000792... *
+>Cluster 133
+0	13aa, >C3-MAOP-ANOXPP-000806... *
+>Cluster 134
+0	13aa, >C3-MAOP-ANOXPP-000845... *
+>Cluster 135
+0	3aa, >C3-MAOP-ANOXPP-000271... at 100.00%
+1	13aa, >C3-MAOP-ANOXPP-000952... *
+>Cluster 136
+0	3aa, >C3-ANOX-000285... at 100.00%
+1	13aa, >C3-MAOP-ANOXPP-000954... *
+>Cluster 137
+0	13aa, >C3-MAOP-ANOXPP-000969... *
+>Cluster 138
+0	13aa, >C3-MAOP-ANOXPP-001031... *
+>Cluster 139
+0	5aa, >C3-ANOX-000506... at 100.00%
+1	13aa, >C3-MAOP-AOPP-001101... *
+>Cluster 140
+0	13aa, >C3-MAOP-AOPP-001102... *
+>Cluster 141
+0	13aa, >C3-MAOP-AOPP-001104... *
+>Cluster 142
+0	3aa, >C3-MAOP-ANOXPP-000908... at 100.00%
+1	13aa, >C3-MAOP-AOPP-001105... *
+>Cluster 143
+0	13aa, >C3-MAOP-AOPP-001106... *
+>Cluster 144
+0	11aa, >C3-MAOP-AOPP-001029... at 100.00%
+1	13aa, >C3-MAOP-AOPP-001107... *
+>Cluster 145
+0	7aa, >C3-ANOX-000302... at 100.00%
+1	8aa, >C3-ANOX-000387... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000229... at 100.00%
+3	13aa, >C3-MAOP-AOPP-001483... *
+>Cluster 146
+0	12aa, >C3-ANOX-000053... *
+>Cluster 147
+0	12aa, >C3-ANOX-000069... *
+1	3aa, >C3-MAOP-ANOXPP-000534... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000696... at 100.00%
+>Cluster 148
+0	12aa, >C3-ANOX-000314... *
+1	3aa, >C3-MAOP-ANOXPP-000323... at 100.00%
+>Cluster 149
+0	12aa, >C3-ANOX-000318... *
+>Cluster 150
+0	12aa, >C3-ANOX-000324... *
+>Cluster 151
+0	12aa, >C3-ANOX-000451... *
+>Cluster 152
+0	12aa, >C3-ANOX-000557... *
+>Cluster 153
+0	12aa, >C3-ANOX-000577... *
+>Cluster 154
+0	12aa, >C3-ANOX-000592... *
+>Cluster 155
+0	12aa, >C3-ANOX-000662... *
+>Cluster 156
+0	3aa, >C3-ANOX-000192... at 100.00%
+1	12aa, >C3-ANOX-000673... *
+2	3aa, >C3-MAOP-AOPP-000054... at 100.00%
+>Cluster 157
+0	12aa, >C3-MAOP-ANOXPP-000183... *
+>Cluster 158
+0	12aa, >C3-MAOP-ANOXPP-000242... *
+1	5aa, >C3-MAOP-ANOXPP-000826... at 100.00%
+>Cluster 159
+0	12aa, >C3-MAOP-ANOXPP-000243... *
+>Cluster 160
+0	12aa, >C3-MAOP-ANOXPP-000248... *
+>Cluster 161
+0	12aa, >C3-MAOP-ANOXPP-000251... *
+>Cluster 162
+0	12aa, >C3-MAOP-ANOXPP-000256... *
+>Cluster 163
+0	12aa, >C3-MAOP-ANOXPP-000261... *
+>Cluster 164
+0	12aa, >C3-MAOP-ANOXPP-000282... *
+1	3aa, >C3-MAOP-ANOXPP-001012... at 100.00%
+>Cluster 165
+0	12aa, >C3-MAOP-ANOXPP-000285... *
+1	11aa, >C3-MAOP-ANOXPP-000559... at 100.00%
+>Cluster 166
+0	12aa, >C3-MAOP-ANOXPP-000290... *
+>Cluster 167
+0	12aa, >C3-MAOP-ANOXPP-000336... *
+1	3aa, >C3-MAOP-ANOXPP-000368... at 100.00%
+>Cluster 168
+0	3aa, >C3-ANOX-000119... at 100.00%
+1	12aa, >C3-MAOP-ANOXPP-000370... *
+>Cluster 169
+0	12aa, >C3-MAOP-ANOXPP-000527... *
+>Cluster 170
+0	12aa, >C3-MAOP-ANOXPP-000688... *
+>Cluster 171
+0	11aa, >C3-MAOP-ANOXPP-000275... at 100.00%
+1	10aa, >C3-MAOP-ANOXPP-000701... at 100.00%
+2	12aa, >C3-MAOP-ANOXPP-000729... *
+>Cluster 172
+0	12aa, >C3-MAOP-ANOXPP-000797... *
+>Cluster 173
+0	4aa, >C3-ANOX-000423... at 100.00%
+1	5aa, >C3-MAOP-ANOXPP-000326... at 100.00%
+2	12aa, >C3-MAOP-AOPP-001065... *
+>Cluster 174
+0	12aa, >C3-MAOP-AOPP-001066... *
+>Cluster 175
+0	3aa, >C3-MAOP-ANOXPP-000133... at 100.00%
+1	12aa, >C3-MAOP-AOPP-001067... *
+>Cluster 176
+0	9aa, >C3-MAOP-AOPP-000938... at 100.00%
+1	12aa, >C3-MAOP-AOPP-001068... *
+>Cluster 177
+0	3aa, >C3-ANOX-000535... at 100.00%
+1	3aa, >C3-ANOX-000694... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000128... at 100.00%
+3	6aa, >C3-MAOP-ANOXPP-000134... at 100.00%
+4	4aa, >C3-MAOP-ANOXPP-000329... at 100.00%
+5	5aa, >C3-MAOP-ANOXPP-000705... at 100.00%
+6	12aa, >C3-MAOP-AOPP-001069... *
+>Cluster 178
+0	3aa, >C3-MAOP-ANOXPP-000338... at 100.00%
+1	12aa, >C3-MAOP-AOPP-001070... *
+>Cluster 179
+0	12aa, >C3-MAOP-AOPP-001071... *
+>Cluster 180
+0	12aa, >C3-MAOP-AOPP-001072... *
+>Cluster 181
+0	11aa, >C3-MAOP-AOPP-001028... at 100.00%
+1	12aa, >C3-MAOP-AOPP-001073... *
+>Cluster 182
+0	10aa, >C3-MAOP-AOPP-000976... at 100.00%
+1	11aa, >C3-MAOP-AOPP-001034... at 100.00%
+2	12aa, >C3-MAOP-AOPP-001074... *
+>Cluster 183
+0	3aa, >C3-MAOP-ANOXPP-000085... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000167... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000601... at 100.00%
+3	12aa, >C3-MAOP-AOPP-001075... *
+>Cluster 184
+0	5aa, >C3-ANOX-000272... at 100.00%
+1	10aa, >C3-ANOX-000697... at 100.00%
+2	7aa, >C3-MAOP-AOPP-000798... at 100.00%
+3	8aa, >C3-MAOP-AOPP-000867... at 100.00%
+4	9aa, >C3-MAOP-AOPP-000940... at 100.00%
+5	11aa, >C3-MAOP-AOPP-001035... at 100.00%
+6	12aa, >C3-MAOP-AOPP-001076... *
+>Cluster 185
+0	3aa, >C3-ANOX-000048... at 100.00%
+1	12aa, >C3-MAOP-AOPP-001078... *
+>Cluster 186
+0	12aa, >C3-MAOP-AOPP-001473... *
+>Cluster 187
+0	12aa, >C3-MAOP-AOPP-001474... *
+>Cluster 188
+0	12aa, >C3-MAOP-AOPP-001475... *
+>Cluster 189
+0	11aa, >C3-ANOX-000041... *
+>Cluster 190
+0	11aa, >C3-ANOX-000043... *
+1	3aa, >C3-ANOX-000417... at 100.00%
+2	4aa, >C3-ANOX-000418... at 100.00%
+3	5aa, >C3-ANOX-000419... at 100.00%
+4	6aa, >C3-ANOX-000420... at 100.00%
+5	7aa, >C3-ANOX-000421... at 100.00%
+6	3aa, >C3-MAOP-ANOXPP-000135... at 100.00%
+7	3aa, >C3-MAOP-ANOXPP-000551... at 100.00%
+8	3aa, >C3-MAOP-ANOXPP-000747... at 100.00%
+9	3aa, >C3-MAOP-ANOXPP-000854... at 100.00%
+10	3aa, >C3-MAOP-ANOXPP-000910... at 100.00%
+11	3aa, >C3-MAOP-AOPP-000141... at 100.00%
+>Cluster 191
+0	11aa, >C3-ANOX-000067... *
+>Cluster 192
+0	11aa, >C3-ANOX-000320... *
+>Cluster 193
+0	11aa, >C3-ANOX-000325... *
+>Cluster 194
+0	5aa, >C3-ANOX-000064... at 100.00%
+1	6aa, >C3-ANOX-000065... at 100.00%
+2	6aa, >C3-ANOX-000066... at 100.00%
+3	11aa, >C3-ANOX-000372... *
+>Cluster 195
+0	3aa, >C3-ANOX-000086... at 100.00%
+1	3aa, >C3-ANOX-000144... at 100.00%
+2	11aa, >C3-ANOX-000388... *
+3	6aa, >C3-ANOX-000529... at 100.00%
+4	5aa, >C3-ANOX-000530... at 100.00%
+5	8aa, >C3-MAOP-ANOXPP-000231... at 100.00%
+6	3aa, >C3-MAOP-ANOXPP-000400... at 100.00%
+>Cluster 196
+0	11aa, >C3-ANOX-000426... *
+>Cluster 197
+0	4aa, >C3-ANOX-000432... at 100.00%
+1	11aa, >C3-ANOX-000433... *
+>Cluster 198
+0	3aa, >C3-ANOX-000024... at 100.00%
+1	11aa, >C3-ANOX-000563... *
+2	3aa, >C3-MAOP-AOPP-000247... at 100.00%
+>Cluster 199
+0	3aa, >C3-ANOX-000182... at 100.00%
+1	11aa, >C3-ANOX-000621... *
+2	9aa, >C3-ANOX-000625... at 100.00%
+3	3aa, >C3-MAOP-ANOXPP-000484... at 100.00%
+>Cluster 200
+0	3aa, >C3-ANOX-000349... at 100.00%
+1	11aa, >C3-MAOP-ANOXPP-000007... *
+>Cluster 201
+0	11aa, >C3-MAOP-ANOXPP-000103... *
+>Cluster 202
+0	11aa, >C3-MAOP-ANOXPP-000122... *
+>Cluster 203
+0	11aa, >C3-MAOP-ANOXPP-000262... *
+>Cluster 204
+0	11aa, >C3-MAOP-ANOXPP-000269... *
+>Cluster 205
+0	11aa, >C3-MAOP-ANOXPP-000317... *
+>Cluster 206
+0	11aa, >C3-MAOP-ANOXPP-000339... *
+>Cluster 207
+0	11aa, >C3-MAOP-ANOXPP-000377... *
+1	3aa, >C3-MAOP-ANOXPP-000985... at 100.00%
+>Cluster 208
+0	11aa, >C3-MAOP-ANOXPP-000406... *
+>Cluster 209
+0	3aa, >C3-ANOX-000147... at 100.00%
+1	11aa, >C3-MAOP-ANOXPP-000409... *
+>Cluster 210
+0	11aa, >C3-MAOP-ANOXPP-000507... *
+>Cluster 211
+0	11aa, >C3-MAOP-ANOXPP-000517... *
+1	3aa, >C3-MAOP-AOPP-000248... at 100.00%
+>Cluster 212
+0	11aa, >C3-MAOP-ANOXPP-000554... *
+>Cluster 213
+0	11aa, >C3-MAOP-ANOXPP-000589... *
+>Cluster 214
+0	3aa, >C3-MAOP-ANOXPP-000341... at 100.00%
+1	11aa, >C3-MAOP-ANOXPP-000604... *
+2	3aa, >C3-MAOP-ANOXPP-000919... at 100.00%
+>Cluster 215
+0	11aa, >C3-MAOP-ANOXPP-000734... *
+>Cluster 216
+0	11aa, >C3-MAOP-ANOXPP-000804... *
+>Cluster 217
+0	11aa, >C3-MAOP-ANOXPP-000852... *
+>Cluster 218
+0	11aa, >C3-MAOP-ANOXPP-000933... *
+>Cluster 219
+0	11aa, >C3-MAOP-ANOXPP-001034... *
+>Cluster 220
+0	11aa, >C3-MAOP-AOPP-001008... *
+>Cluster 221
+0	11aa, >C3-MAOP-AOPP-001021... *
+>Cluster 222
+0	3aa, >C3-MAOP-ANOXPP-000606... at 100.00%
+1	11aa, >C3-MAOP-AOPP-001022... *
+2	11aa, >C3-MAOP-AOPP-001023... at 90.91%
+3	7aa, >C3-MAOP-AOPP-001420... at 100.00%
+>Cluster 223
+0	11aa, >C3-MAOP-AOPP-001024... *
+>Cluster 224
+0	6aa, >C3-MAOP-AOPP-000723... at 100.00%
+1	9aa, >C3-MAOP-AOPP-000939... at 100.00%
+2	11aa, >C3-MAOP-AOPP-001025... *
+>Cluster 225
+0	3aa, >C3-MAOP-ANOXPP-000392... at 100.00%
+1	7aa, >C3-MAOP-AOPP-000807... at 100.00%
+2	11aa, >C3-MAOP-AOPP-001026... *
+>Cluster 226
+0	11aa, >C3-MAOP-AOPP-001027... *
+>Cluster 227
+0	11aa, >C3-MAOP-AOPP-001030... *
+>Cluster 228
+0	8aa, >C3-MAOP-AOPP-000872... at 100.00%
+1	11aa, >C3-MAOP-AOPP-001031... *
+2	10aa, >C3-MAOP-AOPP-001456... at 100.00%
+>Cluster 229
+0	11aa, >C3-MAOP-AOPP-001032... *
+>Cluster 230
+0	11aa, >C3-MAOP-AOPP-001033... *
+>Cluster 231
+0	11aa, >C3-MAOP-AOPP-001037... *
+>Cluster 232
+0	11aa, >C3-MAOP-AOPP-001038... *
+>Cluster 233
+0	11aa, >C3-MAOP-AOPP-001039... *
+>Cluster 234
+0	11aa, >C3-MAOP-AOPP-001466... *
+>Cluster 235
+0	11aa, >C3-MAOP-AOPP-001467... *
+>Cluster 236
+0	10aa, >C3-ANOX-000006... *
+1	4aa, >C3-ANOX-000081... at 100.00%
+2	4aa, >C3-ANOX-000093... at 100.00%
+3	5aa, >C3-ANOX-000098... at 100.00%
+4	3aa, >C3-ANOX-000102... at 100.00%
+>Cluster 237
+0	10aa, >C3-ANOX-000026... *
+>Cluster 238
+0	10aa, >C3-ANOX-000044... *
+>Cluster 239
+0	9aa, >C3-ANOX-000273... at 100.00%
+1	10aa, >C3-ANOX-000274... *
+>Cluster 240
+0	10aa, >C3-ANOX-000277... *
+>Cluster 241
+0	10aa, >C3-ANOX-000280... *
+>Cluster 242
+0	3aa, >C3-ANOX-000170... at 100.00%
+1	10aa, >C3-ANOX-000301... *
+>Cluster 243
+0	10aa, >C3-ANOX-000310... *
+>Cluster 244
+0	10aa, >C3-ANOX-000322... *
+1	3aa, >C3-MAOP-ANOXPP-000830... at 100.00%
+>Cluster 245
+0	10aa, >C3-ANOX-000363... *
+>Cluster 246
+0	10aa, >C3-ANOX-000370... *
+>Cluster 247
+0	10aa, >C3-ANOX-000371... *
+>Cluster 248
+0	10aa, >C3-ANOX-000384... *
+>Cluster 249
+0	10aa, >C3-ANOX-000403... *
+>Cluster 250
+0	10aa, >C3-ANOX-000429... *
+1	8aa, >C3-ANOX-000430... at 100.00%
+>Cluster 251
+0	10aa, >C3-ANOX-000524... *
+>Cluster 252
+0	3aa, >C3-ANOX-000164... at 100.00%
+1	10aa, >C3-ANOX-000579... *
+>Cluster 253
+0	10aa, >C3-ANOX-000581... *
+>Cluster 254
+0	3aa, >C3-ANOX-000011... at 100.00%
+1	10aa, >C3-ANOX-000607... *
+>Cluster 255
+0	10aa, >C3-ANOX-000663... *
+>Cluster 256
+0	10aa, >C3-ANOX-000664... *
+>Cluster 257
+0	10aa, >C3-MAOP-ANOXPP-000083... *
+>Cluster 258
+0	10aa, >C3-MAOP-ANOXPP-000099... *
+>Cluster 259
+0	10aa, >C3-MAOP-ANOXPP-000115... *
+>Cluster 260
+0	10aa, >C3-MAOP-ANOXPP-000126... *
+>Cluster 261
+0	10aa, >C3-MAOP-ANOXPP-000132... *
+>Cluster 262
+0	10aa, >C3-MAOP-ANOXPP-000163... *
+>Cluster 263
+0	10aa, >C3-MAOP-ANOXPP-000170... *
+>Cluster 264
+0	10aa, >C3-MAOP-ANOXPP-000333... *
+>Cluster 265
+0	10aa, >C3-MAOP-ANOXPP-000478... *
+>Cluster 266
+0	10aa, >C3-MAOP-ANOXPP-000563... *
+>Cluster 267
+0	10aa, >C3-MAOP-ANOXPP-000603... *
+>Cluster 268
+0	10aa, >C3-MAOP-ANOXPP-000638... *
+1	7aa, >C3-MAOP-ANOXPP-001022... at 100.00%
+>Cluster 269
+0	10aa, >C3-MAOP-ANOXPP-000721... *
+>Cluster 270
+0	10aa, >C3-MAOP-ANOXPP-000735... *
+>Cluster 271
+0	10aa, >C3-MAOP-ANOXPP-000840... *
+>Cluster 272
+0	10aa, >C3-MAOP-ANOXPP-000861... *
+>Cluster 273
+0	10aa, >C3-MAOP-ANOXPP-000896... *
+>Cluster 274
+0	10aa, >C3-MAOP-ANOXPP-000988... *
+>Cluster 275
+0	10aa, >C3-MAOP-AOPP-000949... *
+>Cluster 276
+0	10aa, >C3-MAOP-AOPP-000969... *
+>Cluster 277
+0	10aa, >C3-MAOP-AOPP-000970... *
+>Cluster 278
+0	10aa, >C3-MAOP-AOPP-000971... *
+>Cluster 279
+0	10aa, >C3-MAOP-AOPP-000972... *
+>Cluster 280
+0	10aa, >C3-MAOP-AOPP-000973... *
+>Cluster 281
+0	7aa, >C3-MAOP-AOPP-000795... at 100.00%
+1	10aa, >C3-MAOP-AOPP-000974... *
+>Cluster 282
+0	10aa, >C3-MAOP-AOPP-000975... *
+>Cluster 283
+0	10aa, >C3-MAOP-AOPP-000977... *
+>Cluster 284
+0	3aa, >C3-MAOP-ANOXPP-000074... at 100.00%
+1	10aa, >C3-MAOP-AOPP-000978... *
+>Cluster 285
+0	10aa, >C3-MAOP-AOPP-000979... *
+>Cluster 286
+0	10aa, >C3-MAOP-AOPP-000980... *
+>Cluster 287
+0	10aa, >C3-MAOP-AOPP-000981... *
+>Cluster 288
+0	10aa, >C3-MAOP-AOPP-000986... *
+>Cluster 289
+0	10aa, >C3-MAOP-AOPP-000987... *
+>Cluster 290
+0	10aa, >C3-MAOP-AOPP-001445... *
+>Cluster 291
+0	3aa, >C3-ANOX-000206... at 100.00%
+1	10aa, >C3-MAOP-AOPP-001450... *
+>Cluster 292
+0	10aa, >C3-MAOP-AOPP-001452... *
+>Cluster 293
+0	10aa, >C3-MAOP-AOPP-001453... *
+>Cluster 294
+0	10aa, >C3-MAOP-AOPP-001454... *
+>Cluster 295
+0	10aa, >C3-MAOP-AOPP-001455... *
+>Cluster 296
+0	10aa, >C3-MAOP-AOPP-001457... *
+>Cluster 297
+0	6aa, >C3-ANOX-000540... at 100.00%
+1	10aa, >C3-MAOP-AOPP-001458... *
+>Cluster 298
+0	8aa, >C3-ANOX-000004... at 100.00%
+1	9aa, >C3-ANOX-000005... *
+2	3aa, >C3-ANOX-000138... at 100.00%
+>Cluster 299
+0	8aa, >C3-ANOX-000020... at 100.00%
+1	9aa, >C3-ANOX-000035... *
+>Cluster 300
+0	9aa, >C3-ANOX-000042... *
+1	3aa, >C3-ANOX-000406... at 100.00%
+2	4aa, >C3-ANOX-000407... at 100.00%
+3	5aa, >C3-ANOX-000582... at 100.00%
+4	6aa, >C3-ANOX-000583... at 100.00%
+>Cluster 301
+0	9aa, >C3-ANOX-000052... *
+>Cluster 302
+0	9aa, >C3-ANOX-000058... *
+>Cluster 303
+0	9aa, >C3-ANOX-000073... *
+>Cluster 304
+0	9aa, >C3-ANOX-000319... *
+1	3aa, >C3-MAOP-ANOXPP-000125... at 100.00%
+>Cluster 305
+0	9aa, >C3-ANOX-000437... *
+>Cluster 306
+0	9aa, >C3-ANOX-000450... *
+>Cluster 307
+0	9aa, >C3-ANOX-000475... *
+1	6aa, >C3-ANOX-000476... at 100.00%
+2	5aa, >C3-ANOX-000477... at 100.00%
+3	4aa, >C3-ANOX-000478... at 100.00%
+4	5aa, >C3-ANOX-000484... at 100.00%
+5	4aa, >C3-ANOX-000485... at 100.00%
+>Cluster 308
+0	9aa, >C3-ANOX-000517... *
+>Cluster 309
+0	3aa, >C3-ANOX-000507... at 100.00%
+1	9aa, >C3-ANOX-000552... *
+>Cluster 310
+0	9aa, >C3-ANOX-000555... *
+>Cluster 311
+0	9aa, >C3-ANOX-000556... *
+>Cluster 312
+0	9aa, >C3-ANOX-000578... *
+>Cluster 313
+0	9aa, >C3-ANOX-000587... *
+>Cluster 314
+0	9aa, >C3-ANOX-000661... *
+>Cluster 315
+0	9aa, >C3-MAOP-ANOXPP-000043... *
+1	5aa, >C3-MAOP-ANOXPP-000447... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000588... at 100.00%
+>Cluster 316
+0	9aa, >C3-MAOP-ANOXPP-000064... *
+>Cluster 317
+0	9aa, >C3-MAOP-ANOXPP-000131... *
+>Cluster 318
+0	9aa, >C3-MAOP-ANOXPP-000156... *
+>Cluster 319
+0	3aa, >C3-ANOX-000186... at 100.00%
+1	9aa, >C3-MAOP-ANOXPP-000211... *
+>Cluster 320
+0	9aa, >C3-MAOP-ANOXPP-000222... *
+>Cluster 321
+0	6aa, >C3-MAOP-ANOXPP-000236... at 100.00%
+1	9aa, >C3-MAOP-ANOXPP-000253... *
+>Cluster 322
+0	9aa, >C3-MAOP-ANOXPP-000374... *
+>Cluster 323
+0	9aa, >C3-MAOP-ANOXPP-000514... *
+>Cluster 324
+0	8aa, >C3-MAOP-ANOXPP-000405... at 100.00%
+1	9aa, >C3-MAOP-ANOXPP-000539... *
+>Cluster 325
+0	9aa, >C3-MAOP-ANOXPP-000679... *
+>Cluster 326
+0	9aa, >C3-MAOP-ANOXPP-000722... *
+>Cluster 327
+0	9aa, >C3-MAOP-ANOXPP-000924... *
+>Cluster 328
+0	9aa, >C3-MAOP-ANOXPP-000929... *
+>Cluster 329
+0	3aa, >C3-ANOX-000394... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000843... at 100.00%
+2	9aa, >C3-MAOP-ANOXPP-000947... *
+>Cluster 330
+0	9aa, >C3-MAOP-ANOXPP-000980... *
+>Cluster 331
+0	9aa, >C3-MAOP-ANOXPP-001004... *
+>Cluster 332
+0	9aa, >C3-MAOP-ANOXPP-001049... *
+>Cluster 333
+0	3aa, >C3-ANOX-000153... at 100.00%
+1	4aa, >C3-ANOX-000287... at 100.00%
+2	9aa, >C3-MAOP-ANOXPP-001052... *
+>Cluster 334
+0	9aa, >C3-MAOP-AOPP-000910... *
+>Cluster 335
+0	9aa, >C3-MAOP-AOPP-000917... *
+>Cluster 336
+0	9aa, >C3-MAOP-AOPP-000918... *
+>Cluster 337
+0	9aa, >C3-MAOP-AOPP-000919... *
+>Cluster 338
+0	9aa, >C3-MAOP-AOPP-000920... *
+>Cluster 339
+0	9aa, >C3-MAOP-AOPP-000921... *
+>Cluster 340
+0	9aa, >C3-MAOP-AOPP-000922... *
+>Cluster 341
+0	9aa, >C3-MAOP-AOPP-000923... *
+>Cluster 342
+0	9aa, >C3-MAOP-AOPP-000925... *
+>Cluster 343
+0	9aa, >C3-MAOP-AOPP-000926... *
+>Cluster 344
+0	9aa, >C3-MAOP-AOPP-000927... *
+>Cluster 345
+0	9aa, >C3-MAOP-AOPP-000928... *
+>Cluster 346
+0	9aa, >C3-MAOP-AOPP-000929... *
+>Cluster 347
+0	9aa, >C3-MAOP-AOPP-000930... *
+>Cluster 348
+0	9aa, >C3-MAOP-AOPP-000931... *
+>Cluster 349
+0	9aa, >C3-MAOP-AOPP-000932... *
+>Cluster 350
+0	9aa, >C3-MAOP-AOPP-000933... *
+>Cluster 351
+0	9aa, >C3-MAOP-AOPP-000934... *
+>Cluster 352
+0	3aa, >C3-ANOX-000110... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000439... at 100.00%
+2	9aa, >C3-MAOP-AOPP-000935... *
+>Cluster 353
+0	9aa, >C3-MAOP-AOPP-000936... *
+>Cluster 354
+0	9aa, >C3-MAOP-AOPP-000937... *
+>Cluster 355
+0	9aa, >C3-MAOP-AOPP-001440... *
+>Cluster 356
+0	8aa, >C3-ANOX-000028... *
+1	7aa, >C3-ANOX-000029... at 100.00%
+>Cluster 357
+0	8aa, >C3-ANOX-000040... *
+>Cluster 358
+0	8aa, >C3-ANOX-000062... *
+>Cluster 359
+0	8aa, >C3-ANOX-000068... *
+1	3aa, >C3-MAOP-ANOXPP-000013... at 100.00%
+>Cluster 360
+0	8aa, >C3-ANOX-000076... *
+>Cluster 361
+0	3aa, >C3-ANOX-000117... at 100.00%
+1	8aa, >C3-ANOX-000292... *
+>Cluster 362
+0	8aa, >C3-ANOX-000327... *
+>Cluster 363
+0	8aa, >C3-ANOX-000373... *
+>Cluster 364
+0	8aa, >C3-ANOX-000404... *
+1	7aa, >C3-ANOX-000405... at 100.00%
+2	6aa, >C3-ANOX-000408... at 100.00%
+3	5aa, >C3-ANOX-000409... at 100.00%
+4	4aa, >C3-ANOX-000410... at 100.00%
+>Cluster 365
+0	8aa, >C3-ANOX-000425... *
+>Cluster 366
+0	8aa, >C3-ANOX-000436... *
+>Cluster 367
+0	8aa, >C3-ANOX-000441... *
+>Cluster 368
+0	8aa, >C3-ANOX-000510... *
+>Cluster 369
+0	8aa, >C3-ANOX-000515... *
+>Cluster 370
+0	8aa, >C3-ANOX-000518... *
+>Cluster 371
+0	8aa, >C3-ANOX-000565... *
+1	3aa, >C3-MAOP-ANOXPP-000586... at 100.00%
+>Cluster 372
+0	8aa, >C3-ANOX-000567... *
+>Cluster 373
+0	8aa, >C3-ANOX-000568... *
+>Cluster 374
+0	8aa, >C3-ANOX-000574... *
+1	7aa, >C3-MAOP-AOPP-000792... at 100.00%
+>Cluster 375
+0	8aa, >C3-ANOX-000584... *
+>Cluster 376
+0	8aa, >C3-ANOX-000585... *
+>Cluster 377
+0	8aa, >C3-ANOX-000609... *
+>Cluster 378
+0	6aa, >C3-ANOX-000622... at 100.00%
+1	7aa, >C3-ANOX-000623... at 100.00%
+2	8aa, >C3-ANOX-000624... *
+3	3aa, >C3-MAOP-AOPP-000089... at 100.00%
+>Cluster 379
+0	8aa, >C3-ANOX-000678... *
+>Cluster 380
+0	8aa, >C3-MAOP-ANOXPP-000012... *
+>Cluster 381
+0	8aa, >C3-MAOP-ANOXPP-000095... *
+1	4aa, >C3-MAOP-AOPP-000488... at 100.00%
+>Cluster 382
+0	8aa, >C3-MAOP-ANOXPP-000102... *
+>Cluster 383
+0	8aa, >C3-MAOP-ANOXPP-000110... *
+>Cluster 384
+0	3aa, >C3-ANOX-000145... at 100.00%
+1	6aa, >C3-MAOP-ANOXPP-000173... at 100.00%
+2	8aa, >C3-MAOP-ANOXPP-000189... *
+>Cluster 385
+0	8aa, >C3-MAOP-ANOXPP-000268... *
+>Cluster 386
+0	8aa, >C3-MAOP-ANOXPP-000289... *
+>Cluster 387
+0	8aa, >C3-MAOP-ANOXPP-000358... *
+>Cluster 388
+0	4aa, >C3-MAOP-ANOXPP-000155... at 100.00%
+1	8aa, >C3-MAOP-ANOXPP-000429... *
+>Cluster 389
+0	8aa, >C3-MAOP-ANOXPP-000448... *
+>Cluster 390
+0	8aa, >C3-MAOP-ANOXPP-000474... *
+>Cluster 391
+0	8aa, >C3-MAOP-ANOXPP-000535... *
+>Cluster 392
+0	8aa, >C3-MAOP-ANOXPP-000610... *
+>Cluster 393
+0	8aa, >C3-MAOP-ANOXPP-000620... *
+>Cluster 394
+0	8aa, >C3-MAOP-ANOXPP-000652... *
+>Cluster 395
+0	8aa, >C3-MAOP-ANOXPP-000694... *
+>Cluster 396
+0	8aa, >C3-MAOP-ANOXPP-000700... *
+>Cluster 397
+0	3aa, >C3-ANOX-000111... at 100.00%
+1	3aa, >C3-ANOX-000341... at 100.00%
+2	8aa, >C3-MAOP-ANOXPP-000738... *
+>Cluster 398
+0	8aa, >C3-MAOP-ANOXPP-000825... *
+>Cluster 399
+0	8aa, >C3-MAOP-ANOXPP-000877... *
+>Cluster 400
+0	8aa, >C3-MAOP-ANOXPP-000880... *
+>Cluster 401
+0	8aa, >C3-MAOP-ANOXPP-000958... *
+>Cluster 402
+0	8aa, >C3-MAOP-ANOXPP-000959... *
+1	7aa, >C3-MAOP-ANOXPP-001030... at 100.00%
+2	7aa, >C3-MAOP-AOPP-000808... at 100.00%
+>Cluster 403
+0	8aa, >C3-MAOP-ANOXPP-001056... *
+>Cluster 404
+0	8aa, >C3-MAOP-AOPP-000820... *
+>Cluster 405
+0	8aa, >C3-MAOP-AOPP-000859... *
+>Cluster 406
+0	8aa, >C3-MAOP-AOPP-000860... *
+>Cluster 407
+0	8aa, >C3-MAOP-AOPP-000861... *
+>Cluster 408
+0	8aa, >C3-MAOP-AOPP-000862... *
+>Cluster 409
+0	8aa, >C3-MAOP-AOPP-000863... *
+>Cluster 410
+0	8aa, >C3-MAOP-AOPP-000864... *
+>Cluster 411
+0	8aa, >C3-MAOP-AOPP-000865... *
+>Cluster 412
+0	8aa, >C3-MAOP-AOPP-000866... *
+>Cluster 413
+0	8aa, >C3-MAOP-AOPP-000868... *
+>Cluster 414
+0	8aa, >C3-MAOP-AOPP-000869... *
+>Cluster 415
+0	3aa, >C3-ANOX-000643... at 100.00%
+1	8aa, >C3-MAOP-AOPP-000870... *
+>Cluster 416
+0	3aa, >C3-ANOX-000113... at 100.00%
+1	6aa, >C3-MAOP-AOPP-000720... at 100.00%
+2	7aa, >C3-MAOP-AOPP-000804... at 100.00%
+3	7aa, >C3-MAOP-AOPP-000806... at 100.00%
+4	8aa, >C3-MAOP-AOPP-000871... *
+>Cluster 417
+0	8aa, >C3-MAOP-AOPP-000873... *
+>Cluster 418
+0	3aa, >C3-MAOP-AOPP-000129... at 100.00%
+1	8aa, >C3-MAOP-AOPP-000874... *
+>Cluster 419
+0	8aa, >C3-MAOP-AOPP-000875... *
+>Cluster 420
+0	8aa, >C3-MAOP-AOPP-000876... *
+>Cluster 421
+0	8aa, >C3-MAOP-AOPP-000877... *
+>Cluster 422
+0	8aa, >C3-MAOP-AOPP-000878... *
+>Cluster 423
+0	8aa, >C3-MAOP-AOPP-000879... *
+>Cluster 424
+0	8aa, >C3-MAOP-AOPP-000880... *
+>Cluster 425
+0	8aa, >C3-MAOP-AOPP-000881... *
+>Cluster 426
+0	8aa, >C3-MAOP-AOPP-001428... *
+>Cluster 427
+0	8aa, >C3-MAOP-AOPP-001432... *
+>Cluster 428
+0	8aa, >C3-MAOP-AOPP-001433... *
+>Cluster 429
+0	3aa, >C3-ANOX-000002... at 100.00%
+1	7aa, >C3-ANOX-000003... *
+>Cluster 430
+0	7aa, >C3-ANOX-000007... *
+1	4aa, >C3-ANOX-000032... at 100.00%
+2	3aa, >C3-MAOP-ANOXPP-000647... at 100.00%
+>Cluster 431
+0	7aa, >C3-ANOX-000030... *
+>Cluster 432
+0	7aa, >C3-ANOX-000039... *
+>Cluster 433
+0	7aa, >C3-ANOX-000054... *
+1	4aa, >C3-MAOP-ANOXPP-000469... at 100.00%
+>Cluster 434
+0	7aa, >C3-ANOX-000056... *
+>Cluster 435
+0	7aa, >C3-ANOX-000057... *
+>Cluster 436
+0	7aa, >C3-ANOX-000074... *
+>Cluster 437
+0	7aa, >C3-ANOX-000075... *
+>Cluster 438
+0	7aa, >C3-ANOX-000281... *
+>Cluster 439
+0	7aa, >C3-ANOX-000299... *
+>Cluster 440
+0	7aa, >C3-ANOX-000303... *
+1	6aa, >C3-MAOP-AOPP-000724... at 100.00%
+>Cluster 441
+0	7aa, >C3-ANOX-000364... *
+>Cluster 442
+0	7aa, >C3-ANOX-000374... *
+>Cluster 443
+0	7aa, >C3-ANOX-000411... *
+>Cluster 444
+0	7aa, >C3-ANOX-000414... *
+1	6aa, >C3-MAOP-ANOXPP-000382... at 100.00%
+>Cluster 445
+0	7aa, >C3-ANOX-000443... *
+>Cluster 446
+0	6aa, >C3-ANOX-000309... at 100.00%
+1	6aa, >C3-ANOX-000489... at 100.00%
+2	7aa, >C3-ANOX-000490... *
+>Cluster 447
+0	7aa, >C3-ANOX-000495... *
+>Cluster 448
+0	7aa, >C3-ANOX-000496... *
+>Cluster 449
+0	7aa, >C3-ANOX-000566... *
+>Cluster 450
+0	7aa, >C3-ANOX-000576... *
+1	6aa, >C3-MAOP-AOPP-000707... at 100.00%
+>Cluster 451
+0	7aa, >C3-ANOX-000616... *
+1	6aa, >C3-MAOP-AOPP-000708... at 100.00%
+>Cluster 452
+0	7aa, >C3-ANOX-000654... *
+>Cluster 453
+0	6aa, >C3-ANOX-000021... at 100.00%
+1	5aa, >C3-ANOX-000022... at 100.00%
+2	4aa, >C3-ANOX-000023... at 100.00%
+3	3aa, >C3-ANOX-000249... at 100.00%
+4	7aa, >C3-ANOX-000691... *
+5	6aa, >C3-ANOX-000692... at 100.00%
+>Cluster 454
+0	5aa, >C3-ANOX-000547... at 100.00%
+1	7aa, >C3-ANOX-000693... *
+2	4aa, >C3-ANOX-000695... at 100.00%
+>Cluster 455
+0	7aa, >C3-MAOP-ANOXPP-000006... *
+1	3aa, >C3-MAOP-ANOXPP-000879... at 100.00%
+>Cluster 456
+0	7aa, >C3-MAOP-ANOXPP-000008... *
+>Cluster 457
+0	7aa, >C3-MAOP-ANOXPP-000041... *
+>Cluster 458
+0	7aa, >C3-MAOP-ANOXPP-000092... *
+>Cluster 459
+0	7aa, >C3-MAOP-ANOXPP-000227... *
+>Cluster 460
+0	7aa, >C3-MAOP-ANOXPP-000340... *
+>Cluster 461
+0	7aa, >C3-MAOP-ANOXPP-000381... *
+1	3aa, >C3-MAOP-ANOXPP-000927... at 100.00%
+>Cluster 462
+0	3aa, >C3-ANOX-000645... at 100.00%
+1	3aa, >C3-ANOX-000646... at 100.00%
+2	7aa, >C3-MAOP-ANOXPP-000384... *
+3	3aa, >C3-MAOP-ANOXPP-000425... at 100.00%
+4	3aa, >C3-MAOP-ANOXPP-000516... at 100.00%
+>Cluster 463
+0	7aa, >C3-MAOP-ANOXPP-000433... *
+1	3aa, >C3-MAOP-ANOXPP-000529... at 100.00%
+>Cluster 464
+0	3aa, >C3-MAOP-ANOXPP-000233... at 100.00%
+1	7aa, >C3-MAOP-ANOXPP-000461... *
+>Cluster 465
+0	7aa, >C3-MAOP-ANOXPP-000463... *
+>Cluster 466
+0	7aa, >C3-MAOP-ANOXPP-000466... *
+>Cluster 467
+0	7aa, >C3-MAOP-ANOXPP-000470... *
+>Cluster 468
+0	3aa, >C3-MAOP-ANOXPP-000440... at 100.00%
+1	7aa, >C3-MAOP-ANOXPP-000569... *
+2	6aa, >C3-MAOP-AOPP-001402... at 100.00%
+>Cluster 469
+0	7aa, >C3-MAOP-ANOXPP-000582... *
+>Cluster 470
+0	7aa, >C3-MAOP-ANOXPP-000671... *
+>Cluster 471
+0	7aa, >C3-MAOP-ANOXPP-000675... *
+>Cluster 472
+0	7aa, >C3-MAOP-ANOXPP-000714... *
+>Cluster 473
+0	7aa, >C3-MAOP-ANOXPP-000751... *
+>Cluster 474
+0	6aa, >C3-ANOX-000045... at 100.00%
+1	5aa, >C3-MAOP-ANOXPP-000424... at 100.00%
+2	7aa, >C3-MAOP-ANOXPP-000768... *
+>Cluster 475
+0	7aa, >C3-MAOP-ANOXPP-000774... *
+>Cluster 476
+0	7aa, >C3-MAOP-ANOXPP-000837... *
+>Cluster 477
+0	7aa, >C3-MAOP-ANOXPP-000909... *
+>Cluster 478
+0	7aa, >C3-MAOP-ANOXPP-000917... *
+>Cluster 479
+0	3aa, >C3-ANOX-000261... at 100.00%
+1	7aa, >C3-MAOP-ANOXPP-000942... *
+>Cluster 480
+0	7aa, >C3-MAOP-ANOXPP-001025... *
+>Cluster 481
+0	7aa, >C3-MAOP-ANOXPP-001050... *
+>Cluster 482
+0	5aa, >C3-MAOP-AOPP-000594... at 100.00%
+1	7aa, >C3-MAOP-AOPP-000789... *
+2	6aa, >C3-MAOP-AOPP-001400... at 100.00%
+>Cluster 483
+0	4aa, >C3-ANOX-000564... at 100.00%
+1	7aa, >C3-MAOP-AOPP-000790... *
+2	5aa, >C3-MAOP-AOPP-001369... at 100.00%
+>Cluster 484
+0	7aa, >C3-MAOP-AOPP-000791... *
+>Cluster 485
+0	3aa, >C3-MAOP-ANOXPP-000510... at 100.00%
+1	7aa, >C3-MAOP-AOPP-000793... *
+>Cluster 486
+0	7aa, >C3-MAOP-AOPP-000794... *
+>Cluster 487
+0	7aa, >C3-MAOP-AOPP-000796... *
+>Cluster 488
+0	3aa, >C3-MAOP-AOPP-000265... at 100.00%
+1	7aa, >C3-MAOP-AOPP-000797... *
+>Cluster 489
+0	5aa, >C3-ANOX-000684... at 100.00%
+1	4aa, >C3-ANOX-000687... at 100.00%
+2	3aa, >C3-ANOX-000688... at 100.00%
+3	4aa, >C3-ANOX-000689... at 100.00%
+4	3aa, >C3-ANOX-000690... at 100.00%
+5	6aa, >C3-MAOP-AOPP-000717... at 100.00%
+6	7aa, >C3-MAOP-AOPP-000799... *
+>Cluster 490
+0	7aa, >C3-MAOP-AOPP-000800... *
+>Cluster 491
+0	7aa, >C3-MAOP-AOPP-000801... *
+>Cluster 492
+0	7aa, >C3-MAOP-AOPP-000802... *
+>Cluster 493
+0	7aa, >C3-MAOP-AOPP-000803... *
+>Cluster 494
+0	7aa, >C3-MAOP-AOPP-000805... *
+>Cluster 495
+0	7aa, >C3-MAOP-AOPP-000810... *
+>Cluster 496
+0	7aa, >C3-MAOP-AOPP-001410... *
+>Cluster 497
+0	7aa, >C3-MAOP-AOPP-001417... *
+>Cluster 498
+0	3aa, >C3-MAOP-ANOXPP-000040... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000246... at 100.00%
+2	7aa, >C3-MAOP-AOPP-001418... *
+>Cluster 499
+0	7aa, >C3-MAOP-AOPP-001419... *
+>Cluster 500
+0	7aa, >C3-MAOP-AOPP-001421... *
+>Cluster 501
+0	4aa, >C3-ANOX-000012... at 100.00%
+1	6aa, >C3-ANOX-000031... *
+>Cluster 502
+0	6aa, >C3-ANOX-000033... *
+>Cluster 503
+0	6aa, >C3-ANOX-000036... *
+>Cluster 504
+0	6aa, >C3-ANOX-000038... *
+>Cluster 505
+0	6aa, >C3-ANOX-000100... *
+>Cluster 506
+0	6aa, >C3-ANOX-000278... *
+>Cluster 507
+0	6aa, >C3-ANOX-000288... *
+>Cluster 508
+0	6aa, >C3-ANOX-000297... *
+>Cluster 509
+0	6aa, >C3-ANOX-000300... *
+>Cluster 510
+0	3aa, >C3-ANOX-000256... at 100.00%
+1	6aa, >C3-ANOX-000308... *
+>Cluster 511
+0	6aa, >C3-ANOX-000317... *
+>Cluster 512
+0	6aa, >C3-ANOX-000351... *
+>Cluster 513
+0	6aa, >C3-ANOX-000358... *
+>Cluster 514
+0	6aa, >C3-ANOX-000360... *
+>Cluster 515
+0	6aa, >C3-ANOX-000368... *
+>Cluster 516
+0	6aa, >C3-ANOX-000386... *
+1	3aa, >C3-MAOP-AOPP-000274... at 100.00%
+>Cluster 517
+0	6aa, >C3-ANOX-000412... *
+>Cluster 518
+0	6aa, >C3-ANOX-000449... *
+>Cluster 519
+0	3aa, >C3-ANOX-000220... at 100.00%
+1	5aa, >C3-ANOX-000481... at 100.00%
+2	6aa, >C3-ANOX-000482... *
+>Cluster 520
+0	6aa, >C3-ANOX-000483... *
+>Cluster 521
+0	6aa, >C3-ANOX-000487... *
+>Cluster 522
+0	6aa, >C3-ANOX-000488... *
+>Cluster 523
+0	3aa, >C3-ANOX-000124... at 100.00%
+1	6aa, >C3-ANOX-000491... *
+>Cluster 524
+0	6aa, >C3-ANOX-000492... *
+>Cluster 525
+0	6aa, >C3-ANOX-000493... *
+>Cluster 526
+0	6aa, >C3-ANOX-000504... *
+>Cluster 527
+0	6aa, >C3-ANOX-000512... *
+>Cluster 528
+0	6aa, >C3-ANOX-000519... *
+>Cluster 529
+0	6aa, >C3-ANOX-000561... *
+>Cluster 530
+0	6aa, >C3-ANOX-000570... *
+>Cluster 531
+0	6aa, >C3-ANOX-000572... *
+1	3aa, >C3-MAOP-AOPP-000062... at 100.00%
+>Cluster 532
+0	6aa, >C3-ANOX-000575... *
+>Cluster 533
+0	6aa, >C3-ANOX-000596... *
+>Cluster 534
+0	6aa, >C3-ANOX-000599... *
+>Cluster 535
+0	6aa, >C3-ANOX-000619... *
+>Cluster 536
+0	3aa, >C3-ANOX-000237... at 100.00%
+1	6aa, >C3-ANOX-000679... *
+>Cluster 537
+0	6aa, >C3-ANOX-000681... *
+>Cluster 538
+0	6aa, >C3-ANOX-000682... *
+>Cluster 539
+0	3aa, >C3-ANOX-000445... at 100.00%
+1	6aa, >C3-ANOX-000683... *
+>Cluster 540
+0	3aa, >C3-ANOX-000629... at 100.00%
+1	6aa, >C3-ANOX-000696... *
+2	3aa, >C3-MAOP-AOPP-000137... at 100.00%
+>Cluster 541
+0	6aa, >C3-MAOP-ANOXPP-000017... *
+>Cluster 542
+0	6aa, >C3-MAOP-ANOXPP-000022... *
+>Cluster 543
+0	6aa, >C3-MAOP-ANOXPP-000056... *
+>Cluster 544
+0	6aa, >C3-MAOP-ANOXPP-000062... *
+>Cluster 545
+0	6aa, >C3-MAOP-ANOXPP-000068... *
+>Cluster 546
+0	6aa, >C3-MAOP-ANOXPP-000101... *
+>Cluster 547
+0	6aa, >C3-MAOP-ANOXPP-000118... *
+>Cluster 548
+0	6aa, >C3-MAOP-ANOXPP-000157... *
+>Cluster 549
+0	6aa, >C3-MAOP-ANOXPP-000209... *
+>Cluster 550
+0	6aa, >C3-MAOP-ANOXPP-000230... *
+>Cluster 551
+0	6aa, >C3-MAOP-ANOXPP-000250... *
+>Cluster 552
+0	3aa, >C3-ANOX-000271... at 100.00%
+1	6aa, >C3-MAOP-ANOXPP-000277... *
+>Cluster 553
+0	6aa, >C3-MAOP-ANOXPP-000278... *
+>Cluster 554
+0	6aa, >C3-MAOP-ANOXPP-000286... *
+>Cluster 555
+0	6aa, >C3-MAOP-ANOXPP-000302... *
+>Cluster 556
+0	6aa, >C3-MAOP-ANOXPP-000399... *
+>Cluster 557
+0	6aa, >C3-MAOP-ANOXPP-000441... *
+>Cluster 558
+0	6aa, >C3-MAOP-ANOXPP-000462... *
+>Cluster 559
+0	6aa, >C3-MAOP-ANOXPP-000471... *
+>Cluster 560
+0	6aa, >C3-MAOP-ANOXPP-000480... *
+1	3aa, >C3-MAOP-ANOXPP-000503... at 100.00%
+>Cluster 561
+0	6aa, >C3-MAOP-ANOXPP-000623... *
+>Cluster 562
+0	6aa, >C3-MAOP-ANOXPP-000625... *
+>Cluster 563
+0	6aa, >C3-MAOP-ANOXPP-000732... *
+>Cluster 564
+0	6aa, >C3-MAOP-ANOXPP-000745... *
+>Cluster 565
+0	6aa, >C3-MAOP-ANOXPP-000752... *
+1	3aa, >C3-MAOP-ANOXPP-000941... at 100.00%
+>Cluster 566
+0	6aa, >C3-MAOP-ANOXPP-000789... *
+>Cluster 567
+0	6aa, >C3-MAOP-ANOXPP-000820... *
+>Cluster 568
+0	3aa, >C3-MAOP-ANOXPP-000767... at 100.00%
+1	6aa, >C3-MAOP-ANOXPP-000874... *
+>Cluster 569
+0	6aa, >C3-MAOP-ANOXPP-000903... *
+>Cluster 570
+0	3aa, >C3-ANOX-000104... at 100.00%
+1	6aa, >C3-MAOP-ANOXPP-000907... *
+>Cluster 571
+0	6aa, >C3-MAOP-ANOXPP-000928... *
+>Cluster 572
+0	6aa, >C3-MAOP-ANOXPP-000940... *
+>Cluster 573
+0	6aa, >C3-MAOP-ANOXPP-000943... *
+>Cluster 574
+0	6aa, >C3-MAOP-ANOXPP-000972... *
+>Cluster 575
+0	6aa, >C3-MAOP-ANOXPP-001032... *
+>Cluster 576
+0	6aa, >C3-MAOP-ANOXPP-001055... *
+>Cluster 577
+0	6aa, >C3-MAOP-AOPP-000640... *
+>Cluster 578
+0	6aa, >C3-MAOP-AOPP-000647... *
+>Cluster 579
+0	6aa, >C3-MAOP-AOPP-000660... *
+>Cluster 580
+0	3aa, >C3-ANOX-000598... at 100.00%
+1	6aa, >C3-MAOP-AOPP-000691... *
+>Cluster 581
+0	6aa, >C3-MAOP-AOPP-000698... *
+>Cluster 582
+0	6aa, >C3-MAOP-AOPP-000699... *
+>Cluster 583
+0	6aa, >C3-MAOP-AOPP-000700... *
+>Cluster 584
+0	6aa, >C3-MAOP-AOPP-000701... *
+>Cluster 585
+0	6aa, >C3-MAOP-AOPP-000702... *
+>Cluster 586
+0	6aa, >C3-MAOP-AOPP-000703... *
+>Cluster 587
+0	6aa, >C3-MAOP-AOPP-000704... *
+>Cluster 588
+0	4aa, >C3-ANOX-000550... at 100.00%
+1	6aa, >C3-MAOP-AOPP-000705... *
+>Cluster 589
+0	6aa, >C3-MAOP-AOPP-000706... *
+>Cluster 590
+0	6aa, >C3-MAOP-AOPP-000709... *
+>Cluster 591
+0	6aa, >C3-MAOP-AOPP-000710... *
+>Cluster 592
+0	6aa, >C3-MAOP-AOPP-000711... *
+>Cluster 593
+0	3aa, >C3-MAOP-ANOXPP-000345... at 100.00%
+1	6aa, >C3-MAOP-AOPP-000712... *
+>Cluster 594
+0	6aa, >C3-MAOP-AOPP-000713... *
+>Cluster 595
+0	6aa, >C3-MAOP-AOPP-000714... *
+>Cluster 596
+0	6aa, >C3-MAOP-AOPP-000715... *
+>Cluster 597
+0	5aa, >C3-MAOP-AOPP-000621... at 100.00%
+1	6aa, >C3-MAOP-AOPP-000716... *
+>Cluster 598
+0	6aa, >C3-MAOP-AOPP-000718... *
+>Cluster 599
+0	3aa, >C3-ANOX-000197... at 100.00%
+1	6aa, >C3-MAOP-AOPP-000719... *
+>Cluster 600
+0	6aa, >C3-MAOP-AOPP-000721... *
+>Cluster 601
+0	6aa, >C3-MAOP-AOPP-000722... *
+>Cluster 602
+0	3aa, >C3-ANOX-000253... at 100.00%
+1	3aa, >C3-ANOX-000264... at 100.00%
+2	6aa, >C3-MAOP-AOPP-000725... *
+>Cluster 603
+0	6aa, >C3-MAOP-AOPP-000726... *
+>Cluster 604
+0	3aa, >C3-ANOX-000103... at 100.00%
+1	6aa, >C3-MAOP-AOPP-000727... *
+>Cluster 605
+0	6aa, >C3-MAOP-AOPP-001380... *
+>Cluster 606
+0	6aa, >C3-MAOP-AOPP-001401... *
+>Cluster 607
+0	5aa, >C3-MAOP-AOPP-000617... at 100.00%
+1	6aa, >C3-MAOP-AOPP-001403... *
+>Cluster 608
+0	6aa, >C3-MAOP-AOPP-001405... *
+>Cluster 609
+0	5aa, >C3-ANOX-000014... *
+>Cluster 610
+0	5aa, >C3-ANOX-000016... *
+>Cluster 611
+0	5aa, >C3-ANOX-000037... *
+>Cluster 612
+0	5aa, >C3-ANOX-000090... *
+1	4aa, >C3-ANOX-000094... at 100.00%
+2	3aa, >C3-ANOX-000096... at 100.00%
+>Cluster 613
+0	5aa, >C3-ANOX-000293... *
+>Cluster 614
+0	5aa, >C3-ANOX-000295... *
+>Cluster 615
+0	5aa, >C3-ANOX-000296... *
+>Cluster 616
+0	5aa, >C3-ANOX-000306... *
+1	3aa, >C3-MAOP-ANOXPP-000613... at 100.00%
+>Cluster 617
+0	5aa, >C3-ANOX-000307... *
+1	3aa, >C3-MAOP-ANOXPP-000859... at 100.00%
+>Cluster 618
+0	5aa, >C3-ANOX-000328... *
+>Cluster 619
+0	5aa, >C3-ANOX-000329... *
+>Cluster 620
+0	5aa, >C3-ANOX-000331... *
+>Cluster 621
+0	5aa, >C3-ANOX-000335... *
+>Cluster 622
+0	5aa, >C3-ANOX-000337... *
+>Cluster 623
+0	5aa, >C3-ANOX-000338... *
+>Cluster 624
+0	5aa, >C3-ANOX-000339... *
+>Cluster 625
+0	5aa, >C3-ANOX-000346... *
+>Cluster 626
+0	5aa, >C3-ANOX-000354... *
+>Cluster 627
+0	5aa, >C3-ANOX-000361... *
+>Cluster 628
+0	5aa, >C3-ANOX-000362... *
+>Cluster 629
+0	5aa, >C3-ANOX-000365... *
+>Cluster 630
+0	5aa, >C3-ANOX-000366... *
+>Cluster 631
+0	5aa, >C3-ANOX-000376... *
+>Cluster 632
+0	3aa, >C3-ANOX-000114... at 100.00%
+1	5aa, >C3-ANOX-000377... *
+>Cluster 633
+0	5aa, >C3-ANOX-000378... *
+1	3aa, >C3-MAOP-AOPP-000251... at 100.00%
+>Cluster 634
+0	5aa, >C3-ANOX-000380... *
+>Cluster 635
+0	5aa, >C3-ANOX-000385... *
+>Cluster 636
+0	5aa, >C3-ANOX-000395... *
+>Cluster 637
+0	5aa, >C3-ANOX-000401... *
+>Cluster 638
+0	5aa, >C3-ANOX-000402... *
+>Cluster 639
+0	5aa, >C3-ANOX-000427... *
+1	4aa, >C3-MAOP-AOPP-000495... at 100.00%
+>Cluster 640
+0	5aa, >C3-ANOX-000428... *
+>Cluster 641
+0	5aa, >C3-ANOX-000499... *
+>Cluster 642
+0	5aa, >C3-ANOX-000500... *
+>Cluster 643
+0	5aa, >C3-ANOX-000501... *
+>Cluster 644
+0	5aa, >C3-ANOX-000502... *
+>Cluster 645
+0	5aa, >C3-ANOX-000503... *
+>Cluster 646
+0	5aa, >C3-ANOX-000505... *
+>Cluster 647
+0	5aa, >C3-ANOX-000511... *
+>Cluster 648
+0	5aa, >C3-ANOX-000516... *
+>Cluster 649
+0	5aa, >C3-ANOX-000527... *
+1	4aa, >C3-ANOX-000534... at 100.00%
+>Cluster 650
+0	5aa, >C3-ANOX-000539... *
+>Cluster 651
+0	5aa, >C3-ANOX-000541... *
+>Cluster 652
+0	5aa, >C3-ANOX-000542... *
+1	3aa, >C3-ANOX-000649... at 100.00%
+>Cluster 653
+0	5aa, >C3-ANOX-000559... *
+>Cluster 654
+0	5aa, >C3-ANOX-000560... *
+1	3aa, >C3-MAOP-AOPP-001292... at 100.00%
+>Cluster 655
+0	5aa, >C3-ANOX-000569... *
+>Cluster 656
+0	5aa, >C3-ANOX-000571... *
+>Cluster 657
+0	5aa, >C3-ANOX-000586... *
+>Cluster 658
+0	5aa, >C3-ANOX-000588... *
+>Cluster 659
+0	3aa, >C3-ANOX-000243... at 100.00%
+1	5aa, >C3-ANOX-000594... *
+>Cluster 660
+0	5aa, >C3-ANOX-000595... *
+>Cluster 661
+0	3aa, >C3-ANOX-000223... at 100.00%
+1	5aa, >C3-ANOX-000597... *
+>Cluster 662
+0	5aa, >C3-ANOX-000605... *
+1	3aa, >C3-MAOP-AOPP-000243... at 100.00%
+>Cluster 663
+0	5aa, >C3-ANOX-000608... *
+>Cluster 664
+0	5aa, >C3-ANOX-000612... *
+>Cluster 665
+0	5aa, >C3-ANOX-000617... *
+>Cluster 666
+0	5aa, >C3-ANOX-000618... *
+>Cluster 667
+0	5aa, >C3-ANOX-000620... *
+>Cluster 668
+0	5aa, >C3-ANOX-000657... *
+>Cluster 669
+0	5aa, >C3-ANOX-000658... *
+>Cluster 670
+0	3aa, >C3-ANOX-000122... at 100.00%
+1	5aa, >C3-ANOX-000659... *
+2	3aa, >C3-MAOP-ANOXPP-000828... at 100.00%
+>Cluster 671
+0	5aa, >C3-ANOX-000667... *
+>Cluster 672
+0	5aa, >C3-ANOX-000668... *
+>Cluster 673
+0	5aa, >C3-ANOX-000675... *
+1	4aa, >C3-MAOP-ANOXPP-001007... at 100.00%
+>Cluster 674
+0	5aa, >C3-ANOX-000676... *
+>Cluster 675
+0	5aa, >C3-ANOX-000677... *
+>Cluster 676
+0	5aa, >C3-ANOX-000680... *
+>Cluster 677
+0	5aa, >C3-ANOX-000699... *
+>Cluster 678
+0	5aa, >C3-MAOP-ANOXPP-000045... *
+>Cluster 679
+0	5aa, >C3-MAOP-ANOXPP-000112... *
+>Cluster 680
+0	5aa, >C3-MAOP-ANOXPP-000162... *
+>Cluster 681
+0	5aa, >C3-MAOP-ANOXPP-000195... *
+>Cluster 682
+0	5aa, >C3-MAOP-ANOXPP-000199... *
+>Cluster 683
+0	5aa, >C3-MAOP-ANOXPP-000210... *
+>Cluster 684
+0	5aa, >C3-MAOP-ANOXPP-000245... *
+>Cluster 685
+0	5aa, >C3-MAOP-ANOXPP-000247... *
+>Cluster 686
+0	3aa, >C3-ANOX-000188... at 100.00%
+1	3aa, >C3-MAOP-ANOXPP-000152... at 100.00%
+2	5aa, >C3-MAOP-ANOXPP-000292... *
+>Cluster 687
+0	5aa, >C3-MAOP-ANOXPP-000318... *
+>Cluster 688
+0	5aa, >C3-MAOP-ANOXPP-000401... *
+>Cluster 689
+0	5aa, >C3-MAOP-ANOXPP-000412... *
+>Cluster 690
+0	5aa, >C3-MAOP-ANOXPP-000428... *
+1	4aa, >C3-MAOP-ANOXPP-000491... at 100.00%
+>Cluster 691
+0	5aa, >C3-MAOP-ANOXPP-000494... *
+>Cluster 692
+0	5aa, >C3-MAOP-ANOXPP-000557... *
+>Cluster 693
+0	5aa, >C3-MAOP-ANOXPP-000577... *
+1	3aa, >C3-MAOP-ANOXPP-000693... at 100.00%
+>Cluster 694
+0	5aa, >C3-MAOP-ANOXPP-000599... *
+>Cluster 695
+0	5aa, >C3-MAOP-ANOXPP-000622... *
+>Cluster 696
+0	5aa, >C3-MAOP-ANOXPP-000630... *
+>Cluster 697
+0	5aa, >C3-MAOP-ANOXPP-000680... *
+>Cluster 698
+0	5aa, >C3-MAOP-ANOXPP-000710... *
+>Cluster 699
+0	3aa, >C3-ANOX-000125... at 100.00%
+1	5aa, >C3-MAOP-ANOXPP-000713... *
+>Cluster 700
+0	5aa, >C3-MAOP-ANOXPP-000827... *
+1	4aa, >C3-MAOP-AOPP-000491... at 100.00%
+>Cluster 701
+0	5aa, >C3-MAOP-ANOXPP-000904... *
+>Cluster 702
+0	5aa, >C3-MAOP-ANOXPP-000932... *
+>Cluster 703
+0	5aa, >C3-MAOP-ANOXPP-000948... *
+>Cluster 704
+0	5aa, >C3-MAOP-ANOXPP-000951... *
+>Cluster 705
+0	5aa, >C3-MAOP-ANOXPP-001010... *
+>Cluster 706
+0	5aa, >C3-MAOP-ANOXPP-001043... *
+>Cluster 707
+0	5aa, >C3-MAOP-AOPP-000591... *
+>Cluster 708
+0	5aa, >C3-MAOP-AOPP-000592... *
+>Cluster 709
+0	5aa, >C3-MAOP-AOPP-000593... *
+>Cluster 710
+0	5aa, >C3-MAOP-AOPP-000595... *
+>Cluster 711
+0	5aa, >C3-MAOP-AOPP-000596... *
+>Cluster 712
+0	5aa, >C3-MAOP-AOPP-000597... *
+>Cluster 713
+0	3aa, >C3-ANOX-000115... at 100.00%
+1	5aa, >C3-MAOP-AOPP-000598... *
+>Cluster 714
+0	5aa, >C3-MAOP-AOPP-000599... *
+>Cluster 715
+0	5aa, >C3-MAOP-AOPP-000600... *
+>Cluster 716
+0	5aa, >C3-MAOP-AOPP-000601... *
+>Cluster 717
+0	5aa, >C3-MAOP-AOPP-000602... *
+>Cluster 718
+0	5aa, >C3-MAOP-AOPP-000603... *
+>Cluster 719
+0	5aa, >C3-MAOP-AOPP-000604... *
+>Cluster 720
+0	5aa, >C3-MAOP-AOPP-000605... *
+>Cluster 721
+0	5aa, >C3-MAOP-AOPP-000606... *
+>Cluster 722
+0	5aa, >C3-MAOP-AOPP-000607... *
+>Cluster 723
+0	5aa, >C3-MAOP-AOPP-000608... *
+>Cluster 724
+0	5aa, >C3-MAOP-AOPP-000609... *
+>Cluster 725
+0	5aa, >C3-MAOP-AOPP-000610... *
+>Cluster 726
+0	5aa, >C3-MAOP-AOPP-000611... *
+>Cluster 727
+0	5aa, >C3-MAOP-AOPP-000612... *
+>Cluster 728
+0	5aa, >C3-MAOP-AOPP-000613... *
+>Cluster 729
+0	5aa, >C3-MAOP-AOPP-000614... *
+>Cluster 730
+0	5aa, >C3-MAOP-AOPP-000615... *
+>Cluster 731
+0	5aa, >C3-MAOP-AOPP-000616... *
+>Cluster 732
+0	5aa, >C3-MAOP-AOPP-000618... *
+>Cluster 733
+0	5aa, >C3-MAOP-AOPP-000619... *
+>Cluster 734
+0	5aa, >C3-MAOP-AOPP-000620... *
+>Cluster 735
+0	5aa, >C3-MAOP-AOPP-001368... *
+>Cluster 736
+0	5aa, >C3-MAOP-AOPP-001370... *
+>Cluster 737
+0	5aa, >C3-MAOP-AOPP-001371... *
+>Cluster 738
+0	3aa, >C3-ANOX-000470... at 100.00%
+1	5aa, >C3-MAOP-AOPP-001372... *
+>Cluster 739
+0	5aa, >C3-MAOP-AOPP-001373... *
+>Cluster 740
+0	3aa, >C3-ANOX-000009... at 100.00%
+1	4aa, >C3-ANOX-000010... *
+>Cluster 741
+0	4aa, >C3-ANOX-000034... *
+>Cluster 742
+0	4aa, >C3-ANOX-000071... *
+>Cluster 743
+0	4aa, >C3-ANOX-000072... *
+>Cluster 744
+0	4aa, >C3-ANOX-000077... *
+>Cluster 745
+0	4aa, >C3-ANOX-000078... *
+>Cluster 746
+0	4aa, >C3-ANOX-000080... *
+>Cluster 747
+0	4aa, >C3-ANOX-000082... *
+1	3aa, >C3-ANOX-000101... at 100.00%
+>Cluster 748
+0	4aa, >C3-ANOX-000085... *
+1	3aa, >C3-ANOX-000240... at 100.00%
+>Cluster 749
+0	4aa, >C3-ANOX-000087... *
+>Cluster 750
+0	4aa, >C3-ANOX-000088... *
+>Cluster 751
+0	4aa, >C3-ANOX-000089... *
+1	3aa, >C3-ANOX-000091... at 100.00%
+>Cluster 752
+0	4aa, >C3-ANOX-000092... *
+1	3aa, >C3-ANOX-000099... at 100.00%
+>Cluster 753
+0	4aa, >C3-ANOX-000095... *
+>Cluster 754
+0	4aa, >C3-ANOX-000282... *
+>Cluster 755
+0	4aa, >C3-ANOX-000283... *
+>Cluster 756
+0	4aa, >C3-ANOX-000286... *
+>Cluster 757
+0	4aa, >C3-ANOX-000290... *
+>Cluster 758
+0	4aa, >C3-ANOX-000298... *
+>Cluster 759
+0	4aa, >C3-ANOX-000326... *
+>Cluster 760
+0	4aa, >C3-ANOX-000330... *
+>Cluster 761
+0	4aa, >C3-ANOX-000332... *
+>Cluster 762
+0	4aa, >C3-ANOX-000333... *
+>Cluster 763
+0	4aa, >C3-ANOX-000334... *
+>Cluster 764
+0	4aa, >C3-ANOX-000336... *
+>Cluster 765
+0	4aa, >C3-ANOX-000340... *
+>Cluster 766
+0	4aa, >C3-ANOX-000347... *
+>Cluster 767
+0	4aa, >C3-ANOX-000348... *
+>Cluster 768
+0	4aa, >C3-ANOX-000350... *
+>Cluster 769
+0	4aa, >C3-ANOX-000355... *
+>Cluster 770
+0	4aa, >C3-ANOX-000367... *
+>Cluster 771
+0	4aa, >C3-ANOX-000381... *
+>Cluster 772
+0	4aa, >C3-ANOX-000382... *
+>Cluster 773
+0	4aa, >C3-ANOX-000383... *
+>Cluster 774
+0	3aa, >C3-ANOX-000389... at 100.00%
+1	4aa, >C3-ANOX-000391... *
+>Cluster 775
+0	4aa, >C3-ANOX-000415... *
+>Cluster 776
+0	4aa, >C3-ANOX-000424... *
+>Cluster 777
+0	3aa, >C3-ANOX-000001... at 100.00%
+1	4aa, >C3-ANOX-000434... *
+>Cluster 778
+0	4aa, >C3-ANOX-000435... *
+>Cluster 779
+0	4aa, >C3-ANOX-000446... *
+>Cluster 780
+0	4aa, >C3-ANOX-000448... *
+>Cluster 781
+0	4aa, >C3-ANOX-000509... *
+>Cluster 782
+0	4aa, >C3-ANOX-000513... *
+>Cluster 783
+0	4aa, >C3-ANOX-000528... *
+>Cluster 784
+0	4aa, >C3-ANOX-000533... *
+>Cluster 785
+0	4aa, >C3-ANOX-000538... *
+1	3aa, >C3-ANOX-000548... at 100.00%
+>Cluster 786
+0	4aa, >C3-ANOX-000546... *
+1	3aa, >C3-MAOP-ANOXPP-000235... at 100.00%
+>Cluster 787
+0	4aa, >C3-ANOX-000551... *
+>Cluster 788
+0	4aa, >C3-ANOX-000554... *
+>Cluster 789
+0	4aa, >C3-ANOX-000580... *
+>Cluster 790
+0	4aa, >C3-ANOX-000589... *
+>Cluster 791
+0	4aa, >C3-ANOX-000590... *
+>Cluster 792
+0	4aa, >C3-ANOX-000591... *
+1	3aa, >C3-MAOP-ANOXPP-001033... at 100.00%
+>Cluster 793
+0	4aa, >C3-ANOX-000600... *
+>Cluster 794
+0	4aa, >C3-ANOX-000601... *
+>Cluster 795
+0	4aa, >C3-ANOX-000660... *
+>Cluster 796
+0	4aa, >C3-ANOX-000665... *
+>Cluster 797
+0	4aa, >C3-ANOX-000669... *
+>Cluster 798
+0	4aa, >C3-ANOX-000670... *
+>Cluster 799
+0	4aa, >C3-MAOP-ANOXPP-000225... *
+>Cluster 800
+0	4aa, >C3-MAOP-ANOXPP-000264... *
+>Cluster 801
+0	3aa, >C3-ANOX-000514... at 100.00%
+1	4aa, >C3-MAOP-ANOXPP-000295... *
+>Cluster 802
+0	4aa, >C3-MAOP-ANOXPP-000568... *
+>Cluster 803
+0	4aa, >C3-MAOP-ANOXPP-000649... *
+>Cluster 804
+0	4aa, >C3-MAOP-ANOXPP-000773... *
+>Cluster 805
+0	4aa, >C3-MAOP-ANOXPP-000918... *
+>Cluster 806
+0	4aa, >C3-MAOP-ANOXPP-000957... *
+>Cluster 807
+0	4aa, >C3-MAOP-ANOXPP-000963... *
+>Cluster 808
+0	4aa, >C3-MAOP-ANOXPP-000992... *
+>Cluster 809
+0	4aa, >C3-MAOP-AOPP-000420... *
+>Cluster 810
+0	4aa, >C3-MAOP-AOPP-000456... *
+>Cluster 811
+0	4aa, >C3-MAOP-AOPP-000485... *
+>Cluster 812
+0	4aa, >C3-MAOP-AOPP-000486... *
+>Cluster 813
+0	4aa, >C3-MAOP-AOPP-000487... *
+>Cluster 814
+0	4aa, >C3-MAOP-AOPP-000492... *
+>Cluster 815
+0	4aa, >C3-MAOP-AOPP-000493... *
+>Cluster 816
+0	4aa, >C3-MAOP-AOPP-000494... *
+>Cluster 817
+0	4aa, >C3-MAOP-AOPP-000496... *
+>Cluster 818
+0	4aa, >C3-MAOP-AOPP-000497... *
+>Cluster 819
+0	4aa, >C3-MAOP-AOPP-000498... *
+>Cluster 820
+0	3aa, >C3-ANOX-000344... at 100.00%
+1	4aa, >C3-MAOP-AOPP-001348... *
+>Cluster 821
+0	3aa, >C3-ANOX-000628... at 100.00%
+1	4aa, >C3-MAOP-AOPP-001350... *
+>Cluster 822
+0	4aa, >C3-MAOP-AOPP-001351... *
+>Cluster 823
+0	3aa, >C3-ANOX-000017... *
+>Cluster 824
+0	3aa, >C3-ANOX-000105... *
+>Cluster 825
+0	3aa, >C3-ANOX-000106... *
+>Cluster 826
+0	3aa, >C3-ANOX-000107... *
+>Cluster 827
+0	3aa, >C3-ANOX-000108... *
+>Cluster 828
+0	3aa, >C3-ANOX-000112... *
+>Cluster 829
+0	3aa, >C3-ANOX-000116... *
+>Cluster 830
+0	3aa, >C3-ANOX-000118... *
+>Cluster 831
+0	3aa, >C3-ANOX-000120... *
+>Cluster 832
+0	3aa, >C3-ANOX-000121... *
+>Cluster 833
+0	3aa, >C3-ANOX-000123... *
+>Cluster 834
+0	3aa, >C3-ANOX-000126... *
+>Cluster 835
+0	3aa, >C3-ANOX-000128... *
+>Cluster 836
+0	3aa, >C3-ANOX-000129... *
+>Cluster 837
+0	3aa, >C3-ANOX-000130... *
+>Cluster 838
+0	3aa, >C3-ANOX-000131... *
+>Cluster 839
+0	3aa, >C3-ANOX-000132... *
+>Cluster 840
+0	3aa, >C3-ANOX-000133... *
+>Cluster 841
+0	3aa, >C3-ANOX-000134... *
+>Cluster 842
+0	3aa, >C3-ANOX-000135... *
+>Cluster 843
+0	3aa, >C3-ANOX-000136... *
+>Cluster 844
+0	3aa, >C3-ANOX-000137... *
+>Cluster 845
+0	3aa, >C3-ANOX-000139... *
+>Cluster 846
+0	3aa, >C3-ANOX-000140... *
+>Cluster 847
+0	3aa, >C3-ANOX-000141... *
+>Cluster 848
+0	3aa, >C3-ANOX-000142... *
+>Cluster 849
+0	3aa, >C3-ANOX-000143... *
+>Cluster 850
+0	3aa, >C3-ANOX-000146... *
+>Cluster 851
+0	3aa, >C3-ANOX-000148... *
+>Cluster 852
+0	3aa, >C3-ANOX-000150... *
+>Cluster 853
+0	3aa, >C3-ANOX-000152... *
+>Cluster 854
+0	3aa, >C3-ANOX-000154... *
+>Cluster 855
+0	3aa, >C3-ANOX-000156... *
+>Cluster 856
+0	3aa, >C3-ANOX-000157... *
+>Cluster 857
+0	3aa, >C3-ANOX-000158... *
+>Cluster 858
+0	3aa, >C3-ANOX-000159... *
+>Cluster 859
+0	3aa, >C3-ANOX-000160... *
+>Cluster 860
+0	3aa, >C3-ANOX-000161... *
+>Cluster 861
+0	3aa, >C3-ANOX-000162... *
+>Cluster 862
+0	3aa, >C3-ANOX-000163... *
+>Cluster 863
+0	3aa, >C3-ANOX-000165... *
+>Cluster 864
+0	3aa, >C3-ANOX-000167... *
+>Cluster 865
+0	3aa, >C3-ANOX-000168... *
+>Cluster 866
+0	3aa, >C3-ANOX-000169... *
+>Cluster 867
+0	3aa, >C3-ANOX-000171... *
+>Cluster 868
+0	3aa, >C3-ANOX-000172... *
+>Cluster 869
+0	3aa, >C3-ANOX-000173... *
+>Cluster 870
+0	3aa, >C3-ANOX-000174... *
+>Cluster 871
+0	3aa, >C3-ANOX-000175... *
+>Cluster 872
+0	3aa, >C3-ANOX-000176... *
+>Cluster 873
+0	3aa, >C3-ANOX-000177... *
+>Cluster 874
+0	3aa, >C3-ANOX-000178... *
+>Cluster 875
+0	3aa, >C3-ANOX-000179... *
+>Cluster 876
+0	3aa, >C3-ANOX-000180... *
+>Cluster 877
+0	3aa, >C3-ANOX-000181... *
+>Cluster 878
+0	3aa, >C3-ANOX-000183... *
+>Cluster 879
+0	3aa, >C3-ANOX-000184... *
+>Cluster 880
+0	3aa, >C3-ANOX-000185... *
+>Cluster 881
+0	3aa, >C3-ANOX-000187... *
+>Cluster 882
+0	3aa, >C3-ANOX-000189... *
+>Cluster 883
+0	3aa, >C3-ANOX-000190... *
+>Cluster 884
+0	3aa, >C3-ANOX-000191... *
+>Cluster 885
+0	3aa, >C3-ANOX-000193... *
+>Cluster 886
+0	3aa, >C3-ANOX-000194... *
+>Cluster 887
+0	3aa, >C3-ANOX-000195... *
+>Cluster 888
+0	3aa, >C3-ANOX-000196... *
+>Cluster 889
+0	3aa, >C3-ANOX-000198... *
+>Cluster 890
+0	3aa, >C3-ANOX-000199... *
+>Cluster 891
+0	3aa, >C3-ANOX-000200... *
+>Cluster 892
+0	3aa, >C3-ANOX-000202... *
+>Cluster 893
+0	3aa, >C3-ANOX-000203... *
+>Cluster 894
+0	3aa, >C3-ANOX-000204... *
+>Cluster 895
+0	3aa, >C3-ANOX-000205... *
+>Cluster 896
+0	3aa, >C3-ANOX-000207... *
+>Cluster 897
+0	3aa, >C3-ANOX-000208... *
+>Cluster 898
+0	3aa, >C3-ANOX-000209... *
+>Cluster 899
+0	3aa, >C3-ANOX-000210... *
+>Cluster 900
+0	3aa, >C3-ANOX-000211... *
+>Cluster 901
+0	3aa, >C3-ANOX-000212... *
+>Cluster 902
+0	3aa, >C3-ANOX-000213... *
+>Cluster 903
+0	3aa, >C3-ANOX-000214... *
+>Cluster 904
+0	3aa, >C3-ANOX-000215... *
+>Cluster 905
+0	3aa, >C3-ANOX-000216... *
+>Cluster 906
+0	3aa, >C3-ANOX-000217... *
+>Cluster 907
+0	3aa, >C3-ANOX-000218... *
+>Cluster 908
+0	3aa, >C3-ANOX-000219... *
+>Cluster 909
+0	3aa, >C3-ANOX-000222... *
+>Cluster 910
+0	3aa, >C3-ANOX-000224... *
+>Cluster 911
+0	3aa, >C3-ANOX-000225... *
+>Cluster 912
+0	3aa, >C3-ANOX-000226... *
+>Cluster 913
+0	3aa, >C3-ANOX-000227... *
+>Cluster 914
+0	3aa, >C3-ANOX-000228... *
+>Cluster 915
+0	3aa, >C3-ANOX-000229... *
+>Cluster 916
+0	3aa, >C3-ANOX-000230... *
+>Cluster 917
+0	3aa, >C3-ANOX-000231... *
+>Cluster 918
+0	3aa, >C3-ANOX-000232... *
+>Cluster 919
+0	3aa, >C3-ANOX-000233... *
+>Cluster 920
+0	3aa, >C3-ANOX-000234... *
+>Cluster 921
+0	3aa, >C3-ANOX-000235... *
+>Cluster 922
+0	3aa, >C3-ANOX-000236... *
+>Cluster 923
+0	3aa, >C3-ANOX-000238... *
+>Cluster 924
+0	3aa, >C3-ANOX-000239... *
+>Cluster 925
+0	3aa, >C3-ANOX-000242... *
+>Cluster 926
+0	3aa, >C3-ANOX-000244... *
+>Cluster 927
+0	3aa, >C3-ANOX-000245... *
+>Cluster 928
+0	3aa, >C3-ANOX-000246... *
+>Cluster 929
+0	3aa, >C3-ANOX-000247... *
+>Cluster 930
+0	3aa, >C3-ANOX-000248... *
+>Cluster 931
+0	3aa, >C3-ANOX-000250... *
+>Cluster 932
+0	3aa, >C3-ANOX-000251... *
+>Cluster 933
+0	3aa, >C3-ANOX-000252... *
+>Cluster 934
+0	3aa, >C3-ANOX-000254... *
+>Cluster 935
+0	3aa, >C3-ANOX-000255... *
+>Cluster 936
+0	3aa, >C3-ANOX-000257... *
+>Cluster 937
+0	3aa, >C3-ANOX-000258... *
+>Cluster 938
+0	3aa, >C3-ANOX-000259... *
+>Cluster 939
+0	3aa, >C3-ANOX-000260... *
+>Cluster 940
+0	3aa, >C3-ANOX-000262... *
+>Cluster 941
+0	3aa, >C3-ANOX-000265... *
+>Cluster 942
+0	3aa, >C3-ANOX-000267... *
+>Cluster 943
+0	3aa, >C3-ANOX-000268... *
+>Cluster 944
+0	3aa, >C3-ANOX-000269... *
+>Cluster 945
+0	3aa, >C3-ANOX-000270... *
+>Cluster 946
+0	3aa, >C3-ANOX-000291... *
+>Cluster 947
+0	3aa, >C3-ANOX-000342... *
+>Cluster 948
+0	3aa, >C3-ANOX-000343... *
+>Cluster 949
+0	3aa, >C3-ANOX-000345... *
+>Cluster 950
+0	3aa, >C3-ANOX-000356... *
+>Cluster 951
+0	3aa, >C3-ANOX-000357... *
+>Cluster 952
+0	3aa, >C3-ANOX-000359... *
+>Cluster 953
+0	3aa, >C3-ANOX-000379... *
+>Cluster 954
+0	3aa, >C3-ANOX-000444... *
+>Cluster 955
+0	3aa, >C3-ANOX-000498... *
+>Cluster 956
+0	3aa, >C3-ANOX-000508... *
+>Cluster 957
+0	3aa, >C3-ANOX-000553... *
+>Cluster 958
+0	3aa, >C3-ANOX-000593... *
+>Cluster 959
+0	3aa, >C3-ANOX-000627... *
+>Cluster 960
+0	3aa, >C3-ANOX-000632... *
+>Cluster 961
+0	3aa, >C3-ANOX-000633... *
+>Cluster 962
+0	3aa, >C3-ANOX-000634... *
+>Cluster 963
+0	3aa, >C3-ANOX-000635... *
+>Cluster 964
+0	3aa, >C3-ANOX-000636... *
+>Cluster 965
+0	3aa, >C3-ANOX-000637... *
+>Cluster 966
+0	3aa, >C3-ANOX-000638... *
+>Cluster 967
+0	3aa, >C3-ANOX-000639... *
+>Cluster 968
+0	3aa, >C3-ANOX-000640... *
+>Cluster 969
+0	3aa, >C3-ANOX-000641... *
+>Cluster 970
+0	3aa, >C3-ANOX-000642... *
+>Cluster 971
+0	3aa, >C3-ANOX-000648... *
+>Cluster 972
+0	3aa, >C3-ANOX-000650... *
+>Cluster 973
+0	3aa, >C3-ANOX-000651... *
+>Cluster 974
+0	3aa, >C3-ANOX-000652... *
+>Cluster 975
+0	3aa, >C3-ANOX-000653... *
+>Cluster 976
+0	3aa, >C3-MAOP-ANOXPP-000015... *
+>Cluster 977
+0	3aa, >C3-MAOP-ANOXPP-000050... *
+>Cluster 978
+0	3aa, >C3-MAOP-ANOXPP-000061... *
+>Cluster 979
+0	3aa, >C3-MAOP-ANOXPP-000066... *
+>Cluster 980
+0	3aa, >C3-MAOP-ANOXPP-000067... *
+>Cluster 981
+0	3aa, >C3-MAOP-ANOXPP-000087... *
+>Cluster 982
+0	3aa, >C3-MAOP-ANOXPP-000088... *
+>Cluster 983
+0	3aa, >C3-MAOP-ANOXPP-000111... *
+>Cluster 984
+0	3aa, >C3-MAOP-ANOXPP-000158... *
+>Cluster 985
+0	3aa, >C3-MAOP-ANOXPP-000171... *
+>Cluster 986
+0	3aa, >C3-MAOP-ANOXPP-000181... *
+>Cluster 987
+0	3aa, >C3-MAOP-ANOXPP-000203... *
+>Cluster 988
+0	3aa, >C3-MAOP-ANOXPP-000280... *
+>Cluster 989
+0	3aa, >C3-MAOP-ANOXPP-000298... *
+>Cluster 990
+0	3aa, >C3-MAOP-ANOXPP-000313... *
+>Cluster 991
+0	3aa, >C3-MAOP-ANOXPP-000337... *
+>Cluster 992
+0	3aa, >C3-MAOP-ANOXPP-000348... *
+>Cluster 993
+0	3aa, >C3-MAOP-ANOXPP-000367... *
+>Cluster 994
+0	3aa, >C3-MAOP-ANOXPP-000389... *
+>Cluster 995
+0	3aa, >C3-MAOP-ANOXPP-000416... *
+>Cluster 996
+0	3aa, >C3-MAOP-ANOXPP-000553... *
+>Cluster 997
+0	3aa, >C3-MAOP-ANOXPP-000570... *
+>Cluster 998
+0	3aa, >C3-MAOP-ANOXPP-000581... *
+>Cluster 999
+0	3aa, >C3-MAOP-ANOXPP-000592... *
+>Cluster 1000
+0	3aa, >C3-MAOP-ANOXPP-000645... *
+>Cluster 1001
+0	3aa, >C3-MAOP-ANOXPP-000723... *
+>Cluster 1002
+0	3aa, >C3-MAOP-ANOXPP-000728... *
+>Cluster 1003
+0	3aa, >C3-MAOP-ANOXPP-000791... *
+>Cluster 1004
+0	3aa, >C3-MAOP-ANOXPP-000855... *
+>Cluster 1005
+0	3aa, >C3-MAOP-ANOXPP-000866... *
+>Cluster 1006
+0	3aa, >C3-MAOP-ANOXPP-000949... *
+>Cluster 1007
+0	3aa, >C3-MAOP-ANOXPP-000973... *
+>Cluster 1008
+0	3aa, >C3-MAOP-ANOXPP-000976... *
+>Cluster 1009
+0	3aa, >C3-MAOP-ANOXPP-001008... *
+>Cluster 1010
+0	3aa, >C3-MAOP-ANOXPP-001014... *
+>Cluster 1011
+0	3aa, >C3-MAOP-ANOXPP-001017... *
+>Cluster 1012
+0	3aa, >C3-MAOP-ANOXPP-001019... *
+>Cluster 1013
+0	3aa, >C3-MAOP-ANOXPP-001027... *
+>Cluster 1014
+0	3aa, >C3-MAOP-ANOXPP-001042... *
+>Cluster 1015
+0	3aa, >C3-MAOP-AOPP-000061... *
+>Cluster 1016
+0	3aa, >C3-MAOP-AOPP-000117... *
+>Cluster 1017
+0	3aa, >C3-MAOP-AOPP-000122... *
+>Cluster 1018
+0	3aa, >C3-MAOP-AOPP-000145... *
+>Cluster 1019
+0	3aa, >C3-MAOP-AOPP-000178... *
+>Cluster 1020
+0	3aa, >C3-MAOP-AOPP-000196... *
+>Cluster 1021
+0	3aa, >C3-MAOP-AOPP-000241... *
+>Cluster 1022
+0	3aa, >C3-MAOP-AOPP-000245... *
+>Cluster 1023
+0	3aa, >C3-MAOP-AOPP-000246... *
+>Cluster 1024
+0	3aa, >C3-MAOP-AOPP-000249... *
+>Cluster 1025
+0	3aa, >C3-MAOP-AOPP-000250... *
+>Cluster 1026
+0	3aa, >C3-MAOP-AOPP-000261... *
+>Cluster 1027
+0	3aa, >C3-MAOP-AOPP-000262... *
+>Cluster 1028
+0	3aa, >C3-MAOP-AOPP-000263... *
+>Cluster 1029
+0	3aa, >C3-MAOP-AOPP-000269... *
+>Cluster 1030
+0	3aa, >C3-MAOP-AOPP-000270... *
+>Cluster 1031
+0	3aa, >C3-MAOP-AOPP-000271... *
+>Cluster 1032
+0	3aa, >C3-MAOP-AOPP-000272... *
+>Cluster 1033
+0	3aa, >C3-MAOP-AOPP-000273... *
+>Cluster 1034
+0	3aa, >C3-MAOP-AOPP-000279... *
+>Cluster 1035
+0	3aa, >C3-MAOP-AOPP-001241... *
+>Cluster 1036
+0	3aa, >C3-MAOP-AOPP-001246... *
+>Cluster 1037
+0	3aa, >C3-MAOP-AOPP-001261... *
+>Cluster 1038
+0	3aa, >C3-MAOP-AOPP-001271... *
+>Cluster 1039
+0	3aa, >C3-MAOP-AOPP-001284... *
+>Cluster 1040
+0	3aa, >C3-MAOP-AOPP-001285... *
+>Cluster 1041
+0	3aa, >C3-MAOP-AOPP-001286... *
+>Cluster 1042
+0	3aa, >C3-MAOP-AOPP-001288... *
+>Cluster 1043
+0	3aa, >C3-MAOP-AOPP-001289... *
+>Cluster 1044
+0	3aa, >C3-MAOP-AOPP-001291... *
+>Cluster 1045
+0	3aa, >C3-MAOP-AOPP-001293... *

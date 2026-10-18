@@ -345,14 +345,14 @@
 ## Task 3.7 — Apply 90% identity deduplication
 
 ### Subtasks
-- [ ] Convert cleaned sequences to FASTA.
-- [ ] Run CD-HIT at 90% identity.
-- [ ] Preserve the CD-HIT cluster output.
-- [ ] Convert representative sequences back to the working table format.
-- [ ] Record:
-  - [ ] input count;
-  - [ ] representative count;
-  - [ ] cluster count.
+- [x] Convert cleaned sequences to FASTA.
+- [x] Run CD-HIT at 90% identity.
+- [x] Preserve the CD-HIT cluster output.
+- [x] Convert representative sequences back to the working table format.
+- [x] Record:
+  - [x] input count;
+  - [x] representative count;
+  - [x] cluster count.
 
 ### Deliverable
 - 90%-deduplicated audit dataset.
@@ -1021,7 +1021,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] Audit sequences acquired.
 - [x] Sequences standardized and validated.
 - [x] 3–50 AA filter applied.
-- [ ] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.
+- [x] 90% CD-HIT deduplication completed or demonstrably working on the intended dataset.
 - [ ] Redox filter `{W,Y,H,M,C}` applied.
 - [ ] Residue annotation works.
 - [ ] P1 generator works.
