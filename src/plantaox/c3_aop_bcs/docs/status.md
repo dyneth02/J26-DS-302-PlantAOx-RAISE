@@ -78,16 +78,24 @@
 - Confirmed PU-AOP source and manifests are present, but its required ignored checkpoint/cache artifacts and documented external backup are absent from this checkout.
 - Kept all five predictors explicitly `not_integrated` because none has yet produced a retained real score through the C3 predictor interface.
 - Confirmed all 73 current C3 tests pass with 64 subtests, including registry completeness, operational limitations, integration-claim enforcement, and deterministic Markdown rendering.
+- Froze the Task 3.21 PP1 primary predictor set as AOPxSVM, AnOxPePred, and PU-AOP, with readiness-based integration order AOPxSVM first, AnOxPePred second, and PU-AOP third conditional on its frozen handoff.
+- Defined a truthful PP1 floor of at least one verified real predictor and a target of at least two; a one-predictor result must be labelled a single-predictor pilot, and the Task 3.22 dummy can never satisfy the real-predictor floor.
+- Classified Multi-AOP and AOP-DRL as secondary: Multi-AOP is deferred for dependency, input-semantics, and licence risks, while AOP-DRL remains blocked by missing inference assets, an unavailable published service, and non-commercial restrictions.
+- Added the versioned `predictor_priority_v1.json` decision record and deterministic `predictor_priority_scope.md` report, with ranked rationale, next actions, and explicit activation rules.
+- Prepared `pu_aop_handoff_request.md` as the Component 2 coordination contract covering frozen model selection, checkpoint/hash, feature schema, fold scaler, ESM-2 and descriptor contracts, read-only inference, score semantics, reference fixture, batching/failures, and use authorization.
+- Recorded that the PU-AOP handoff request is prepared but the handoff itself remains pending; C3 will not guess among Component 2's accepted models or claim integration without the binary artifacts and a reproduced reference score.
+- Documented seven unresolved access issues across all five predictors, each with severity, state, and a measurable exit criterion.
+- Confirmed all 78 current C3 tests pass with 64 subtests, including priority-set enforcement, Task 3.20 status synchronization, PU-AOP handoff readiness gating, issue coverage, and deterministic report generation.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.20 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.21 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.21: Prioritize the minimum viable predictor set
+## Next task — Task 3.22: Build a non-experimental dummy/smoke-test predictor
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- prioritize AnOxPePred, AOPxSVM, and PU-AOP for the minimum viable PP1 predictor set using the Task 3.20 evidence;
-- coordinate the frozen PU-AOP model/scaler/cache handoff with Component 2;
-- treat Multi-AOP and AOP-DRL as secondary where their environment, licensing, or missing-artifact constraints prevent timely verified scoring;
-- document every unresolved access issue and keep integration claims tied to retained real-score evidence.
+- implement one simple deterministic predictor behind the Task 3.19 common interface;
+- label it explicitly as software testing only, not a scientific AOP predictor, and excluded from experimental results;
+- use it to smoke-test the future scoring and metric pipeline without satisfying the Task 3.21 real-predictor requirement;
+- retain deterministic tests and provenance that prevent the dummy output from being mistaken for scientific evidence.

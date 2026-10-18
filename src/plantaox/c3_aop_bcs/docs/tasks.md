@@ -600,13 +600,13 @@
 ## Task 3.21 — Prioritize the minimum viable predictor set
 
 ### Subtasks
-- [ ] Prioritize:
-  - [ ] AnOxPePred;
-  - [ ] AOPxSVM;
-  - [ ] PU-AOP.
-- [ ] Coordinate with Component 2 for the PU-AOP frozen-model handoff.
-- [ ] Treat Multi-AOP and AOP-DRL as secondary if access/reproduction is not ready before PP1.
-- [ ] Document any unresolved access issue.
+- [x] Prioritize:
+  - [x] AnOxPePred;
+  - [x] AOPxSVM;
+  - [x] PU-AOP.
+- [x] Coordinate with Component 2 for the PU-AOP frozen-model handoff.
+- [x] Treat Multi-AOP and AOP-DRL as secondary if access/reproduction is not ready before PP1.
+- [x] Document any unresolved access issue.
 
 ### Deliverable
 - Realistic PP1 predictor-integration scope.
@@ -1030,7 +1030,7 @@ Before considering the PP1 implementation stage complete, verify the following.
 - [x] One-position mutation validation works.
 - [x] Automated tests pass.
 - [x] Common predictor interface exists.
-- [ ] Predictor-access status is documented.
+- [x] Predictor-access status is documented.
 - [ ] At least one real predictor has been successfully scored if technically accessible.
 - [ ] Pilot original/perturbed scores are stored.
 - [ ] DeltaScore is computed.
