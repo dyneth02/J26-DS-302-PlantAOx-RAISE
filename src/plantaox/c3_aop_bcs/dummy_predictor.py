@@ -11,6 +11,7 @@ from .predictor_interface import BasePredictorAdapter, PredictorDescriptor
 
 DUMMY_PREDICTOR_VERSION = "1.0.0"
 DUMMY_PREDICTOR_ID = "c3_software_smoke_test_dummy"
+DUMMY_SCORING_METHOD = "position_weighted_alphabetical_residue_rank_checksum"
 DEFAULT_DUMMY_DEFINITION_PATH = Path(__file__).with_name("dummy_predictor_v1.json")
 
 SOFTWARE_TESTING_ONLY = True
@@ -69,7 +70,7 @@ def dummy_predictor_definition() -> dict[str, object]:
             "reported as experimental results or biological evidence."
         ),
         "scoring_method": {
-            "name": "position_weighted_alphabetical_residue_rank_checksum",
+            "name": DUMMY_SCORING_METHOD,
             "formula": (
                 "sum(position * alphabetical_residue_rank) / "
                 "(20 * sum(positions))"

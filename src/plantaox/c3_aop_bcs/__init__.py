@@ -23,7 +23,8 @@ from .predictor_interface import (
     PredictorScoringError,
     PredictorUnavailableError,
 )
-from .dummy_predictor import DummySmokeTestPredictor
+from .dummy_predictor import DUMMY_SCORING_METHOD, DummySmokeTestPredictor
+from .predictor_scoring import build_scored_perturbation_dataset
 from .predictor_access import (
     load_predictor_access_registry,
     render_predictor_access_table,
@@ -51,6 +52,8 @@ __all__ = [
     "PredictorScoringError",
     "PredictorUnavailableError",
     "DummySmokeTestPredictor",
+    "DUMMY_SCORING_METHOD",
+    "build_scored_perturbation_dataset",
     "load_predictor_access_registry",
     "render_predictor_access_table",
     "load_predictor_priority_plan",
