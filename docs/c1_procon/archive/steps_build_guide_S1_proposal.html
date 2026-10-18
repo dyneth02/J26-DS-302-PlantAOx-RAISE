@@ -1,0 +1,944 @@
+<title>AOP-ProCon — Build Guide</title>
+<style>
+  :root{
+    --ink:#211527; --paper:#FBF9FC; --paper-raised:#FFFFFF;
+    --accent:#6B2FA0; --accent-warm:#B5661E; --accent-soft:#F1E6FA;
+    --line:#DDD3E6; --line-soft:#EAE2F1;
+    --mono-bg:#F2EDF7; --mono-ink:#4A2065;
+    --ok:#2E7D4F; --ok-soft:#E4F3EA;
+    --warn:#9A5B12; --warn-soft:#FBEEDC;
+    --muted:#6E5F78;
+    --shadow: 0 1px 2px rgba(33,21,39,.04), 0 8px 24px -12px rgba(33,21,39,.18);
+    --radius: 10px;
+  }
+  :root[data-theme="dark"]{
+    --ink:#ECE4F2; --paper:#150F19; --paper-raised:#1D1521;
+    --accent:#C79BE8; --accent-warm:#E3A85E; --accent-soft:#2A2032;
+    --line:#372A40; --line-soft:#2A2130;
+    --mono-bg:#241A2C; --mono-ink:#E4C9FA;
+    --ok:#7FD4A0; --ok-soft:#1C2E22;
+    --warn:#E8B573; --warn-soft:#332412;
+    --muted:#B29FC0;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px -14px rgba(0,0,0,.6);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#ECE4F2; --paper:#150F19; --paper-raised:#1D1521;
+      --accent:#C79BE8; --accent-warm:#E3A85E; --accent-soft:#2A2032;
+      --line:#372A40; --line-soft:#2A2130;
+      --mono-bg:#241A2C; --mono-ink:#E4C9FA;
+      --ok:#7FD4A0; --ok-soft:#1C2E22;
+      --warn:#E8B573; --warn-soft:#332412;
+      --muted:#B29FC0;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+
+  *{box-sizing:border-box;}
+  html{color-scheme:light dark;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    font-size:16.5px; line-height:1.62;
+  }
+  .serif{ font-family: "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; }
+  code, pre, .mono, kbd{
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+
+  a{ color:var(--accent); text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+  /* ---------- shell layout ---------- */
+  .shell{
+    max-width:1180px; margin:0 auto;
+    display:grid; grid-template-columns: 250px minmax(0,1fr);
+    gap:0 44px;
+  }
+  @media (max-width: 900px){
+    .shell{ grid-template-columns: 1fr; }
+    .rail{ display:none; }
+  }
+
+  /* ---------- top header ---------- */
+  header.top{
+    border-bottom:1px solid var(--line);
+    padding: 28px 24px 22px;
+  }
+  .top-inner{ max-width:1180px; margin:0 auto; display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap; }
+  .eyebrow{
+    font-size:12.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
+    font-weight:600; margin:0 0 8px;
+  }
+  h1.doctitle{
+    font-size: clamp(26px,3.4vw,34px); margin:0 0 6px; text-wrap:balance;
+    font-weight:600; letter-spacing:-.01em;
+  }
+  .sub{ color:var(--muted); margin:0; max-width:56ch; font-size:15px; }
+  .theme-toggle{
+    border:1px solid var(--line); background:var(--paper-raised); color:var(--ink);
+    border-radius:20px; padding:7px 14px; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; gap:6px; flex:none;
+  }
+  .theme-toggle:hover{ border-color:var(--accent); }
+
+  .progress-wrap{ margin-top:16px; }
+  .progress-track{
+    height:6px; border-radius:4px; background:var(--line-soft); overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent-warm));
+    transition:width .25s ease;
+  }
+  .progress-label{ font-size:12.5px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums; }
+
+  /* ---------- sidebar rail ---------- */
+  .rail{ padding: 26px 0 60px; position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; }
+  .rail-phase{ margin-bottom:4px; }
+  .rail-phase > a{
+    display:block; padding:7px 10px; border-radius:7px; font-size:13.5px;
+    color:var(--ink); text-decoration:none; font-weight:600;
+  }
+  .rail-phase > a:hover{ background:var(--accent-soft); }
+  .rail-phase.active > a{ color:var(--accent); background:var(--accent-soft); }
+  .rail-steps{ list-style:none; margin:0 0 10px; padding:0 0 0 20px; }
+  .rail-steps li a{
+    display:block; padding:4px 8px; font-size:12.5px; color:var(--muted); text-decoration:none;
+    border-radius:6px;
+  }
+  .rail-steps li a:hover{ color:var(--ink); background:var(--line-soft); }
+  .rail-steps li.done a{ color:var(--ok); }
+  .rail-steps li.done a::before{ content:"✓ "; }
+
+  /* ---------- main column ---------- */
+  main{ padding: 30px 24px 100px; min-width:0; }
+  .intro{
+    max-width:66ch; margin: 0 0 40px;
+  }
+  .intro p{ color:var(--ink); }
+  .intro .callout{
+    background:var(--accent-soft); border:1px solid var(--line);
+    border-radius:var(--radius); padding:16px 18px; margin-top:18px; font-size:14.5px;
+  }
+
+  section.phase{ margin-bottom: 56px; scroll-margin-top: 20px; }
+  .phase-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:6px; }
+  .phase-num{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    font-size:15px; color:var(--accent-warm); font-weight:600; flex:none;
+  }
+  h2.phase-title{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    font-size: clamp(21px,2.6vw,26px); margin:0; font-weight:600; text-wrap:balance;
+  }
+  .phase-blurb{ color:var(--muted); max-width:64ch; margin: 6px 0 26px; font-size:15px; }
+
+  article.step{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius);
+    padding: 20px 22px 22px; margin-bottom:16px; box-shadow:var(--shadow);
+    scroll-margin-top: 20px;
+  }
+  .step-head{ display:flex; align-items:flex-start; gap:12px; }
+  .step-check{
+    flex:none; width:22px; height:22px; margin-top:2px; border-radius:6px;
+    border:1.5px solid var(--line); background:var(--paper); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; color:var(--paper);
+    transition: background .15s, border-color .15s;
+  }
+  .step-check.checked{ background:var(--ok); border-color:var(--ok); }
+  .step-check svg{ width:13px; height:13px; opacity:0; }
+  .step-check.checked svg{ opacity:1; }
+  .step-titlewrap{ flex:1; min-width:0; }
+  .step-num{ font-size:12.5px; color:var(--accent-warm); font-weight:700; letter-spacing:.02em; }
+  h3.step-title{ font-size:17.5px; margin:2px 0 0; font-weight:600; }
+  .step-body{ margin-top:12px; max-width:68ch; }
+  .step-body p{ margin:0 0 12px; }
+  .step-body ul, .step-body ol{ margin:0 0 12px; padding-left:22px; }
+  .step-body li{ margin-bottom:6px; }
+
+  pre{
+    background:var(--mono-bg); border:1px solid var(--line-soft); border-radius:8px;
+    padding:13px 14px; overflow-x:auto; font-size:13px; line-height:1.55; margin:10px 0 14px;
+    position:relative;
+  }
+  pre code{ color:var(--mono-ink); }
+  .copybtn{
+    position:absolute; top:8px; right:8px; font-size:11px; border:1px solid var(--line);
+    background:var(--paper-raised); color:var(--muted); border-radius:6px; padding:3px 8px; cursor:pointer;
+  }
+  .copybtn:hover{ color:var(--accent); border-color:var(--accent); }
+  code:not(pre code){
+    background:var(--mono-bg); color:var(--mono-ink); padding:1px 6px; border-radius:5px; font-size:.88em;
+  }
+
+  .note{
+    border-radius:8px; padding:11px 14px; font-size:13.8px; margin:12px 0; border:1px solid;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .note.ok{ background:var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+  .note.warn{ background:var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+  .note .tag{ flex:none; font-weight:700; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-top:1px; }
+  .note.ok .tag{ color:var(--ok); }
+  .note.warn .tag{ color:var(--warn); }
+
+  table{ border-collapse:collapse; width:100%; font-size:13.8px; margin:10px 0 14px; }
+  th,td{ text-align:left; padding:7px 10px; border-bottom:1px solid var(--line-soft); }
+  th{ color:var(--muted); font-weight:600; font-size:12.5px; text-transform:uppercase; letter-spacing:.03em; }
+  .tablewrap{ overflow-x:auto; }
+
+  footer.end{
+    max-width:66ch; margin: 20px 0 0; padding-top:24px; border-top:1px solid var(--line);
+    color:var(--muted); font-size:13.5px;
+  }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div>
+      <p class="eyebrow">Component 1 · AOP-ProCon · IT23144408</p>
+      <h1 class="doctitle serif">Build Guide, Step by Step</h1>
+      <p class="sub">Everything between "I have a proposal report" and "AOP-BenchPos + a trained embedding model exist on my laptop." Follow it top to bottom — later phases depend on earlier ones.</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn" type="button" aria-label="Toggle color theme">
+      <span id="themeIcon">◐</span> <span id="themeLabel">Auto</span>
+    </button>
+  </div>
+  <div class="top-inner" style="margin-top:16px; padding-top:0; align-items:center;">
+    <div class="progress-wrap" style="flex:1;">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">0 of 22 steps done</div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" id="rail"></nav>
+  <main>
+    <div class="intro">
+      <p>You don't need to know how any of this works before you start — you need to know <em>what to do next</em>. This guide breaks Component&nbsp;1 into 7 phases and 22 concrete steps, in the order you should actually do them. Each step has: what you're doing, why it matters, the exact command or code to run, and what "done correctly" looks like.</p>
+      <div class="callout">
+        <strong>How to use this page:</strong> tick a step's checkbox once it's genuinely done (not just attempted) — your progress is saved in this browser automatically. Don't skip ahead to Phase 4 before Phase 1 is finished; almost every later step reads a file that an earlier step produces.
+      </div>
+    </div>
+
+    <!-- PHASE 0 -->
+    <section class="phase" id="phase-0">
+      <div class="phase-head"><span class="phase-num serif">Phase 0</span><h2 class="phase-title serif">Get your toolbox ready</h2></div>
+      <p class="phase-blurb">Before you download a single peptide sequence, set up the environment so every later step just works. This is a one-time, roughly half-day job.</p>
+
+      <article class="step" id="s0-1" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 0.1</div>
+            <h3 class="step-title">Set up your project folder and GitHub repo</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Create one repository now, even if it's empty — you and your teammates will all pull from the same <code>AOP-BenchPos</code> and embedding files later, and it's much less painful to start organised than to reorganise in month 6.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code>aop-procon/
+├── data/
+│   ├── raw/            # exactly what you downloaded, untouched
+│   ├── processed/       # AOP-BenchPos.csv and friends
+│   └── embeddings/      # cached .npy ESM-2 embeddings
+├── src/
+│   ├── data_prep.py
+│   ├── descriptors.py
+│   ├── embed.py
+│   ├── pairs.py
+│   ├── model.py
+│   ├── train.py
+│   └── evaluate.py
+├── notebooks/           # exploratory Colab / Jupyter notebooks
+├── results/             # metric tables, plots, logs
+├── requirements.txt
+└── README.md</code></pre>
+          <p>Install Python 3.10+ and create a virtual environment so this project's libraries never collide with anything else on your laptop:</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code>python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Mac/Linux</code></pre>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> You can run <code>python --version</code> inside the activated venv and see 3.10 or higher, and <code>git status</code> works inside <code>aop-procon/</code>.</div>
+      </article>
+
+      <article class="step" id="s0-2" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 0.2</div>
+            <h3 class="step-title">Get Google Colab Pro access</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Your laptop GPU (RTX 4050, 6GB) is fine for the two smallest ESM-2 models and for the entire training step later — but the 650M primary backbone and the 3B scaling-ablation model need a GPU with at least 16GB VRAM, which is what Colab Pro's T4 instance gives you. You only need this occasionally (a handful of embedding-extraction passes), not continuously, so don't pay for it until you're actually at Phase 2.</p>
+          <ol>
+            <li>Subscribe to Colab Pro at <code>colab.research.google.com</code>.</li>
+            <li>Open a blank notebook, go to <strong>Runtime → Change runtime type → T4 GPU</strong>, and confirm it connects.</li>
+            <li>Mount your Google Drive from the notebook so cached embeddings survive between sessions instead of disappearing when the runtime resets.</li>
+          </ol>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> Running <code>!nvidia-smi</code> in a Colab cell shows a Tesla T4 with ~15GB memory.</div>
+      </article>
+
+      <article class="step" id="s0-3" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 0.3</div>
+            <h3 class="step-title">Install the core libraries</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>These are every library referenced later in this guide. Put them in <code>requirements.txt</code> and install once.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code>torch
+fair-esm
+biopython
+scikit-learn
+scipy
+pandas
+numpy
+matplotlib</code></pre>
+          <pre><button class="copybtn" data-copy>Copy</button><code>pip install -r requirements.txt</code></pre>
+          <p>CD-HIT and GraphPart are separate command-line tools, not pip packages — you'll install those in Phase 1 exactly when you need them, so you're not fighting an install error you can't yet explain.</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> <code>python -c "import torch, esm, Bio, sklearn, scipy"</code> runs with no errors.</div>
+      </article>
+    </section>
+
+    <!-- PHASE 1 -->
+    <section class="phase" id="phase-1">
+      <div class="phase-head"><span class="phase-num serif">Phase 1</span><h2 class="phase-title serif">Build AOP-BenchPos, your dataset</h2></div>
+      <p class="phase-blurb">Everything downstream depends on this being right. Rushing this phase is the single most common way this kind of project goes wrong later.</p>
+
+      <article class="step" id="s1-1" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 1.1</div>
+            <h3 class="step-title">Download the five source databases</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Get exactly these files — not the raw or intermediate files that sit alongside them in the same repositories.</p>
+          <div class="tablewrap">
+          <table>
+            <tr><th>Source</th><th>What to get</th><th>Where</th></tr>
+            <tr><td>AnOxPePred</td><td><code>Supplementary_Data_S1_Marcatili.csv</code> only — already deduplicated, has FRS/Chelator columns</td><td>GitHub: <code>dtu-pas/AnOxPePred</code></td></tr>
+            <tr><td>Multi-AOP</td><td>Clone the repo, keep the 2,597 positive sequences, discard the negatives</td><td>GitHub: <code>CaiJianxiu/Multi-AOP</code></td></tr>
+            <tr><td>BIOPEP-UWM</td><td>Search Activity = <code>antioxidative</code>, or pull the BIOPEP-tagged subset from Peptipedia's bulk export</td><td><code>biochemia.uwm.edu.pl/biopep</code></td></tr>
+            <tr><td>DFBP</td><td><code>Supplementary_Table_S1</code> from the DFBP <em>Bioinformatics</em> paper page, filter Activity contains "Antioxidant"</td><td><code>dfbp.big.ac.cn</code> or the paper's supplementary files</td></tr>
+            <tr><td>Peptipedia</td><td>Filter Activity = Antioxidant, export CSV (also grab the pre-computed physicochemical columns while you're there)</td><td><code>peptipedia.cl</code></td></tr>
+          </table>
+          </div>
+          <p>Save every raw download untouched into <code>data/raw/</code> — you'll want to be able to prove later exactly what came from where.</p>
+        </div>
+        <div class="note warn"><span class="tag">Common mistake</span> Don't use AnOxPePred's <code>01_AO_db.csv</code> or the <code>03_p*.csv</code> fold files — those are the authors' raw/intermediate files and either contain duplicates or only partial subsets.</div>
+      </article>
+
+      <article class="step" id="s1-2" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 1.2</div>
+            <h3 class="step-title">Standardise every source into one common table</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Every source formats sequences and labels differently. Before anything else can happen, they all need to become one pandas DataFrame with the same columns.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code># src/data_prep.py
+import pandas as pd
+
+def clean_sequence(seq: str) -> str:
+    return str(seq).upper().replace("~", "").strip()
+
+def load_source(path, source_name):
+    df = pd.read_csv(path)
+    df["sequence"] = df["Sequence"].apply(clean_sequence)
+    df = df[(df["sequence"].str.len() >= 3) & (df["sequence"].str.len() <= 50)]
+    df["source_db"] = source_name
+    return df[["sequence", "source_db"]].drop_duplicates()
+
+# repeat for each of the 5 sources, then:
+merged = pd.concat([anoxpepred_df, multiaop_df, biopep_df, dfbp_df, peptipedia_df],
+                    ignore_index=True)
+merged.to_csv("data/processed/merged_raw.csv", index=False)</code></pre>
+          <p>Every source's raw file has different column names — check each one manually before writing its loader; don't assume they all have a column literally called <code>Sequence</code>.</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> One CSV, one <code>sequence</code> column, one <code>source_db</code> column, no sequence outside 3–50 amino acids.</div>
+      </article>
+
+      <article class="step" id="s1-3" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 1.3</div>
+            <h3 class="step-title">Remove near-duplicate sequences with CD-HIT</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Multiple databases will contain the exact same peptide, sometimes with tiny spelling differences. Left in, these inflate your peptide count and can leak between train and test later. CD-HIT collapses anything ≥90% identical into one representative sequence.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code># install (Linux/WSL or Colab)
+sudo apt-get install cd-hit
+# or: conda install -c bioconda cd-hit
+
+# convert your merged table to FASTA first, then run:
+cd-hit -i merged.fasta -o merged_cdhit90.fasta -c 0.90 -n 5 -M 0 -d 0</code></pre>
+          <p>On Windows, run this step inside WSL or a Colab cell — CD-HIT doesn't have a native Windows build.</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> The output FASTA has noticeably fewer sequences than the input, and <code>merged_cdhit90.fasta.clstr</code> exists (it lists what got merged into what).</div>
+      </article>
+
+      <article class="step" id="s1-4" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 1.4</div>
+            <h3 class="step-title">Label every sequence with its mechanism tier</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>This is the labelling scheme the whole component is built on — get it right once here and every later stage inherits it correctly.</p>
+          <ul>
+            <li><strong>Tier 1 (FRS)</strong> — from AnOxPePred, where the <code>FRS</code> column = 1.</li>
+            <li><strong>Tier 2 (MC)</strong> — from AnOxPePred, where the <code>Chelator</code> column = 1.</li>
+            <li><strong>Tier 3 (General)</strong> — everything else: BIOPEP-UWM / DFBP / Peptipedia records tagged "antioxidant" with no specific assay behind them.</li>
+          </ul>
+          <p>Add a <code>tier</code> column to your merged table and save it. From this point on, <strong>Tier 3 is read-only</strong> — it goes into evaluation later, never into a training pair.</p>
+        </div>
+        <div class="note warn"><span class="tag">Common mistake</span> Don't guess a tier for a sequence that only has a generic "antioxidant" tag. If you can't point to an assay type behind a label, it's Tier 3 — full stop.</div>
+      </article>
+
+      <article class="step" id="s1-5" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 1.5</div>
+            <h3 class="step-title">Check you actually have enough data</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Do this before writing a single line of model code — it changes how much of the rest of the pipeline you need to worry about.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code>print(df["tier"].value_counts())</code></pre>
+          <p>You want at least ~150 sequences in Tier 1 and at least ~150 in Tier 2. If either falls short:</p>
+          <ol>
+            <li>Relax the CD-HIT threshold from 90% to 95% and re-run Step 1.3 to recover more sequences.</li>
+            <li>If still short, plan for 2-fold leave-source-out instead of 3-fold later, and write this down as a documented limitation — don't hide it.</li>
+          </ol>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> You have a printed count per tier and a decision (proceed as planned, or fall back to 95%/2-fold) written down in your notes.</div>
+      </article>
+
+      <article class="step" id="s1-6" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 1.6</div>
+            <h3 class="step-title">Create homology-safe leave-source-out splits</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>A plain random 80/20 split lets near-identical peptides sit on both sides of the split, which will make your model look better than it really is. Instead, use GraphPart/HESTIA (reused from the AutoPeptideML reproducibility archive) at a 40% identity threshold, and rotate which source database is held out.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code># pip install graphpart  (or clone from the AutoPeptideML repo's scripts/ folder)
+graphpart fasta merged_cdhit90.fasta --threshold 0.40 --out-file lso_folds.csv</code></pre>
+          <p>You want three folds: train on AnOxPePred + BIOPEP-UWM, test on held-out DFBP; then rotate so each of the three source databases gets held out exactly once. Multi-AOP and Peptipedia sequences fall into whichever fold their nearest homolog lands in.</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> You have <code>AOP-BenchPos.csv</code> with columns <code>sequence, source_db, tier, lso_fold</code> — this file is Phase 1's whole output, and every later phase reads from it.</div>
+      </article>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section class="phase" id="phase-2">
+      <div class="phase-head"><span class="phase-num serif">Phase 2</span><h2 class="phase-title serif">Turn peptides into numbers</h2></div>
+      <p class="phase-blurb">Two representations get computed for every sequence in AOP-BenchPos: a small hand-crafted chemistry vector, and a large learned ESM-2 vector.</p>
+
+      <article class="step" id="s2-1" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 2.1</div>
+            <h3 class="step-title">Compute the 15 physicochemical features</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>This runs entirely on your laptop CPU in seconds — no GPU needed.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code># src/descriptors.py
+from Bio.SeqUtils.ProtParam import ProteinAnalysis
+
+def compute_descriptors(seq: str) -> dict:
+    pa = ProteinAnalysis(seq)
+    return {
+        "mw": pa.molecular_weight(),
+        "gravy": pa.gravy(),
+        "aromaticity": pa.aromaticity(),
+        "instability": pa.instability_index(),
+        "charge": pa.charge_at_pH(7.0),
+        # aliphatic index + 8 CTD features: use iFeature or a published
+        # CTD implementation rather than re-deriving the formulas yourself
+    }</code></pre>
+          <p>If a sequence already has descriptors from Peptipedia's export, reuse those instead of recomputing — it's one less thing that can silently disagree between sources.</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> A 15-column numeric table exists, one row per AOP-BenchPos sequence, with no missing values.</div>
+      </article>
+
+      <article class="step" id="s2-2" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 2.2</div>
+            <h3 class="step-title">Extract ESM-2 embeddings — small model first, then Colab</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Test your extraction code on the 35M model locally before spending Colab GPU time on the 650M model — bugs are much cheaper to find on the fast, free model.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code># src/embed.py
+import torch, esm, numpy as np
+
+model, alphabet = esm.pretrained.esm2_t12_35M_UR50D()   # swap to t33_650M later
+model.eval()
+batch_converter = alphabet.get_batch_converter()
+
+def embed_sequences(seqs):
+    data = [(str(i), s) for i, s in enumerate(seqs)]
+    _, _, tokens = batch_converter(data)
+    with torch.no_grad():
+        out = model(tokens, repr_layers=[model.num_layers])
+    reps = out["representations"][model.num_layers]
+    embeddings = []
+    for i, s in enumerate(seqs):
+        per_residue = reps[i, 1:len(s)+1]
+        pooled = per_residue.max(0).values if len(s) < 10 else per_residue.mean(0)
+        embeddings.append(pooled.numpy())
+    return np.stack(embeddings)
+
+np.save("data/embeddings/esm2_35M.npy", embed_sequences(sequence_list))</code></pre>
+          <p>Once that runs cleanly end to end, switch the model line to <code>esm2_t33_650M_UR50D()</code>, move the notebook to Colab with the T4 runtime, and cache the result straight to Google Drive so it survives the session ending.</p>
+        </div>
+        <div class="note warn"><span class="tag">Common mistake</span> Don't re-run ESM-2 inside your training loop later — extract once here, save to <code>.npy</code>, and have the training script in Phase 4 only ever read the cached file.</div>
+      </article>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section class="phase" id="phase-3">
+      <div class="phase-head"><span class="phase-num serif">Phase 3</span><h2 class="phase-title serif">Decide which peptides get paired together</h2></div>
+      <p class="phase-blurb">This is the step that makes the whole approach "positive-only" — no negative examples are chosen here, only which positives count as similar to each other.</p>
+
+      <article class="step" id="s3-1" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 3.1</div>
+            <h3 class="step-title">Compute physicochemical distance within each tier</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>For every pair of Tier 1 sequences, and separately every pair of Tier 2 sequences, compute the Euclidean distance between their 15-feature descriptor vectors (never compare across tiers here).</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code>from scipy.spatial.distance import pdist, squareform
+
+tier1_dist = squareform(pdist(tier1_descriptors, metric="euclidean"))</code></pre>
+          <p>Try a few candidate distance thresholds against a small held-out validation slice and pick the one that gives you a reasonable number of pairs per anchor — not so tight that most sequences get zero partners, not so loose that it stops meaning anything.</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> You can state, in one sentence, the distance threshold you chose and why.</div>
+      </article>
+
+      <article class="step" id="s3-2" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 3.2</div>
+            <h3 class="step-title">Build the positive-pair list</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>A pair qualifies only if both conditions hold: same tier (1-with-1 or 2-with-2, never mixed), and within the distance threshold from Step 3.1.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code>pairs = []
+for tier_df in [tier1_df, tier2_df]:
+    dist = squareform(pdist(tier_df[descriptor_cols], metric="euclidean"))
+    close = np.argwhere((dist > 0) & (dist < THRESHOLD))
+    for i, j in close:
+        pairs.append((tier_df.index[i], tier_df.index[j]))</code></pre>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> A saved pair list (indices or sequence IDs), and every pair in it can be traced back to a matching tier and a distance under your threshold.</div>
+      </article>
+    </section>
+
+    <!-- PHASE 4 -->
+    <section class="phase" id="phase-4">
+      <div class="phase-head"><span class="phase-num serif">Phase 4</span><h2 class="phase-title serif">Build and train the model</h2></div>
+      <p class="phase-blurb">The actual novel part of Component 1: a contrastive loss with no negative term, kept honest by three prototype anchors.</p>
+
+      <article class="step" id="s4-1" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 4.1</div>
+            <h3 class="step-title">Implement the positive-only loss</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Standard supervised contrastive loss compares an anchor-positive pair against every negative in the batch. Here, that negative term is simply removed — the loss just pulls the anchor and its positive closer together.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code># src/model.py
+import torch, torch.nn.functional as F
+
+def positive_only_loss(anchor, positive, tau=0.07):
+    anchor = F.normalize(anchor, dim=-1)
+    positive = F.normalize(positive, dim=-1)
+    sim = (anchor * positive).sum(-1) / tau
+    return -sim.mean()   # no denominator, no negatives</code></pre>
+        </div>
+        <div class="note warn"><span class="tag">Common mistake</span> This loss on its own is happy to collapse every embedding to the same point — don't train with it until Step 4.2's diversity term is wired in.</div>
+      </article>
+
+      <article class="step" id="s4-2" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 4.2</div>
+            <h3 class="step-title">Implement the three mechanism prototypes</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>One prototype vector each for FRS, MC and GEN. They start at each group's embedding centroid and track the model with an exponential moving average (EMA). Separately, a <strong>push-away term</strong> is added to the training loss so the model actively keeps the three mechanism regions apart.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code>class Prototypes:
+    def __init__(self, init_centroids, ema=0.99):
+        self.vectors = {k: F.normalize(v, dim=-1) for k, v in init_centroids.items()}
+        self.ema = ema
+
+    def update(self, tier, batch_mean_embedding):
+        # detached EMA buffer — NOT part of the training graph.
+        old = self.vectors[tier]
+        new = self.ema * old + (1 - self.ema) * batch_mean_embedding
+        self.vectors[tier] = F.normalize(new, dim=-1)
+
+    def push_away_loss(self, embeddings, tier, lam=0.1):
+        # embeddings must be the LIVE (non-detached) batch output of
+        # projection_head, so gradient actually reaches the trainable
+        # weights. Pulls this batch's embeddings away from the OTHER
+        # two tiers' current prototypes.
+        other = [v for k, v in self.vectors.items() if k != tier]
+        sim = sum(F.cosine_similarity(embeddings, o.unsqueeze(0).expand_as(embeddings)).mean()
+                   for o in other)
+        return lam * sim
+
+    def pairwise_distance_report(self):
+        # diagnostic only, for the Step 4.4 collapse check — not part of the loss.
+        keys = list(self.vectors.keys())
+        return {f"{keys[i]}-{keys[j]}": (1 - (self.vectors[keys[i]] * self.vectors[keys[j]]).sum()).item()
+                for i in range(len(keys)) for j in range(i + 1, len(keys))}</code></pre>
+        </div>
+        <div class="note warn"><span class="tag">Why this changed</span> An earlier version of this guide computed the diversity term purely from <code>self.vectors</code> (the EMA buffers) and added it straight to the loss. Because those buffers are built from <code>.detach()</code>'d embeddings, that term carried <strong>no gradient back to <code>projection_head</code></strong> — it would silently do nothing during training. <code>push_away_loss</code> fixes this by computing the term from the current batch's live embeddings instead, so it actually influences training; <code>pairwise_distance_report</code> is now the separate, EMA-based signal you log for the Step 4.4 collapse check.</div>
+        <div class="note ok"><span class="tag">Checkpoint</span> Calling <code>prototypes.pairwise_distance_report()</code> right after initialisation shows three clearly different, non-collapsed distances (not near 0).</div>
+      </article>
+
+      <article class="step" id="s4-3" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 4.3</div>
+            <h3 class="step-title">Write the training loop</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Batch size 64 positive pairs, max 100 epochs, early stopping with patience 10 on a held-out validation slice. This is the step that only ever touches cached <code>.npy</code> embeddings — it does not load ESM-2 at all, which is why it's fast even on a laptop.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code># src/train.py
+projection_head = torch.nn.Linear(1280, 128)   # ESM-2 650M dim -> 128-D output
+optimizer = torch.optim.Adam(projection_head.parameters(), lr=1e-3)
+
+for epoch in range(100):
+    for anchor_idx, positive_idx, tier in pair_batches:
+        a = projection_head(esm_embeddings[anchor_idx])   # live, NOT detached
+        p = projection_head(esm_embeddings[positive_idx])
+        loss = positive_only_loss(a, p) + prototypes.push_away_loss(a, tier)
+        optimizer.zero_grad(); loss.backward(); optimizer.step()
+        prototypes.update(tier, a.mean(0).detach())        # EMA buffer update, detached on purpose
+    val_score = evaluate_on_validation_fold()
+    early_stopper.step(val_score)
+    if early_stopper.should_stop: break</code></pre>
+          <p>Note the two different roles here: <code>push_away_loss(a, tier)</code> uses the batch's <strong>live</strong> embedding <code>a</code> so the optimiser can actually act on it, while <code>prototypes.update(...)</code> immediately after uses a <strong>detached</strong> copy — the EMA buffer is meant to track the space, not be trained by gradient descent directly. Mixing these up (detaching the loss input, or not detaching the EMA input) is the easiest way to silently break this step.</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> Training loss goes down over the first few epochs and doesn't hit NaN.</div>
+      </article>
+
+      <article class="step" id="s4-4" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 4.4</div>
+            <h3 class="step-title">Watch for prototype collapse while training</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Log the pairwise cosine distance between all three prototypes every epoch, using the diagnostic method added in Step 4.2. If any pair drops below 0.1, the push-away term isn't strong enough yet.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code># append inside the epoch loop, after prototypes.update(...) calls
+print(epoch, prototypes.pairwise_distance_report())</code></pre>
+          <ol>
+            <li>Increase <code>lam</code> from 0.1 to 0.5 in <code>push_away_loss</code>.</li>
+            <li>Re-initialise the prototypes (ideally with an orthogonal initialisation) and restart training.</li>
+          </ol>
+        </div>
+        <div class="note warn"><span class="tag">Common mistake</span> Don't discover a collapse only after training finishes — check the logged distance plot at epoch 10, not epoch 100.</div>
+      </article>
+    </section>
+
+    <!-- PHASE 5 -->
+    <section class="phase" id="phase-5">
+      <div class="phase-head"><span class="phase-num serif">Phase 5</span><h2 class="phase-title serif">Prove it actually works</h2></div>
+      <p class="phase-blurb">A trained model isn't evidence by itself — these are the specific numbers your report and presentations need.</p>
+
+      <article class="step" id="s5-1" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 5.1</div>
+            <h3 class="step-title">Recall@K and nDCG@10 on the LSO folds</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>For every held-out query peptide, retrieve its K nearest neighbours by cosine similarity in the 128-D space and check how many actually share its mechanism tier.</p>
+          <pre><button class="copybtn" data-copy>Copy</button><code>from sklearn.metrics import ndcg_score
+from sklearn.metrics.pairwise import cosine_similarity
+
+sims = cosine_similarity(query_embeddings, gallery_embeddings)
+top_k = sims.argsort(axis=1)[:, -10:]
+recall_at_10 = (query_tier[:, None] == gallery_tier[top_k]).any(axis=1).mean()</code></pre>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> A Recall@10 and nDCG@10 number for each of the three LSO folds, not just one averaged number.</div>
+      </article>
+
+      <article class="step" id="s5-2" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 5.2</div>
+            <h3 class="step-title">Prototype purity (K-means, K=3)</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <pre><button class="copybtn" data-copy>Copy</button><code>from sklearn.cluster import KMeans
+
+clusters = KMeans(n_clusters=3, n_init=10).fit_predict(all_embeddings)
+purity = compute_purity(clusters, true_tiers)   # fraction matching majority label per cluster</code></pre>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> A purity score above roughly 0.7 is the signal the embedding space genuinely separated by mechanism.</div>
+      </article>
+
+      <article class="step" id="s5-3" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 5.3</div>
+            <h3 class="step-title">Prove homology leakage would have inflated your results</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Retrain the exact same model, but this time evaluate on a plain random 80/20 split instead of the LSO folds. Compare Recall@10 between the two. If the random split scores higher, that gap <em>is</em> the leakage inflation — and reporting that number honestly is itself one of this component's contributions (HP4).</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> Two Recall@10 numbers side by side: LSO vs. random split, with the difference stated explicitly.</div>
+      </article>
+
+      <article class="step" id="s5-4" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 5.4</div>
+            <h3 class="step-title">Run the statistical tests properly</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <pre><button class="copybtn" data-copy>Copy</button><code>from scipy import stats
+
+stat, p = stats.wilcoxon(lso_scores, random_split_scores)
+stat2, p2 = stats.mannwhitneyu(fused_purity_scores, esm_only_purity_scores)
+rho, p3 = stats.spearmanr(param_counts, ndcg_scores)
+
+alpha = 0.05 / n_comparisons   # Bonferroni correction</code></pre>
+          <p>Report the p-value <em>and</em> an effect size (Cohen's d or rank-biserial correlation) for every result you call significant — a p-value alone doesn't tell your supervisor how big the difference actually is.</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> Every claim in your results section has a test name, a p-value, and an effect size attached to it.</div>
+      </article>
+    </section>
+
+    <!-- PHASE 6 -->
+    <section class="phase" id="phase-6">
+      <div class="phase-head"><span class="phase-num serif">Phase 6</span><h2 class="phase-title serif">The scaling ablation (HP5)</h2></div>
+      <p class="phase-blurb">Does a bigger ESM-2 model actually make the representation better, or does the benefit plateau early? This is the last thing to do, once the primary 650M pipeline is proven to work end to end.</p>
+
+      <article class="step" id="s6-1" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 6.1</div>
+            <h3 class="step-title">Repeat Phases 2–5 for 150M and 3B</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Same code, same pair list, same training procedure — only the ESM-2 checkpoint changes. Run <code>esm2_t30_150M_UR50D</code> on your laptop, and <code>esm2_t36_3B_UR50D</code> on Colab (drop the batch size to 16–8 if you hit an out-of-memory error on the T4).</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> Four nDCG@10 numbers, one per backbone size (35M, 150M, 650M, 3B), all evaluated the same way.</div>
+      </article>
+
+      <article class="step" id="s6-2" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 6.2</div>
+            <h3 class="step-title">Correlate model size against performance</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <p>Spearman correlation between log parameter count and nDCG@10, plus pairwise Wilcoxon tests between adjacent sizes (35M vs 150M, 150M vs 650M, 650M vs 3B).</p>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> A one-sentence answer you can say out loud: "scaling helped up to X, then plateaued" or "scaling made no significant difference" — either is a valid, reportable finding.</div>
+      </article>
+    </section>
+
+    <!-- PHASE 7 -->
+    <section class="phase" id="phase-7">
+      <div class="phase-head"><span class="phase-num serif">Phase 7</span><h2 class="phase-title serif">Wrap it up</h2></div>
+      <p class="phase-blurb">Component 1's job isn't only your own results — the rest of PlantAOx-RAISE reads from what you produce here.</p>
+
+      <article class="step" id="s7-1" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 7.1</div>
+            <h3 class="step-title">Package AOP-BenchPos and the trained model for your teammates</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <ul>
+            <li><code>AOP-BenchPos.csv</code> — sequence, source_db, tier, lso_fold.</li>
+            <li><code>embeddings_128d.npy</code> + an index mapping rows back to sequences.</li>
+            <li>The three trained prototype vectors, saved separately, since C4's plant screening pipeline queries against them directly.</li>
+            <li>A short README explaining how to load and query the model, written for someone who has never seen your training code.</li>
+          </ul>
+        </div>
+        <div class="note ok"><span class="tag">Checkpoint</span> A teammate could take these files and compute a similarity score for a brand-new peptide without asking you a single question.</div>
+      </article>
+
+      <article class="step" id="s7-2" data-step>
+        <div class="step-head">
+          <div class="step-check" data-check></div>
+          <div class="step-titlewrap">
+            <div class="step-num">STEP 7.2</div>
+            <h3 class="step-title">What to bring to each checkpoint</h3>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="tablewrap">
+          <table>
+            <tr><th>Checkpoint</th><th>Show up with</th></tr>
+            <tr><td>Progress Presentation I</td><td>AOP-BenchPos finished, Phase 1 complete, embeddings extracted for at least the 650M backbone</td></tr>
+            <tr><td>Progress Presentation II</td><td>A trained model, primary evaluation numbers (Recall@K, nDCG@10, purity, LSO-vs-random comparison)</td></tr>
+            <tr><td>Final submission</td><td>The scaling ablation finished, all statistical tests run, results written up with effect sizes</td></tr>
+          </table>
+          </div>
+        </div>
+      </article>
+
+      <footer class="end">
+        This guide mirrors Section 3 (Methodology) and Section 5 (Gantt Chart) of your proposal report — if a supervisor asks "why this order," point them here. Stuck on something not covered? The AutoPeptideML GitHub repo has a working GraphPart example end to end, and the <code>fair-esm</code> README covers every embedding-extraction edge case you're likely to hit.
+      </footer>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+  // ---------- theme toggle ----------
+  var root = document.documentElement;
+  var stored = localStorage.getItem('aop-theme');
+  if (stored) root.setAttribute('data-theme', stored);
+  function currentLabel(){
+    var t = root.getAttribute('data-theme');
+    return t === 'dark' ? 'Dark' : t === 'light' ? 'Light' : 'Auto';
+  }
+  document.getElementById('themeLabel').textContent = currentLabel();
+  document.getElementById('themeBtn').addEventListener('click', function(){
+    var t = root.getAttribute('data-theme');
+    var next = t === 'dark' ? 'light' : t === 'light' ? null : 'dark';
+    if (next) { root.setAttribute('data-theme', next); localStorage.setItem('aop-theme', next); }
+    else { root.removeAttribute('data-theme'); localStorage.removeItem('aop-theme'); }
+    document.getElementById('themeLabel').textContent = currentLabel();
+  });
+
+  // ---------- build sidebar nav ----------
+  var rail = document.getElementById('rail');
+  var phases = document.querySelectorAll('section.phase');
+  phases.forEach(function(phase){
+    var title = phase.querySelector('h2.phase-title').textContent;
+    var num = phase.querySelector('.phase-num').textContent;
+    var div = document.createElement('div');
+    div.className = 'rail-phase';
+    div.innerHTML = '<a href="#' + phase.id + '">' + num + ' — ' + title + '</a>';
+    var ul = document.createElement('ul');
+    ul.className = 'rail-steps';
+    phase.querySelectorAll('article.step').forEach(function(step){
+      var stitle = step.querySelector('h3.step-title').textContent;
+      var li = document.createElement('li');
+      li.id = 'rail-' + step.id;
+      li.innerHTML = '<a href="#' + step.id + '">' + stitle + '</a>';
+      ul.appendChild(li);
+    });
+    div.appendChild(ul);
+    rail.appendChild(div);
+  });
+
+  // ---------- checkbox state + progress ----------
+  var steps = document.querySelectorAll('[data-step]');
+  var KEY = 'aop-procon-progress';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){ state = {}; }
+
+  var checkSvg = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3.5 8.5 6.5 11.5 12.5 4.5"></polyline></svg>';
+
+  function updateProgress(){
+    var total = steps.length, done = 0;
+    steps.forEach(function(s){ if (state[s.id]) done++; });
+    var pct = total ? Math.round(done/total*100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = done + ' of ' + total + ' steps done';
+  }
+
+  steps.forEach(function(step){
+    var box = step.querySelector('[data-check]');
+    box.innerHTML = checkSvg;
+    function paint(){
+      var on = !!state[step.id];
+      box.classList.toggle('checked', on);
+      var railItem = document.getElementById('rail-' + step.id);
+      if (railItem) railItem.classList.toggle('done', on);
+    }
+    box.addEventListener('click', function(){
+      state[step.id] = !state[step.id];
+      localStorage.setItem(KEY, JSON.stringify(state));
+      paint(); updateProgress();
+    });
+    paint();
+  });
+  updateProgress();
+
+  // ---------- copy buttons ----------
+  document.querySelectorAll('[data-copy]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var code = btn.parentElement.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(function(){
+        var old = btn.textContent; btn.textContent = 'Copied';
+        setTimeout(function(){ btn.textContent = old; }, 1200);
+      });
+    });
+  });
+
+  // ---------- active section highlight on scroll ----------
+  var railPhases = document.querySelectorAll('.rail-phase');
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting){
+        railPhases.forEach(function(p){ p.classList.remove('active'); });
+        var idx = Array.from(phases).indexOf(entry.target);
+        if (railPhases[idx]) railPhases[idx].classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -70% 0px' });
+  phases.forEach(function(p){ observer.observe(p); });
+})();
+</script>
