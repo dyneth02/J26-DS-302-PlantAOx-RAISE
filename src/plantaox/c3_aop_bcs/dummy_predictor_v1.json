@@ -1,0 +1,36 @@
+{
+  "predictor_id": "c3_software_smoke_test_dummy",
+  "display_name": "C3 software smoke-test dummy (NON-EXPERIMENTAL)",
+  "version": "1.0.0",
+  "interface_version": "1.0",
+  "classification": {
+    "software_testing_only": true,
+    "scientific_aop_predictor": false,
+    "experimental_results_allowed": false
+  },
+  "warning": "This deterministic dummy is only for software pipeline tests. It is not a scientific antioxidant-peptide predictor and its scores must never be reported as experimental results or biological evidence.",
+  "scoring_method": {
+    "name": "position_weighted_alphabetical_residue_rank_checksum",
+    "formula": "sum(position * alphabetical_residue_rank) / (20 * sum(positions))",
+    "amino_acid_order": "ACDEFGHIKLMNPQRSTVWY",
+    "position_indexing": "one-based",
+    "output_range": [
+      0.0,
+      1.0
+    ],
+    "biological_basis": "none"
+  },
+  "allowed_uses": [
+    "predictor-interface smoke tests",
+    "scoring-pipeline smoke tests",
+    "metric-pipeline smoke tests",
+    "failure-handling and reproducibility tests"
+  ],
+  "prohibited_uses": [
+    "scientific AOP prediction",
+    "experimental results",
+    "predictor comparison",
+    "biological interpretation",
+    "satisfying the PP1 real-predictor requirement"
+  ]
+}
