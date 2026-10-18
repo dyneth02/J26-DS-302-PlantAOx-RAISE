@@ -1,0 +1,56 @@
+{
+  "step": 8,
+  "date_run": "2026-10-18T15:33:27",
+  "versions": {
+    "python": "3.12.6",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "scikit-learn": "1.9.1",
+    "matplotlib": "3.11.2"
+  },
+  "s2_fingerprint": "47d9c2a2fff63eb1",
+  "input_sha256": {
+    "data/AOP-BenchPos_S2.csv": "b116ddc72cbaeee1e1271855169c5b32a2e14ad802979d214d8eedb7a298c4e4",
+    "data/descriptors.csv": "182a4e5144931a411c2b888f2be56e1c77973a2233a0526653d4bf2dce26dd9b",
+    "embeddings/esm2_35M.npy": "cade4e4d41d5c69258d55116245a8ba8c23cbd8abe2b3dfc220c0ff79c8fe090",
+    "embeddings/esm2_150M.npy": "758f076c064035b6b9c4335ea5f7a81ef3c56fff3169d72e485f949cbcf03bd9",
+    "embeddings/esm2_650M.npy": "8f8ca44ff9a28bfd852144b1b119dfb06ffc0d95bdd86bee5475db7e543849ec",
+    "embeddings/esm2_3B.npy": "e52fa61a4fed2a095c9de750da646a4f755e27458c21f244cff57606af26a52b"
+  },
+  "seed": 42,
+  "n_boot": 2000,
+  "cv": "StratifiedGroupKFold(5, shuffle=True) x 10, groups=homology_group",
+  "headline_metric": "fold-mean AUROC over 50 test folds",
+  "bootstrap": "group bootstrap over homology groups (weighted, all folds recomputed)",
+  "step5_released_oof_auroc_esm650M": 0.5931245745405037,
+  "length_bins": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    11,
+    15
+  ],
+  "match_draws": 20,
+  "lc_fracs": [
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "outputs": [
+    "step8_cv_design.csv",
+    "step8_delta_esm_over_confounds.csv",
+    "step8_fold_composition.csv",
+    "step8_headline.csv",
+    "step8_learning_curve.csv",
+    "step8_learning_curve.png",
+    "step8_length_matched.csv",
+    "step8_length_matched_runs.csv",
+    "step8_probe_anoxpepred_only.csv",
+    "step8_probe_strict.csv"
+  ]
+}

@@ -1,0 +1,30 @@
+features,design,AUROC_pooled,AUROC_foldmean
+ESM-2 650M,Step 5 released OOF (scikit-learn 1.6.1),0.5931245745405037,
+ESM-2 650M,"lso_fold 2-fold, train 0 -> test 1",0.6487190620929223,0.6487190620929223
+ESM-2 650M,"lso_fold 2-fold, train 1 -> test 0",0.6746546739479601,0.6746546739479601
+ESM-2 650M,"GroupKFold(5) re-run, integer ids (scikit-learn 1.9.1)",0.6551395507147719,0.656126450183787
+ESM-2 650M,"GroupKFold(5) re-run, string ids (scikit-learn 1.9.1)",0.6015146358066712,0.6085449596807497
+ESM-2 650M,StratifiedGroupKFold(5) x10: lowest repeat,0.5715282505105514,0.5683345452759585
+ESM-2 650M,StratifiedGroupKFold(5) x10: highest repeat,0.6324370319945541,0.631251472021816
+ESM-2 650M,StratifiedGroupKFold(5) x10: all 50 folds (Step 8 headline = AUROC_foldmean),0.6077944179714091,0.6013320553807612
+AAC-20,"lso_fold 2-fold, train 0 -> test 1",0.6882327399044725,0.6882327399044725
+AAC-20,"lso_fold 2-fold, train 1 -> test 0",0.6474783167362673,0.6474783167362673
+AAC-20,"GroupKFold(5) re-run, integer ids (scikit-learn 1.9.1)",0.6492511912865895,0.6570842194470027
+AAC-20,"GroupKFold(5) re-run, string ids (scikit-learn 1.9.1)",0.6382658270932609,0.6429621522823661
+AAC-20,StratifiedGroupKFold(5) x10: lowest repeat,0.5737576582709326,0.5712908429945491
+AAC-20,StratifiedGroupKFold(5) x10: highest repeat,0.6247617426820966,0.6253697771609807
+AAC-20,StratifiedGroupKFold(5) x10: all 50 folds (Step 8 headline = AUROC_foldmean),0.6096153846153847,0.6056414351565809
+SOURCE,"lso_fold 2-fold, train 0 -> test 1",0.673469387755102,0.673469387755102
+SOURCE,"lso_fold 2-fold, train 1 -> test 0",0.6090909090909091,0.6090909090909091
+SOURCE,"GroupKFold(5) re-run, integer ids (scikit-learn 1.9.1)",0.5674863852961198,0.6508856682769727
+SOURCE,"GroupKFold(5) re-run, string ids (scikit-learn 1.9.1)",0.5512253233492171,0.6503272888102609
+SOURCE,StratifiedGroupKFold(5) x10: lowest repeat,0.5860874744724303,0.6390476190476191
+SOURCE,StratifiedGroupKFold(5) x10: highest repeat,0.6043652144315862,0.6407142857142857
+SOURCE,StratifiedGroupKFold(5) x10: all 50 folds (Step 8 headline = AUROC_foldmean),0.6731875425459495,0.6398571428571429
+LENGTH,"lso_fold 2-fold, train 0 -> test 1",0.6159719206831669,0.6159719206831669
+LENGTH,"lso_fold 2-fold, train 1 -> test 0",0.5405717956954706,0.5405717956954706
+LENGTH,"GroupKFold(5) re-run, integer ids (scikit-learn 1.9.1)",0.5840963240299524,0.6044955698184112
+LENGTH,"GroupKFold(5) re-run, string ids (scikit-learn 1.9.1)",0.5933032675289311,0.619681059149562
+LENGTH,StratifiedGroupKFold(5) x10: lowest repeat,0.5695541184479238,0.5973371732639648
+LENGTH,StratifiedGroupKFold(5) x10: highest repeat,0.5951242341729067,0.6171757327368147
+LENGTH,StratifiedGroupKFold(5) x10: all 50 folds (Step 8 headline = AUROC_foldmean),0.5808032675289313,0.6076448235791756
