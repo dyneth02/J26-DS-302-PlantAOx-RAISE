@@ -91,9 +91,9 @@
 
 ## Next task — Task 3.22: Build a non-experimental dummy/smoke-test predictor
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - implement one simple deterministic predictor behind the Task 3.19 common interface;
 - label it explicitly as software testing only, not a scientific AOP predictor, and excluded from experimental results;
