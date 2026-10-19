@@ -441,3 +441,11 @@ The inventory was synchronized on 19 October 2026 before validating the newly su
 - **Status: In Progress.** The expected `ref_cloud.npy` and `ref_cloud_sequences.csv` files are present alongside the candidate embedding handoff. Their source, shape, row alignment, and checksum have not yet been verified; do not label production outputs as real-cloud results before `embed-import` and downstream stages pass.
 - Preserve the previous mock cloud backup and outputs as a sensitivity comparison. Signal files remain `source=mock`.
 - No new real-cloud metrics or tier outcomes are verified at this point.
+
+
+## Current work session — claimed replacement cloud verification (19 October 2026)
+
+- **Status: Blocked.** The files currently present at `data/interim/c4_screen/embeddings/ref_cloud.npy` and `ref_cloud_sequences.csv` are the previous MOCK handoff, not the claimed C2 FR1 cloud. The array is `(500, 1280)` float16; the metadata contains 500 rows, all `source=mock_cloud`, `evidence_tier=MOCK`, and IDs beginning `MOCK`.
+- SHA-256: `ref_cloud.npy` = `6469e03b85760f8e7659b776589f792d9b37aabbafda5333cd7464e3beee948`; `ref_cloud_sequences.csv` = `5e547f189759312d809de4ab3980875c5626d179f255026af0ff1c0ce1694bc0`. No `*_mock.*` backup files are present in the embeddings directory.
+- The real-cloud stages (`embed-import`, `cloud`, `ad`, `signals`, `score`, `cards`, `dashboard`) and the two-run reproducibility check were not run because the real cloud handoff is absent. Existing mock outputs were left untouched; no new real-cloud metrics or PP1 materials were generated.
+- **Needed to resume:** replace both cloud files with the C2-positive sequence list and its matching Colab embeddings (same row order, one embedding per CSV row), and provide the mock backups in `*_mock.*` if they are to be retained for direct comparison. Then validate the source metadata and array dimensions before running production.
