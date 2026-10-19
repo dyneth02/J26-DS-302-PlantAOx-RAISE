@@ -12,6 +12,6 @@ Benchmark **S2 build v3** (fingerprint `47d9c2a2fff63eb1`): 1,389 unique peptide
 | `results/` | Step 4-6 tables, Step 5 v4 supervised probe (repeated grouped CV), Step 7 OOF probe scores, `step8/` confound controls |
 | `results/checkpoint_sha256.csv` | SHA-256 of the 15 trained checkpoints (the `.pt` files are not committed) |
 
-Not committed: ESM-2 embedding arrays (`.npy`), model checkpoints (`.pt`), the release zip, raw third-party repositories. They can be regenerated with `notebooks/c1_procon/STEP02` and `STEP04` (see `docs/c1_procon/PIPELINE_README.md`).
+Not committed: ESM-2 embedding arrays (`.npy`), model checkpoints (`.pt`), the release zip, raw third-party repositories. They can be regenerated with `notebooks/c1_procon/STEP02` and `STEP04` (see `src/plantaox/c1_procon/docs/PIPELINE_README.md`).
 
 Data files are byte-exact copies (the repository sets `data/** -text`).
