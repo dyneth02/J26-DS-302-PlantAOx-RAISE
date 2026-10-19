@@ -76,6 +76,10 @@ def test_mock_signals_join_by_sequence_and_scoring_invariants(tmp_path):
     tiers[["sequence", "d_norm", "tier"]].to_parquet(tier_input, index=False)
     signals = tmp_path / "signals"
     generate_and_validate_mock_signals(tier_input, signals, seed=42, inject=1)
+    repeated = tmp_path / "signals_repeat"
+    generate_and_validate_mock_signals(tier_input, repeated, seed=42, inject=1)
+    for name in ("c1_sim.parquet", "c2_prob.parquet", "c3_bcs.json", "MOCK_MANIFEST.json"):
+        assert (signals / name).read_bytes() == (repeated / name).read_bytes()
     joined, bcs = validate_and_join_signals(tiers, signals)
     assert bcs["source"] == "mock"
     assert set(joined.SIM_C1_source) == {"mock"} and set(joined.PROB_C2_source) == {"mock"}
@@ -88,6 +92,18 @@ def test_mock_signals_join_by_sequence_and_scoring_invariants(tmp_path):
     s2 = ranked.loc[ranked.sequence == "EFGH", "CS"].iloc[0]
     assert .5 * joined.loc[joined.sequence == "ACD", "SIM_C1"].iloc[0] + .5 * joined.loc[joined.sequence == "ACD", "PROB_C2"].iloc[0] * .9 == pytest.approx(s1)
     assert s1 >= 0 and s2 >= 0
+
+
+def test_score_decreases_with_greater_ad_distance_when_other_signals_are_fixed():
+    joined = pd.DataFrame({"peptide_id": ["p1", "p2"], "sequence": ["ACD", "EFG"],
+        "d_norm": [.1, .8], "tier": [1, 1], "embedded": [True, True], "SIM_C1": [.6, .6],
+        "PROB_C2": [.8, .8], "SIM_C1_source": ["mock", "mock"],
+        "PROB_C2_source": ["mock", "mock"], "cloud_source": ["mock_cloud", "mock_cloud"]})
+    candidates = pd.DataFrame({"peptide_id": ["p1", "p2"], "sequence": ["ACD", "EFG"]})
+    memberships = pd.DataFrame({"peptide_id": ["p1", "p2"], "plant": ["olive", "olive"]})
+    ranked = score_candidates(joined, memberships, candidates, {"weights": {"w1": .5, "w2": .5}})
+    by_sequence = ranked.set_index("sequence").CS
+    assert by_sequence["ACD"] > by_sequence["EFG"]
 
 
 def test_cards_flags_summary_and_dashboard_are_mock_labelled(tmp_path):
