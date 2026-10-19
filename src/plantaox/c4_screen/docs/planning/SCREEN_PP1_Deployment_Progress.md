@@ -83,3 +83,10 @@ Use **Done** only when the inventory's defined output and acceptance evidence ar
 | NFR2 timing | Done | Rice N=140,813: tiering 18.562604 s, scoring/ranking 1.644521 s, total 20.207124 s (one local host run). |
 | PP1 technical report, demo, slides, logbook and FASTA handoff note | Done (drafts) | All are present in C4 docs; future 20–21 Oct logbook entries remain prompts. FASTA handoff is draft only; no owner message sent. |
 | Freeze package and local tag | Pending | Requires focused test pass, checksummed C4-only manifest/report, and annotated local tag. Checkout branch is `feat/c4-Screen1`; requested `c4/pp1-final` branch is unavailable and branch switching is prohibited by the task constraints. |
+
+
+## Current update — replacement reference cloud (19 October 2026)
+
+| Work item | Status | Evidence / next step |
+|---|---|---|
+| Replacement real-cloud handoff validation and production rerun | In Progress | `ref_cloud.npy` and `ref_cloud_sequences.csv` are present under `data/interim/c4_screen/embeddings/`; validate provenance, shape, sequence alignment, and checksums with `embed-import`, then run cloud, AD, mock signals, score, cards, dashboard, and two reproducibility runs. Existing mock-cloud outputs/backups are retained for sensitivity comparison. No replacement-cloud results are verified yet. |

@@ -16,7 +16,7 @@
 
 ## Repository Status Audit — 19 October 2026
 
-The inventory was synchronized on 19 October 2026 after production verification. Gate 1 remains unchanged. Local ESM download, owner contract follow-ups, and a real-cloud source ladder are superseded as marked below. The supplied candidate embeddings validated at 152,259 × 1,280; the reference cloud has 500 sequences and is MOCK (`mock_cloud`). Downstream C4 outputs and tests are recorded in [`PP1_STATUS.md`](../planning/PP1_STATUS.md).
+The inventory was synchronized on 19 October 2026 before validating the newly supplied reference-cloud handoff. Gate 1 remains unchanged. Local ESM download and owner contract follow-ups are superseded as marked below. The candidate embedding handoff was previously validated at 152,259 × 1,280. Replacement `ref_cloud.npy` and `ref_cloud_sequences.csv` are present but not yet validated or processed; production cloud status remains unverified until the ordered stages complete. Current evidence is in [`PP1_STATUS.md`](../planning/PP1_STATUS.md).
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 
@@ -434,3 +434,10 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - **Appendix 2:** Logbook, including the earlier dashboard prototype entries.
 
 **Version:** 1.0 — PP1 execution-focused Planner breakdown, two-day window.
+
+
+## Current work session — replacement reference cloud validation (19 October 2026)
+
+- **Status: In Progress.** The expected `ref_cloud.npy` and `ref_cloud_sequences.csv` files are present alongside the candidate embedding handoff. Their source, shape, row alignment, and checksum have not yet been verified; do not label production outputs as real-cloud results before `embed-import` and downstream stages pass.
+- Preserve the previous mock cloud backup and outputs as a sensitivity comparison. Signal files remain `source=mock`.
+- No new real-cloud metrics or tier outcomes are verified at this point.
