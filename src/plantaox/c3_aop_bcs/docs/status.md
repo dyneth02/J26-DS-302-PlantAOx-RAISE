@@ -153,11 +153,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.32 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.33: Manually inspect example variants
+## Current task — Task 3.33: Manually inspect example variants
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - select representative P1, P2, and P3 examples from the PP1 pilot;
 - manually verify mutation position, original/new residue, and resulting sequence;
