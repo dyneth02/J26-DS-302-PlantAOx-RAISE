@@ -11,6 +11,7 @@ import unittest
 from plantaox.c3_aop_bcs.run_manifest import (
     DEFAULT_REPORT_PATHS,
     DEFAULT_RESULT_PATHS,
+    DEFAULT_OUTPUT_PATH,
     RUN_ID,
     RunManifestError,
     build_run_manifest,
@@ -89,6 +90,17 @@ class RunManifestTests(unittest.TestCase):
             self._build(second)
             self.assertEqual(first.read_bytes(), second.read_bytes())
             self.assertEqual(json.loads(first.read_text(encoding="utf-8"))["run_id"], RUN_ID)
+
+    def test_committed_manifest_is_byte_reproducible(self):
+        committed = json.loads(DEFAULT_OUTPUT_PATH.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory(dir=TEST_DIRECTORY) as directory:
+            generated = Path(directory) / "manifest.json"
+            build_run_manifest(
+                code_commit=committed["code"]["git_commit"],
+                output_path=generated,
+                created_on=date.fromisoformat(committed["run_date"]),
+            )
+            self.assertEqual(generated.read_bytes(), DEFAULT_OUTPUT_PATH.read_bytes())
 
     def test_invalid_commit_and_incomplete_registries_are_rejected(self):
         with tempfile.TemporaryDirectory(dir=TEST_DIRECTORY) as directory:
