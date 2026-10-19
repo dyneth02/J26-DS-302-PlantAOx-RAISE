@@ -444,3 +444,9 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - **Status: Done for the API phase.** A read-only FastAPI surface is implemented under `backend/app/api/v1/c4_screen`, with component schemas/services and fixture-backed tests under `tests/backend/c4_screen/`. It is integrated at the shared `/api/v1` composition root and reads the frozen C4 artifacts without changing the screening pipeline.
 - API responses must preserve the current provenance: `cloud_source=mock_cloud`, signal sources=`mock`, and no retrieval metrics computed on mock inputs.
 - Verification: `pytest tests/backend/c4_screen -q -p no:cacheprovider` passed (8 tests), including a smoke test against this checkout’s frozen outputs. API behavior covers data/meta, funnel, tier/AD/length summaries, candidate filters/details, cards, abstained candidates, and CSV export.
+
+
+## Current work session — C4 frontend integration (19 October 2026)
+
+- **Status: In Progress.** Building the C4 React/TypeScript feature in its own `frontend/src/features/c4-screen/` module and registering its routes/component entry in the shared app files. Existing C1/C2/C3 feature files will remain unchanged. The feature will consume the read-only `/api/v1/c4` contract and preserve mock/provisional provenance.
+- Acceptance remains pending until focused frontend tests and the production build are verified.

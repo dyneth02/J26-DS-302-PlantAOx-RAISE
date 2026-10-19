@@ -78,3 +78,10 @@ Use **Done** only when the inventory's defined output and acceptance evidence ar
 | Workstream | Status | Evidence / next step |
 |---|---|---|
 | Read-only C4 API and fixture tests | Done | `backend.app.api.v1.c4_screen` is included in the `/api/v1` router; component response schemas and cached, column-projected artifact services are under `backend/app/schemas` and `backend/app/services/c4_screen/`. `pytest tests/backend/c4_screen -q -p no:cacheprovider`: 8 passed, including a live frozen-artifact smoke test. API remains read-only and labels the current cloud/signals as mock. |
+
+
+## Current work session — C4 frontend integration (19 October 2026)
+
+| Workstream | Status | Evidence / next step |
+|---|---|---|
+| C4 frontend feature, API client, and route registration | In Progress | Implementing under `frontend/src/features/c4-screen/` and integrating through shared router/component registry only. It will use the existing React + TypeScript + Vite stack and the tested `/api/v1/c4` API. Focused feature tests and a production build remain to be run. |
