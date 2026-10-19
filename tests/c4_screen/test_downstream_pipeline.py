@@ -9,7 +9,7 @@ from plantaox.c4_screen.cards import _reliability_flag, make_cards
 from plantaox.c4_screen.cloud import build_reference_meta
 from plantaox.c4_screen.dashboard import build_summary, write_dashboard
 from plantaox.c4_screen.embed_import import EmbeddingImportError, import_embeddings, row_sequence_sha256
-from plantaox.c4_screen.score import score_candidates
+from plantaox.c4_screen.score import score_candidates, weight_sweep
 from plantaox.c4_screen.signals import generate_and_validate_mock_signals, validate_and_join_signals
 
 
@@ -104,6 +104,46 @@ def test_score_decreases_with_greater_ad_distance_when_other_signals_are_fixed()
     ranked = score_candidates(joined, memberships, candidates, {"weights": {"w1": .5, "w2": .5}})
     by_sequence = ranked.set_index("sequence").CS
     assert by_sequence["ACD"] > by_sequence["EFG"]
+
+
+def test_weight_sweep_runs_and_synthetic_planted_set_ranks_above_random():
+    # Test-only 2,000-row sandbox; these constructed records are not project outputs.
+    rng = np.random.default_rng(42)
+    n, planted = 2000, 20
+    sequences = [f"A{'C' if i % 2 else 'D'}{'E' if i % 3 else 'F'}{i:04d}" for i in range(n)]
+    joined = pd.DataFrame({"peptide_id": [f"p{i:04d}" for i in range(n)], "sequence": sequences,
+        "d_norm": np.r_[rng.uniform(0.0, .2, planted), rng.uniform(.2, 1.0, n-planted)],
+        "tier": np.r_[np.ones(planted, dtype=int), rng.choice([1, 2, 3], n-planted)],
+        "embedded": True, "SIM_C1": np.r_[rng.uniform(.85, 1, planted), rng.uniform(0, .8, n-planted)],
+        "PROB_C2": np.r_[rng.uniform(.85, 1, planted), rng.uniform(0, .8, n-planted)],
+        "SIM_C1_source": "mock", "PROB_C2_source": "mock", "cloud_source": "mock_cloud"})
+    memberships = pd.DataFrame({"peptide_id": joined.peptide_id, "plant": "synthetic"})
+    candidates = joined[["peptide_id", "sequence"]].copy()
+    default = {"weights": {"w1": .5, "w2": .5}}
+    results = weight_sweep(joined, memberships, candidates, default)
+    assert set(results) == {.25, .5, .75}
+    assert default["weights"] == {"w1": .5, "w2": .5}
+    for ranked in results.values():
+        assert ranked.CS.between(0, 1).all()
+        assert ranked.loc[ranked.tier == 3, "CS"].eq(0).all()
+        top = set(ranked.nsmallest(planted, "rank").peptide_id)
+        assert len(top.intersection(joined.head(planted).peptide_id)) >= planted * .9
+
+
+def test_sequence_key_real_signal_swap_in_procedure(tmp_path):
+    # Synthetic real-source contract fixture; no biological result is asserted.
+    seqs = ["ACDE", "FGHI"]
+    tiers = pd.DataFrame({"peptide_id": ["p1", "p2"], "sequence": seqs,
+        "d_AD": [.01, .02], "d_norm": [.1, .2], "tier": [1, 2], "embedded": [True, True],
+        "cloud_source": ["mock_cloud"] * 2})
+    pd.DataFrame({"sequence": seqs, "SIM_C1": [.7, .6], "source": ["real"] * 2}).to_parquet(
+        tmp_path / "c1_sim.parquet", index=False)
+    pd.DataFrame({"sequence": seqs, "PROB_C2": [.8, .5], "evidence_tier": ["E1", "E2"],
+        "source": ["real"] * 2}).to_parquet(tmp_path / "c2_prob.parquet", index=False)
+    (tmp_path / "c3_bcs.json").write_text(json.dumps({"source": "real", "strata": []}), encoding="utf-8")
+    joined, bcs = validate_and_join_signals(tiers, tmp_path)
+    assert bcs["source"] == "real"
+    assert joined.SIM_C1_source.eq("real").all() and joined.PROB_C2_source.eq("real").all()
 
 
 def test_cards_flags_summary_and_dashboard_are_mock_labelled(tmp_path):
