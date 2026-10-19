@@ -102,16 +102,21 @@
 - Explicitly prohibited batch-wise min-max, percentile, z-score, and invented sigmoid transformations so original-versus-perturbed differences cannot change with batch composition.
 - Verified all 20,072 original/perturbed dummy score values across 10,036 rows are already within `[0,1]` (observed range `0.075–1.0`) and remain unchanged; this is software validation only, while every real predictor remains pending retained real-score verification.
 - Confirmed all seven focused Task 3.24 tests pass with six subtests. The broader C3 run passed 91 tests and 74 subtests, with four unrelated pre-existing byte-reproducibility failures caused by CRLF line endings in older Task 3.19–3.22 committed artifacts.
+- Created the versioned `c3_aop_bcs_pp1_pilot_v1` dataset by deterministically selecting 20 of the 734 eligible audit subjects using master seed `42` and a row-order-independent coverage-first/SHA-256 tie-break algorithm.
+- Represented 12 distinct sequence lengths from 3 to 36 amino acids across all four fixed length bands, all five W/Y/H/M/C redox residues, five single-type and 15 multiple-type redox patterns, 20 distinct exact redox patterns, both E1 and E2 evidence, and multiple source datasets.
+- Exported the 20 provenance-preserving pilot subjects and all 449 linked perturbations: 54 P1, 150 P2, and 245 P3 variants.
+- Added a checksum-backed pilot report recording the frozen seed, selection algorithm, source and output hashes, coverage counts, and a passing validation result; regeneration is byte-identical and independent of candidate row order.
+- Confirmed all four focused Task 3.25 tests pass. The broader C3 run passed 95 tests and 74 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.24 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.25 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.25: Create the PP1 pilot subset
+## Next task — Task 3.26: Calculate DeltaScore
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- select approximately 10–30 peptides reproducibly using the fixed research seed;
-- represent multiple sequence lengths and redox-residue patterns;
-- retain source/provenance fields and version the selected pilot records;
-- verify that the subset is sufficient to demonstrate the complete PP1 workflow without presenting dummy scores as scientific results.
+- compute `DeltaScore = Score(original) - Score(perturbed)` for every scored perturbation;
+- store the corresponding absolute DeltaScore value;
+- preserve predictor, sequence, perturbation, and testing-status provenance;
+- verify the calculation using explicit hand-checked examples before generating the versioned result artifact.
