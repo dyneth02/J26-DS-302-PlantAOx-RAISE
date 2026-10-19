@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { PointerEvent, ReactNode } from "react";
 
 /**
  * Small SVG chart primitives for Component 01. They are written for this feature (not shared) so the
@@ -139,6 +139,8 @@ export interface ScatterPoint {
   color: string;
   faint?: boolean;
   radius?: number;
+  /** Hidden points keep their place in the axis range, so toggling a group does not rescale the map. */
+  hidden?: boolean;
 }
 
 export function ScatterPlot({
@@ -173,7 +175,7 @@ export function ScatterPlot({
   const X = (v: number) => pad.l + clamp((v - (x0 - dx)) / (x1 - x0 + 2 * dx), 0.005, 0.995) * (W - pad.l - pad.r);
   const Y = (v: number) => H - pad.b - clamp((v - (y0 - dy)) / (y1 - y0 + 2 * dy), 0.005, 0.995) * (H - pad.t - pad.b);
   // faint points first so highlighted classes are drawn on top
-  const ordered = [...points].sort((a, b) => Number(!!b.faint) - Number(!!a.faint));
+  const ordered = points.filter((p) => !p.hidden).sort((a, b) => Number(!!b.faint) - Number(!!a.faint));
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={ariaLabel} style={{ display: "block" }}>
@@ -200,15 +202,265 @@ export function ScatterPlot({
   );
 }
 
-export function Legend({ entries }: { entries: [string, string][] }) {
+export interface ScatterPoint3D {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+  color: string;
+  faint?: boolean;
+  radius?: number;
+  hidden?: boolean;
+}
+
+/** Resolve a CSS colour that may be a `var(--token)` so it can be used on a canvas. */
+function resolveCanvasColor(el: Element, color: string): string {
+  const match = /^var\((--[\w-]+)\)$/.exec(color);
+  if (!match) return color;
+  return getComputedStyle(el).getPropertyValue(match[1]).trim() || "#888888";
+}
+
+/**
+ * 3-D version of ScatterPlot: a perspective canvas the viewer can rotate (drag) and zoom (wheel). It does not need a
+ * 3-D library; at ~1.4k points a plain 2-D canvas with depth sorting is fast and keeps the bundle small.
+ * All three axes use one common scale so the shape of the cloud is not distorted.
+ */
+export function ScatterPlot3D({
+  points,
+  axisLabels,
+  onHover,
+  ariaLabel,
+}: {
+  points: ScatterPoint3D[];
+  axisLabels: [string, string, string];
+  onHover?: (id: string | null) => void;
+  ariaLabel: string;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const view = useRef({ yaw: 0.7, pitch: 0.35, zoom: 1 });
+  const dragRef = useRef<{ x: number; y: number } | null>(null);
+  const hoverRef = useRef<string | null>(null);
+  const projected = useRef<{ id: string; sx: number; sy: number }[]>([]);
+  const frame = useRef(0);
+  const [spin, setSpin] = useState(false);
+
+  // Robust, common scale: 1st-99th percentile of every axis, clipped just outside the box.
+  const normalised = useMemo(() => {
+    const q = (values: number[], p: number) => {
+      const sorted = [...values].sort((a, b) => a - b);
+      return sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(p * (sorted.length - 1))))];
+    };
+    const axes = [points.map((p) => p.x), points.map((p) => p.y), points.map((p) => p.z)];
+    const lo = axes.map((a) => q(a, 0.01));
+    const hi = axes.map((a) => q(a, 0.99));
+    const half = Math.max(...hi.map((h, i) => h - lo[i])) / 2 || 1;
+    const mid = hi.map((h, i) => (h + lo[i]) / 2);
+    const clip = (v: number) => Math.max(-1.15, Math.min(1.15, v));
+    return points.map((p) => ({ ...p, nx: clip((p.x - mid[0]) / half), ny: clip((p.y - mid[1]) / half), nz: clip((p.z - mid[2]) / half) }));
+  }, [points]);
+
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext?.("2d");
+    if (!canvas || !ctx) return;
+    const ratio = window.devicePixelRatio || 1;
+    const W = canvas.clientWidth;
+    const H = canvas.clientHeight;
+    if (canvas.width !== Math.round(W * ratio) || canvas.height !== Math.round(H * ratio)) {
+      canvas.width = Math.round(W * ratio);
+      canvas.height = Math.round(H * ratio);
+    }
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const { yaw, pitch, zoom } = view.current;
+    const scale = Math.min(W, H) * 0.3 * zoom;
+    const [cy, sy, cp, sp, camera] = [Math.cos(yaw), Math.sin(yaw), Math.cos(pitch), Math.sin(pitch), 4];
+    const project = (x: number, y: number, z: number) => {
+      const x1 = x * cy + z * sy;
+      const z1 = -x * sy + z * cy;
+      const y2 = y * cp - z1 * sp;
+      const z2 = y * sp + z1 * cp;
+      const f = camera / (camera - z2);
+      return { sx: W / 2 + x1 * scale * f, sy: H / 2 - y2 * scale * f, depth: z2 };
+    };
+    ctx.strokeStyle = resolveCanvasColor(canvas, "var(--color-border)");
+    ctx.lineWidth = 1;
+    const corners: [number, number, number][] = [];
+    for (const x of [-1, 1]) for (const y of [-1, 1]) for (const z of [-1, 1]) corners.push([x, y, z]);
+    const edges: [number, number][] = [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]];
+    ctx.beginPath();
+    for (const [a, b] of edges) {
+      const p = project(...corners[a]);
+      const q = project(...corners[b]);
+      ctx.moveTo(p.sx, p.sy);
+      ctx.lineTo(q.sx, q.sy);
+    }
+    ctx.stroke();
+    ctx.fillStyle = resolveCanvasColor(canvas, "var(--color-text-muted)");
+    ctx.font = "11px sans-serif";
+    ([[1.18, 0, 0], [0, 1.18, 0], [0, 0, 1.18]] as const).forEach((pos, i) => {
+      const p = project(pos[0], pos[1], pos[2]);
+      ctx.fillText(`PC${i + 1}`, p.sx - 8, p.sy + 4);
+    });
+
+    const items = normalised
+      .filter((p) => !p.hidden)
+      .map((p) => ({ p, ...project(p.nx, p.ny, p.nz) }))
+      .sort((a, b) => a.depth - b.depth);
+    projected.current = items.map((i) => ({ id: i.p.id, sx: i.sx, sy: i.sy }));
+    for (const { p, sx, sy: py, depth } of items) {
+      const near = (depth + 1.7) / 3.4;
+      ctx.globalAlpha = (p.faint ? 0.3 : 0.9) * (0.45 + 0.55 * near);
+      ctx.fillStyle = resolveCanvasColor(canvas, p.color);
+      ctx.beginPath();
+      ctx.arc(sx, py, (p.radius ?? 3.2) * (0.7 + 0.6 * near) * Math.min(1.6, zoom), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    const hit = items.find((i) => i.p.id === hoverRef.current);
+    if (hit) {
+      ctx.strokeStyle = resolveCanvasColor(canvas, "var(--color-text)");
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(hit.sx, hit.sy, 8, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }, [normalised]);
+
+  const schedule = useCallback(() => {
+    cancelAnimationFrame(frame.current);
+    frame.current = requestAnimationFrame(draw);
+  }, [draw]);
+
+  useEffect(() => {
+    schedule();
+    const canvas = canvasRef.current;
+    const observer = typeof ResizeObserver === "undefined" || !canvas ? null : new ResizeObserver(schedule);
+    if (canvas) observer?.observe(canvas);
+    return () => {
+      observer?.disconnect();
+      cancelAnimationFrame(frame.current);
+    };
+  }, [schedule]);
+
+  useEffect(() => {
+    if (!spin) return;
+    let id = 0;
+    const tick = () => {
+      if (!dragRef.current) view.current.yaw += 0.004;
+      draw();
+      id = requestAnimationFrame(tick);
+    };
+    id = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(id);
+  }, [spin, draw]);
+
+  const onMove = (e: PointerEvent<HTMLCanvasElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (dragRef.current) {
+      view.current.yaw += (e.clientX - dragRef.current.x) * 0.01;
+      view.current.pitch = Math.max(-1.5, Math.min(1.5, view.current.pitch + (e.clientY - dragRef.current.y) * 0.01));
+      dragRef.current = { x: e.clientX, y: e.clientY };
+    }
+    let best: string | null = null;
+    let bestDist = 12;
+    for (const p of projected.current) {
+      const d = Math.hypot(p.sx - (e.clientX - rect.left), p.sy - (e.clientY - rect.top));
+      if (d < bestDist) {
+        bestDist = d;
+        best = p.id;
+      }
+    }
+    if (best !== hoverRef.current) {
+      hoverRef.current = best;
+      onHover?.(best);
+    }
+    schedule();
+  };
+
   return (
-    <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
-      {entries.map(([color, label]) => (
-        <span key={label} className="inline-flex items-center gap-1.5">
-          <span style={{ background: color, width: 11, height: 11, borderRadius: 3, display: "inline-block" }} />
-          {label}
+    <div>
+      <canvas
+        ref={canvasRef}
+        role="img"
+        aria-label={ariaLabel}
+        style={{ width: "100%", height: 480, display: "block", cursor: "grab", touchAction: "none", border: "1px solid var(--color-border)", borderRadius: 12 }}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture?.(e.pointerId);
+          dragRef.current = { x: e.clientX, y: e.clientY };
+        }}
+        onPointerUp={() => {
+          dragRef.current = null;
+        }}
+        onPointerMove={onMove}
+        onPointerLeave={() => {
+          hoverRef.current = null;
+          onHover?.(null);
+          schedule();
+        }}
+        onWheel={(e) => {
+          view.current.zoom = Math.max(0.5, Math.min(3, view.current.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1)));
+          schedule();
+        }}
+        onDoubleClick={() => {
+          view.current = { yaw: 0.7, pitch: 0.35, zoom: 1 };
+          schedule();
+        }}
+      />
+      <div className="mt-2 flex flex-wrap items-center gap-4 text-xs" style={{ color: "var(--color-text-muted)" }}>
+        <span>
+          {axisLabels[0]} · {axisLabels[1]} · {axisLabels[2]}
         </span>
-      ))}
+        <span>Drag to rotate, scroll to zoom, double-click to reset.</span>
+        <label className="inline-flex items-center gap-1.5">
+          <input type="checkbox" checked={spin} onChange={(e) => setSpin(e.target.checked)} /> auto-rotate
+        </label>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Colour key. When `onToggle` is given every entry becomes a button that shows or hides that group in the chart
+ * (`hidden` holds the labels currently switched off).
+ */
+export function Legend({
+  entries,
+  hidden,
+  onToggle,
+}: {
+  entries: [string, string][];
+  hidden?: ReadonlySet<string>;
+  onToggle?: (label: string) => void;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+      {entries.map(([color, label]) => {
+        const off = hidden?.has(label) ?? false;
+        const swatch = <span style={{ background: off ? "transparent" : color, border: `2px solid ${color}`, width: 11, height: 11, borderRadius: 3, display: "inline-block", flexShrink: 0 }} />;
+        if (!onToggle) {
+          return (
+            <span key={label} className="inline-flex items-center gap-1.5">
+              {swatch}
+              {label}
+            </span>
+          );
+        }
+        return (
+          <button
+            key={label}
+            type="button"
+            onClick={() => onToggle(label)}
+            aria-pressed={!off}
+            title={off ? `Show ${label}` : `Hide ${label}`}
+            className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5"
+            style={{ opacity: off ? 0.55 : 1, textDecoration: off ? "line-through" : "none", cursor: "pointer", background: "transparent", color: "inherit" }}
+          >
+            {swatch}
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }

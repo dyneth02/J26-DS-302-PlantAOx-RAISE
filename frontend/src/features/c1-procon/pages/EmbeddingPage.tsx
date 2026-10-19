@@ -4,17 +4,28 @@ import { c1Api } from "@/features/c1-procon/services/api";
 import { DataState } from "@/components/research/DataState";
 import { Card, CardHeader, StatTile } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { C1_COLORS, Callout, HBarChart, Legend, ScatterPlot, Toggle } from "@/features/c1-procon/components/charts";
-import type { BarItem, ScatterPoint } from "@/features/c1-procon/components/charts";
+import { C1_COLORS, Callout, HBarChart, Legend, ScatterPlot, ScatterPlot3D, Toggle } from "@/features/c1-procon/components/charts";
+import type { BarItem, ScatterPoint, ScatterPoint3D } from "@/features/c1-procon/components/charts";
 import type { EmbeddingPoint, EmbeddingResponse, EmbeddingSpace } from "@/features/c1-procon/types";
 
 type SpaceKey = "esm2" | "primary" | "maxspread";
 type ColorBy = "class" | "length" | "source";
+type Dimension = "2d" | "3d";
+
+const CLASS_LABELS = {
+  mc: "MC-active (metal chelation)",
+  frs: "FRS-only (radical scavenging)",
+  other: "not in the strict pool (mechanism not established)",
+} as const;
 
 const SPACE_OPTIONS: [SpaceKey, string][] = [
   ["esm2", "Untrained ESM-2"],
   ["primary", "Main trained head"],
   ["maxspread", "Spread-selected head"],
+];
+const DIMENSION_OPTIONS: [Dimension, string][] = [
+  ["2d", "2D map"],
+  ["3d", "3D map"],
 ];
 const COLOR_OPTIONS: [ColorBy, string][] = [
   ["class", "Mechanism (MC vs FRS)"],
@@ -95,15 +106,40 @@ function PullTogetherIllustration() {
 function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
   const [space, setSpace] = useState<SpaceKey>("esm2");
   const [colorBy, setColorBy] = useState<ColorBy>("class");
+  const [dimension, setDimension] = useState<Dimension>("2d");
+  const [hiddenGroups, setHiddenGroups] = useState<ReadonlySet<string>>(new Set());
   const [hovered, setHovered] = useState<string | null>(null);
 
   const bySequence = useMemo(() => new Map(data.points.map((p) => [p.sequence, p])), [data.points]);
   const sources = useMemo(() => Array.from(new Set(data.points.map((p) => p.source_group ?? "unknown"))).sort(), [data.points]);
   const sourceColor = (name: string) => SOURCE_PALETTE[sources.indexOf(name) % SOURCE_PALETTE.length];
 
+  const groupOf = (p: EmbeddingPoint): string =>
+    colorBy === "class"
+      ? p.strict_class === "MC-active"
+        ? CLASS_LABELS.mc
+        : p.strict_class === "FRS-only"
+          ? CLASS_LABELS.frs
+          : CLASS_LABELS.other
+      : colorBy === "length"
+        ? (LENGTH_BINS.find(([, , test]) => test(p.length))?.[0] ?? "other")
+        : (p.source_group ?? "unknown");
+  const toggleGroup = (label: string) =>
+    setHiddenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
+  const changeColorBy = (value: ColorBy) => {
+    setColorBy(value);
+    setHiddenGroups(new Set()); // the groups differ between colourings
+  };
+
   const points: ScatterPoint[] = data.points.map((p) => {
     const color = colorBy === "class" ? classColor(p) : colorBy === "length" ? lengthColor(p) : sourceColor(p.source_group ?? "unknown");
     return {
+      hidden: hiddenGroups.has(groupOf(p)),
       id: p.sequence,
       x: p.coords[space][0],
       y: p.coords[space][1],
@@ -113,9 +149,11 @@ function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
     };
   });
 
+  const points3d: ScatterPoint3D[] = points.map((p, i) => ({ ...p, z: data.points[i].coords[space][2] ?? 0 }));
+
   const legend: [string, string][] =
     colorBy === "class"
-      ? [[C1_COLORS.mc, "MC-active (metal chelation)"], [C1_COLORS.frs, "FRS-only (radical scavenging)"], [C1_COLORS.gen, "not in the strict pool (mechanism not established)"]]
+      ? [[C1_COLORS.mc, CLASS_LABELS.mc], [C1_COLORS.frs, CLASS_LABELS.frs], [C1_COLORS.gen, CLASS_LABELS.other]]
       : colorBy === "length"
         ? LENGTH_BINS.map(([label, color]) => [color, label] as [string, string])
         : sources.map((s) => [sourceColor(s), s] as [string, string]);
@@ -126,6 +164,8 @@ function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
   const hover = hovered ? bySequence.get(hovered) : undefined;
   const xLabel = `PC1 (${(current.pc_variance_share[0] * 100).toFixed(0)}% of the variance)`;
   const yLabel = `PC2 (${(current.pc_variance_share[1] * 100).toFixed(0)}%)`;
+  const zShare = current.pc_variance_share[2];
+  const zLabel = `PC3 (${zShare === undefined ? "n/a" : (zShare * 100).toFixed(0) + "%"})`;
 
   const cosineItems: BarItem[] = data.spaces.flatMap((s) => [
     { label: `${s.name} - MC with MC`, value: s.within_mc, color: C1_COLORS.mc },
@@ -201,7 +241,7 @@ function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
       <Card>
         <CardHeader
           title="Map of the 1,389 peptides"
-          subtitle="Each dot is a peptide; peptides that look alike to the model sit close together (2-D PCA of the embedding)."
+          subtitle={`Each dot is a peptide; peptides that look alike to the model sit close together (${dimension === "3d" ? "3-D" : "2-D"} PCA of the embedding).`}
         />
         <div className="mb-3 flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-3">
@@ -209,12 +249,28 @@ function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
             <Toggle options={SPACE_OPTIONS} value={space} onChange={setSpace} />
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs font-semibold uppercase" style={{ color: "var(--color-text-muted)" }}>View</span>
+            <Toggle options={DIMENSION_OPTIONS} value={dimension} onChange={setDimension} />
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
             <span className="text-xs font-semibold uppercase" style={{ color: "var(--color-text-muted)" }}>Colour by</span>
-            <Toggle options={COLOR_OPTIONS} value={colorBy} onChange={setColorBy} />
+            <Toggle options={COLOR_OPTIONS} value={colorBy} onChange={changeColorBy} />
           </div>
         </div>
-        <ScatterPlot points={points} xLabel={xLabel} yLabel={yLabel} onHover={setHovered} ariaLabel={`PCA map of the peptides in the ${current.name} space`} />
-        <Legend entries={legend} />
+        {dimension === "2d" ? (
+          <ScatterPlot points={points} xLabel={xLabel} yLabel={yLabel} onHover={setHovered} ariaLabel={`PCA map of the peptides in the ${current.name} space`} />
+        ) : (
+          <ScatterPlot3D
+            points={points3d}
+            axisLabels={[xLabel, yLabel, zLabel]}
+            onHover={setHovered}
+            ariaLabel={`3-D PCA map of the peptides in the ${current.name} space`}
+          />
+        )}
+        <Legend entries={legend} hidden={hiddenGroups} onToggle={toggleGroup} />
+        <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+          Click a legend entry to hide or show that group.
+        </p>
         <p className="mt-2 min-h-5 text-xs" style={{ color: "var(--color-text-muted)" }} aria-live="polite">
           {hover ? (
             <>

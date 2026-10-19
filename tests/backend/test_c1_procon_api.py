@@ -143,9 +143,10 @@ async def test_embedding_shows_that_training_collapses_instead_of_separating_mec
     # and its nearest neighbours are no better than chance at finding MC-active peptides
     chance = body["meta"]["chance_mc_neighbour_purity"]
     assert spaces["primary"]["mc_neighbour_purity"] <= chance
+    assert all(len(s["pc_variance_share"]) == 3 for s in body["spaces"])
     assert body["meta"]["peptides_ge_10_aa"] + body["meta"]["peptides_lt_10_aa"] == 1389
     point = body["points"][0]
-    assert set(point["coords"]) == {"esm2", "primary", "maxspread"} and len(point["coords"]["esm2"]) == 2
+    assert set(point["coords"]) == {"esm2", "primary", "maxspread"} and len(point["coords"]["esm2"]) == 3  # PC1-PC3, the 2-D map uses the first two
     counts = {c["pair_set"]: c["pairs"] for c in body["pair_counts"]}
     assert counts["positive_pairs"] == 10195 and counts["ablation_random_pairs"] == 10195
     assert len(body["pair_examples"]) == 6
