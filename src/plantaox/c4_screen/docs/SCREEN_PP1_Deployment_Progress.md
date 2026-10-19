@@ -20,7 +20,7 @@
 | Retrieval evaluation (FR6) | Pending | No held-out evaluation set, metric implementation, or results are present. Later milestone. |
 | Evidence cards (FR7) | Done with MOCK signals | `cards.json` has top-50 Tier 1/2 candidates per plant, abstained Tier 3 examples, mock source labels, and ten injected rice demo cases. |
 | Dashboard | Done with MOCK data | Offline `c4_dashboard.html` and full summary generated from the validated production outputs. |
-| PP1 freeze, report, and presentation | In Progress | Presentation target is 21 October 2026. A 29-file checksummed manifest was generated; only C4 tests were run as requested. |
+| PP1 freeze, report, and presentation | In Progress | Presentation target is 21 October 2026. A checksummed manifest covers generated outputs and SHA-256-only hashes for all five supplied handoff inputs. Two `all` runs matched across 32 compared pipeline outputs. C4 diagnostics include Spearman length associations, cloud/candidate length distributions, and a separate mean-centering sensitivity; baseline thresholds/tiers are unchanged. `pytest tests/c4_screen`: 12 passed; no repository-wide suite was run. Slide numbers are in `PP1_NUMBERS.md`. |
 
 ## Gate 1 observed funnel
 
@@ -57,8 +57,8 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 
 - **Production stages:** `embed-import`, `cloud`, `ad`, `signals`, `score`, `cards`, `dashboard` completed in order. Import validated the manifest hash and exact candidate/index peptide_id+sequence order. Hash uses SHA-256 of newline-joined sequences in index order, matching the manifest recipe.
 - **Counts:** 152,259 candidates embedded; zero unembedded. Cloud N=500, `source=mock_cloud`. Signal inputs and BCS have `source=mock`.
-- **AD:** `mu=0.0185099002`, `sigma=0.0097886926`, `t1=0.0282985928`, `t2=0.0380872854`. Highest single-tier fraction is rice Tier 1 at 56.99%; no plant exceeds 95%, so conditional mean-centering diagnostic was not triggered. Thresholds were not tuned.
-- **Artifacts:** AD tiers, parameters, diagnostics, cloud metadata, mock signals/manifest, ranking, cards, summary, offline dashboard, and 29-file output checksum manifest exist under `data/interim/c4_screen/`.
+- **AD:** `mu=0.0185099002`, `sigma=0.0097886926`, `t1=0.0282985928`, `t2=0.0380872854`. Highest single-tier fraction is rice Tier 1 at 56.99%; no plant exceeds 95%. The requested joint mean-centering sensitivity was run separately; baseline tiers and thresholds were not changed or tuned.
+- **Artifacts:** AD tiers, parameters, diagnostics, cloud metadata, mock signals/manifest, ranking, cards, summary, offline dashboard, and the output checksum manifest (33 generated files plus five handoff-input SHA-256 values) exist under `data/interim/c4_screen/`.
 - **Verification:** only `pytest tests/c4_screen` was run: 12 passed. No full repository suite was run in this work session.
 - **Constraint:** Layer-33 mean-residue pooling remains a C4 assumption pending C1 confirmation. The reference cloud is MOCK; signal results/cards are mock demonstrations, not biological evidence. No PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS results are claimed.
 

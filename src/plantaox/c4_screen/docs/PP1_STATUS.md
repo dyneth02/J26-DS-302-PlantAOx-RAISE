@@ -55,7 +55,7 @@ Tier fractions by plant and length bin:
 | Soybean | 3–10 | 11,763 | 53.90% | 31.19% | 14.91% |
 | Soybean | 11–20 | 1,705 | 64.34% | 18.83% | 16.83% |
 
-No plant exceeded the >95% single-tier degeneracy criterion (maximum fraction: rice 56.99%). Therefore the conditional mean-centering check was **not triggered**; thresholds were unchanged. All signal sources are `mock`; cloud source is `mock_cloud`. Ten injected demonstration sequences were tagged, all among rice Tier 3 abstentions. They are demonstrations, not evidence; no PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS was computed.
+No plant exceeded the >95% single-tier degeneracy criterion (maximum fraction: rice 56.99%). The separately requested joint mean-centering sensitivity was run; its overall T1/T2/T3 fractions were 9.41%/18.87%/71.73%. Production thresholds and tiers remain unchanged. All signal sources are `mock`; cloud source is `mock_cloud`. Ten injected demonstration sequences were tagged, all among rice Tier 3 abstentions. They are demonstrations, not evidence; no PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS was computed.
 
 Three highest-CS card examples (MOCK signals/cloud):
 
@@ -67,4 +67,4 @@ Three highest-CS card examples (MOCK signals/cloud):
 
 Abstained examples (Tier 3, RED, CS=0): olive `AEATDAQ`; olive `AEG`; rice `AGMEEVDMDEEVRPEF` (injected demonstration case).
 
-`tests/c4_screen` passed **12 tests**. The checksummed manifest is `data/interim/c4_screen/c4_output_manifest.json`: it covers 29 generated/available output files, has run status `complete_mock_cloud_production`, and has SHA-256 `85439e8a6b13268f4a630c686ba4a17c5b9307d4b35122dd57fe838ae0f28860`. The five `.npy`/handoff inputs are excluded from the output manifest; the copied embedding manifest is included.
+`tests/c4_screen` passed **12 tests**. Two consecutive `python -m plantaox.c4_screen.run all` runs matched SHA-256 for all 32 compared pipeline outputs. The manifest `data/interim/c4_screen/c4_output_manifest.json` checksums generated output files and records SHA-256 only for each of the five handoff inputs; none of the binary handoff files are copied into the manifest or Git. Diagnostics include per-plant Spearman `d_AD`/length correlations and length distributions. A separate joint mean-centering sensitivity yielded overall T1/T2/T3 fractions 9.41%/18.87%/71.73%; baseline tiers and thresholds were not changed. `pytest tests/c4_screen`: 12 passed; the full repository suite was not run. See `PP1_NUMBERS.md` for slide-ready figures.

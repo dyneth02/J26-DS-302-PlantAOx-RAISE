@@ -167,7 +167,8 @@ The inventory was synchronized on 19 October 2026 after production verification.
 ## 3.6 — Diagnostics and Go/No-Go Gate `[D1 EVE · ~45 min]`
 - [x] Plot `d_AD` histograms: MOCK reference cloud vs each plant, with threshold lines.
 - [x] Tabulate tier fractions per plant and length bin; export candidate length distribution.
-- [x] Degeneracy criterion (>95% in one tier) evaluated: no plant is degenerate; mean-centering diagnostic was not triggered. Thresholds were not tuned.
+- [x] Degeneracy criterion (>95% in one tier) evaluated: no plant is degenerate (maximum 56.99%). A separately labelled joint mean-centering sensitivity was run; baseline tiers and thresholds were not changed or tuned.
+- [x] Record per-plant Spearman `d_AD`/length associations and MOCK-cloud vs candidate length distributions in the diagnostics folder.
 - [x] Record the diagnostic outcome in the decision log.
 
 ## 3.7 — Preliminary PDSS (Stretch) `[D1 EVE · ~20 min]`
@@ -176,7 +177,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 
 ## 3.8 — FR1/FR2 Acceptance Tests `[D1 EVE · ~30 min]`
 - [x] 100% of candidates have an embedding and a tier (152,259/152,259).
-- [ ] Determinism: two runs produce identical tiering hashes.
+- [x] Determinism: two `all` runs produced identical SHA-256 values for all 32 compared pipeline output files, including the tier table.
 - [ ] Performance: tiering plus later ranking on the largest plant completes in under 5 minutes from cached embeddings (NFR2).
 - [x] Export the AD tier table and the tier/AD sections of `summary.json`.
 
@@ -304,10 +305,10 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [ ] Keep tests running after each stage.
 
 ## 7.2 — Acceptance Gate and Freeze `[D2 EVE · ~1 h]`
-- [ ] Re-run the pipeline from raw inputs and fixed config; confirm identical outputs.
-- [ ] Run the full test suite.
-- [ ] Write a checksummed manifest of all artifacts and tag the release (e.g., `c4-pp1-v1`).
-- [ ] Record achieved candidate counts, tier distributions, and any deviations from the proposal.
+- [x] Re-run the pipeline from local reviewed FASTAs, cached embeddings, and fixed config; confirm identical output hashes across two runs.
+- [x] Run the requested C4 test suite (`pytest tests/c4_screen`): 12 passed. The repository-wide suite was not run.
+- [x] Write a checksummed manifest of generated outputs and record SHA-256 hashes (without copying) for the five supplied handoff files; local release tag `c4-pp1-v1` applied after commit.
+- [x] Record verified funnel counts, tier distributions, AD parameters, diagnostics, and deviations in `PP1_NUMBERS.md` and `PP1_STATUS.md`.
 
 ## 7.3 — PP1 Technical Report (Short) `[D2 EVE · ~1 h]`
 - [ ] Document FR1: proteomes, digestion, filters, dedup, funnel counts, and the engine substitution.
