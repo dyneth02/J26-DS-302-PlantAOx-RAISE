@@ -34,7 +34,8 @@ COMPONENTS: list[ComponentInfo] = [
         code="C4",
         title="PlantAOP-Screen",
         owner_note="Plant-derived peptide screening and reliability-aware prioritization",
-        status="not_integrated",
+        status="implemented",
+        base_path="/c4",
     ),
 ]
 

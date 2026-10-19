@@ -448,5 +448,6 @@ The inventory was synchronized on 19 October 2026 after production verification.
 
 ## Current work session — C4 frontend integration (19 October 2026)
 
-- **Status: In Progress.** Building the C4 React/TypeScript feature in its own `frontend/src/features/c4-screen/` module and registering its routes/component entry in the shared app files. Existing C1/C2/C3 feature files will remain unchanged. The feature will consume the read-only `/api/v1/c4` contract and preserve mock/provisional provenance.
-- Acceptance remains pending until focused frontend tests and the production build are verified.
+- **Status: In Progress.** Implemented the C4 React/TypeScript feature in `frontend/src/features/c4-screen/` and registered it in the shared router and component registry. Shared API request/state helpers were added because the existing app references those paths but they were absent from the checkout. C1/C2/C3 feature files were not changed. The feature consumes the read-only `/api/v1/c4` contract and preserves mock/provisional provenance.
+- Implemented overview, pipeline, applicability-domain, candidate explorer/detail drawer, evidence cards/CSV, abstained candidates, and about/limitations views, including the persistent mock ribbon and presentation-mode toggle.
+- The backend C4 fixture and shared platform route tests pass: 10 passed. Frontend tests and production build remain **unverified**: the offline install could not complete because `xml-name-validator@5.0.0` is not present in the local npm cache (`ENOTCACHED`). Do not tick Bucket 6 acceptance tasks until frontend dependencies are available and those checks pass.

@@ -12,8 +12,8 @@ export function NotIntegratedPage() {
       <CardHeader title={component?.title ?? "Component"} subtitle={component?.ownerNote} />
       <Badge tone="neutral">Not integrated</Badge>
       <p className="mt-3 text-sm" style={{ color: "var(--color-text-muted)" }}>
-        This component is owned by a different team member and has not been integrated into the
-        shared platform yet. This PP1 demonstration implements Component 02 (PU-AOP) only.
+        This component has not yet been integrated into the shared platform. Other components have
+        their own integration status and research-data limitations.
       </p>
     </Card>
   );

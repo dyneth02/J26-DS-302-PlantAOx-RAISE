@@ -33,8 +33,8 @@ export function PlatformOverviewPage() {
           subtitle="Four-component research framework for reliable computational antioxidant-peptide discovery."
         />
         <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-          This PP1 demonstration implements Component 02 (PU-AOP) end-to-end against its accepted, frozen research
-          artifacts. Components C1, C3 and C4 are shown for ownership context only — they are not yet integrated.
+          This PP1 demonstration integrates Component 02 (PU-AOP) and Component 04 (PlantAOP-Screen) against their
+          available research artifacts. C4 outputs retain explicit mock-cloud and mock-signal limitations.
         </p>
       </Card>
 
@@ -60,7 +60,7 @@ export function PlatformOverviewPage() {
                 </p>
                 {component.status === "implemented" && component.base_path && (
                   <Link
-                    to="/c2"
+                    to={component.base_path}
                     className="mt-3 inline-block text-sm font-medium"
                     style={{ color: "var(--color-primary)" }}
                   >

@@ -84,4 +84,4 @@ Use **Done** only when the inventory's defined output and acceptance evidence ar
 
 | Workstream | Status | Evidence / next step |
 |---|---|---|
-| C4 frontend feature, API client, and route registration | In Progress | Implementing under `frontend/src/features/c4-screen/` and integrating through shared router/component registry only. It will use the existing React + TypeScript + Vite stack and the tested `/api/v1/c4` API. Focused feature tests and a production build remain to be run. |
+| C4 frontend feature, API client, and route registration | In Progress | C4 views and route/component registration are implemented under `frontend/src/features/c4-screen/`; shared API helpers are present because existing app imports require them. Backend fixture/platform tests pass (10 passed). Frontend tests/build are unverified because `npm ci --offline` could not fetch uncached `xml-name-validator@5.0.0` (`ENOTCACHED`); rerun after dependencies are available. |

@@ -16,7 +16,7 @@ async def test_health(client):
     assert resp.json() == {"status": "ok", "service": "plantaox-raise-api"}
 
 
-async def test_components_lists_all_four_with_only_c2_implemented(client):
+async def test_components_lists_all_four_with_c2_and_c4_implemented(client):
     resp = await client.get("/api/v1/components")
     assert resp.status_code == 200
     components = resp.json()
@@ -25,4 +25,5 @@ async def test_components_lists_all_four_with_only_c2_implemented(client):
     assert statuses["C2"] == "implemented"
     assert statuses["C1"] == "not_integrated"
     assert statuses["C3"] == "not_integrated"
-    assert statuses["C4"] == "not_integrated"
+    assert statuses["C4"] == "implemented"
+    assert next(c for c in components if c["code"] == "C4")["base_path"] == "/c4"

@@ -3,6 +3,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PlatformOverviewPage } from "@/app/pages/PlatformOverviewPage";
 import { NotIntegratedPage } from "@/app/pages/NotIntegratedPage";
 import { c2PuRoutes } from "@/features/c2-pu/routes";
+import { c4ScreenRoutes } from "@/features/c4-screen/routes";
 
 function RootLayout() {
   return (
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { index: true, element: <PlatformOverviewPage /> },
       { path: "not-integrated/:componentId", element: <NotIntegratedPage /> },
       ...c2PuRoutes,
+      ...c4ScreenRoutes,
     ],
   },
 ]);

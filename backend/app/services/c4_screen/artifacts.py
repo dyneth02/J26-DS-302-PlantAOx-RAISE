@@ -184,7 +184,13 @@ def get_meta() -> dict[str, Any]:
 
 
 def get_funnel() -> list[dict[str, Any]]:
-    return _to_records(dataset()["funnel"].sort_values("plant"))
+    data = dataset()
+    funnel = data["funnel"].copy()
+    embedded_ids = set(data["tiers"].loc[data["tiers"].embedded.astype(bool), "peptide_id"])
+    counts = (data["membership"].loc[data["membership"].peptide_id.isin(embedded_ids)]
+              .groupby("plant").peptide_id.nunique().to_dict())
+    funnel["embedded"] = funnel.plant.map(counts).fillna(0).astype(int)
+    return _to_records(funnel.sort_values("plant"))
 
 
 def get_tier_summary(plant: str | None = None) -> dict[str, Any]:
@@ -271,7 +277,8 @@ def get_lengths() -> dict[str, Any]:
 
 
 def query_candidates(*, plant: str | None, tier: int | None, len_min: int | None,
-                     len_max: int | None, q: str | None, sort: str, order: str,
+                     len_max: int | None, cs_min: float | None, cs_max: float | None,
+                     q: str | None, sort: str, order: str,
                      page: int, page_size: int) -> dict[str, Any]:
     data = dataset()
     frame = data["ranked"]
@@ -284,6 +291,10 @@ def query_candidates(*, plant: str | None, tier: int | None, len_min: int | None
         frame = frame.loc[frame.length >= len_min]
     if len_max is not None:
         frame = frame.loc[frame.length <= len_max]
+    if cs_min is not None:
+        frame = frame.loc[frame.CS >= cs_min]
+    if cs_max is not None:
+        frame = frame.loc[frame.CS <= cs_max]
     if q:
         frame = frame.loc[frame.sequence.str.contains(q, case=False, regex=False)]
     ascending = order == "asc"

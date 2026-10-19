@@ -1,0 +1,37 @@
+.c4-screen {
+  --c4-tier-1: #15803d;
+  --c4-tier-2: #b45309;
+  --c4-tier-3: #b91c1c;
+}
+
+.c4-screen button,
+.c4-screen a,
+.c4-screen select,
+.c4-screen input {
+  min-height: 2.25rem;
+}
+
+.c4-screen button:focus-visible,
+.c4-screen a:focus-visible,
+.c4-screen select:focus-visible,
+.c4-screen input:focus-visible,
+.c4-screen summary:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.c4-presentation {
+  font-size: 1.125rem;
+}
+
+.c4-presentation h2 {
+  font-size: 1.8rem;
+}
+
+.c4-presentation h3,
+.c4-presentation td,
+.c4-presentation th,
+.c4-presentation label,
+.c4-presentation button {
+  font-size: 1rem;
+}

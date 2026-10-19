@@ -58,6 +58,8 @@ def candidates(
     tier: int | None = Query(default=None, ge=1, le=3),
     len_min: int | None = Query(default=None, ge=3, le=20),
     len_max: int | None = Query(default=None, ge=3, le=20),
+    cs_min: float | None = Query(default=None, ge=0, le=1),
+    cs_max: float | None = Query(default=None, ge=0, le=1),
     q: str | None = Query(default=None, max_length=64),
     sort: Literal["sequence", "peptide_id", "plant", "tier", "length", "d_AD", "CS", "rank"] = "rank",
     order: Literal["asc", "desc"] = "asc",
@@ -68,8 +70,13 @@ def candidates(
         from fastapi import HTTPException
 
         raise HTTPException(status_code=422, detail="len_min must be less than or equal to len_max")
+    if cs_min is not None and cs_max is not None and cs_min > cs_max:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=422, detail="cs_min must be less than or equal to cs_max")
     return artifacts.query_candidates(
-        plant=plant, tier=tier, len_min=len_min, len_max=len_max, q=q,
+        plant=plant, tier=tier, len_min=len_min, len_max=len_max,
+        cs_min=cs_min, cs_max=cs_max, q=q,
         sort=sort, order=order, page=page, page_size=page_size,
     )
 

@@ -25,6 +25,7 @@ def test_funnel_tier_summary_and_sensitivity(c4_client):
     funnel = c4_client.get("/api/v1/c4/funnel")
     assert funnel.status_code == 200
     assert [row["plant"] for row in funnel.json()] == ["rice", "soybean"]
+    assert all(row["embedded"] >= 0 for row in funnel.json())
 
     summary = c4_client.get("/api/v1/c4/tiers/summary?plant=rice")
     assert summary.status_code == 200
@@ -53,7 +54,7 @@ def test_ad_histogram_and_lengths(c4_client):
 
 
 def test_candidate_filters_order_pagination_and_validation(c4_client):
-    response = c4_client.get("/api/v1/c4/candidates?plant=rice&tier=3&len_min=3&len_max=5&q=WY&page=1&page_size=1")
+    response = c4_client.get("/api/v1/c4/candidates?plant=rice&tier=3&len_min=3&len_max=5&cs_min=0&cs_max=0&q=WY&page=1&page_size=1")
     assert response.status_code == 200
     body = response.json()
     assert body["total"] == 1

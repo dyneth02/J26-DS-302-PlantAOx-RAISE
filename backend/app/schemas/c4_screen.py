@@ -24,6 +24,7 @@ class FunnelRow(BaseModel):
     length_filtered: int
     composition_filtered: int
     deduplicated: int
+    embedded: int = 0
 
 
 class TierFraction(BaseModel):
