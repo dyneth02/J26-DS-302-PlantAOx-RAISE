@@ -117,11 +117,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.26 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.27: Detect prediction flips and calculate PFR
+## Current task — Task 3.27: Detect prediction flips and calculate PFR
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - define and record the applicable decision threshold for each scored predictor;
 - classify the original and perturbed scores and detect label changes;
