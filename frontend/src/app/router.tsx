@@ -4,6 +4,7 @@ import { PlatformOverviewPage } from "@/app/pages/PlatformOverviewPage";
 import { NotIntegratedPage } from "@/app/pages/NotIntegratedPage";
 import { c1ProconRoutes } from "@/features/c1-procon/routes";
 import { c2PuRoutes } from "@/features/c2-pu/routes";
+import { c4ScreenRoutes } from "@/features/c4-screen/routes";
 
 function RootLayout() {
   return (
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: "not-integrated/:componentId", element: <NotIntegratedPage /> },
       ...c1ProconRoutes,
       ...c2PuRoutes,
+      ...c4ScreenRoutes,
     ],
   },
 ]);

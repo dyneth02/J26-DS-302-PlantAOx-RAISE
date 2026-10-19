@@ -73,6 +73,21 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 Use **Done** only when the inventory's defined output and acceptance evidence are present and verified. **In Progress** means a partial artifact exists but acceptance is incomplete. **Pending** means there is no implementation/output evidence or the work is explicitly later scope. Update this file and the task inventory together when status changes.
 
 
+<<<<<<< HEAD:src/plantaox/c4_screen/docs/SCREEN_PP1_Deployment_Progress.md
+## Current work session — C4 backend API (19 October 2026)
+
+| Workstream | Status | Evidence / next step |
+|---|---|---|
+| Read-only C4 API and fixture tests | Done | `backend.app.api.v1.c4_screen` is included in the `/api/v1` router; component response schemas and cached, column-projected artifact services are under `backend/app/schemas` and `backend/app/services/c4_screen/`. `pytest tests/backend/c4_screen -q -p no:cacheprovider`: 8 passed, including a live frozen-artifact smoke test. API remains read-only and labels the current cloud/signals as mock. |
+
+
+## Current work session — C4 frontend integration (19 October 2026)
+
+| Workstream | Status | Evidence / next step |
+|---|---|---|
+| Shared API router + frontend registry/routes | Done | C4 API router is included in `backend/app/api/v1/router.py`; `frontend/src/app/router.tsx` spreads `c4ScreenRoutes` and `frontend/src/config/components.ts` registers `/c4`. API fixture/platform checks: 10 passed. Commit: `32eecde`. |
+| C4 frontend feature acceptance | In Progress | C4 views and shared API helpers are committed under `frontend/src/features/c4-screen/` and `frontend/src/lib/api/`. Frontend tests/build remain unverified because offline dependency installation failed: `xml-name-validator@5.0.0` is uncached (`ENOTCACHED`). Keep Bucket 6 unchecked until those checks run. |
+=======
 ## Follow-up status — real-cloud discovery and remaining freeze work (19 October 2026)
 
 | Work item | Status | Evidence / next step |
@@ -98,3 +113,4 @@ Use **Done** only when the inventory's defined output and acceptance evidence ar
 - SHA-256: `ref_cloud.npy` = `6469e03b85760f8e7659b776589f792d9b37aabbafda5333cd7464e3beee948`; `ref_cloud_sequences.csv` = `5e547f189759312d809de4ab3980875c5626d179f255026af0ff1c0ce1694bc0`. No `*_mock.*` backup files are present in the embeddings directory.
 - The real-cloud stages (`embed-import`, `cloud`, `ad`, `signals`, `score`, `cards`, `dashboard`) and the two-run reproducibility check were not run because the real cloud handoff is absent. Existing mock outputs were left untouched; no new real-cloud metrics or PP1 materials were generated.
 - **Needed to resume:** replace both cloud files with the C2-positive sequence list and its matching Colab embeddings (same row order, one embedding per CSV row), and provide the mock backups in `*_mock.*` if they are to be retained for direct comparison. Then validate the source metadata and array dimensions before running production.
+>>>>>>> 9a1be7e842bf3663cbee11067fa0dd01ec9b2571:src/plantaox/c4_screen/docs/planning/SCREEN_PP1_Deployment_Progress.md

@@ -51,7 +51,7 @@ export const COMPONENT_REGISTRY: ComponentDescriptor[] = [
     title: "PlantAOP-Screen",
     shortTitle: "C4 — PlantAOP-Screen",
     ownerNote: "Plant-derived peptide screening and reliability-aware prioritization",
-    status: "not_integrated",
-    basePath: null,
+    status: "implemented",
+    basePath: "/c4",
   },
 ];

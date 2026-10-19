@@ -37,8 +37,8 @@ export function DataState<T>({
         </p>
         {isUnavailable && (
           <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
-            This is expected on a checkout missing the Git-ignored C2 feature caches / checkpoints.
-            See docs/PP1_DASHBOARD_SETUP.md for recovery instructions.
+            This can occur when Git-ignored research artifacts are absent from the checkout.
+            Check the relevant component handover for recovery instructions.
           </p>
         )}
       </Card>

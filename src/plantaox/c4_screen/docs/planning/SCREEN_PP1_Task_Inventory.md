@@ -436,6 +436,21 @@ The inventory was synchronized on 19 October 2026 before validating the newly su
 **Version:** 1.0 — PP1 execution-focused Planner breakdown, two-day window.
 
 
+<<<<<<< HEAD:src/plantaox/c4_screen/docs/SCREEN_PP1_Task_Inventory.md
+## Current work session — C4 backend API (19 October 2026)
+
+- **Status: Done for the API phase.** A read-only FastAPI surface is implemented under `backend/app/api/v1/c4_screen`, with component schemas/services and fixture-backed tests under `tests/backend/c4_screen/`. It is integrated at the shared `/api/v1` composition root and reads the frozen C4 artifacts without changing the screening pipeline.
+- API responses must preserve the current provenance: `cloud_source=mock_cloud`, signal sources=`mock`, and no retrieval metrics computed on mock inputs.
+- Verification: `pytest tests/backend/c4_screen -q -p no:cacheprovider` passed (8 tests), including a smoke test against this checkout’s frozen outputs. API behavior covers data/meta, funnel, tier/AD/length summaries, candidate filters/details, cards, abstained candidates, and CSV export.
+
+
+## Current work session — C4 frontend integration (19 October 2026)
+
+- **Shared integration: Done.** The C4 FastAPI router is included by `backend/app/api/v1/router.py`; the shared frontend router includes `c4ScreenRoutes`, and the component registry points to `/c4`. Evidence: commit `32eecde` and the files listed above. The API/platform integration tests pass (10 passed).
+- **Frontend acceptance: In Progress.** The React/TypeScript feature is implemented in `frontend/src/features/c4-screen/`; shared API request/state helpers are included because existing app imports require them. C1/C2/C3 feature files were not changed. The feature consumes the read-only `/api/v1/c4` contract and preserves mock/provisional provenance.
+- Implemented overview, pipeline, applicability-domain, candidate explorer/detail drawer, evidence cards/CSV, abstained candidates, and about/limitations views, including the persistent mock ribbon and presentation-mode toggle.
+- The backend C4 fixture and shared platform route tests pass: 10 passed. Frontend tests and production build remain **unverified**: the offline install could not complete because `xml-name-validator@5.0.0` is not present in the local npm cache (`ENOTCACHED`). Do not tick Bucket 6 acceptance tasks until frontend dependencies are available and those checks pass.
+=======
 ## Current work session — replacement reference cloud validation (19 October 2026)
 
 - **Status: In Progress.** The expected `ref_cloud.npy` and `ref_cloud_sequences.csv` files are present alongside the candidate embedding handoff. Their source, shape, row alignment, and checksum have not yet been verified; do not label production outputs as real-cloud results before `embed-import` and downstream stages pass.
@@ -449,3 +464,4 @@ The inventory was synchronized on 19 October 2026 before validating the newly su
 - SHA-256: `ref_cloud.npy` = `6469e03b85760f8e7659b776589f792d9b37aabbafda5333cd7464e3beee948`; `ref_cloud_sequences.csv` = `5e547f189759312d809de4ab3980875c5626d179f255026af0ff1c0ce1694bc0`. No `*_mock.*` backup files are present in the embeddings directory.
 - The real-cloud stages (`embed-import`, `cloud`, `ad`, `signals`, `score`, `cards`, `dashboard`) and the two-run reproducibility check were not run because the real cloud handoff is absent. Existing mock outputs were left untouched; no new real-cloud metrics or PP1 materials were generated.
 - **Needed to resume:** replace both cloud files with the C2-positive sequence list and its matching Colab embeddings (same row order, one embedding per CSV row), and provide the mock backups in `*_mock.*` if they are to be retained for direct comparison. Then validate the source metadata and array dimensions before running production.
+>>>>>>> 9a1be7e842bf3663cbee11067fa0dd01ec9b2571:src/plantaox/c4_screen/docs/planning/SCREEN_PP1_Task_Inventory.md
