@@ -16,7 +16,7 @@
 
 ## Repository Status Audit — 19 October 2026
 
-The inventory was synchronized with repository evidence on 19 October 2026. Component 4 Gate 1 candidate generation now has implementation, four-plant candidate outputs, a funnel, and five passing focused tests. This completes the candidate-generation acceptance scope; the optional BIOPEP-UWM web comparison and delivery of `candidates.fasta` to C1/C2 owners remain pending. CUDA is unavailable and ESM-2 weights have not loaded. No embedding, AD, scoring, or frontend work is claimed. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) for counts and synchronized status.
+The inventory was synchronized with repository evidence on 19 October 2026. Gate 1 candidate generation is complete and must remain unchanged. The current FR2/FR4 work is constrained by five absent Colab handoff files: `c4_esm2_t33_650M.npy`, `c4_embedding_index.parquet`, `c4_embedding_manifest.json`, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. Do not run or download ESM-2 locally; implement/test downstream algorithms with synthetic arrays while real import/tiering is blocked. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) for synchronized status.
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 

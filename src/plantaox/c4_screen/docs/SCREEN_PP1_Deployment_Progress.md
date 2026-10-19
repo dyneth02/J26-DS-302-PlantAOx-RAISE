@@ -12,9 +12,9 @@
 | Proteome inputs | Done for Gate 1 | Four unchanged reviewed FASTAs are in `data/raw/c4_screen/proteomes/`; original UniProt-named downloads are retained under `source_downloads/`. URL, access date, file size, SHA-256, release, and counts are in `metadata/c4_data_registry.csv`; exclusions are in `metadata/c4_protein_exclusions.csv`. |
 | Dependencies and environment | In Progress | The requested fair-esm, biopython, pyteomics, pandas, pyarrow, scikit-learn, and pytest packages are installed in `.venv`, and `requirements.txt` now records the environment via `pip freeze`. CUDA is unavailable (`False`); the ESM-2 download remains incomplete and model loading is not verified. `tests/c4_screen/check_gpu.py` is a probe, not a pipeline acceptance test. |
 | Candidate generation (FR1 / Gate 1) | Done | `python -m plantaox.c4_screen.run all` generated candidate Parquet/FASTA, membership, funnel, and funnel-only summary. Five focused tests pass. A repeated full run produced byte-identical SHA-256 values for all nine outputs. All 152,259 sequences are unique and all 266,361 parent-coordinate provenance links were checked against the source FASTAs. Optional BIOPEP web comparison and C1/C2 handoff remain pending. |
-| Embeddings and AD tiers (FR2) | In Progress | The requested Colab/import workflow and provisional mock-cloud AD pipeline are being assessed. Per instruction, no ESM-2 model will be loaded or downloaded locally. Embedding artifact presence and schema are not yet verified. |
+| Embeddings and AD tiers (FR2) | In Progress; import blocked | Colab notebook exists, but all five specified import files are absent: candidate `.npy`, embedding index parquet, embedding manifest, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. No ESM-2 is loaded/downloaded locally. AD code will be developed and tested with synthetic arrays; no real candidate tier output can be produced without the cached artifacts. |
 | PDSS (FR3) | Pending | No implementation or results. Planned stretch/later analysis. |
-| Signal integration and combined score (FR4) | Pending | No C1/C2 signal contract, scoring, abstention, or dummy signal artifacts are present. |
+| Signal integration and combined score (FR4) | In Progress | The provisional interface spec is present, and the existing mock utility is `tests/c4_screen/fixtures/mock_signals.py`. Signal generation/validation and score/card implementation are planned against synthetic test data. No real signal files are present. |
 | Cross-predictor audit (FR5) | Pending | No implementation or predictor outputs are present. Later milestone. |
 | Retrieval evaluation (FR6) | Pending | No held-out evaluation set, metric implementation, or results are present. Later milestone. |
 | Evidence cards (FR7) | Pending | No card schema, generator, BCS integration, or example cards are present. |
@@ -53,17 +53,17 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 
 ## Current work session — embedding/AD and mock integration
 
-- **Done:** Gate 1 remains complete and unchanged. The interface spec and Colab notebook named for this phase are present in the working tree.
-- **In Progress:** Validate whether Colab embedding/cloud artifacts exist and whether their shapes, index order, and manifest hashes meet the requested import contract. Use synthetic fixtures if the files are absent.
-- **Pending:** Cloud metadata, AD tiers and diagnostics, mock signal validation, scoring/cards, summary/dashboard, and consolidated `all` stage. Each stays blocked on its direct prerequisites only.
+- **Done:** Gate 1 remains complete and unchanged. Read the provisional interface spec, task inventory, progress report, Colab notebook, and existing mock utility. The current C4 app page is empty (0 bytes), so phase 6 requires a static offline dashboard if implemented.
+- **Blocked (Phase 1 import):** Missing `data/interim/c4_screen/embeddings/c4_esm2_t33_650M.npy`, `c4_embedding_index.parquet`, `c4_embedding_manifest.json`, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. Do not load or download ESM-2 locally.
+- **In Progress:** Implement synthetic-testable cloud metadata and AD routines, use the existing `tests/c4_screen/fixtures/mock_signals.py` rather than duplicating it, then implement mock-only scoring/cards/summary/dashboard.
+- **Pending:** Real cloud metadata and real-candidate AD tiers depend on the absent reference-cloud files; no full-candidate embedding/tiering result is claimed.
 - **Constraint:** Do not load, download, or run ESM-2 locally. The requested embedding recipe remains a C4 assumption pending C1 confirmation. Do not compute evaluation metrics on mock signals.
 
 ## Next actions
 
-1. Inspect the interface contract, Colab notebook, mock signal utility, and cached embedding/cloud artifacts.
-2. Import embeddings only after verifying the required candidate/index/manifest contracts; report missing files exactly.
-3. Implement the reference-cloud metadata, AD, and downstream mock-only demo stages with deterministic synthetic tests where cached arrays are absent.
-4. Keep every mock signal/cloud output visibly labelled and exclude mock data from retrieval-performance metrics.
+1. Obtain the five missing embedding/cloud files from the Colab handoff to unblock import and real-candidate AD tiers.
+2. Complete synthetic-unit coverage for cloud metadata, AD, score/card generation, mock validation, summary, and offline dashboard while inputs are absent.
+3. Keep every mock signal/cloud output visibly labelled and exclude mock data from retrieval-performance metrics.
 
 ## Status rule
 
