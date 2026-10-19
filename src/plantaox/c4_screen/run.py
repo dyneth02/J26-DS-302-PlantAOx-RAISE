@@ -167,7 +167,7 @@ def run_dashboard(out_dir: Path, cards: dict) -> dict:
 
 def write_output_manifest(out_dir: Path, run_status: str = "complete",
                           missing_inputs: list[str] | None = None) -> Path:
-    """Checksum available outputs without copying or hashing the external embedding handoff."""
+    """Checksum generated outputs and record hashes (never copies) for supplied handoff files."""
     manifest_path = out_dir / "c4_output_manifest.json"
     entries = []
     for path in sorted(out_dir.rglob("*")):
@@ -181,9 +181,23 @@ def write_output_manifest(out_dir: Path, run_status: str = "complete",
                 digest.update(chunk)
         entries.append({"path": path.relative_to(out_dir).as_posix(), "size_bytes": path.stat().st_size,
                         "sha256": digest.hexdigest()})
+    handoff_names = ("c4_esm2_t33_650M.npy", "c4_embedding_index.parquet",
+                     "c4_embedding_manifest.json", "ref_cloud.npy", "ref_cloud_sequences.csv")
+    handoff_inputs = {}
+    embedding_dir = out_dir / "embeddings"
+    for name in handoff_names:
+        path = embedding_dir / name
+        if path.is_file():
+            digest = hashlib.sha256()
+            with path.open("rb") as handle:
+                for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                    digest.update(chunk)
+            handoff_inputs[name] = {"path": path.relative_to(out_dir).as_posix(),
+                                    "sha256": digest.hexdigest()}
     manifest_path.write_text(json.dumps({"run_status": run_status,
         "cloud_source": "mock_cloud", "signal_source": "mock",
-        "missing_inputs": missing_inputs or [], "files": entries},
+        "missing_inputs": missing_inputs or [], "files": entries,
+        "handoff_inputs": handoff_inputs},
         indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return manifest_path
 

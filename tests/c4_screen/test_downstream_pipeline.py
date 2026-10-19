@@ -11,6 +11,7 @@ from plantaox.c4_screen.dashboard import build_summary, write_dashboard
 from plantaox.c4_screen.embed_import import EmbeddingImportError, import_embeddings, row_sequence_sha256
 from plantaox.c4_screen.score import score_candidates, weight_sweep
 from plantaox.c4_screen.signals import generate_and_validate_mock_signals, validate_and_join_signals
+from plantaox.c4_screen.run import write_output_manifest
 
 
 def test_import_reports_all_missing_handoff_files(tmp_path):
@@ -158,6 +159,24 @@ def test_sequence_key_real_signal_swap_in_procedure(tmp_path):
     joined, bcs = validate_and_join_signals(tiers, tmp_path)
     assert bcs["source"] == "real"
     assert joined.SIM_C1_source.eq("real").all() and joined.PROB_C2_source.eq("real").all()
+
+
+def test_output_manifest_hashes_handoff_inputs_without_copying(tmp_path):
+    import hashlib
+    names = ("c4_esm2_t33_650M.npy", "c4_embedding_index.parquet",
+             "c4_embedding_manifest.json", "ref_cloud.npy", "ref_cloud_sequences.csv")
+    embedding_dir = tmp_path / "embeddings"
+    embedding_dir.mkdir()
+    expected = {}
+    for name in names:
+        payload = f"synthetic handoff: {name}".encode()
+        (embedding_dir / name).write_bytes(payload)
+        expected[name] = hashlib.sha256(payload).hexdigest()
+    (tmp_path / "generated.json").write_text("{}\n", encoding="utf-8")
+    manifest_path = write_output_manifest(tmp_path)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert {name: row["sha256"] for name, row in manifest["handoff_inputs"].items()} == expected
+    assert not any((tmp_path / name).exists() for name in names)
 
 
 def test_cards_flags_summary_and_dashboard_are_mock_labelled(tmp_path):
