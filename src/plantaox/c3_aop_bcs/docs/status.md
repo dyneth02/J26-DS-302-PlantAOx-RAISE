@@ -170,15 +170,22 @@
 - Pinned the research configuration, BLOSUM62 support record, dummy predictor definition, 12 authoritative source reports, and 12 versioned result/figure artifacts with paths, formats, byte sizes, record counts where applicable, and SHA-256 checksums.
 - Preserved the explicit classification that this is preliminary dummy software-testing evidence, not a scientific result, and that real-predictor experimental scoring remains pending.
 - Confirmed all seven focused Task 3.35 tests pass with 24 subtests, including commit validation, cross-report reconciliation, artifact completeness, checksum coverage, and byte-identical canonical regeneration. The broader C3 run passed 139 tests and 138 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Completed Task 3.36 by freezing `c3_aop_bcs_shap_faithfulness_v1`, a residue-level schema that links one predictor's SHAP value to the matching P1 alanine-scan DeltaScore through sequence, predictor, one-based position, residue, and P1 variant identity.
+- Defined and validated all required fields: sequence ID and sequence, predictor ID/version, residue position and residue, signed SHAP and absolute SHAP, signed P1 DeltaScore and absolute P1 DeltaScore, plus KernelSHAP backend/version, background-dataset version, and random seed provenance.
+- Preserved signed values for directional interpretation while defining the later primary comparison as Pearson correlation of `|SHAP_i|` with `|DeltaScore_i|` at matched P1 redox-residue positions, evaluated per predictor.
+- Added strict record and join validation for uppercase standard sequences, one-based positions, residue/sequence agreement, membership in the frozen redox set, matching predictor and P1 metadata, alanine replacement, finite numeric values, exact absolute magnitudes, and duplicate P1 positions.
+- Prepared a predictor-independent `KernelShapRequest` / `KernelShapBackend` / `KernelShapExplanation` module boundary connected to the Task 3.19 predictor interface, requiring exactly one finite explanation value per sequence position.
+- Added deterministic machine-readable schema and human-readable implementation-plan artifacts, both explicitly recording that no concrete KernelSHAP backend, SHAP dependency, SHAP execution, or scientific SHAP result is required for Task 3.36 or PP1.
+- Deferred scientifically consequential choices—background selection, concrete backend verification, real-predictor execution, and correlation interpretation—until the required real predictors and experiment design are ready.
+- Confirmed all six focused Task 3.36 tests pass with nine subtests, including schema coverage, protocol conformance, P1 pairing, invalid-join rejection, deterministic generation, and committed-artifact reproduction. The broader C3 run passed 145 tests and 147 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.35 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.36 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.36: Prepare the SHAP-faithfulness data structure
+## Current task — Task 3.37: Update implementation documentation
 
-**Status:** In progress.
+**Status:** Not started; next task.
 
-Current work:
+Next work:
 
-- define the sequence, predictor, residue-position, residue, SHAP-value, absolute-SHAP, P1 DeltaScore, and absolute-DeltaScore fields;
-- preserve the planned comparison of `|SHAP_i|` with `|DeltaScore_i|`;
-- prepare the KernelSHAP module boundary without making the complete SHAP experiment a PP1 blocker.
+- update the architecture and repository-structure documentation to match the implemented C3 system;
+- document dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, and configuration/usage instructions.

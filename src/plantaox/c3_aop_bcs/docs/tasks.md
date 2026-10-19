@@ -848,21 +848,21 @@
 ## Task 3.36 — Prepare the SHAP-faithfulness data structure
 
 ### Subtasks
-- [ ] Define fields for:
-  - [ ] sequence ID;
-  - [ ] predictor;
-  - [ ] residue position;
-  - [ ] residue;
-  - [ ] SHAP value;
-  - [ ] absolute SHAP;
-  - [ ] P1 DeltaScore;
-  - [ ] absolute DeltaScore.
-- [ ] Confirm the later analysis will compare:
+- [x] Define fields for:
+  - [x] sequence ID;
+  - [x] predictor;
+  - [x] residue position;
+  - [x] residue;
+  - [x] SHAP value;
+  - [x] absolute SHAP;
+  - [x] P1 DeltaScore;
+  - [x] absolute DeltaScore.
+- [x] Confirm the later analysis will compare:
 
   `|SHAP_i|` vs `|DeltaScore_i|`
 
-- [ ] Prepare the code/module boundary for KernelSHAP.
-- [ ] Do not make the complete SHAP experiment a blocker for PP1.
+- [x] Prepare the code/module boundary for KernelSHAP.
+- [x] Do not make the complete SHAP experiment a blocker for PP1.
 
 ### Deliverable
 - SHAP-faithfulness implementation plan/schema.
