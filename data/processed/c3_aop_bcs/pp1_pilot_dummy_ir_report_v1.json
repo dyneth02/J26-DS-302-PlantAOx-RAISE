@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "pipeline_version": "c3_aop_bcs_invariance_rate_v1",
+  "dataset_version": "c3_aop_bcs_pp1_pilot_dummy_p2_invariance_v1",
+  "created_on": "2026-10-19",
+  "source_dataset_version": "c3_aop_bcs_pp1_pilot_dummy_delta_scores_v1",
+  "definition": {
+    "eligible_perturbation_type": "P2",
+    "delta_source": "research_config.toml research.primary_delta",
+    "delta": 0.05,
+    "invariant_rule": "absolute_delta_score < delta",
+    "boundary_rule": "an edit with absolute_delta_score == delta is non-invariant",
+    "invariance_rate": "invariant_p2_count / evaluated_p2_count"
+  },
+  "predictor": {
+    "predictor_id": "c3_software_smoke_test_dummy",
+    "display_name": "C3 software smoke-test dummy (NON-EXPERIMENTAL)",
+    "version": "1.0.0",
+    "scoring_method": "position_weighted_alphabetical_residue_rank_checksum",
+    "software_testing_only": true,
+    "scientific_result": false
+  },
+  "source": {
+    "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_delta_scores_v1.csv",
+    "record_count": 449,
+    "p2_record_count": 150,
+    "sha256": "d14e56a5cf0f1d7a6958e01628de64bcae4665217067d8c34a218ac94c8e9e55"
+  },
+  "result": {
+    "evaluated_p2_count": 150,
+    "invariant_p2_count": 140,
+    "non_invariant_p2_count": 10,
+    "invariance_rate": 0.9333333333333333
+  },
+  "boundary_checks": [
+    {
+      "absolute_delta_score": 0.049999999999999996,
+      "expected_invariant": true,
+      "actual_invariant": true
+    },
+    {
+      "absolute_delta_score": 0.05,
+      "expected_invariant": false,
+      "actual_invariant": false
+    }
+  ],
+  "validation": {
+    "status": "PASS",
+    "only_p2_records": true,
+    "all_rows_classified": true,
+    "counts_reconcile": true,
+    "ir_within_zero_to_one": true,
+    "strict_boundary_verified": true,
+    "software_testing_only_preserved": true
+  },
+  "output": {
+    "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_p2_invariance_v1.csv",
+    "record_count": 150,
+    "fields": [
+      "score_schema_version",
+      "predictor_id",
+      "predictor_display_name",
+      "predictor_version",
+      "scoring_method",
+      "software_testing_only",
+      "schema_version",
+      "variant_id",
+      "sequence_id",
+      "original_sequence",
+      "position",
+      "original_residue",
+      "substituted_residue",
+      "perturbed_sequence",
+      "perturbation_type",
+      "blosum62_score",
+      "random_seed",
+      "random_metadata",
+      "original_score",
+      "perturbed_score",
+      "normalization_schema_version",
+      "score_contract_id",
+      "normalization_mapping",
+      "original_usable_score",
+      "perturbed_usable_score",
+      "delta_score",
+      "absolute_delta_score",
+      "invariance_delta",
+      "invariance_comparator",
+      "is_invariant"
+    ],
+    "sha256": "f8eba6b099f416abdd59b4e3b40e441a103ab4c2c341f61ed4f3b1738cfc9c88"
+  }
+}
