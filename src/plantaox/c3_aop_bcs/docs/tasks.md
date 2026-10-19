@@ -1141,7 +1141,7 @@ Preliminary BCS
 Reproducible pilot results
 ```
 
-A concise explanation for PP1 is:
+gitA concise explanation for PP1 is:
 
 > “I have implemented the core AOP-BCS behavioural-audit pipeline. The system prepares a validated AOP subject set, identifies the fixed W/Y/H/M/C redox positions, generates and validates P1, P2 and P3 one-position perturbations, sends original and perturbed sequences through available AOP predictors, records score changes and prediction flips, and calculates preliminary IR, FSR and BCS values. The full five-predictor experiment, statistical hypothesis testing and SHAP-faithfulness analysis continue after PP1.”
 
