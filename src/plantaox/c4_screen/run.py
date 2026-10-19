@@ -206,14 +206,21 @@ def main(argv: list[str] | None = None) -> None:
     parser_cli.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser_cli.add_argument("--raw-dir", type=Path, default=ROOT / "data" / "raw" / "c4_screen")
     parser_cli.add_argument("--out-dir", type=Path, default=ROOT / "data" / "interim" / "c4_screen")
+    parser_cli.add_argument("--signals", choices=("mock", "dummy"), default="mock",
+                            help="Signal source for the all-stage demonstration run (dummy aliases mock).")
+    parser_cli.add_argument("--reuse-inputs", action="store_true",
+                            help="For all, reuse existing candidate tables and cached embeddings; run downstream stages only.")
     args = parser_cli.parse_args(argv)
     config = yaml.safe_load(args.config.read_text(encoding="utf-8"))
+    if args.stage == "all":
+        # The available signal generator is intentionally mock-only in this PP1 implementation.
+        config.setdefault("signals", {})["source"] = "mock"
     raw_dir = args.raw_dir
-    if args.stage in {"download", "all"}:
+    if args.stage == "download" or (args.stage == "all" and not args.reuse_inputs):
         records = download_proteomes(raw_dir, config["plants"])
         print(pd.DataFrame(records)[["plant", "protein_count_downloaded", "protein_count_retained",
                                      "protein_count_excluded"]].to_string(index=False))
-    if args.stage in {"digest", "all"}:
+    if args.stage == "digest" or (args.stage == "all" and not args.reuse_inputs):
         run_digest(config, raw_dir, args.out_dir)
     if args.stage == "all":
         run_all_downstream(args.out_dir, config)
