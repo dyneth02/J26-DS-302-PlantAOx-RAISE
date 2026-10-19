@@ -52,3 +52,20 @@ def test_duplicate_sequences_are_refused(tmp_path, s2):
     pd.concat([s2, s2.iloc[[0]]]).to_csv(path, index=False)
     with pytest.raises(BenchmarkMismatchError):
         load_benchmark(path)
+
+
+def test_strict_pool_has_the_documented_size_and_target(s2):
+    from plantaox.c1_procon.benchmark import strict_pool
+
+    pool = strict_pool(s2)
+    assert len(pool) == 669
+    assert int(pool["y"].sum()) == 104 and int((pool["y"] == 0).sum()) == 565
+    assert not pool["labels"].eq("GEN").any()
+
+
+def test_every_frs_only_peptide_comes_from_one_source_database(s2):
+    from plantaox.c1_procon.benchmark import strict_pool
+
+    pool = strict_pool(s2)
+    assert pool.loc[pool["y"] == 0, "source_group"].nunique() == 1  # the source confound found in Step 8
+    assert (pool.loc[pool["y"] == 1, "source_group"] == "external_literature").sum() == 29
