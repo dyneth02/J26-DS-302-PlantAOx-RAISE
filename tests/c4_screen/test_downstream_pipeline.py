@@ -133,4 +133,5 @@ def test_cards_flags_summary_and_dashboard_are_mock_labelled(tmp_path):
     summary = build_summary(funnel_path, tiers, candidates, cloud_meta, params, {"SIM_C1": "mock"})
     html = write_dashboard(summary, cards, tmp_path / "dashboard.html")
     assert summary["cloud"]["mock"] is True and summary["embedded_count"] == 3
+    assert sum(summary["d_AD_histogram"]["bins"]) == 3
     assert "MOCK CLOUD" in html.read_text(encoding="utf-8") and "__PAYLOAD__" not in html.read_text(encoding="utf-8")

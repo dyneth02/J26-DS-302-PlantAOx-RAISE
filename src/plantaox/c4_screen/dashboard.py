@@ -13,7 +13,7 @@ def build_summary(funnel_path: str | Path, tiers: pd.DataFrame, candidates: pd.D
                   cloud_meta: pd.DataFrame, ad_params: dict, signal_sources: dict,
                   output_path: str | Path | None = None) -> dict:
     funnel = pd.read_csv(funnel_path).to_dict("records")
-    embedded = tiers[tiers.embedded.astype(bool)]
+    embedded = tiers[tiers.embedded.astype(bool)].drop_duplicates("peptide_id")
     plants = {}
     membership = candidates[["peptide_id"]].copy()
     if "plant" in tiers:
