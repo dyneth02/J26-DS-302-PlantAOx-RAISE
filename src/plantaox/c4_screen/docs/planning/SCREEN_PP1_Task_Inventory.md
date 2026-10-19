@@ -16,7 +16,7 @@
 
 ## Repository Status Audit — 19 October 2026
 
-The inventory was synchronized on 19 October 2026 after production verification. Gate 1 remains unchanged. Local ESM download, owner contract follow-ups, and a real-cloud source ladder are superseded as marked below. The supplied candidate embeddings validated at 152,259 × 1,280; the reference cloud has 500 sequences and is MOCK (`mock_cloud`). Downstream C4 outputs and tests are recorded in [`PP1_STATUS.md`](PP1_STATUS.md).
+The inventory was synchronized on 19 October 2026 after production verification. Gate 1 remains unchanged. Local ESM download, owner contract follow-ups, and a real-cloud source ladder are superseded as marked below. The supplied candidate embeddings validated at 152,259 × 1,280; the reference cloud has 500 sequences and is MOCK (`mock_cloud`). Downstream C4 outputs and tests are recorded in [`PP1_STATUS.md`](../planning/PP1_STATUS.md).
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 
@@ -75,8 +75,8 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [ ] Reuse shared utilities (e.g., descriptor extraction, seeding) if the shared repository already provides them; do not duplicate.
 
 ## 1.2 — Plant Proteome Acquisition `[D1 AM · ~1 h]`
-- [x] Download Swiss-Prot **reviewed** FASTA for Glycine max, Oryza sativa (japonica), Brassica napus, and Olea europaea using taxonomy-filtered `reviewed:true` UniProt queries. Downloaded files and exact URLs are in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
-- [x] Record source URLs, access date (19 October 2026, Asia/Colombo), UniProt release (`2026_03`, released 02 September 2026), file sizes, and SHA-256 checksums in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
+- [x] Download Swiss-Prot **reviewed** FASTA for Glycine max, Oryza sativa (japonica), Brassica napus, and Olea europaea using taxonomy-filtered `reviewed:true` UniProt queries. Downloaded files and exact URLs are in `../technical/SCREEN_PP1_Data_and_outputs.md`.
+- [x] Record source URLs, access date (19 October 2026, Asia/Colombo), UniProt release (`2026_03`, released 02 September 2026), file sizes, and SHA-256 checksums in `../technical/SCREEN_PP1_Data_and_outputs.md`.
 - [x] Count FASTA protein records: soybean 439; rice 4,197; rapeseed 159; olive 110. These are input protein counts and cannot be compared directly with the proposal's 5K–50K post-digestion peptide-candidate estimate; revisit the estimate after the FR1 funnel is measured.
 - [x] Apply the input filters: drop proteins < 50 AA and sequences with non-standard residues; log exclusions in `data/raw/c4_screen/metadata/c4_protein_exclusions.csv`.
 - [x] Save unchanged UniProt response files under `data/raw/c4_screen/proteomes/source_downloads/` with canonical plant-named copies in `proteomes/`; version their provenance with UniProt release, retrieval date, source query, and SHA-256. Keep raw sequence files local and ignored by Git.
@@ -86,7 +86,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [ ] Candidate FASTA handoff to C1/C2 owners remains a separate coordination item.
 
 ## 1.4 — Design Decision Log `[D1 AM · ~15 min]`
-- [x] Log: reviewed-only proteome scope, pyteomics substitution, pepsin pH 1.3 rule, exact-match dedup policy, and C4-provisional BCS flag thresholds in `docs/decision_log.md`.
+- [x] Log: reviewed-only proteome scope, pyteomics substitution, pepsin pH 1.3 rule, exact-match dedup policy, and C4-provisional BCS flag thresholds in `../planning/decision_log.md`.
 - [x] Log: μ_cloud/σ_cloud definition, `d_norm` definition, tier thresholds, and provisional-cloud policy. Parameters verified against the supplied MOCK cloud; see production results below and `PP1_STATUS.md`.
 - [x] Log: PDSS denominator concern for supervisor review before the PDSS stage. Concern recorded; supervisor review remains pending.
 
@@ -114,7 +114,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 ## 2.3 — Deduplication with Provenance `[D1 AM · ~45 min]`
 - [x] Deduplicate by exact sequence **per plant** and across plants, merging all parent accessions and positions into a provenance list.
 - [x] Generate stable peptide IDs (sequence-hash based) and a per-plant membership table.
-- [x] Skip CD-HIT and document the <=9 AA exact-match equivalence and deferred 10–20 AA clustering in `docs/decision_log.md`.
+- [x] Skip CD-HIT and document the <=9 AA exact-match equivalence and deferred 10–20 AA clustering in `../planning/decision_log.md`.
 - [x] Test provenance aggregation on duplicated sequences from multiple parent proteins.
 
 ## 2.4 — Physicochemical Descriptors `[D1 AM · ~30 min]`
@@ -196,7 +196,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Implemented behavior: supplied `ref_cloud.npy` + `ref_cloud_sequences.csv` normalize to `ref_cloud_meta.csv` columns `id, sequence, evidence_tier, source, is_plant`; candidate signals join on **sequence** (not peptide_id); values, source labels, coverage, cloud shape, manifest, and finite arrays are validated with specific errors.
 
 ## 4.2 — Rule-Based Dummy Signal Generation `[D2 AM · ~1 h]`
-- [x] Reconcile the inventory with the [existing generator](../../../../tests/c4_screen/fixtures/mock_signals.py) (unchanged): latent score is z-score of `3 × redox fraction + 2 × hydrophobic fraction + 1 × (length <= 10)`.
+- [x] Reconcile the inventory with the [existing generator](../../../../../tests/c4_screen/fixtures/mock_signals.py) (unchanged): latent score is z-score of `3 × redox fraction + 2 × hydrophobic fraction + 1 × (length <= 10)`.
 - [x] Verified formulas: `PROB_C2 = clip(sigmoid(-3 + 1.2z + N(0, 0.6 × (1 + 1.5·d_norm))), 0.005, 0.995)`; `SIM_C1 = sigmoid(0.8z − 0.8z(d_norm) + N(0, 0.7))`; seed 42. Ten Tier 3 demo rows receive injected PROB_C2 0.90–0.97.
 - [x] Measured mock Spearman correlations on 152,259 rows: SIM_C1/PROB_C2=0.462903; SIM_C1/d_norm=−0.693003; PROB_C2/d_norm=−0.173945. Descriptive only; no tuning.
 - [x] Novel candidate `evidence_tier=U`; all generated files carry `source="mock"`.
@@ -209,7 +209,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Implemented behavior: use the existing mock generator's BCS strata keyed by length bin **3–10 / 11–20**; retain `source="mock"`. The LOW/MEDIUM/HIGH cutoffs 0.5/0.7 are explicitly C4-provisional.
 
 ## 4.5 — Synthetic Test Sandbox `[D2 AM · ~30 min]`
-- [x] Generate 2,000 synthetic sequences/embeddings in a seeded test-only sandbox; 20 planted positives are embedded near the synthetic cloud ([test evidence](../../../../tests/c4_screen/test_downstream_pipeline.py)). No test rows are exported as research data.
+- [x] Generate 2,000 synthetic sequences/embeddings in a seeded test-only sandbox; 20 planted positives are embedded near the synthetic cloud ([test evidence](../../../../../tests/c4_screen/test_downstream_pipeline.py)). No test rows are exported as research data.
 - [x] Assert planted positives rank above random, Tier 3 CS=0, CS bounds, and deterministic weight sweep; explicitly **not** a research result.
 
 ## 4.6 — Manifest, Labelling, and Swap-Out Procedure `[D2 AM · ~20 min]`
@@ -254,7 +254,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Weight sweep runs at 0.25/0.5/0.75; default config remains 0.5.
 
 ## 5.6 — One-Command End-to-End Run `[D2 PM · ~30 min]`
-- [x] [`run.py`](../run.py): `python -m plantaox.c4_screen.run all --reuse-inputs --signals dummy` produces cards/summary from cached candidates and embeddings; `dummy` aliases mock ([outputs](../../../../data/interim/c4_screen/c4_dashboard.html), [`c4_output_manifest.json`](../../../../data/interim/c4_screen/c4_output_manifest.json)).
+- [x] [`run.py`](../../run.py): `python -m plantaox.c4_screen.run all --reuse-inputs --signals dummy` produces cards/summary from cached candidates and embeddings; `dummy` aliases mock ([outputs](../../../../../data/interim/c4_screen/c4_dashboard.html), [`c4_output_manifest.json`](../../../../../data/interim/c4_screen/c4_output_manifest.json)).
 - [x] Two consecutive cached all runs matched SHA-256 across 35 generated files (34 output entries plus the output manifest).
 
 **Function B evidence attachments:** CS implementation, cards JSON, abstained list, test output, end-to-end run log.
@@ -306,16 +306,16 @@ The inventory was synchronized on 19 October 2026 after production verification.
 
 ## 7.2 — Acceptance Gate and Freeze `[D2 EVE · ~1 h]`
 - [x] Re-run the pipeline from local reviewed FASTAs, cached embeddings, and fixed config; confirm identical output hashes across two runs.
-- [x] Run only the requested C4 test suite (`pytest tests/c4_screen`): 15 passed ([test sources](../../../../tests/c4_screen/)). The repository-wide suite was not run.
-- [x] Verify the [output checksum manifest](../../../../data/interim/c4_screen/c4_output_manifest.json) and SHA-256-only entries for five supplied handoff files; create the [C4 freeze manifest](C4_PP1_FREEZE_MANIFEST.json) and local annotated tag `c4-pp1-v2` after its freeze commit. Existing `c4-pp1-v1` is untouched.
+- [x] Run only the requested C4 test suite (`pytest tests/c4_screen`): 15 passed ([test sources](../../../../../tests/c4_screen/)). The repository-wide suite was not run.
+- [x] Verify the [output checksum manifest](../../../../../data/interim/c4_screen/c4_output_manifest.json) and SHA-256-only entries for five supplied handoff files; create the [C4 freeze manifest](../reports/C4_PP1_FREEZE_MANIFEST.json) and local annotated tag `c4-pp1-v2` after its freeze commit. Existing `c4-pp1-v1` is untouched.
 - [x] Record verified funnel counts, tier distributions, AD parameters, diagnostics, and deviations in `PP1_NUMBERS.md` and `PP1_STATUS.md`.
 
 ## 7.3 — PP1 Technical Report (Short) `[D2 EVE · ~1 h]`
-- [x] Document FR1/FR2/Function B formulas, observed outputs, limitations and claim boundaries in [C4_PP1_TECHNICAL_REPORT.md](C4_PP1_TECHNICAL_REPORT.md).
+- [x] Document FR1/FR2/Function B formulas, observed outputs, limitations and claim boundaries in [../reports/C4_PP1_TECHNICAL_REPORT.md](../reports/C4_PP1_TECHNICAL_REPORT.md).
 - [x] Add FR-to-artifact traceability table and current real-cloud staging state.
 
 ## 7.4 — PP1 Slides and Rehearsal `[D2 EVE · ~1 h]`
-- [x] Draft five slides with speaker notes, explicit MOCK labels, and Q&A prep in [C4_PP1_SLIDES.md](C4_PP1_SLIDES.md).
+- [x] Draft five slides with speaker notes, explicit MOCK labels, and Q&A prep in [../presentation/C4_PP1_SLIDES.md](../presentation/C4_PP1_SLIDES.md).
 - [x] Use only verified numbers and describe uncomputed retrieval evaluation as future work.
 - [ ] Rehearse once with a timer (not performed in this session).
 
@@ -416,7 +416,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 | Ranking output | `c4_ranking.parquet` | CS and rank per plant |
 | Evidence cards | `cards.json` | Top-50 cards per plant plus abstained list |
 | Dashboard summary | `summary.json` | Funnel, tier fractions, histogram bins |
-| Freeze manifest | `C4_PP1_FREEZE_MANIFEST.json` | Checksummed release (`c4_pp1_freeze_v1`, local tag `c4-pp1-v2`) |
+| Freeze manifest | `../reports/C4_PP1_FREEZE_MANIFEST.json` | Checksummed release (`c4_pp1_freeze_v1`, local tag `c4-pp1-v2`) |
 | PP1 report | `c4_pp1_technical_report.md` | Actual status, results, limitations |
 
 *These are suggested names, not mandatory paths from the proposal. Adapt them to the established shared repository contracts; do not create duplicate data artifacts.*

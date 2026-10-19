@@ -40,7 +40,7 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 - The C4 Python package is at `src/plantaox/c4_screen/`, and tests are at `tests/c4_screen/`.
 - The C4 package now contains the Gate 1 candidate-generation modules and configuration; tests include unit and mock-signal integration coverage.
 - Installed pyteomics 5.0.1 rules were verified as `pepsin ph1.3` and `trypsin`; pyteomics `icleave` offsets preserve parent coordinates.
-- Four reviewed-only UniProt query results are present with release/query, sizes, and hashes in `SCREEN_PP1_DATA_AND_OUTPUTS.md`; canonical raw files byte-match the downloads.
+- Four reviewed-only UniProt query results are present with release/query, sizes, and hashes in `../technical/SCREEN_PP1_Data_and_outputs.md`; canonical raw files byte-match the downloads.
 - The original reviewed input counts were 439 soybean, 4,197 rice, 159 rapeseed, and 110 olive. These are source protein records, not peptide candidate counts.
 - The local project environment reports no CUDA device. No ESM-2 weights were downloaded or loaded locally; the supplied Colab embedding handoff was validated and imported.
 - The top-level project `README.md` is empty; the Component 4 entry point and command documentation are in `src/plantaox/c4_screen/docs/README.md`.

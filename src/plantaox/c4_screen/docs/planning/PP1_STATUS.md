@@ -72,9 +72,9 @@ Abstained examples (Tier 3, RED, CS=0): olive `AEATDAQ`; olive `AEG`; rice `AGME
 
 ## C4 PP1 follow-up freeze work — 19 October 2026
 
-- A read-only search found C2 frozen PP1 CD-HIT representatives. A 912-sequence E1/E2, standard-alphabet, 3–20 AA list is staged at `data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv` (E1=478, E2=434). Source label is provisional C2 baseline v1, pending replacement by C1 AOP-BenchPos. Its SHA-256 is recorded in `decision_log.md`. These sequences are not embedded yet; production remains on MOCK cloud N=500.
+- A read-only search found C2 frozen PP1 CD-HIT representatives. A 912-sequence E1/E2, standard-alphabet, 3–20 AA list is staged at `data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv` (E1=478, E2=434). Source label is provisional C2 baseline v1, pending replacement by C1 AOP-BenchPos. Its SHA-256 is recorded in `../planning/decision_log.md`. These sequences are not embedded yet; production remains on MOCK cloud N=500.
 - Cached rice performance (N=140,813): AD tiering 18.562604 s; mock-signal scoring/ranking 1.644521 s; total 20.207124 s. This is one host/run, below the five-minute NFR2 target.
 - `all --reuse-inputs --signals mock` and `all --reuse-inputs --signals dummy` are supported; dummy aliases mock. Two mock runs had matching SHA-256 across 35 files. The `--reuse-inputs` mode skips network proteome download and candidate regeneration, preserving Gate 1 outputs.
 - C4-only tests: 15 passed. A seeded 2,000-row synthetic cloud-near-positive sandbox and mock/real signal-source swap fixture are tests only. Mock signal correlations were measured without tuning; details are in the technical report.
-- Freeze docs, acceptance reports and handoff draft are listed in `C4_PP1_HANDOVER.md`; integrity hashes are in `C4_PP1_FREEZE_MANIFEST.json`. No external message has been sent.
+- Freeze docs, acceptance reports and handoff draft are listed in `C4_PP1_HANDOVER.md`; integrity hashes are in `../reports/C4_PP1_FREEZE_MANIFEST.json`. No external message has been sent.
 - Checkout branch is `feat/c4-Screen1`; the requested `c4/pp1-final` branch was not checked out, and branch switching was prohibited. Release tag `c4-pp1-v2` points to this current branch's freeze commit.

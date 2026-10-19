@@ -11,119 +11,119 @@
   "cloud_source": "mock_cloud",
   "component_docs": [
     {
-      "path": "src/plantaox/c4_screen/docs/C4_CANDIDATE_FASTA_HANDOFF.md",
-      "sha256": "157951c53e6d4fb92404d0d7dbea20039416679e7766df20cd33cfb52d949479",
+      "path": "src/plantaox/c4_screen/docs/contracts/C4_Interface_Spec_v0.1_PROVISIONAL.md",
+      "sha256": "441fd1e8e2933ffde991c0a8d27df1f36a370b42bba418a5a9b62edeffa4b205",
+      "size_bytes": 4067
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/decision_log.md",
+      "sha256": "fdb53787a1612f17464150645db68322091630aa1cbe801aaf4d01472820720f",
+      "size_bytes": 5071
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/PP1_NUMBERS.md",
+      "sha256": "942f6b1f6198763ec3e8a75b4bb1da7a02173b7f1c34a9c60bc5c517d6f5c0d9",
+      "size_bytes": 4764
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/PP1_STATUS.md",
+      "sha256": "4150ab6efad0096891fec3261e57bb2d7446c85b33b79f6043edc3712aabaf00",
+      "size_bytes": 6592
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/SCREEN_PP1_Deployment_Progress.md",
+      "sha256": "c9e8ad96dc24ce45802c13b803f464ca6d7b14d37024776a2c3ef1e5751c90d9",
+      "size_bytes": 10940
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/SCREEN_PP1_Task_Inventory.md",
+      "sha256": "0db27c2318150b73aa92cfc0177b30767de4765a857525b0e49a3b6725a829c9",
+      "size_bytes": 35189
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/presentation/C4_CANDIDATE_FASTA_HANDOFF.md",
+      "sha256": "f9a7523306a3d0b9dfc5fc83e0631c5dbb87546d35ae6793127d0a1841807c1a",
       "size_bytes": 1032
     },
     {
-      "path": "src/plantaox/c4_screen/docs/c4_fr1_acceptance_report.md",
-      "sha256": "7639333059ce73555085d078b82f27bfdb7e2a1f6f9dfa41b215401f90b8e8cb",
-      "size_bytes": 885
+      "path": "src/plantaox/c4_screen/docs/presentation/C4_PP1_DEMO_SCRIPT.md",
+      "sha256": "3976f9f6e64e9c58a9dd4d847c620e8fa94d50e8e768b4d91b1306c645dd4889",
+      "size_bytes": 2298
     },
     {
-      "path": "src/plantaox/c4_screen/docs/c4_fr2_acceptance_report.md",
-      "sha256": "c9b624a9b1262c0a803fe912f2672fcd55836fce2cc94edef5763493a31f32f7",
-      "size_bytes": 789
+      "path": "src/plantaox/c4_screen/docs/presentation/C4_PP1_LOGBOOK_DRAFT.md",
+      "sha256": "1f72e633f29986d5076ed11089bc44ef5bd66be2f97cdb12e5b304b810a15ec8",
+      "size_bytes": 2148
     },
     {
-      "path": "src/plantaox/c4_screen/docs/c4_fr4_acceptance_report.md",
-      "sha256": "723bf63145517ae84be88898c80bd626dbf67c58bfd42aa701a381c5b0fc3514",
-      "size_bytes": 775
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/c4_fr7_acceptance_report.md",
-      "sha256": "02c12f1a76ae9fa3f9202d155ed5a7741d1c445f5e25ced973081e09124fb545",
-      "size_bytes": 704
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/C4_Interface_Spec_v0.1_PROVISIONAL.md",
-      "sha256": "b7d9ab32c5fd7d9bb601a17357de939158e907f3a3978ff79a0d0cb4e4a1c13d",
-      "size_bytes": 4141
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/C4_PP1_DEMO_SCRIPT.md",
-      "sha256": "765bf0ccec5ad97fe16a510ff963117f0496a93cc2fa8d1b9eb4a5e0cf6c301c",
-      "size_bytes": 2308
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/C4_PP1_FREEZE_REPORT.md",
-      "sha256": "53d337994a053881e72e5c9db810c65501bd6439b8aba804c6727739e9fd94e2",
-      "size_bytes": 3291
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/C4_PP1_HANDOVER.md",
-      "sha256": "bc26ccacd15f07e01adaea051a89e4f732e7aefd94ac984e7cc60f401f95fe48",
-      "size_bytes": 2452
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/C4_PP1_LOGBOOK_DRAFT.md",
-      "sha256": "e0a6a050a43be34fdb4af4c9fa273eff74efae48fb2133635c84e9844ce20047",
-      "size_bytes": 2173
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/C4_PP1_SLIDES.md",
-      "sha256": "e88aa38636d8774c7e10f4bea5bb535f98ffc6ac01b0eb697453a5c6343eca62",
-      "size_bytes": 4314
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/C4_PP1_TECHNICAL_REPORT.md",
-      "sha256": "0b69f1fba73b5fd60fe5370ab873a74b1824c1da5c709d4565e74ffc7856b8a0",
-      "size_bytes": 8664
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/decision_log.md",
-      "sha256": "45b7e022ae5ddd0bed1e176a067437444f3ff0f2f5bdb98698ceb8a435a0c45a",
-      "size_bytes": 5096
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/PP1_NUMBERS.md",
-      "sha256": "c4c124f8ae4a53c62aaa9c038ec3fddd46b279dd9159526f94f915dfe7300906",
-      "size_bytes": 4833
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/PP1_STATUS.md",
-      "sha256": "603b840c971f2b1871a3d48ce54c360e3055e9071f9e1b746492916a02cb050a",
-      "size_bytes": 6649
+      "path": "src/plantaox/c4_screen/docs/presentation/C4_PP1_SLIDES.md",
+      "sha256": "4819b339c3280d729a8df72d4ba47fadb996a80f1345c66243f8a6e83fb357cd",
+      "size_bytes": 4272
     },
     {
       "path": "src/plantaox/c4_screen/docs/README.md",
-      "sha256": "04de004fcec205e392d0dbab31f870bf3432ef035299ea575f666822ab9fca02",
-      "size_bytes": 5248
+      "sha256": "826680996f4aceebe813ee1330679e87b4a1db484f1ad0f968e4ab04c72484ba",
+      "size_bytes": 3419
     },
     {
-      "path": "src/plantaox/c4_screen/docs/SCREEN_PP1_Architecture.md",
-      "sha256": "3afc64d43e008fc1d5be80c4a9d77c5f302b470e8385f4ea5c47d30aaa5d134c",
-      "size_bytes": 4628
+      "path": "src/plantaox/c4_screen/docs/reports/c4_fr1_acceptance_report.md",
+      "sha256": "1313adc6337de96d36df30b8dfd13e238997df080e183cd9542a96982f0fc72b",
+      "size_bytes": 875
     },
     {
-      "path": "src/plantaox/c4_screen/docs/SCREEN_PP1_Checksums.sha256",
+      "path": "src/plantaox/c4_screen/docs/reports/c4_fr2_acceptance_report.md",
+      "sha256": "fc37bdb85968a2a1ccfcd6c9ef4d688de8df4213c7172d8c006b3b02bbe52ae2",
+      "size_bytes": 779
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/c4_fr4_acceptance_report.md",
+      "sha256": "f723e5505834e2119f4a22ac4c0f18706672a09f7eec3cac9cedb656a1b60de9",
+      "size_bytes": 765
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/c4_fr7_acceptance_report.md",
+      "sha256": "888fc4096c74edf30a209f6e41b507e35a72487c96a9bbbea08bfdc1da4bcedb",
+      "size_bytes": 695
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/C4_PP1_FREEZE_REPORT.md",
+      "sha256": "cb211835515b62f8af78b5ee1623d5663631271c5909546b7b0ebf5a71462f8c",
+      "size_bytes": 3256
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/C4_PP1_HANDOVER.md",
+      "sha256": "9a3fa70817583f838d101908443d4153639e1280026f5d80bae58b3cc1b4c899",
+      "size_bytes": 2418
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/C4_PP1_TECHNICAL_REPORT.md",
+      "sha256": "e62cfc9d22a70b1253d8100907ef16d1177b6fc6ac43db07d2d0be5bc8fe07cb",
+      "size_bytes": 8596
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Architecture.md",
+      "sha256": "ab0bf76caeea28774cc59db417a68d75fd16ea86227bbb846fa754eff1c52599",
+      "size_bytes": 4569
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Checksums.sha256",
       "sha256": "ee0e29a9355446b5ebe24b56e5f98f722f3d21449f3a5834c3183efaba226193",
       "size_bytes": 628
     },
     {
-      "path": "src/plantaox/c4_screen/docs/SCREEN_PP1_Data_and_outputs.md",
-      "sha256": "f4843d7e53afff5472546b2272513334185b759427f3136548400ad9e368ed88",
-      "size_bytes": 8175
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Data_and_outputs.md",
+      "sha256": "bff068c6aeec21a24dbff6774ffe24479cb3c025367c5cf061131e883d10c7e0",
+      "size_bytes": 8096
     },
     {
-      "path": "src/plantaox/c4_screen/docs/SCREEN_PP1_Deployment_Progress.md",
-      "sha256": "70e4bd7dc0bb4980e25de889898bea5bfdae1aae252cf39371d4fe1e231c96e0",
-      "size_bytes": 11012
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Methodology.md",
+      "sha256": "2cc48821a4f3846c183cd322ed603649ae6357c5607a1f5c5bdbb548dd731d54",
+      "size_bytes": 6766
     },
     {
-      "path": "src/plantaox/c4_screen/docs/SCREEN_PP1_Methodology.md",
-      "sha256": "42414181ee98950c7e9eb263b795aab10934d8e4ab720122ebb3b48e5c6366ea",
-      "size_bytes": 6832
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/SCREEN_PP1_Task_Inventory.md",
-      "sha256": "a9a4aa72cccf5f810a9cf857769a0b4b75a51e95f08c985b0dc6e769bd40ac2c",
-      "size_bytes": 35476
-    },
-    {
-      "path": "src/plantaox/c4_screen/docs/SCREEN_PP1_Validation.md",
-      "sha256": "4f03e81e7fab2862acb78d8be14e3892995f57e249d8608f57089c8118b06d69",
-      "size_bytes": 5530
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Validation.md",
+      "sha256": "46f71742ad196df9ddbb5c4139cbf4cae22f250fa09e54baf916d8e726c65f56",
+      "size_bytes": 5463
     }
   ],
   "component_source_and_tests": [
