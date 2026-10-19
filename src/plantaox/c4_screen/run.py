@@ -10,15 +10,6 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
-import numpy as np
-
-from .embed_import import import_embeddings
-from .cloud import build_reference_meta
-from .ad import assign_tiers, write_ad_diagnostics
-from .signals import generate_and_validate_mock_signals, validate_and_join_signals
-from .score import score_candidates
-from .cards import make_cards
-from .dashboard import build_summary, write_dashboard
 
 from .dedup import deduplicate, deduplicate_by_plant
 from .descriptors import add_descriptors
@@ -85,18 +76,24 @@ def run_digest(config: dict, raw_dir: Path, out_dir: Path) -> dict:
     return summary
 
 
-def run_embed_import(out_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, dict]:
+def run_embed_import(out_dir: Path):
+    from .embed_import import import_embeddings
+
     return import_embeddings(out_dir / "candidates.parquet", out_dir / "embeddings",
                              manifest_copy=out_dir / "c4_embedding_manifest.json")
 
 
 def run_cloud(out_dir: Path) -> pd.DataFrame:
+    from .cloud import build_reference_meta
+
     embeddings = out_dir / "embeddings"
     meta = build_reference_meta(embeddings / "ref_cloud_sequences.csv", out_dir / "ref_cloud_meta.csv")
     return meta
 
 
 def run_ad(out_dir: Path, config: dict) -> pd.DataFrame:
+    from .ad import assign_tiers, write_ad_diagnostics
+
     candidates, index, matrix, cloud_meta, cloud, _ = run_embed_import(out_dir)
     cloud_meta = run_cloud(out_dir)
     memberships = pd.read_parquet(out_dir / "plant_membership.parquet")
@@ -111,6 +108,8 @@ def run_ad(out_dir: Path, config: dict) -> pd.DataFrame:
 
 
 def run_signals(out_dir: Path, config: dict) -> dict:
+    from .signals import generate_and_validate_mock_signals
+
     tiers = pd.read_parquet(out_dir / "c4_ad_tiers.parquet")
     embedded = tiers.loc[tiers.embedded.astype(bool), ["sequence", "d_norm", "tier"]].copy()
     signal_dir = out_dir / "signals"
@@ -127,6 +126,9 @@ def run_signals(out_dir: Path, config: dict) -> dict:
 
 
 def run_score(out_dir: Path, config: dict) -> pd.DataFrame:
+    from .signals import validate_and_join_signals
+    from .score import score_candidates
+
     tiers = pd.read_parquet(out_dir / "c4_ad_tiers.parquet")
     embedded = tiers.loc[tiers.embedded.astype(bool)].copy()
     joined, bcs = validate_and_join_signals(embedded, out_dir / "signals")
@@ -139,6 +141,8 @@ def run_score(out_dir: Path, config: dict) -> pd.DataFrame:
 
 
 def run_cards(out_dir: Path, config: dict) -> dict:
+    from .cards import make_cards
+
     ranked = pd.read_parquet(out_dir / "c4_ranked_candidates.parquet")
     mock_manifest = json.loads((out_dir / "signals" / "MOCK_MANIFEST.json").read_text(encoding="utf-8"))
     bcs = json.loads((out_dir / "signals" / "c3_bcs.json").read_text(encoding="utf-8"))
@@ -146,6 +150,8 @@ def run_cards(out_dir: Path, config: dict) -> dict:
 
 
 def run_dashboard(out_dir: Path, cards: dict) -> dict:
+    from .dashboard import build_summary, write_dashboard
+
     tiers = pd.read_parquet(out_dir / "c4_ad_tiers.parquet")
     memberships = pd.read_parquet(out_dir / "plant_membership.parquet")
     tiers = tiers.merge(memberships[["peptide_id", "plant"]], on="peptide_id", how="left", validate="one_to_many")
