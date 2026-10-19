@@ -21,16 +21,50 @@
 - C1 SIM, C2 probability, and C3 BCS stand-ins have source `mock`. Any dashboard/card/summary generated from these values must display a permanent mock notice.
 - Injected mock examples are demonstrations, not findings. Do not report PARRS, Recall@K, MRR, EF@1%, or ARR on mock signals. PDSS is not implemented; its denominator concern remains open.
 
-## Current execution state
+## Production verification — 19 October 2026
 
-The project owner reports these five files are supplied, but the embedding directory is absent from this checkout. The ordered production attempt therefore remains blocked:
+The supplied handoff passed `embed-import`: 152,259/152,259 candidates embedded, 1,280 dimensions, float16 source arrays, all finite, candidate/index order matched by peptide_id and sequence, and manifest row hash matched. Distance calculations used float32. Reference cloud: **500 sequences**, source `mock_cloud`.
 
-- `c4_esm2_t33_650M.npy`
-- `c4_embedding_index.parquet`
-- `c4_embedding_manifest.json`
-- `ref_cloud.npy`
-- `ref_cloud_sequences.csv`
+| AD parameter | Verified value |
+|---|---:|
+| `mu_cloud` | 0.0185099002 |
+| `sigma_cloud` (population SD) | 0.0097886926 |
+| `t1` (mu + sigma) | 0.0282985928 |
+| `t2` (mu + 2 sigma) | 0.0380872854 |
+| SD multiplier | 1.0 |
 
-`embed-import` stopped before row-ID hash validation, so no hash formula comparison was needed. `cloud` failed on the missing sequence CSV; downstream `ad`, `signals`, `score`, `cards`, and `dashboard` stages lacked their required inputs/artifacts. No local ESM-2 load/download was attempted. Consequently, actual embedded counts, mu/sigma/t1/t2, tier fractions, real-data cards, and full downstream checksum freeze are unavailable. A blocked-state [checksum manifest](../../../../data/interim/c4_screen/c4_output_manifest.json) hashes the nine existing Gate 1 outputs and lists the missing inputs.
+Tier fractions (counts and fractions; all plants have 100% embedding coverage):
 
-Verification: `tests/c4_screen` passed **12** tests. Full repository `pytest -q`: **552 passed, 38 skipped, 32 failed, 98 errors** (17 subtests passed). Failures/errors include unrelated C2 artifact/model-dependent tests; C2 ESM tests attempted to download their 35M checkpoint but could not write to the configured user cache (`PermissionError`). Six tracked C2 data outputs modified by that test run were restored afterward.
+| Plant | Tier 1 | Tier 2 | Tier 3 |
+|---|---:|---:|---:|
+| Olive | 291 (51.50%) | 189 (33.45%) | 85 (15.04%) |
+| Rapeseed | 2,461 (50.12%) | 1,605 (32.69%) | 844 (17.19%) |
+| Rice | 80,252 (56.99%) | 35,718 (25.37%) | 24,843 (17.64%) |
+| Soybean | 7,437 (55.22%) | 3,990 (29.63%) | 2,041 (15.15%) |
+
+Tier fractions by plant and length bin:
+
+| Plant | Length bin | n | Tier 1 | Tier 2 | Tier 3 |
+|---|---|---:|---:|---:|---:|
+| Olive | 3–10 | 460 | 46.52% | 39.35% | 14.13% |
+| Olive | 11–20 | 105 | 73.33% | 7.62% | 19.05% |
+| Rapeseed | 3–10 | 4,345 | 49.21% | 34.15% | 16.64% |
+| Rapeseed | 11–20 | 565 | 57.17% | 21.42% | 21.42% |
+| Rice | 3–10 | 114,692 | 57.90% | 26.84% | 15.26% |
+| Rice | 11–20 | 26,121 | 53.01% | 18.90% | 28.08% |
+| Soybean | 3–10 | 11,763 | 53.90% | 31.19% | 14.91% |
+| Soybean | 11–20 | 1,705 | 64.34% | 18.83% | 16.83% |
+
+No plant exceeded the >95% single-tier degeneracy criterion (maximum fraction: rice 56.99%). Therefore the conditional mean-centering check was **not triggered**; thresholds were unchanged. All signal sources are `mock`; cloud source is `mock_cloud`. Ten injected demonstration sequences were tagged, all among rice Tier 3 abstentions. They are demonstrations, not evidence; no PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS was computed.
+
+Three highest-CS card examples (MOCK signals/cloud):
+
+| Plant | Sequence | Tier | d_AD | CS | SIM_C1 | PROB_C2 |
+|---|---|---:|---:|---:|---:|---:|
+| Soybean | `MAHQWV` | 1 | 0.012657 | 0.812150 | 0.991582 | 0.947628 |
+| Rice | `LMTCYVR` | 1 | 0.009272 | 0.804253 | 0.982838 | 0.827003 |
+| Rice | `GIHCMA` | 1 | 0.010808 | 0.803665 | 0.984122 | 0.870134 |
+
+Abstained examples (Tier 3, RED, CS=0): olive `AEATDAQ`; olive `AEG`; rice `AGMEEVDMDEEVRPEF` (injected demonstration case).
+
+`tests/c4_screen` passed **12 tests**. The checksummed manifest is `data/interim/c4_screen/c4_output_manifest.json`: it covers 29 generated/available output files, has run status `complete_mock_cloud_production`, and has SHA-256 `85439e8a6b13268f4a630c686ba4a17c5b9307d4b35122dd57fe838ae0f28860`. The five `.npy`/handoff inputs are excluded from the output manifest; the copied embedding manifest is included.

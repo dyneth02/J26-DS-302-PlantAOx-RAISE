@@ -16,7 +16,7 @@
 
 ## Repository Status Audit — 19 October 2026
 
-The inventory was synchronized with repository evidence on 19 October 2026. Gate 1 candidate generation is complete and must remain unchanged. The current plan supersedes local ESM-2 download, owner contract follow-ups, and a real-cloud source ladder where indicated below. The project owner reports the embedding handoff is supplied, but this checkout does not contain `data/interim/c4_screen/embeddings/`; production import remains blocked. The supplied 500-sequence cloud is MOCK. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) and [`PP1_STATUS.md`](PP1_STATUS.md) for exact runtime status.
+The inventory was synchronized on 19 October 2026 after production verification. Gate 1 remains unchanged. Local ESM download, owner contract follow-ups, and a real-cloud source ladder are superseded as marked below. The supplied candidate embeddings validated at 152,259 × 1,280; the reference cloud has 500 sequences and is MOCK (`mock_cloud`). Downstream C4 outputs and tests are recorded in [`PP1_STATUS.md`](PP1_STATUS.md).
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 
@@ -87,7 +87,7 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 
 ## 1.4 — Design Decision Log `[D1 AM · ~15 min]`
 - [x] Log: reviewed-only proteome scope, pyteomics substitution, pepsin pH 1.3 rule, exact-match dedup policy, and C4-provisional BCS flag thresholds in `docs/decision_log.md`.
-- [x] Log: μ_cloud/σ_cloud definition, `d_norm` definition, tier thresholds, and provisional-cloud policy before the embedding/AD stage. Logged as decisions; real parameters remain uncomputed pending inputs.
+- [x] Log: μ_cloud/σ_cloud definition, `d_norm` definition, tier thresholds, and provisional-cloud policy. Parameters verified against the supplied MOCK cloud; see production results below and `PP1_STATUS.md`.
 - [x] Log: PDSS denominator concern for supervisor review before the PDSS stage. Concern recorded; supervisor review remains pending.
 
 **Setup evidence attachments:** environment lockfile, FASTA checksums, protein-count table, contract notes, decision log.
@@ -140,45 +140,45 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 **Definition of done:** 100% of candidates embedded and assigned Tier 1/2/3 against a labelled provisional reference cloud, with diagnostics and a determinism check.
 
 ## 3.1 — ESM-2 Embedding Pipeline `[D1 PM · ~1 h]`
-- [ ] Implement batch embedding with `esm2_t33_650M_UR50D`: layer 33, mean-pooled over residue positions, excluding BOS/EOS, fp16.
+- [x] Colab handoff manifest verifies `esm2_t33_650M_UR50D`, layer 33, mean pooling excluding BOS/EOS/PAD, saved float16.
 - [ ] **Benchmark on 2,000 peptides** and extrapolate total runtime before launching the full run.
 - [ ] Implement chunked checkpointing so an interrupted run can resume.
-- [ ] Write an embedding manifest (model, layer, pooling, dtype, row-ID hash).
+- [x] Write and validate the embedding manifest (model, layer, pooling, dtype, row-ID hash).
 
 ## 3.2 — Embed All Candidates `[D1 PM · background]`
-- [ ] Run embedding for all four plants as a background job while Tasks 3.3–3.4 are coded.
-- [ ] Verify shape (N × 1280), dtype, row order against the candidate table, and absence of NaN/Inf.
-- [ ] Cache as `.npy` with a peptide-ID index.
+- [x] Colab handoff contains embeddings for all candidates (manifest reports N=152,259; device Tesla T4).
+- [x] Verify shape (152,259 × 1,280), saved float16, row order against candidate peptide_id/sequence, and absence of NaN/Inf; importer returns float32 for distance math.
+- [x] Cache as `.npy` with a peptide-ID/sequence index.
 
 ## 3.3 — Provisional Reference Cloud `[D1 PM · ~1 h]`
 - [ ] **SUPERSEDED:** Real-positive source ladder and cloud embedding. Use the supplied 500-sequence MOCK placeholder (`source="mock_cloud"`, seed 42); do not generate or embed a replacement cloud.
-- [ ] Validate supplied cloud files and record observed metadata/counts. Keep future held-out evaluation-set disjointness as an open requirement before any real evaluation.
+- [x] Validate supplied cloud files and record observed metadata/counts: N=500, source `mock_cloud`. Held-out evaluation-set disjointness remains open before real evaluation.
 
 ## 3.4 — AD Parameter Fitting `[D1 EVE · ~45 min]`
-- [ ] Compute the cloud centroid.
-- [ ] Compute leave-one-out `d_AD = 1 − cos(embed(x), centroid)` for cloud members; derive **μ_cloud** and **σ_cloud**.
-- [ ] Freeze the thresholds in `ad_params.json`: t1 = μ + σ, t2 = μ + 2σ.
+- [x] Compute the cloud centroid.
+- [x] Compute leave-one-out `d_AD = 1 − cos(embed(x), centroid)` for cloud members; derive **μ_cloud=0.01850990** and **σ_cloud=0.00978869** (population SD).
+- [x] Freeze the thresholds in `ad_params.json`: **t1=0.02829859**, **t2=0.03808729** (sd_multiplier=1.0).
 
 ## 3.5 — Tier Assignment `[D1 EVE · ~30 min]`
-- [ ] Compute `d_AD` for every plant candidate.
-- [ ] Assign Tier 1 (`d_AD < t1`), Tier 2 (`t1 ≤ d_AD < t2`), Tier 3 (`d_AD ≥ t2`).
-- [ ] Wire the SD multiplier ∈ {1.0, 1.5, 2.0} as a parameter; show only the default for PP1.
+- [x] Compute `d_AD` for every plant candidate (152,259 embedded; zero not embedded).
+- [x] Assign Tier 1 (`d_AD < t1`), Tier 2 (`t1 ≤ d_AD < t2`), Tier 3 (`d_AD ≥ t2`).
+- [x] Wire the SD multiplier as a config parameter; PP1 used the default 1.0.
 
 ## 3.6 — Diagnostics and Go/No-Go Gate `[D1 EVE · ~45 min]`
-- [ ] Plot `d_AD` histograms: reference cloud vs each plant, with threshold lines.
-- [ ] Tabulate tier fractions per plant.
-- [ ] If tiers are degenerate, run an anisotropy check (e.g., mean-centering) and log the finding; do not tune thresholds to improve appearance.
-- [ ] Record the diagnostic outcome in the decision log.
+- [x] Plot `d_AD` histograms: MOCK reference cloud vs each plant, with threshold lines.
+- [x] Tabulate tier fractions per plant and length bin; export candidate length distribution.
+- [x] Degeneracy criterion (>95% in one tier) evaluated: no plant is degenerate; mean-centering diagnostic was not triggered. Thresholds were not tuned.
+- [x] Record the diagnostic outcome in the decision log.
 
 ## 3.7 — Preliminary PDSS (Stretch) `[D1 EVE · ~20 min]`
 - [ ] Compute PDSS per plant as defined, labelled "preliminary, provisional cloud".
 - [ ] Note the near-zero-denominator risk and the proposed leave-one-out alternative for supervisor review.
 
 ## 3.8 — FR1/FR2 Acceptance Tests `[D1 EVE · ~30 min]`
-- [ ] 100% of candidates have an embedding and a tier.
+- [x] 100% of candidates have an embedding and a tier (152,259/152,259).
 - [ ] Determinism: two runs produce identical tiering hashes.
 - [ ] Performance: tiering plus later ranking on the largest plant completes in under 5 minutes from cached embeddings (NFR2).
-- [ ] Export the AD tier table and the tier/AD sections of `summary.json`.
+- [x] Export the AD tier table and the tier/AD sections of `summary.json`.
 
 > **Gate 2 (end of D1):** Tiers exist for every candidate and the histogram looks interpretable. If embedding is too slow, reduce to the largest feasible subset per plant (document it) and continue.
 
@@ -201,8 +201,8 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 - [ ] Set `evidence_tier = U` for novel candidates.
 
 ## 4.3 — Demonstration Cases `[D2 AM · ~20 min]`
-- [ ] Inject about 10 real Tier 3 candidates with `PROB_C2 ≥ 0.9` to illustrate "high classifier score, still abstained".
-- [ ] Tag these rows in the data and in the UI as injected demonstration cases (a hypothesis to test, not a finding).
+- [x] Inject 10 Tier 3 sequences with mock `PROB_C2 ≥ 0.9` to illustrate "high classifier score, still abstained" (MOCK demonstration only).
+- [x] Tag these rows in the manifest/cards as injected demonstration cases (a hypothesis to test, not a finding).
 
 ## 4.4 — BCS Placeholder Table `[D2 AM · ~15 min]`
 - [x] Implemented behavior: use the existing mock generator's BCS strata keyed by length bin **3–10 / 11–20**; retain `source="mock"`. The LOW/MEDIUM/HIGH cutoffs 0.5/0.7 are explicitly C4-provisional.
@@ -212,8 +212,8 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 - [ ] Use it to assert code behaviour (e.g., CS ranks planted positives above random), explicitly **not** as a research result.
 
 ## 4.6 — Manifest, Labelling, and Swap-Out Procedure `[D2 AM · ~20 min]`
-- [ ] Write `DUMMY_MANIFEST.json` (generator version, seed, file hashes).
-- [ ] Ensure every dummy file carries a `source: dummy` column.
+- [x] Existing mock utility wrote `signals/MOCK_MANIFEST.json` (generator version, seed, file hashes; source `mock`).
+- [x] Verify generated C1/C2/BCS signal artifacts carry `source="mock"`.
 - [ ] Document the swap procedure: replace file → set `signals.source: real` → run validator → confirm tiers unchanged and CS changes only through signals.
 - [ ] Optional stretch: if the C2 owner can run inference with the frozen fold-0 checkpoint, replace the dummy `c2_prob.parquet` and relabel it "real, fold-0, preliminary".
 
@@ -230,25 +230,25 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 - [x] Implemented behavior: join tier table, SIM_C1, and PROB_C2 by **sequence**; fail on missing/duplicate rows or out-of-range values; propagate each signal's `source` (`mock` for the current generator) into results/cards.
 
 ## 5.2 — Combined Score `[D2 AM · ~45 min]`
-- [ ] Compute `d_norm = min(d_AD / (μ + 2σ), 1)`.
-- [ ] Compute `CS = w1·SIM_C1 + w2·PROB_C2·(1 − d_norm)` with w1 = w2 = 0.5, weights configurable.
-- [ ] Force `CS = 0` for all Tier 3 candidates.
+- [x] Compute `d_norm = min(d_AD / t2, 1)` with the frozen `t2`.
+- [x] Compute `CS = w1·SIM_C1 + w2·PROB_C2·(1 − d_norm)` with configured w1 = w2 = 0.5.
+- [x] Force `CS = 0` for all Tier 3 candidates.
 - [ ] Wire the weight sweep (w1 ∈ {0.25, 0.5, 0.75}) as a parameter; show only the default for PP1.
 
 ## 5.3 — Ranking `[D2 AM · ~20 min]`
-- [ ] Rank candidates within each plant by CS with a deterministic tie-break.
-- [ ] Keep Tier 3 candidates in a separate "abstained" list with `CS = 0`.
+- [x] Rank candidates within each plant by CS with sequence as deterministic tie-break.
+- [x] Keep Tier 3 candidates in the separate `abstained` list with `CS = 0`.
 
 ## 5.4 — Evidence Card Generation `[D2 PM · ~1 h]`
-- [ ] Build the top 50 Tier 1/2 candidates per plant as JSON cards containing: sequence; provenance (species, parent accession, enzymes, position); physicochemical summary; SIM_C1; PROB_C2 + evidence tier; AD tier and `d_AD`; GREEN/AMBER flag; CS and rank; BCS flag.
-- [ ] Render the BCS flag as `Predictor BCS = X.XX [HIGH/MEDIUM/LOW reliability]`, keyed to the candidate's length bin, with the warning text when BCS < 0.5.
-- [ ] Show the RED flag only in the abstained list, not as top-50 cards.
-- [ ] Carry the dummy-source labels into each card.
+- [x] Generate up to 50 Tier 1/2 cards per plant with sequence, provenance, physicochemical values, mock signals/evidence tier, AD, flags, CS, rank, and BCS fields.
+- [x] Key BCS values/flags to the candidate length bin and apply the C4-provisional thresholds.
+- [x] Show RED only in the abstained list.
+- [x] Carry mock signal and `mock_cloud` source labels into cards.
 
 ## 5.5 — Function B Tests `[D2 PM · ~30 min]`
-- [ ] Tier 3 always yields CS = 0.
-- [ ] CS stays within [0, 1].
-- [ ] CS decreases as `d_AD` increases when other inputs are fixed.
+- [x] Tier 3 always yields CS = 0.
+- [x] CS stays within [0, 1].
+- [x] CS decreases as `d_AD` increases when other inputs are fixed.
 - [ ] On the synthetic sandbox, CS ranks planted positives above random.
 - [ ] Weight sweep runs without error.
 
@@ -321,7 +321,7 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 - [ ] Present only verified results; show PARRS, ARR, and Recall@K as roadmap, not results.
 - [ ] Rehearse once with a timer; schedule a second rehearsal in the contingency window.
 
-## 7.5 — Progress Presentation 01 (Target: 26 October 2026)
+## 7.5 — Progress Presentation 01 (Target: 21 October 2026)
 - [ ] Deliver the component presentation and live demo (fallback: recording).
 - [ ] Capture panel questions and feedback.
 - [ ] Prepare answers for likely challenges: why dummy data; whether `d_AD` is circular; pepsin vs known AOPs; where the candidate counts come from.
@@ -354,7 +354,7 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 | **D2 13:00–17:00** | Dashboard adaptation, views, labelling, robustness | 6.1–6.4 |
 | **D2 17:00–21:00** | Demo script, freeze and tag, report, slides, first rehearsal | 6.5, 7.2–7.4 |
 | **20–25 Oct** | Contingency: supervisor feedback, polish, second rehearsal | — |
-| **26 Oct** | PP1 presentation | 7.5 |
+| **21 Oct** | PP1 presentation | 7.5 |
 | **30 Oct** | Checklist submission | 7.6 |
 
 ## Decision Gates

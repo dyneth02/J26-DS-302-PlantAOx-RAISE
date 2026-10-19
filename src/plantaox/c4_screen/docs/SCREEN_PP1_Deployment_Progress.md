@@ -11,16 +11,16 @@
 | Documentation architecture | Done | Component README, architecture, methodology, data/output contracts, and validation criteria are present in `src/plantaox/c4_screen/docs/`. They explicitly distinguish planned methodology from current implementation. |
 | Repository scaffold | Done for Gate 1 | Implemented `digest.py`, `filters.py`, `dedup.py`, `descriptors.py`, `run.py`, `config.yaml`, and focused tests in the established `src/` and `tests/` layout. Embedding/AD/signal modules remain out of this scope. |
 | Proteome inputs | Done for Gate 1 | Four unchanged reviewed FASTAs are in `data/raw/c4_screen/proteomes/`; original UniProt-named downloads are retained under `source_downloads/`. URL, access date, file size, SHA-256, release, and counts are in `metadata/c4_data_registry.csv`; exclusions are in `metadata/c4_protein_exclusions.csv`. |
-| Dependencies and environment | In Progress | The requested fair-esm, biopython, pyteomics, pandas, pyarrow, scikit-learn, and pytest packages are installed in `.venv`, and `requirements.txt` now records the environment via `pip freeze`. CUDA is unavailable (`False`); the ESM-2 download remains incomplete and model loading is not verified. `tests/c4_screen/check_gpu.py` is a probe, not a pipeline acceptance test. |
+| Dependencies and environment | Done for C4 run | Required C4 dependencies are installed. Local CUDA is unavailable; the validated ESM-2 handoff manifest reports Colab Tesla T4. No local ESM-2 load/download was performed. |
 | Candidate generation (FR1 / Gate 1) | Done | `python -m plantaox.c4_screen.run all` generated candidate Parquet/FASTA, membership, funnel, and funnel-only summary. Five focused tests pass. A repeated full run produced byte-identical SHA-256 values for all nine outputs. All 152,259 sequences are unique and all 266,361 parent-coordinate provenance links were checked against the source FASTAs. Optional BIOPEP web comparison and C1/C2 handoff remain pending. |
-| Embeddings and AD tiers (FR2) | Blocked; handoff unavailable in this checkout | The owner reports the five Colab files were supplied, but `data/interim/c4_screen/embeddings/` is absent here. `embed-import` fails before hash validation; no real candidate tiers/parameters were computed. No local ESM-2 execution. |
+| Embeddings and AD tiers (FR2) | Done against MOCK cloud | 152,259/152,259 candidate embeddings validated; cloud N=500 (`mock_cloud`). `mu=0.0185099002`, `sigma=0.0097886926`, `t1=0.0282985928`, `t2=0.0380872854`. No plant has >95% in one tier; no threshold tuning. |
 | PDSS (FR3) | Pending | No implementation or results. Planned stretch/later analysis. |
-| Signal integration and combined score (FR4) | In Progress; synthetic contract verified, production blocked | Existing mock utility is reused; sequence joins preserve source labels; score formula and Tier 3 zeroing are implemented and tested synthetically. Production `signals`/`score` stages lack the tier table; no retrieval metrics are computed on mock signals. |
+| Signal integration and combined score (FR4) | Done with MOCK signals | `signals` and `score` completed, joining on sequence; all sources are `mock`; Tier 3 CS is zero. No retrieval metrics are computed on mock signals. |
 | Cross-predictor audit (FR5) | Pending | No implementation or predictor outputs are present. Later milestone. |
 | Retrieval evaluation (FR6) | Pending | No held-out evaluation set, metric implementation, or results are present. Later milestone. |
-| Evidence cards (FR7) | In Progress; synthetic contract verified, production blocked | JSON top-50 and abstained-list card generation, C4-provisional BCS flags, provenance fields, and mock notices are implemented and tested synthetically; production has no ranking table. |
-| Dashboard | In Progress; synthetic artifact support, production blocked | Offline HTML and MOCK-labelled summary code are implemented and synthetically tested; production has no cards/AD summary. |
-| PP1 freeze, report, and presentation | In Progress; partial manifest | Presentation target is 21 October 2026. A blocked-state manifest checksums the nine existing Gate 1 outputs; full-data freeze remains blocked. |
+| Evidence cards (FR7) | Done with MOCK signals | `cards.json` has top-50 Tier 1/2 candidates per plant, abstained Tier 3 examples, mock source labels, and ten injected rice demo cases. |
+| Dashboard | Done with MOCK data | Offline `c4_dashboard.html` and full summary generated from the validated production outputs. |
+| PP1 freeze, report, and presentation | In Progress | Presentation target is 21 October 2026. A 29-file checksummed manifest was generated; only C4 tests were run as requested. |
 
 ## Gate 1 observed funnel
 
@@ -55,19 +55,17 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 
 ## Current work session — embedding/AD and mock integration (19 October 2026)
 
-- **Done and unchanged:** Gate 1 candidate generation. The task inventory, provisional interface spec, progress file, Colab notebook, existing mock utility, and project outputs were inspected.
-- **Blocked (current checkout):** Although the project owner reports the files were supplied, `data/interim/c4_screen/embeddings/` does not exist here. The five missing files are `c4_esm2_t33_650M.npy`, `c4_embedding_index.parquet`, `c4_embedding_manifest.json`, `ref_cloud.npy`, and `ref_cloud_sequences.csv`.
-- **Stage attempts:** `embed-import` failed on those missing files before the hash check; `cloud` failed because `ref_cloud_sequences.csv` is missing; `ad` was blocked on all five; `signals` and `score` lack `c4_ad_tiers.parquet`; `cards` lacks `c4_ranked_candidates.parquet`; `dashboard` lacks `cards.json`. Hash formula comparison was not applicable because validation never reached row-ID hashing.
-- **Implemented and synthetically verified:** strict embedding handoff validation; supplied-cloud metadata checks; LOO AD calibration and tiering; diagnostics including mean-centering checks on degeneracy without threshold tuning; existing mock generator/validator integration; sequence-key joins; scoring; cards; MOCK-labelled summary and offline dashboard.
-- **Verification:** `tests/c4_screen` — 12 passed. Full repository `pytest -q` — 552 passed, 38 skipped, 32 failed, 98 errors (plus 17 subtests passed). Failures/errors include unrelated C2 tests that require model/data artifacts; ESM-2 C2 tests attempted a checkpoint download and hit `PermissionError` writing under `C:\Users\hcoor\.cache\torch\hub\checkpoints`. The test run's six modified C2 tracked artifacts were restored to their pre-run state.
-- **Checksums:** `data/interim/c4_screen/c4_output_manifest.json` records hashes/sizes for nine existing Gate 1 outputs and status `blocked_missing_embedding_handoff`; it is not a full downstream output freeze.
-- **In Progress:** Run `embed-import`, `cloud`, `ad`, `signals`, `score`, `cards`, and `dashboard` in order; then run tests and produce the checksum manifest.
-- **Constraint:** Layer-33 mean-residue pooling remains a C4 assumption pending C1 confirmation. Reference cloud source is `mock_cloud`; signals are `mock`. No PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS results are claimed.
+- **Production stages:** `embed-import`, `cloud`, `ad`, `signals`, `score`, `cards`, `dashboard` completed in order. Import validated the manifest hash and exact candidate/index peptide_id+sequence order. Hash uses SHA-256 of newline-joined sequences in index order, matching the manifest recipe.
+- **Counts:** 152,259 candidates embedded; zero unembedded. Cloud N=500, `source=mock_cloud`. Signal inputs and BCS have `source=mock`.
+- **AD:** `mu=0.0185099002`, `sigma=0.0097886926`, `t1=0.0282985928`, `t2=0.0380872854`. Highest single-tier fraction is rice Tier 1 at 56.99%; no plant exceeds 95%, so conditional mean-centering diagnostic was not triggered. Thresholds were not tuned.
+- **Artifacts:** AD tiers, parameters, diagnostics, cloud metadata, mock signals/manifest, ranking, cards, summary, offline dashboard, and 29-file output checksum manifest exist under `data/interim/c4_screen/`.
+- **Verification:** only `pytest tests/c4_screen` was run: 12 passed. No full repository suite was run in this work session.
+- **Constraint:** Layer-33 mean-residue pooling remains a C4 assumption pending C1 confirmation. The reference cloud is MOCK; signal results/cards are mock demonstrations, not biological evidence. No PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS results are claimed.
 
 ## Next actions
 
-1. Validate supplied embedding/cloud files and run production stages in order.
-2. Run the full test suite and create the output checksum manifest.
+1. Confirm C1's ESM representation recipe and supervisor review of the unresolved PDSS denominator.
+2. Preserve the MOCK provenance and prevent mock signals/cloud from being presented as biological evidence.
 3. Keep every mock signal/cloud output visibly labelled and exclude mock data from retrieval-performance metrics.
 
 ## Status rule
