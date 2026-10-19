@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "n_peptides": 1389,
+    "n_strict": 669,
+    "n_mc_active": 104,
+    "chance_mc_neighbour_purity": 0.1555,
+    "neighbours": 10,
+    "pooling_rule": "max-pool over residues for peptides shorter than 10 aa, mean-pool for 10 aa or longer",
+    "peptides_ge_10_aa": 322,
+    "peptides_lt_10_aa": 1067
+  },
+  "spaces": {
+    "esm2": {
+      "name": "Untrained ESM-2 650M",
+      "dim": 1280,
+      "pc_variance_share": [
+        0.3125,
+        0.0862
+      ],
+      "within_mc": 0.9275,
+      "within_frs": 0.9173,
+      "between": 0.9205,
+      "all_pairs": 0.9184,
+      "separation": 0.002,
+      "mc_neighbour_purity": 0.1923,
+      "pc1_length_correlation": -0.6271
+    },
+    "primary": {
+      "name": "Main trained head",
+      "dim": 128,
+      "pc_variance_share": [
+        0.5089,
+        0.0669
+      ],
+      "within_mc": 0.9961,
+      "within_frs": 0.9969,
+      "between": 0.9963,
+      "all_pairs": 0.9967,
+      "separation": 0.0002,
+      "mc_neighbour_purity": 0.1269,
+      "pc1_length_correlation": 0.6922
+    },
+    "maxspread": {
+      "name": "Head selected for spread",
+      "dim": 128,
+      "pc_variance_share": [
+        0.3263,
+        0.2441
+      ],
+      "within_mc": 0.3034,
+      "within_frs": 0.3666,
+      "between": 0.3167,
+      "all_pairs": 0.3519,
+      "separation": 0.0183,
+      "mc_neighbour_purity": 0.1644,
+      "pc1_length_correlation": -0.2314
+    }
+  }
+}
