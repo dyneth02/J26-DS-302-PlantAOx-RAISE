@@ -824,19 +824,19 @@
 ## Task 3.35 — Create run manifests and provenance records
 
 ### Subtasks
-- [ ] Record:
-  - [ ] dataset version;
-  - [ ] predictor version;
-  - [ ] code commit;
-  - [ ] random seed;
-  - [ ] redox set;
-  - [ ] BLOSUM62 rule;
-  - [ ] delta threshold;
-  - [ ] peptide count;
-  - [ ] perturbation counts;
-  - [ ] failures/missing scores;
-  - [ ] run date.
-- [ ] Keep result files versioned and traceable.
+- [x] Record:
+  - [x] dataset version;
+  - [x] predictor version;
+  - [x] code commit;
+  - [x] random seed;
+  - [x] redox set;
+  - [x] BLOSUM62 rule;
+  - [x] delta threshold;
+  - [x] peptide count;
+  - [x] perturbation counts;
+  - [x] failures/missing scores;
+  - [x] run date.
+- [x] Keep result files versioned and traceable.
 
 ### Deliverable
 - Reproducible run manifest.

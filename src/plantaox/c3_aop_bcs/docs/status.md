@@ -162,15 +162,23 @@
 - Applied shared axes and direct labels and placed the visible warning `PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS` on every figure, preserving the distinction between software pipeline evidence and future real-predictor experimental results.
 - Verified that all requested outputs exist, use only generated results, retain the preliminary/testing-only classification, parse as valid SVG, reproduce byte-for-byte, and match their authoritative metric reports.
 - Confirmed all four focused Task 3.34 tests pass with four subtests. The broader C3 run passed 132 tests and 114 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Completed Task 3.35 by implementing a deterministic PP1 run-manifest generator that cross-checks the authoritative selection, scoring, perturbation, metric, inspection, count-review, and visualization reports before writing provenance.
+- Created the versioned `c3_aop_bcs_pp1_dummy_pilot_run_v1` manifest with run date `2026-10-19`, PP1 dataset version, dummy predictor identity/version/scoring method, and the full Git commit `ca77c59b2c9ccb1cbb221528659d15789e139715` containing the manifest generator.
+- Recorded master seed `42`, redox set W/Y/H/M/C, primary delta `0.05`, sensitivity deltas, and the complete P2 BLOSUM62 rule: non-redox positions, minimum score `>= 1`, frozen exclusions, highest-score selection, and alphabetical tie-breaking.
+- Reconciled 20 pilot peptides and 449 perturbations (54 P1, 150 P2, and 245 P3) independently across the pilot, DeltaScore, count-review, and CSV artifacts.
+- Recorded zero rejected full-pipeline perturbations and zero missing or failed pilot scores, derived from the selected perturbation count and the validated finite DeltaScore count rather than an unsupported manual claim.
+- Pinned the research configuration, BLOSUM62 support record, dummy predictor definition, 12 authoritative source reports, and 12 versioned result/figure artifacts with paths, formats, byte sizes, record counts where applicable, and SHA-256 checksums.
+- Preserved the explicit classification that this is preliminary dummy software-testing evidence, not a scientific result, and that real-predictor experimental scoring remains pending.
+- Confirmed all seven focused Task 3.35 tests pass with 24 subtests, including commit validation, cross-report reconciliation, artifact completeness, checksum coverage, and byte-identical canonical regeneration. The broader C3 run passed 139 tests and 138 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.34 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.35 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.35: Create run manifests and provenance records
+## Current task — Task 3.36: Prepare the SHAP-faithfulness data structure
 
-**Status:** In progress.
+**Status:** Not started; next task.
 
-Current work:
+Next work:
 
-- audit the validated PP1 artifacts and their existing provenance records;
-- record the dataset and predictor versions, code commit, random seed, redox set, BLOSUM62 rule, primary delta, peptide and perturbation counts, failures or missing scores, and run date;
-- pin versioned PP1 result files with paths and checksums in a reproducible run manifest.
+- define the sequence, predictor, residue-position, residue, SHAP-value, absolute-SHAP, P1 DeltaScore, and absolute-DeltaScore fields;
+- preserve the planned comparison of `|SHAP_i|` with `|DeltaScore_i|`;
+- prepare the KernelSHAP module boundary without making the complete SHAP experiment a PP1 blocker.
