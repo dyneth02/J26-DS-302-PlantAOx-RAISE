@@ -150,16 +150,22 @@
 - Added an explicit 20% PP1 quality-control dominance flag, documented as a pragmatic non-inferential cutoff; no sequence exceeds it, and the largest contributor is `C3-ANOX-000467` with 64/449 variants (`0.14253897550111358`).
 - Exported a checksum-backed per-subject count table and JSON report containing expected/actual type counts, shares, equal-share ratios, zero-case classifications, source provenance, and validation results.
 - Confirmed all four focused Task 3.32 tests pass. The broader C3 run passed 124 tests and 104 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Completed Task 3.33 by manually selecting and inspecting six representative pilot variants: two P1, two P2, and two P3 examples spanning short and long peptides, different positions, and distinct residue changes.
+- Verified row by row that each declared one-based position is the only changed position, the original and substituted residues match their sequences, the perturbed sequence reconstructs exactly, and sequence length remains unchanged.
+- Independently reproduced the two P2 selections and their Biopython BLOSUM62 scores: `L1I` scores 2 and `V6I` scores 3 under the frozen deterministic selection rule.
+- Independently recomputed every selected original score, perturbed score, and DeltaScore using the deterministic dummy scorer, and confirmed the two P3 examples retain master seed `42` and their random metadata.
+- Added a versioned machine-readable inspection record and a concise PP1-ready Markdown table, both clearly labelled as software-testing evidence rather than scientific AOP results.
+- Confirmed all four focused Task 3.33 tests pass with six subtests. The broader C3 run passed 128 tests and 110 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.32 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.33 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.33: Manually inspect example variants
+## Next task — Task 3.34: Create preliminary visualizations
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- select representative P1, P2, and P3 examples from the PP1 pilot;
-- manually verify mutation position, original/new residue, and resulting sequence;
-- verify the P2 BLOSUM62 score and original/perturbed predictor scores;
-- preserve the examples as traceable PP1 slide/demo evidence.
+- create pilot/preliminary P1/P2/P3 absolute DeltaScore distributions;
+- create original-versus-perturbed score examples;
+- create a preliminary IR/FSR/BCS summary table and prediction-flip comparison;
+- use only generated artifacts and retain explicit dummy/software-testing labels.

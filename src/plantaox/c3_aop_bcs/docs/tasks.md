@@ -790,15 +790,15 @@
 ## Task 3.33 — Manually inspect example variants
 
 ### Subtasks
-- [ ] Select representative P1 examples.
-- [ ] Select representative P2 examples.
-- [ ] Select representative P3 examples.
-- [ ] Verify:
-  - [ ] mutation position;
-  - [ ] original/new residue;
-  - [ ] resulting sequence;
-  - [ ] BLOSUM62 score for P2;
-  - [ ] original and perturbed predictor scores.
+- [x] Select representative P1 examples.
+- [x] Select representative P2 examples.
+- [x] Select representative P3 examples.
+- [x] Verify:
+  - [x] mutation position;
+  - [x] original/new residue;
+  - [x] resulting sequence;
+  - [x] BLOSUM62 score for P2;
+  - [x] original and perturbed predictor scores.
 
 ### Deliverable
 - Hand-verified examples for PP1 slides/demo.
