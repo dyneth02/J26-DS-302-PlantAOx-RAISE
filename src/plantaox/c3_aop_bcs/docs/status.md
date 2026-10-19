@@ -141,11 +141,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.30 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.31: Prepare delta-sensitivity support
+## Current task — Task 3.31: Prepare delta-sensitivity support
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - make the metric pipeline accept the configured `0.02`, `0.05`, and `0.10` delta thresholds;
 - retain `0.05` as the primary PP1 result;
