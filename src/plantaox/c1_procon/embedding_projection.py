@@ -6,7 +6,7 @@ Inputs (not committed, regenerate with notebooks/c1_procon Steps 2 and 4):
   * ``AOP-BenchPos_S2.csv``                           - the benchmark (labels, length, source, homology groups)
 
 Outputs (small, committed under ``data/processed/c1_procon/results``):
-  * ``embedding_projection.csv`` - a 2-D PCA of the same 1,389 peptides in three spaces
+  * ``embedding_projection.csv`` - a 3-D PCA (PC1-PC3) of the same 1,389 peptides in three spaces
   * ``embedding_stats.json``     - variance explained, cosine structure and neighbour purity per space
 
 Nothing here is a model result: it only describes the geometry of the already-accepted embeddings.
@@ -37,13 +37,13 @@ def unit(x: np.ndarray) -> np.ndarray:
     return x / np.clip(np.linalg.norm(x, axis=1, keepdims=True), 1e-12, None)
 
 
-def pca2(x: np.ndarray) -> tuple[np.ndarray, list[float]]:
-    """Deterministic 2-D PCA (SVD of the centred matrix); also returns the variance share of PC1 and PC2."""
+def pca3(x: np.ndarray) -> tuple[np.ndarray, list[float]]:
+    """Deterministic 3-D PCA (SVD of the centred matrix); also returns the variance share of PC1 to PC3."""
     centred = x - x.mean(axis=0, keepdims=True)
     u, s, _ = np.linalg.svd(centred, full_matrices=False)
-    coords = u[:, :2] * s[:2]
+    coords = u[:, :3] * s[:3]
     share = (s**2) / (s**2).sum()
-    return coords, [float(share[0]), float(share[1])]
+    return coords, [float(v) for v in share[:3]]
 
 
 def strict_pool(s2: pd.DataFrame) -> pd.DataFrame:
@@ -122,8 +122,9 @@ def build(embeddings_dir: Path, checkpoints_dir: Path, benchmark_csv: Path, out_
     )
     stats: dict[str, dict] = {}
     for key, z in spaces.items():
-        coords, share = pca2(z)
-        table[f"{key}_pc1"], table[f"{key}_pc2"] = coords[:, 0].round(5), coords[:, 1].round(5)
+        coords, share = pca3(z)
+        for k in range(3):
+            table[f"{key}_pc{k + 1}"] = coords[:, k].round(5)
         zs = z[in_strict]
         entry = {"name": names[key], "dim": int(z.shape[1]), "pc_variance_share": [round(v, 4) for v in share]}
         entry.update({k: round(v, 4) for k, v in cosine_structure(zs, mc_strict).items()})
