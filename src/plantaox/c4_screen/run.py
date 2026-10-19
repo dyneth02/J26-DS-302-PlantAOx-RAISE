@@ -165,8 +165,9 @@ def run_dashboard(out_dir: Path, cards: dict) -> dict:
     return summary
 
 
-def write_output_manifest(out_dir: Path) -> Path:
-    """Checksum generated outputs without copying or hashing the external embedding handoff."""
+def write_output_manifest(out_dir: Path, run_status: str = "complete",
+                          missing_inputs: list[str] | None = None) -> Path:
+    """Checksum available outputs without copying or hashing the external embedding handoff."""
     manifest_path = out_dir / "c4_output_manifest.json"
     entries = []
     for path in sorted(out_dir.rglob("*")):
@@ -180,7 +181,9 @@ def write_output_manifest(out_dir: Path) -> Path:
                 digest.update(chunk)
         entries.append({"path": path.relative_to(out_dir).as_posix(), "size_bytes": path.stat().st_size,
                         "sha256": digest.hexdigest()})
-    manifest_path.write_text(json.dumps({"status": "MOCK / PROVISIONAL", "files": entries},
+    manifest_path.write_text(json.dumps({"run_status": run_status,
+        "cloud_source": "mock_cloud", "signal_source": "mock",
+        "missing_inputs": missing_inputs or [], "files": entries},
         indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return manifest_path
 
