@@ -133,16 +133,21 @@
 - Exported the provenance-preserving P1 response table and a checksum-backed report containing the metric definition, delta source, counts, rate, strict boundary checks, and validation results.
 - Preserved the non-experimental boundary in every FSR row and in the report; this dummy FSR validates the metric pipeline and is not a scientific reliability result.
 - Confirmed all four focused Task 3.29 tests pass with three subtests. The broader C3 run passed 111 tests and 90 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.30 using the frozen formula `BCS = IR × (1 - FSR)` with strict finite `[0,1]` validation for both component rates and the resulting score.
+- Combined the validated Task 3.28 dummy IR `140/150 = 0.9333333333333333` and Task 3.29 dummy FSR `28/54 = 0.5185185185185185`, producing a preliminary pilot BCS of `0.44938271604938274`.
+- Added a versioned, deterministic BCS report that pins both source reports by path, dataset version, and SHA-256 checksum and rejects failed validation, mismatched predictor metadata, different source datasets, or inconsistent delta thresholds.
+- Verified the BCS formula with explicit manual examples, confirmed the result is within `[0,1]`, and preserved clear labels that the dummy value is software-testing-only and is not a scientific result or final conclusion.
+- Confirmed all four focused Task 3.30 tests pass with six subtests. The broader C3 run passed 115 tests and 96 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.29 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.30 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.30: Calculate preliminary BCS
+## Next task — Task 3.31: Prepare delta-sensitivity support
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- combine the Task 3.28 IR and Task 3.29 FSR using `BCS = IR × (1 - FSR)`;
-- verify that the result is within the expected `[0,1]` range;
-- validate the formula using explicit hand-calculated examples;
-- label the dummy BCS as a preliminary software-only pilot value, not a scientific conclusion.
+- make the metric pipeline accept the configured `0.02`, `0.05`, and `0.10` delta thresholds;
+- retain `0.05` as the primary PP1 result;
+- demonstrate reproducible reruns at the sensitivity thresholds where practical;
+- reserve full robustness interpretation for the later study.

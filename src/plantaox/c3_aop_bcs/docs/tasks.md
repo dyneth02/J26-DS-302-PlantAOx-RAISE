@@ -742,13 +742,13 @@
 ## Task 3.30 — Calculate preliminary BCS
 
 ### Subtasks
-- [ ] Compute:
+- [x] Compute:
 
   `BCS = IR × (1 - FSR)`
 
-- [ ] Check that BCS falls in the expected range.
-- [ ] Verify the formula with small manually calculated examples.
-- [ ] Report PP1 values as **preliminary pilot values**, not final conclusions.
+- [x] Check that BCS falls in the expected range.
+- [x] Verify the formula with small manually calculated examples.
+- [x] Report PP1 values as **preliminary pilot values**, not final conclusions.
 
 ### Deliverable
 - Preliminary pilot BCS.
