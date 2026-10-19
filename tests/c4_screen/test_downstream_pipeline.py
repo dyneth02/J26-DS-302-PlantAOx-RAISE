@@ -9,8 +9,9 @@ from plantaox.c4_screen.cards import _reliability_flag, make_cards
 from plantaox.c4_screen.cloud import build_reference_meta
 from plantaox.c4_screen.dashboard import build_summary, write_dashboard
 from plantaox.c4_screen.embed_import import EmbeddingImportError, import_embeddings, row_sequence_sha256
-from plantaox.c4_screen.score import score_candidates
+from plantaox.c4_screen.score import score_candidates, weight_sweep
 from plantaox.c4_screen.signals import generate_and_validate_mock_signals, validate_and_join_signals
+from plantaox.c4_screen.run import write_output_manifest
 
 
 def test_import_reports_all_missing_handoff_files(tmp_path):
@@ -104,6 +105,78 @@ def test_score_decreases_with_greater_ad_distance_when_other_signals_are_fixed()
     ranked = score_candidates(joined, memberships, candidates, {"weights": {"w1": .5, "w2": .5}})
     by_sequence = ranked.set_index("sequence").CS
     assert by_sequence["ACD"] > by_sequence["EFG"]
+
+
+def test_weight_sweep_runs_and_synthetic_planted_set_ranks_above_random():
+    # Test-only 2,000-row sandbox; these constructed records are not project outputs.
+    rng = np.random.default_rng(42)
+    n, planted, dim = 2000, 20, 16
+    alphabet = "ACDEFGHIKLMNPQRSTVWY"
+    def encode(i):
+        chars = []
+        for _ in range(6):
+            chars.append(alphabet[i % len(alphabet)])
+            i //= len(alphabet)
+        return "".join(chars)
+    sequences = [encode(i) for i in range(n)]
+    ids = [f"p{i:04d}" for i in range(n)]
+    center = np.r_[1.0, np.zeros(dim - 1)]
+    cloud = (center + rng.normal(0, .01, size=(80, dim))).astype(np.float32)
+    # The first 20 planted positives are close to the synthetic cloud centroid;
+    # the remaining candidates point away from it and serve as random negatives.
+    vectors = np.vstack([center + rng.normal(0, .005, size=(planted, dim)),
+                         -center + rng.normal(0, .05, size=(n-planted, dim))]).astype(np.float32)
+    candidates = pd.DataFrame({"peptide_id": ids, "sequence": sequences})
+    tiers, _, _ = assign_tiers(candidates, candidates.copy(), vectors, cloud, cloud_source="mock_cloud")
+    joined = tiers.copy()
+    joined["SIM_C1"] = np.r_[rng.uniform(.85, 1, planted), rng.uniform(0, .4, n-planted)]
+    joined["PROB_C2"] = np.r_[rng.uniform(.85, 1, planted), rng.uniform(0, .4, n-planted)]
+    joined["SIM_C1_source"] = "mock"
+    joined["PROB_C2_source"] = "mock"
+    memberships = pd.DataFrame({"peptide_id": ids, "plant": "synthetic"})
+    default = {"weights": {"w1": .5, "w2": .5}}
+    results = weight_sweep(joined, memberships, candidates, default)
+    assert set(results) == {.25, .5, .75}
+    assert default["weights"] == {"w1": .5, "w2": .5}
+    for ranked in results.values():
+        assert ranked.CS.between(0, 1).all()
+        assert ranked.loc[ranked.tier == 3, "CS"].eq(0).all()
+        top = set(ranked.nsmallest(planted, "rank").peptide_id)
+        assert top == set(ids[:planted])
+
+
+def test_sequence_key_real_signal_swap_in_procedure(tmp_path):
+    # Synthetic real-source contract fixture; no biological result is asserted.
+    seqs = ["ACDE", "FGHI"]
+    tiers = pd.DataFrame({"peptide_id": ["p1", "p2"], "sequence": seqs,
+        "d_AD": [.01, .02], "d_norm": [.1, .2], "tier": [1, 2], "embedded": [True, True],
+        "cloud_source": ["mock_cloud"] * 2})
+    pd.DataFrame({"sequence": seqs, "SIM_C1": [.7, .6], "source": ["real"] * 2}).to_parquet(
+        tmp_path / "c1_sim.parquet", index=False)
+    pd.DataFrame({"sequence": seqs, "PROB_C2": [.8, .5], "evidence_tier": ["E1", "E2"],
+        "source": ["real"] * 2}).to_parquet(tmp_path / "c2_prob.parquet", index=False)
+    (tmp_path / "c3_bcs.json").write_text(json.dumps({"source": "real", "strata": []}), encoding="utf-8")
+    joined, bcs = validate_and_join_signals(tiers, tmp_path)
+    assert bcs["source"] == "real"
+    assert joined.SIM_C1_source.eq("real").all() and joined.PROB_C2_source.eq("real").all()
+
+
+def test_output_manifest_hashes_handoff_inputs_without_copying(tmp_path):
+    import hashlib
+    names = ("c4_esm2_t33_650M.npy", "c4_embedding_index.parquet",
+             "c4_embedding_manifest.json", "ref_cloud.npy", "ref_cloud_sequences.csv")
+    embedding_dir = tmp_path / "embeddings"
+    embedding_dir.mkdir()
+    expected = {}
+    for name in names:
+        payload = f"synthetic handoff: {name}".encode()
+        (embedding_dir / name).write_bytes(payload)
+        expected[name] = hashlib.sha256(payload).hexdigest()
+    (tmp_path / "generated.json").write_text("{}\n", encoding="utf-8")
+    manifest_path = write_output_manifest(tmp_path)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert {name: row["sha256"] for name, row in manifest["handoff_inputs"].items()} == expected
+    assert not any((tmp_path / name).exists() for name in names)
 
 
 def test_cards_flags_summary_and_dashboard_are_mock_labelled(tmp_path):

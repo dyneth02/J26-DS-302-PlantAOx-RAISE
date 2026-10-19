@@ -61,9 +61,9 @@ No plant exceeded the >95% single-tier degeneracy criterion (largest baseline fr
 
 - The 500-sequence reference cloud is a **synthetic MOCK placeholder** (`source=mock_cloud`), not a validated AOP-positive biological reference set. AD distances, calibration, tiers, and related diagnostics are therefore provisional and cloud-dependent.
 - SIM_C1, PROB_C2, and BCS values are **mock signals** (`source=mock`). Cards, scores, and rankings do not establish retrieval or biological performance.
-- These numbers do not establish causal AOP relevance, experimental activity, plant safety, or clinical/agricultural efficacy. They do not report PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS.
+- These numbers do not establish causal AOP relevance, experimental activity, plant safety, or clinical/agricultural efficacy. No retrieval-evaluation results are reported from mock inputs; the PDSS analysis is deferred.
 - The ESM-2 layer-33 mean-residue pooling recipe is a C4 working assumption awaiting C1 confirmation.
 
 ## Reproducibility evidence
 
-Two consecutive `python -m plantaox.c4_screen.run all` executions produced identical SHA-256 hashes for all **32 compared pipeline output files**. The generated output manifest is `data/interim/c4_screen/c4_output_manifest.json`; it includes SHA-256-only entries for the five supplied handoff files while leaving those large inputs out of Git. Only `pytest tests/c4_screen` was run: **12 passed**.
+Two consecutive `python -m plantaox.c4_screen.run all --reuse-inputs --signals mock` executions produced identical SHA-256 hashes for all **35 compared generated files** (34 manifest-listed outputs plus the output manifest). The generated output manifest is `data/interim/c4_screen/c4_output_manifest.json`; it includes SHA-256-only entries for the five supplied handoff files while leaving those large inputs out of Git. Only `pytest tests/c4_screen` was run: **15 passed**. Cached rice tiering took 18.562604 s and scoring/ranking took 1.644521 s (20.207124 s combined; single-host measurement). A provisional C2-derived E1/E2 real-cloud sequence list (N=912) is staged at `data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv`; no embeddings exist for it yet.

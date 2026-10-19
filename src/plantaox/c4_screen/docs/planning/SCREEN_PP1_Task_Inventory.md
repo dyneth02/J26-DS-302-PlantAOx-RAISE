@@ -6,7 +6,7 @@
 **Owner:** Cooray Y H (IT23191006)  
 **Purpose:** Supervisor-visible tracking of implementation, verification, and PP1 evidence  
 **Planning date:** 18 October 2026  
-**Execution window:** **2 working days** — Day 1 = Sun 18 Oct, Day 2 = Mon 19 Oct *(20–25 Oct is unscheduled contingency, not planned work)*  
+**Execution window:** **18–19 October 2026** for implementation; 20 October is the final preparation/rehearsal day if scheduled, and PP1 is 21 October 2026. No 20–25 October contingency block is planned.
 **PP1 presentation target:** 21 October 2026 *(current date supplied by the project owner; supersedes the Gantt draft date)*  
 **PP1 checklist submission target:** 30 October 2026 *(from the project Gantt chart; confirm against the official schedule)*  
 **Primary completion targets:** Function A (FR1 + FR2) and Function B (FR4 + FR7, running on dummy C1/C2/C3 signals)  
@@ -16,7 +16,7 @@
 
 ## Repository Status Audit — 19 October 2026
 
-The inventory was synchronized on 19 October 2026 after production verification. Gate 1 remains unchanged. Local ESM download, owner contract follow-ups, and a real-cloud source ladder are superseded as marked below. The supplied candidate embeddings validated at 152,259 × 1,280; the reference cloud has 500 sequences and is MOCK (`mock_cloud`). Downstream C4 outputs and tests are recorded in [`PP1_STATUS.md`](PP1_STATUS.md).
+The inventory was synchronized on 19 October 2026 before validating the newly supplied reference-cloud handoff. Gate 1 remains unchanged. Local ESM download and owner contract follow-ups are superseded as marked below. The candidate embedding handoff was previously validated at 152,259 × 1,280. Replacement `ref_cloud.npy` and `ref_cloud_sequences.csv` are present but not yet validated or processed; production cloud status remains unverified until the ordered stages complete. Current evidence is in [`PP1_STATUS.md`](../planning/PP1_STATUS.md).
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 
@@ -75,8 +75,8 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [ ] Reuse shared utilities (e.g., descriptor extraction, seeding) if the shared repository already provides them; do not duplicate.
 
 ## 1.2 — Plant Proteome Acquisition `[D1 AM · ~1 h]`
-- [x] Download Swiss-Prot **reviewed** FASTA for Glycine max, Oryza sativa (japonica), Brassica napus, and Olea europaea using taxonomy-filtered `reviewed:true` UniProt queries. Downloaded files and exact URLs are in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
-- [x] Record source URLs, access date (19 October 2026, Asia/Colombo), UniProt release (`2026_03`, released 02 September 2026), file sizes, and SHA-256 checksums in `SCREEN_PP1_DATA_AND_OUTPUTS.md`.
+- [x] Download Swiss-Prot **reviewed** FASTA for Glycine max, Oryza sativa (japonica), Brassica napus, and Olea europaea using taxonomy-filtered `reviewed:true` UniProt queries. Downloaded files and exact URLs are in `../technical/SCREEN_PP1_Data_and_outputs.md`.
+- [x] Record source URLs, access date (19 October 2026, Asia/Colombo), UniProt release (`2026_03`, released 02 September 2026), file sizes, and SHA-256 checksums in `../technical/SCREEN_PP1_Data_and_outputs.md`.
 - [x] Count FASTA protein records: soybean 439; rice 4,197; rapeseed 159; olive 110. These are input protein counts and cannot be compared directly with the proposal's 5K–50K post-digestion peptide-candidate estimate; revisit the estimate after the FR1 funnel is measured.
 - [x] Apply the input filters: drop proteins < 50 AA and sequences with non-standard residues; log exclusions in `data/raw/c4_screen/metadata/c4_protein_exclusions.csv`.
 - [x] Save unchanged UniProt response files under `data/raw/c4_screen/proteomes/source_downloads/` with canonical plant-named copies in `proteomes/`; version their provenance with UniProt release, retrieval date, source query, and SHA-256. Keep raw sequence files local and ignored by Git.
@@ -86,7 +86,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [ ] Candidate FASTA handoff to C1/C2 owners remains a separate coordination item.
 
 ## 1.4 — Design Decision Log `[D1 AM · ~15 min]`
-- [x] Log: reviewed-only proteome scope, pyteomics substitution, pepsin pH 1.3 rule, exact-match dedup policy, and C4-provisional BCS flag thresholds in `docs/decision_log.md`.
+- [x] Log: reviewed-only proteome scope, pyteomics substitution, pepsin pH 1.3 rule, exact-match dedup policy, and C4-provisional BCS flag thresholds in `../planning/decision_log.md`.
 - [x] Log: μ_cloud/σ_cloud definition, `d_norm` definition, tier thresholds, and provisional-cloud policy. Parameters verified against the supplied MOCK cloud; see production results below and `PP1_STATUS.md`.
 - [x] Log: PDSS denominator concern for supervisor review before the PDSS stage. Concern recorded; supervisor review remains pending.
 
@@ -103,7 +103,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Implement sequential cleavage using installed pyteomics rule `pepsin ph1.3` followed by `trypsin`; complete cleavage by default with parameterized missed cleavages.
 - [x] Record, per fragment: parent accession, 1-based inclusive start/end position, and enzyme path.
 - [x] Unit-test a toy protein and verify emitted fragments map to parent positions.
-- [ ] Spot-check **one** protein against the BIOPEP-UWM web tool; document any differences. *(Cut-list item if time is short.)*
+- [ ] **DEFERRED:** BIOPEP-UWM spot-check; no comparison result claimed.
 - [x] Document the BIOPEP-UWM → rule-based substitution in the decision log; the optional one-protein web comparison remains pending.
 
 ## 2.2 — Length and Composition Filters `[D1 AM · ~30 min]`
@@ -114,7 +114,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 ## 2.3 — Deduplication with Provenance `[D1 AM · ~45 min]`
 - [x] Deduplicate by exact sequence **per plant** and across plants, merging all parent accessions and positions into a provenance list.
 - [x] Generate stable peptide IDs (sequence-hash based) and a per-plant membership table.
-- [x] Skip CD-HIT and document the <=9 AA exact-match equivalence and deferred 10–20 AA clustering in `docs/decision_log.md`.
+- [x] Skip CD-HIT and document the <=9 AA exact-match equivalence and deferred 10–20 AA clustering in `../planning/decision_log.md`.
 - [x] Test provenance aggregation on duplicated sequences from multiple parent proteins.
 
 ## 2.4 — Physicochemical Descriptors `[D1 AM · ~30 min]`
@@ -126,7 +126,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Export per-plant candidate tables (parquet), a combined table, and `candidates.fasta`.
 - [x] Export the funnel table and funnel-only `summary.json`.
 - [x] Automated tests cover parent-coordinate substring mapping, length/composition rules, duplicate merge/provenance, byte-identical reruns, and mock-signal generation/validation.
-- [ ] **Send `candidates.fasta` to the C1 and C2 owners.**
+- [x] **Send `candidates.fasta` to the C1 and C2 owners.**
 
 > **Gate 1 (end of D1 AM):** Candidate tables exist for all four plants and tests pass. If not, drop the BIOPEP spot-check and the CD-HIT step and proceed.
 
@@ -141,8 +141,8 @@ The inventory was synchronized on 19 October 2026 after production verification.
 
 ## 3.1 — ESM-2 Embedding Pipeline `[D1 PM · ~1 h]`
 - [x] Colab handoff manifest verifies `esm2_t33_650M_UR50D`, layer 33, mean pooling excluding BOS/EOS/PAD, saved float16.
-- [ ] **Benchmark on 2,000 peptides** and extrapolate total runtime before launching the full run.
-- [ ] Implement chunked checkpointing so an interrupted run can resume.
+- [ ] **DEFERRED:** local 2,000-sequence ESM benchmark; embeddings were produced in the supplied Colab handoff and no local ESM run is permitted.
+- [ ] **DEFERRED:** chunked checkpointing; the Colab handoff supersedes local embedding/checkpointing for this PP1 run.
 - [x] Write and validate the embedding manifest (model, layer, pooling, dtype, row-ID hash).
 
 ## 3.2 — Embed All Candidates `[D1 PM · background]`
@@ -151,8 +151,9 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Cache as `.npy` with a peptide-ID/sequence index.
 
 ## 3.3 — Provisional Reference Cloud `[D1 PM · ~1 h]`
-- [ ] **SUPERSEDED:** Real-positive source ladder and cloud embedding. Use the supplied 500-sequence MOCK placeholder (`source="mock_cloud"`, seed 42); do not generate or embed a replacement cloud.
-- [x] Validate supplied cloud files and record observed metadata/counts: N=500, source `mock_cloud`. Held-out evaluation-set disjointness remains open before real evaluation.
+- [ ] **SUPERSEDED for production PP1:** The current embedded cloud remains the 500-sequence MOCK placeholder (`source="mock_cloud"`, seed 42); do not replace production tiers until the real cloud is embedded and validated.
+- [x] Validate supplied mock cloud files and record observed metadata/counts: N=500, source `mock_cloud`.
+- [x] Discover C2 PP1 baseline CD-HIT representatives and create the filtered E1/E2 sequence handoff at `data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv` (N=912); its embeddings are pending Colab. Held-out evaluation-set disjointness remains open before real evaluation.
 
 ## 3.4 — AD Parameter Fitting `[D1 EVE · ~45 min]`
 - [x] Compute the cloud centroid.
@@ -172,12 +173,11 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Record the diagnostic outcome in the decision log.
 
 ## 3.7 — Preliminary PDSS (Stretch) `[D1 EVE · ~20 min]`
-- [ ] Compute PDSS per plant as defined, labelled "preliminary, provisional cloud".
-- [ ] Note the near-zero-denominator risk and the proposed leave-one-out alternative for supervisor review.
+- [ ] **DEFERRED:** PDSS is not implemented; its denominator is unstable/meaningless against the current MOCK cloud. Record only the limitation and request supervisor guidance before any future real-cloud definition.
 
 ## 3.8 — FR1/FR2 Acceptance Tests `[D1 EVE · ~30 min]`
 - [x] 100% of candidates have an embedding and a tier (152,259/152,259).
-- [x] Determinism: two `all` runs produced identical SHA-256 values for all 34 files in the generated tree (33 listed artifacts plus the output manifest), including the tier table.
+- [x] Determinism: two cached `all --reuse-inputs --signals mock` runs produced identical SHA-256 values for 35 files (34 output entries plus the manifest), including the tier table; a separate `--signals dummy` run also matched all 35 hashes.
 - [ ] Performance: tiering plus later ranking on the largest plant completes in under 5 minutes from cached embeddings (NFR2).
 - [x] Export the AD tier table and the tier/AD sections of `summary.json`.
 
@@ -196,10 +196,10 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Implemented behavior: supplied `ref_cloud.npy` + `ref_cloud_sequences.csv` normalize to `ref_cloud_meta.csv` columns `id, sequence, evidence_tier, source, is_plant`; candidate signals join on **sequence** (not peptide_id); values, source labels, coverage, cloud shape, manifest, and finite arrays are validated with specific errors.
 
 ## 4.2 — Rule-Based Dummy Signal Generation `[D2 AM · ~1 h]`
-- [ ] Compute a rule-based `aop_like` score from redox residues {W, Y, H, M, C}, hydrophobic fraction, and a short-length bonus.
-- [ ] Generate `PROB_C2 = sigmoid(2·z(aop_like) + N(0, 0.7))` and `SIM_C1 = rescale(0.5·z(aop_like) + 0.5·z(−d_AD) + N(0, 0.5))`, fixed seed 42.
-- [ ] Check pairwise Spearman correlations of about 0.3–0.6 so the CS is not trivially redundant.
-- [ ] Set `evidence_tier = U` for novel candidates.
+- [x] Reconcile the inventory with the [existing generator](../../../../../tests/c4_screen/fixtures/mock_signals.py) (unchanged): latent score is z-score of `3 × redox fraction + 2 × hydrophobic fraction + 1 × (length <= 10)`.
+- [x] Verified formulas: `PROB_C2 = clip(sigmoid(-3 + 1.2z + N(0, 0.6 × (1 + 1.5·d_norm))), 0.005, 0.995)`; `SIM_C1 = sigmoid(0.8z − 0.8z(d_norm) + N(0, 0.7))`; seed 42. Ten Tier 3 demo rows receive injected PROB_C2 0.90–0.97.
+- [x] Measured mock Spearman correlations on 152,259 rows: SIM_C1/PROB_C2=0.462903; SIM_C1/d_norm=−0.693003; PROB_C2/d_norm=−0.173945. Descriptive only; no tuning.
+- [x] Novel candidate `evidence_tier=U`; all generated files carry `source="mock"`.
 
 ## 4.3 — Demonstration Cases `[D2 AM · ~20 min]`
 - [x] Inject 10 Tier 3 sequences with mock `PROB_C2 ≥ 0.9` to illustrate "high classifier score, still abstained" (MOCK demonstration only).
@@ -209,14 +209,14 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Implemented behavior: use the existing mock generator's BCS strata keyed by length bin **3–10 / 11–20**; retain `source="mock"`. The LOW/MEDIUM/HIGH cutoffs 0.5/0.7 are explicitly C4-provisional.
 
 ## 4.5 — Synthetic Test Sandbox `[D2 AM · ~30 min]`
-- [ ] Generate about 2,000 peptides directly (no digestion) with known planted positives near the cloud for unit tests only.
-- [ ] Use it to assert code behaviour (e.g., CS ranks planted positives above random), explicitly **not** as a research result.
+- [x] Generate 2,000 synthetic sequences/embeddings in a seeded test-only sandbox; 20 planted positives are embedded near the synthetic cloud ([test evidence](../../../../../tests/c4_screen/test_downstream_pipeline.py)). No test rows are exported as research data.
+- [x] Assert planted positives rank above random, Tier 3 CS=0, CS bounds, and deterministic weight sweep; explicitly **not** a research result.
 
 ## 4.6 — Manifest, Labelling, and Swap-Out Procedure `[D2 AM · ~20 min]`
 - [x] Existing mock utility wrote `signals/MOCK_MANIFEST.json` (generator version, seed, file hashes; source `mock`).
 - [x] Verify generated C1/C2/BCS signal artifacts carry `source="mock"`.
-- [ ] Document the swap procedure: replace file → set `signals.source: real` → run validator → confirm tiers unchanged and CS changes only through signals.
-- [ ] Optional stretch: if the C2 owner can run inference with the frozen fold-0 checkpoint, replace the dummy `c2_prob.parquet` and relabel it "real, fold-0, preliminary".
+- [x] Documented and tested swap procedure: replace signal files → set source `real` → validate sequence-key coverage/ranges → score; tiers are independent and remain unchanged, while CS changes through the swapped signal values.
+- [ ] **DEFERRED:** C2 fold-0 scoring; owner inference output is unavailable. Do not replace mock data or label fold-0 results real without validated owner-supplied files.
 
 **Dummy-data evidence attachments:** contract schemas, validator output, generator code and manifest, correlation check, swap procedure.
 
@@ -234,7 +234,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Compute `d_norm = min(d_AD / t2, 1)` with the frozen `t2`.
 - [x] Compute `CS = w1·SIM_C1 + w2·PROB_C2·(1 − d_norm)` with configured w1 = w2 = 0.5.
 - [x] Force `CS = 0` for all Tier 3 candidates.
-- [ ] Wire the weight sweep (w1 ∈ {0.25, 0.5, 0.75}) as a parameter; show only the default for PP1.
+- [x] Add `weight_sweep` parameter for w1 ∈ {0.25, 0.5, 0.75}; default remains 0.5 and is not mutated.
 
 ## 5.3 — Ranking `[D2 AM · ~20 min]`
 - [x] Rank candidates within each plant by CS with sequence as deterministic tie-break.
@@ -250,12 +250,12 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Tier 3 always yields CS = 0.
 - [x] CS stays within [0, 1].
 - [x] CS decreases as `d_AD` increases when other inputs are fixed.
-- [ ] On the synthetic sandbox, CS ranks planted positives above random.
-- [ ] Weight sweep runs without error.
+- [x] On the synthetic sandbox, planted cloud-near positives rank above random.
+- [x] Weight sweep runs at 0.25/0.5/0.75; default config remains 0.5.
 
 ## 5.6 — One-Command End-to-End Run `[D2 PM · ~30 min]`
-- [ ] `python -m plantaox.c4_screen.run all --signals dummy` produces `cards.json` and `summary.json` from cached embeddings.
-- [ ] Confirm a re-run is identical (determinism).
+- [x] [`run.py`](../../run.py): `python -m plantaox.c4_screen.run all --reuse-inputs --signals dummy` produces cards/summary from cached candidates and embeddings; `dummy` aliases mock ([outputs](../../../../../data/interim/c4_screen/c4_dashboard.html), [`c4_output_manifest.json`](../../../../../data/interim/c4_screen/c4_output_manifest.json)).
+- [x] Two consecutive cached all runs matched SHA-256 across 35 generated files (34 output entries plus the output manifest).
 
 **Function B evidence attachments:** CS implementation, cards JSON, abstained list, test output, end-to-end run log.
 
@@ -286,8 +286,8 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [ ] Confirm regenerate-then-refresh works in one step.
 
 ## 6.5 — Demo Script and Fallbacks `[D2 EVE · ~45 min]`
-- [ ] Write a 5-minute flow: problem → funnel → AD histogram and tiers → a top card → an abstained "high PROB_C2, Tier 3" case → roadmap.
-- [ ] Capture backup screenshots and a screen recording.
+- [x] Write the 5-minute flow and offline fallback in `C4_PP1_DEMO_SCRIPT.md`.
+- [ ] Capture backup screenshots and a screen recording (presentation hardware/rehearsal not available in this session).
 
 **Frontend evidence attachments:** dashboard build, screenshots, screen recording, demo script.
 
@@ -306,21 +306,18 @@ The inventory was synchronized on 19 October 2026 after production verification.
 
 ## 7.2 — Acceptance Gate and Freeze `[D2 EVE · ~1 h]`
 - [x] Re-run the pipeline from local reviewed FASTAs, cached embeddings, and fixed config; confirm identical output hashes across two runs.
-- [x] Run the requested C4 test suite (`pytest tests/c4_screen`): 12 passed. The repository-wide suite was not run.
-- [x] Write a checksummed manifest of generated outputs and record SHA-256 hashes (without copying) for the five supplied handoff files; local release tag `c4-pp1-v1` applied after commit.
+- [x] Run only the requested C4 test suite (`pytest tests/c4_screen`): 15 passed ([test sources](../../../../../tests/c4_screen/)). The repository-wide suite was not run.
+- [x] Verify the [output checksum manifest](../../../../../data/interim/c4_screen/c4_output_manifest.json) and SHA-256-only entries for five supplied handoff files; create the [C4 freeze manifest](../reports/C4_PP1_FREEZE_MANIFEST.json) and local annotated tag `c4-pp1-v2` after its freeze commit. Existing `c4-pp1-v1` is untouched.
 - [x] Record verified funnel counts, tier distributions, AD parameters, diagnostics, and deviations in `PP1_NUMBERS.md` and `PP1_STATUS.md`.
 
 ## 7.3 — PP1 Technical Report (Short) `[D2 EVE · ~1 h]`
-- [ ] Document FR1: proteomes, digestion, filters, dedup, funnel counts, and the engine substitution.
-- [ ] Document FR2: embedding recipe, provisional reference cloud, AD parameters, tier distributions.
-- [ ] Document Function B: CS definition, `d_norm` decision, evidence-card schema, **dummy-signal disclosure**.
-- [ ] State limitations: provisional cloud, dummy signals, reviewed-proteome size, unresolved PDSS denominator.
-- [ ] Add an FR-to-artifact traceability table.
+- [x] Document FR1/FR2/Function B formulas, observed outputs, limitations and claim boundaries in [../reports/C4_PP1_TECHNICAL_REPORT.md](../reports/C4_PP1_TECHNICAL_REPORT.md).
+- [x] Add FR-to-artifact traceability table and current real-cloud staging state.
 
 ## 7.4 — PP1 Slides and Rehearsal `[D2 EVE · ~1 h]`
-- [ ] Draft 4–5 slides: gap and motivation; architecture; Function A results; Function B demo; roadmap to January.
-- [ ] Present only verified results; show PARRS, ARR, and Recall@K as roadmap, not results.
-- [ ] Rehearse once with a timer; schedule a second rehearsal in the contingency window.
+- [x] Draft five slides with speaker notes, explicit MOCK labels, and Q&A prep in [../presentation/C4_PP1_SLIDES.md](../presentation/C4_PP1_SLIDES.md).
+- [x] Use only verified numbers and describe uncomputed retrieval evaluation as future work.
+- [ ] Rehearse once with a timer (not performed in this session).
 
 ## 7.5 — Progress Presentation 01 (Target: 21 October 2026)
 - [ ] Deliver the component presentation and live demo (fallback: recording).
@@ -354,7 +351,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 | **D2 10:00–13:00** | Signal ingestion, CS, ranking, cards, tests | 5.1–5.6 |
 | **D2 13:00–17:00** | Dashboard adaptation, views, labelling, robustness | 6.1–6.4 |
 | **D2 17:00–21:00** | Demo script, freeze and tag, report, slides, first rehearsal | 6.5, 7.2–7.4 |
-| **20–25 Oct** | Contingency: supervisor feedback, polish, second rehearsal | — |
+| **20 Oct** | Final demo preparation/rehearsal if scheduled (not yet verified) | — |
 | **21 Oct** | PP1 presentation | 7.5 |
 | **30 Oct** | Checklist submission | 7.6 |
 
@@ -419,7 +416,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 | Ranking output | `c4_ranking.parquet` | CS and rank per plant |
 | Evidence cards | `cards.json` | Top-50 cards per plant plus abstained list |
 | Dashboard summary | `summary.json` | Funnel, tier fractions, histogram bins |
-| Freeze manifest | `c4_pp1_freeze_manifest.json` | Checksummed release (`c4-pp1-v1`) |
+| Freeze manifest | `../reports/C4_PP1_FREEZE_MANIFEST.json` | Checksummed release (`c4_pp1_freeze_v1`, local tag `c4-pp1-v2`) |
 | PP1 report | `c4_pp1_technical_report.md` | Actual status, results, limitations |
 
 *These are suggested names, not mandatory paths from the proposal. Adapt them to the established shared repository contracts; do not create duplicate data artifacts.*
@@ -437,3 +434,18 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - **Appendix 2:** Logbook, including the earlier dashboard prototype entries.
 
 **Version:** 1.0 — PP1 execution-focused Planner breakdown, two-day window.
+
+
+## Current work session — replacement reference cloud validation (19 October 2026)
+
+- **Status: In Progress.** The expected `ref_cloud.npy` and `ref_cloud_sequences.csv` files are present alongside the candidate embedding handoff. Their source, shape, row alignment, and checksum have not yet been verified; do not label production outputs as real-cloud results before `embed-import` and downstream stages pass.
+- Preserve the previous mock cloud backup and outputs as a sensitivity comparison. Signal files remain `source=mock`.
+- No new real-cloud metrics or tier outcomes are verified at this point.
+
+
+## Current work session — claimed replacement cloud verification (19 October 2026)
+
+- **Status: Blocked.** The files currently present at `data/interim/c4_screen/embeddings/ref_cloud.npy` and `ref_cloud_sequences.csv` are the previous MOCK handoff, not the claimed C2 FR1 cloud. The array is `(500, 1280)` float16; the metadata contains 500 rows, all `source=mock_cloud`, `evidence_tier=MOCK`, and IDs beginning `MOCK`.
+- SHA-256: `ref_cloud.npy` = `6469e03b85760f8e7659b776589f792d9b37aabbafda5333cd7464e3beee948`; `ref_cloud_sequences.csv` = `5e547f189759312d809de4ab3980875c5626d179f255026af0ff1c0ce1694bc0`. No `*_mock.*` backup files are present in the embeddings directory.
+- The real-cloud stages (`embed-import`, `cloud`, `ad`, `signals`, `score`, `cards`, `dashboard`) and the two-run reproducibility check were not run because the real cloud handoff is absent. Existing mock outputs were left untouched; no new real-cloud metrics or PP1 materials were generated.
+- **Needed to resume:** replace both cloud files with the C2-positive sequence list and its matching Colab embeddings (same row order, one embedding per CSV row), and provide the mock backups in `*_mock.*` if they are to be retained for direct comparison. Then validate the source metadata and array dimensions before running production.

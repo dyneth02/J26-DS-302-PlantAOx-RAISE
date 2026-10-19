@@ -1,0 +1,518 @@
+{
+  "boundaries": [
+    "Production cloud and all Function B signal data are MOCK.",
+    "ESM layer-33 mean residue pooling is an unconfirmed C4 assumption.",
+    "C2-derived 912-sequence cloud list is staged but not embedded; production outputs remain on mock_cloud.",
+    "No mock-derived retrieval-performance results are claimed.",
+    "Large input/output data, arrays and weights are not committed."
+  ],
+  "branch_deviation": "Checkout was feat/c4-Screen1; branch switching was prohibited, so the freeze tag is on the current branch.",
+  "checkout_branch": "feat/c4-Screen1",
+  "cloud_source": "mock_cloud",
+  "component_docs": [
+    {
+      "path": "src/plantaox/c4_screen/docs/contracts/C4_Interface_Spec_v0.1_PROVISIONAL.md",
+      "sha256": "441fd1e8e2933ffde991c0a8d27df1f36a370b42bba418a5a9b62edeffa4b205",
+      "size_bytes": 4067
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/decision_log.md",
+      "sha256": "fdb53787a1612f17464150645db68322091630aa1cbe801aaf4d01472820720f",
+      "size_bytes": 5071
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/PP1_NUMBERS.md",
+      "sha256": "942f6b1f6198763ec3e8a75b4bb1da7a02173b7f1c34a9c60bc5c517d6f5c0d9",
+      "size_bytes": 4764
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/PP1_STATUS.md",
+      "sha256": "2c9c189a3572d7cf9147e6be1b19da463264b26f20167e549edc2b6322aba215",
+      "size_bytes": 7907
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/SCREEN_PP1_Deployment_Progress.md",
+      "sha256": "9c0c4efb535b556f38c7e5acb6ecf5969dc63f2b7d9c85835fd6edddb53592f4",
+      "size_bytes": 12867
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/planning/SCREEN_PP1_Task_Inventory.md",
+      "sha256": "6fc5f036f658696d5972e35935235cb5a88acab1a6f480dd572d0478f158c182",
+      "size_bytes": 37219
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/presentation/C4_CANDIDATE_FASTA_HANDOFF.md",
+      "sha256": "f9a7523306a3d0b9dfc5fc83e0631c5dbb87546d35ae6793127d0a1841807c1a",
+      "size_bytes": 1032
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/presentation/C4_PP1_DEMO_SCRIPT.md",
+      "sha256": "3976f9f6e64e9c58a9dd4d847c620e8fa94d50e8e768b4d91b1306c645dd4889",
+      "size_bytes": 2298
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/presentation/C4_PP1_LOGBOOK_DRAFT.md",
+      "sha256": "1f72e633f29986d5076ed11089bc44ef5bd66be2f97cdb12e5b304b810a15ec8",
+      "size_bytes": 2148
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/presentation/C4_PP1_SLIDES.md",
+      "sha256": "4819b339c3280d729a8df72d4ba47fadb996a80f1345c66243f8a6e83fb357cd",
+      "size_bytes": 4272
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/README.md",
+      "sha256": "826680996f4aceebe813ee1330679e87b4a1db484f1ad0f968e4ab04c72484ba",
+      "size_bytes": 3419
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/c4_fr1_acceptance_report.md",
+      "sha256": "1313adc6337de96d36df30b8dfd13e238997df080e183cd9542a96982f0fc72b",
+      "size_bytes": 875
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/c4_fr2_acceptance_report.md",
+      "sha256": "fc37bdb85968a2a1ccfcd6c9ef4d688de8df4213c7172d8c006b3b02bbe52ae2",
+      "size_bytes": 779
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/c4_fr4_acceptance_report.md",
+      "sha256": "f723e5505834e2119f4a22ac4c0f18706672a09f7eec3cac9cedb656a1b60de9",
+      "size_bytes": 765
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/c4_fr7_acceptance_report.md",
+      "sha256": "888fc4096c74edf30a209f6e41b507e35a72487c96a9bbbea08bfdc1da4bcedb",
+      "size_bytes": 695
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/C4_PP1_FREEZE_REPORT.md",
+      "sha256": "cb211835515b62f8af78b5ee1623d5663631271c5909546b7b0ebf5a71462f8c",
+      "size_bytes": 3256
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/C4_PP1_HANDOVER.md",
+      "sha256": "9a3fa70817583f838d101908443d4153639e1280026f5d80bae58b3cc1b4c899",
+      "size_bytes": 2418
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/reports/C4_PP1_TECHNICAL_REPORT.md",
+      "sha256": "e62cfc9d22a70b1253d8100907ef16d1177b6fc6ac43db07d2d0be5bc8fe07cb",
+      "size_bytes": 8596
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Architecture.md",
+      "sha256": "ab0bf76caeea28774cc59db417a68d75fd16ea86227bbb846fa754eff1c52599",
+      "size_bytes": 4569
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Checksums.sha256",
+      "sha256": "ee0e29a9355446b5ebe24b56e5f98f722f3d21449f3a5834c3183efaba226193",
+      "size_bytes": 628
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Data_and_outputs.md",
+      "sha256": "bff068c6aeec21a24dbff6774ffe24479cb3c025367c5cf061131e883d10c7e0",
+      "size_bytes": 8096
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Methodology.md",
+      "sha256": "2cc48821a4f3846c183cd322ed603649ae6357c5607a1f5c5bdbb548dd731d54",
+      "size_bytes": 6766
+    },
+    {
+      "path": "src/plantaox/c4_screen/docs/technical/SCREEN_PP1_Validation.md",
+      "sha256": "46f71742ad196df9ddbb5c4139cbf4cae22f250fa09e54baf916d8e726c65f56",
+      "size_bytes": 5463
+    }
+  ],
+  "component_source_and_tests": [
+    {
+      "path": "src/plantaox/c4_screen/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "src/plantaox/c4_screen/ad.py",
+      "sha256": "c57dbbbb075cdbbd3396c9cecd1b190e58b3407dc82fc58a0387673274844947",
+      "size_bytes": 10414
+    },
+    {
+      "path": "src/plantaox/c4_screen/cards.py",
+      "sha256": "7e0d15d73481adb55400fff8dc01aaf720895492791ecdcc973ba599f59d2744",
+      "size_bytes": 3738
+    },
+    {
+      "path": "src/plantaox/c4_screen/cloud.py",
+      "sha256": "7f551e0c3b36174ac5b06a7b892945b4c39da287087d7172f5a478be58186e84",
+      "size_bytes": 1842
+    },
+    {
+      "path": "src/plantaox/c4_screen/config.yaml",
+      "sha256": "7c0b9c6d1ad8ab36f95adb48033fac59e00355e2eda4ea03d57ce7226317a425",
+      "size_bytes": 589
+    },
+    {
+      "path": "src/plantaox/c4_screen/dashboard.py",
+      "sha256": "98e94373c2a2a71b575ef880000ae49571c5944c190eeee31a51f5ff4735e211",
+      "size_bytes": 8189
+    },
+    {
+      "path": "src/plantaox/c4_screen/dedup.py",
+      "sha256": "c7e79ac826c094afabec15d7668eede5f06b31da39ccfb7a2962d096dfcb29b0",
+      "size_bytes": 1794
+    },
+    {
+      "path": "src/plantaox/c4_screen/descriptors.py",
+      "sha256": "f357fc67862ca95d1e7ac3358887db140e480efe3524fac99551e4b3f6a9ad2d",
+      "size_bytes": 814
+    },
+    {
+      "path": "src/plantaox/c4_screen/digest.py",
+      "sha256": "d8eb430947426da8c90645d6b415076674237c4da3db687fdb082d3d6c263623",
+      "size_bytes": 7476
+    },
+    {
+      "path": "src/plantaox/c4_screen/embed_import.py",
+      "sha256": "99c5f5e47fd2aea738eb3afa7401d4b431febe5f588d7796d77e8dabdfc02d23",
+      "size_bytes": 4456
+    },
+    {
+      "path": "src/plantaox/c4_screen/filters.py",
+      "sha256": "acb2fba85c3b84eaa41a188bc942831b065dcef0ada32f8ce9e3bd3e0a149ce7",
+      "size_bytes": 1083
+    },
+    {
+      "path": "src/plantaox/c4_screen/run.py",
+      "sha256": "0fdf08894be16c9c59cd35d7bb3f59381487adbadacd3e9bee6aedd7d2a39344",
+      "size_bytes": 12853
+    },
+    {
+      "path": "src/plantaox/c4_screen/score.py",
+      "sha256": "150ddb2910e1f59d6ec772148af103c864af61a2630ec25d7172b306713c15d2",
+      "size_bytes": 2820
+    },
+    {
+      "path": "src/plantaox/c4_screen/sensitivity.py",
+      "sha256": "756fb2ddf575fdc75c7f8c32ab0abc237b22b6b623ac6cc8b8df47c57961773c",
+      "size_bytes": 7864
+    },
+    {
+      "path": "src/plantaox/c4_screen/signals.py",
+      "sha256": "4b1d2f17126f1292eec917baba191ea237201a07952689ddd2c6d27492787bca",
+      "size_bytes": 3795
+    },
+    {
+      "path": "tests/c4_screen/check_gpu.py",
+      "sha256": "3f1983cf83f121cfc2299a8eedcc91ab1e019fc9bdcc8fe2aa7edf6a7f59d1cc",
+      "size_bytes": 117
+    },
+    {
+      "path": "tests/c4_screen/fixtures/mock_signals.py",
+      "sha256": "95b34d6894a7e848423ea5395e3f7e72187dbcf8a6153c1eef6ea561391b8222",
+      "size_bytes": 11534
+    },
+    {
+      "path": "tests/c4_screen/test_candidate_generation.py",
+      "sha256": "df8009f1b0135be96cc7a0e658ab5a8fc6f4e645ab787070059deb65a407d549",
+      "size_bytes": 4140
+    },
+    {
+      "path": "tests/c4_screen/test_downstream_pipeline.py",
+      "sha256": "39b214b24f8ed47d8e53ca893ca9c25a5c25c6550f5a64c2161ff1458330b5ad",
+      "size_bytes": 12657
+    }
+  ],
+  "determinism": {
+    "all_hashes_identical": true,
+    "files_compared": 35,
+    "runs": [
+      "all --reuse-inputs --signals mock",
+      "all --reuse-inputs --signals mock",
+      "all --reuse-inputs --signals dummy"
+    ]
+  },
+  "freeze_id": "c4_pp1_freeze_v1",
+  "freeze_status": "FROZEN FOR PP1 WITH LIMITATIONS",
+  "generated_outputs": [
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/ad_params.json",
+      "sha256": "ee01f7e8a43350e50b8f3b8e86335fc920e986d61256da3889d8ed9dafaca661",
+      "size_bytes": 416
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/c4_ad_tiers.parquet",
+      "sha256": "34240f9b5c6914240a257b28be68e8ef84aa5c2b197d53209990cad8e56169ca",
+      "size_bytes": 13534401
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/c4_dashboard.html",
+      "sha256": "1e9fdf8d0e45ca4f87b4c479add9e9c1955dba31b195b9aa586dca5adcf50d71",
+      "size_bytes": 6207534
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/c4_embedding_manifest.json",
+      "sha256": "c794e8de1cf5ad83d6df36132d3f039a35bdf0a0efda203639623d62ae6cbb0d",
+      "size_bytes": 293
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/c4_ranked_candidates.parquet",
+      "sha256": "8cb6e7bc9ff991ada56c50a7823f456943d6b71126e1685cea64ca75353891d0",
+      "size_bytes": 26563598
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/candidates.fasta",
+      "sha256": "bcf23050ebdcba94940043ad4b959d3659f9a7bc2c6734de401453479e96b3c7",
+      "size_bytes": 11363274
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/candidates.parquet",
+      "sha256": "de4862ae32fc44df2f6a8b27ba4e3c01125de58236c213e6d8cf44624cc1dddf",
+      "size_bytes": 17779246
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/candidates_olive.parquet",
+      "sha256": "6c06397f2c8bdf2d51b0e467fee5e4605badffa9baab9853ede5b6a3d9745301",
+      "size_bytes": 80837
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/candidates_rapeseed.parquet",
+      "sha256": "f70b1d7ae7bb0667380d61c51f693dfe9ffc35bbabf510220c8a95fd8d9e9cb4",
+      "size_bytes": 556835
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/candidates_rice.parquet",
+      "sha256": "89ffe11adedcf775983512058c728b15e821dfa89588e508bbafe095c302416d",
+      "size_bytes": 16217528
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/candidates_soybean.parquet",
+      "sha256": "3b719cae094041edcf593f7472daaaa1831da77785bf1f6be0f9f5399b83d142",
+      "size_bytes": 1536315
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/cards.json",
+      "sha256": "73c4f2847860a9f6d775101e8af8a764da89c7e1c82d36719318cf8fc6fe0ca1",
+      "size_bytes": 9799443
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/candidate_length_distribution.csv",
+      "sha256": "e7f21c20a8f4830c849c850ff6ff105ba244546c103901cb1e91c6c2a3fc87e1",
+      "size_bytes": 174
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/cloud_vs_candidate_length_distribution.csv",
+      "sha256": "48783bf906496adf9cd2a74be0f43be96a3c4cd3141545150cbac16bc6df264b",
+      "size_bytes": 7430
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/d_ad_hist_olive.png",
+      "sha256": "e5ae7a1f807bcbf53a777570059af62fea1951a9c88f03ff076e09e45ec18bba",
+      "size_bytes": 38340
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/d_ad_hist_rapeseed.png",
+      "sha256": "5b8ce969c6acd7a8e5dd38e17685e8ef36e12b9b0594c81afd53ffb590d77c66",
+      "size_bytes": 36608
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/d_ad_hist_rice.png",
+      "sha256": "c49529fc2f6eb48574f7525204d02977a2bccf094adf2605fe194845d700d96c",
+      "size_bytes": 37223
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/d_ad_hist_soybean.png",
+      "sha256": "7f1bb182e0c465359a9248c0336fa86fcdaca50ed9ad7705d76d55a613822e7b",
+      "size_bytes": 37620
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/d_ad_vs_sequence_length_spearman.csv",
+      "sha256": "34f662074f49063bb8c017da235056f10c916be8aec8b7882b30ceac4a411d63",
+      "size_bytes": 524
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/mean_centering_sensitivity_params.json",
+      "sha256": "be9c43a69668b056924ebfce3805bf638ea62b1c2ce22a0ef3ae02cb80e02bf0",
+      "size_bytes": 557
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/mean_centering_tier_fraction_sensitivity.csv",
+      "sha256": "db9cc29aad84b7ef2d77da7fdc2f4a63d2315ac049190e2ee0e2fc797a9cff39",
+      "size_bytes": 5936
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/tier_degeneracy_report.json",
+      "sha256": "109cd9f3002ab243f82d17e4e3583743462b4d8712196ac2da4765717ff4e883",
+      "size_bytes": 575
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/tier_fractions_by_length_bin.csv",
+      "sha256": "888ad78c21803d1209c37c5059cd26a0d67ed331298afc621a3cc53b289b063a",
+      "size_bytes": 981
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/diagnostics/tier_fractions_by_plant.csv",
+      "sha256": "d7b84a0fb2f875474411c5ec32de79f2a04cfbf9fb6347cc5cc5aa07b5574ab3",
+      "size_bytes": 433
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv",
+      "sha256": "a0dfed117b5a9cb560d00ce7d39099406b537096631fbaeb51fa6e61a947ead1",
+      "size_bytes": 114403
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/funnel_summary.csv",
+      "sha256": "41533cb2ca4ecffd910b1fc2d3c5824326281efc3ebbfe1398defe9871eab511",
+      "size_bytes": 245
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/plant_membership.parquet",
+      "sha256": "e3e1e5286dd5ae033ceaaeda0060eff0f4683e620f9f291fa32ca2d1c5d663b3",
+      "size_bytes": 11890723
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/ref_cloud_meta.csv",
+      "sha256": "5e547f189759312d809de4ab3980875c5626d179f255026af0ff1c0ce1694bc0",
+      "size_bytes": 22112
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/signals/c1_sim.parquet",
+      "sha256": "f6e1297f68c42210d05ec71ab32c673a213af709001db80047693558c843bc8c",
+      "size_bytes": 2262520
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/signals/c2_prob.parquet",
+      "sha256": "660f0f8591fd7e20257fd9611ddfb6101e4a6b1f1e20c8454a18791ff6911aac",
+      "size_bytes": 2205763
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/signals/c3_bcs.json",
+      "sha256": "8d6674d04ab3c5f97255bbe61d5c5f9120be2ac9db33edbbf7f782b9ad72aa39",
+      "size_bytes": 1793
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/signals/MOCK_MANIFEST.json",
+      "sha256": "6e4f227716125d82ea16cee53358e596e1e468b2a0c9f55cdc81f8902066d096",
+      "size_bytes": 877
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/signals/tier_candidates.parquet",
+      "sha256": "ba4c286d6bbf33826335568831702315d4dfbfbdba2b56e8c91af529883401af",
+      "size_bytes": 2532733
+    },
+    {
+      "git_disposition": "generated data output; not committed",
+      "path": "data/interim/c4_screen/summary.json",
+      "sha256": "8be0bd0326f2e6758facde9800950df0668b7cf9b9abcd1cc00d822f241e90c3",
+      "size_bytes": 4098
+    },
+    {
+      "git_disposition": "output manifest; not committed",
+      "path": "data/interim/c4_screen/c4_output_manifest.json",
+      "sha256": "e9f5d9741d6501c83144d74e5773d1a1f79bac8bc50c4f12db4277047114999d",
+      "size_bytes": 7011
+    }
+  ],
+  "handoff_inputs_hash_only": {
+    "c4_embedding_index.parquet": {
+      "git_disposition": "local handoff; not committed",
+      "path": "embeddings/c4_embedding_index.parquet",
+      "sha256": "b8b7be5ce1e4730f7cbeb90c1d2af46a5fcf51900e44a50c2a69a99f423a5169"
+    },
+    "c4_embedding_manifest.json": {
+      "git_disposition": "local handoff; not committed",
+      "path": "embeddings/c4_embedding_manifest.json",
+      "sha256": "c794e8de1cf5ad83d6df36132d3f039a35bdf0a0efda203639623d62ae6cbb0d"
+    },
+    "c4_esm2_t33_650M.npy": {
+      "git_disposition": "local handoff; not committed",
+      "path": "embeddings/c4_esm2_t33_650M.npy",
+      "sha256": "8918fc6ca91df9628d1810413a55300a7c6c03bcf2598aee395dd4fb36f38569"
+    },
+    "ref_cloud.npy": {
+      "git_disposition": "local handoff; not committed",
+      "path": "embeddings/ref_cloud.npy",
+      "sha256": "6469e03b85760f8e7659b776589f792d9b37aabb57afda5333cd7464e3bee948"
+    },
+    "ref_cloud_sequences.csv": {
+      "git_disposition": "local handoff; not committed",
+      "path": "embeddings/ref_cloud_sequences.csv",
+      "sha256": "5e547f189759312d809de4ab3980875c5626d179f255026af0ff1c0ce1694bc0"
+    }
+  },
+  "mock_spearman_diagnostics": {
+    "PROB_C2_vs_d_norm": -0.173945,
+    "SIM_C1_vs_PROB_C2": 0.462903,
+    "SIM_C1_vs_d_norm": -0.693003
+  },
+  "mock_spearman_diagnostics_n": 152259,
+  "nfr2_cached_rice": {
+    "n": 140813,
+    "python": "3.13.3",
+    "scoring_ranking_seconds": 1.644521,
+    "status": "below target on this single measured host/run; signal/cloud are mock",
+    "target_seconds": 300,
+    "tiering_seconds": 18.562604,
+    "total_seconds": 20.207124
+  },
+  "output_manifest_entries": 34,
+  "real_cloud_staging": {
+    "embedded": false,
+    "evidence_tiers": {
+      "E1": 478,
+      "E2": 434
+    },
+    "length_domain": [
+      3,
+      20
+    ],
+    "n": 912,
+    "path": "data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv",
+    "sha256": "a0dfed117b5a9cb560d00ce7d39099406b537096631fbaeb51fa6e61a947ead1",
+    "size_bytes": 114403,
+    "source": "c2_fr1_positives_pp1_baseline_v1 (provisional, read-only use, C1 AOP-BenchPos to replace)",
+    "standard_20_aa_alphabet": true
+  },
+  "release_tag": "c4-pp1-v2",
+  "requested_branch": "c4/pp1-final",
+  "signal_source": "mock",
+  "snapshot_date": "2026-10-19",
+  "tests": {
+    "command": "pytest tests/c4_screen",
+    "result": "15 passed"
+  },
+  "verified_implementation_parent_revision": "e8b75ad965a188e274e60cb53be7f6224ba7a558"
+}
