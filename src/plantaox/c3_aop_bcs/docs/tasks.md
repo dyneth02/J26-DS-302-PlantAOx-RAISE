@@ -758,13 +758,13 @@
 ## Task 3.31 — Prepare delta-sensitivity support
 
 ### Subtasks
-- [ ] Ensure the metric code can accept:
-  - [ ] 0.02;
-  - [ ] 0.05;
-  - [ ] 0.10.
-- [ ] Use `0.05` as the primary PP1 result.
-- [ ] If time permits, demonstrate that the pipeline can rerun the other thresholds.
-- [ ] Leave the full robustness interpretation for the later study.
+- [x] Ensure the metric code can accept:
+  - [x] 0.02;
+  - [x] 0.05;
+  - [x] 0.10.
+- [x] Use `0.05` as the primary PP1 result.
+- [x] If time permits, demonstrate that the pipeline can rerun the other thresholds.
+- [x] Leave the full robustness interpretation for the later study.
 
 ### Deliverable
 - Configurable threshold-analysis code.

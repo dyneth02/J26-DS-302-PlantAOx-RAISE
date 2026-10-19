@@ -138,16 +138,22 @@
 - Added a versioned, deterministic BCS report that pins both source reports by path, dataset version, and SHA-256 checksum and rejects failed validation, mismatched predictor metadata, different source datasets, or inconsistent delta thresholds.
 - Verified the BCS formula with explicit manual examples, confirmed the result is within `[0,1]`, and preserved clear labels that the dummy value is software-testing-only and is not a scientific result or final conclusion.
 - Confirmed all four focused Task 3.30 tests pass with six subtests. The broader C3 run passed 115 tests and 96 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.31 as a configurable sensitivity runner that reads the frozen `sensitivity_deltas` and `primary_delta` values instead of hard-coding analysis thresholds.
+- Recalculated P2 IR, P1 FSR, and preliminary BCS reproducibly at all configured thresholds: `0.02` gives IR `0.7066666666666667`, FSR `0.2962962962962963`, and BCS `0.497283950617284`; primary `0.05` reproduces IR `0.9333333333333333`, FSR `0.5185185185185185`, and BCS `0.44938271604938274`; `0.10` gives IR `0.98`, FSR `0.7777777777777778`, and BCS `0.21777777777777776`.
+- Added a deterministic, checksum-backed delta-sensitivity report with per-threshold counts, strict `< delta` boundary semantics, one explicit primary result, range validation, predictor metadata, and source provenance.
+- Verified equality is excluded at each of `0.02`, `0.05`, and `0.10`, invalid threshold configurations are rejected, and repeated generation returns identical report content.
+- Kept the sensitivity outputs explicitly software-testing-only and documented that PP1 demonstrates configurability rather than making a full robustness interpretation, which remains later-study work.
+- Confirmed all five focused Task 3.31 tests pass with eight subtests. The broader C3 run passed 120 tests and 104 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.30 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.31 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.31: Prepare delta-sensitivity support
+## Next task — Task 3.32: Review perturbation counts
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- make the metric pipeline accept the configured `0.02`, `0.05`, and `0.10` delta thresholds;
-- retain `0.05` as the primary PP1 result;
-- demonstrate reproducible reruns at the sensitivity thresholds where practical;
-- reserve full robustness interpretation for the later study.
+- count P1, P2, and P3 variants in the pilot artifacts;
+- detect unexpected zero-variant cases;
+- measure whether any individual sequence dominates the perturbation dataset;
+- export a traceable perturbation-count summary for PP1 review.
