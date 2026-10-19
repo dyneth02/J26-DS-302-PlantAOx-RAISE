@@ -776,11 +776,11 @@
 ## Task 3.32 — Review perturbation counts
 
 ### Subtasks
-- [ ] Count P1 variants.
-- [ ] Count P2 variants.
-- [ ] Count P3 variants.
-- [ ] Check for unexpected zero-variant cases.
-- [ ] Check whether any sequence dominates the generated dataset.
+- [x] Count P1 variants.
+- [x] Count P2 variants.
+- [x] Count P3 variants.
+- [x] Check for unexpected zero-variant cases.
+- [x] Check whether any sequence dominates the generated dataset.
 
 ### Deliverable
 - Perturbation summary table.

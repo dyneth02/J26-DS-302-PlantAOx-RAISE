@@ -144,16 +144,22 @@
 - Verified equality is excluded at each of `0.02`, `0.05`, and `0.10`, invalid threshold configurations are rejected, and repeated generation returns identical report content.
 - Kept the sensitivity outputs explicitly software-testing-only and documented that PP1 demonstrates configurability rather than making a full robustness interpretation, which remains later-study work.
 - Confirmed all five focused Task 3.31 tests pass with eight subtests. The broader C3 run passed 120 tests and 104 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.32 as a deterministic count-quality review over the versioned 20-subject PP1 pilot and its 449 perturbations.
+- Reconciled the global counts as 54 P1, 150 P2, and 245 P3 variants, with all three types non-zero and every per-subject actual count matching the frozen P1/P2/P3 generator rules.
+- Confirmed every pilot subject has at least one variant and found no unexpected zero-variant cases; `C3-ANOX-000205` (`WHH`) correctly has zero P2 variants because it contains no non-redox position eligible for P2.
+- Added an explicit 20% PP1 quality-control dominance flag, documented as a pragmatic non-inferential cutoff; no sequence exceeds it, and the largest contributor is `C3-ANOX-000467` with 64/449 variants (`0.14253897550111358`).
+- Exported a checksum-backed per-subject count table and JSON report containing expected/actual type counts, shares, equal-share ratios, zero-case classifications, source provenance, and validation results.
+- Confirmed all four focused Task 3.32 tests pass. The broader C3 run passed 124 tests and 104 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.31 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.32 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.32: Review perturbation counts
+## Next task — Task 3.33: Manually inspect example variants
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- count P1, P2, and P3 variants in the pilot artifacts;
-- detect unexpected zero-variant cases;
-- measure whether any individual sequence dominates the perturbation dataset;
-- export a traceable perturbation-count summary for PP1 review.
+- select representative P1, P2, and P3 examples from the PP1 pilot;
+- manually verify mutation position, original/new residue, and resulting sequence;
+- verify the P2 BLOSUM62 score and original/perturbed predictor scores;
+- preserve the examples as traceable PP1 slide/demo evidence.
