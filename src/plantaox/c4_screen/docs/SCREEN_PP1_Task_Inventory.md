@@ -177,7 +177,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 
 ## 3.8 — FR1/FR2 Acceptance Tests `[D1 EVE · ~30 min]`
 - [x] 100% of candidates have an embedding and a tier (152,259/152,259).
-- [x] Determinism: two `all` runs produced identical SHA-256 values for all 32 compared pipeline output files, including the tier table.
+- [x] Determinism: two `all` runs produced identical SHA-256 values for all 34 files in the generated tree (33 listed artifacts plus the output manifest), including the tier table.
 - [ ] Performance: tiering plus later ranking on the largest plant completes in under 5 minutes from cached embeddings (NFR2).
 - [x] Export the AD tier table and the tier/AD sections of `summary.json`.
 
