@@ -97,38 +97,95 @@
 - Recorded the dummy predictor ID, display name, version `1.0.0`, scoring method, testing-only classification, source/output/cache checksums, counts, and checkpoint policy in `dummy_predictor_scoring_report_v1.json`.
 - Preserved the Task 3.22 safety boundary in every scoring row: these dummy scores are software-testing evidence only and are not scientific AOP predictions or experimental results.
 - Confirmed all 88 current C3 tests pass with 68 subtests, including full production-artifact counts, schema, provenance, checksum, caching, interruption, and resume verification.
-- Completed a read-only audit of all five Component 2 models accepted by the `c2_pp1_freeze_v1` manifest: PN, Direct-clamped nnPU, Corrective nnPU, Two-Step PU, and PU-Bagging.
-- Added the checksum-pinned `c3_pu_aop_five_model_audit_v1` record and reproducible human-readable audit report without modifying any Component 2 file.
-- Confirmed that the five configurations share the frozen fold-0 495-feature contract, while preserving their distinct score semantics—especially Two-Step PU's raw corrected values that can exceed 1.
-- Verified that all five checkpoint binaries and the fold-0 scaled feature cache are absent from the current checkout, the documented external backup path is unavailable on this machine, and no per-model numerical reference-score fixture exists.
-- Identified the accepted PU-Bagging run's `n_estimators=10` versus Component 2 planning/status documentation's `n_estimators=100` as a handoff contradiction requiring Component 2 confirmation.
-- Recorded ten blocking, high-priority, decision, or scientific handoff findings covering artifacts, reference fixtures, `fair-esm` and ESM-2 weight provenance, inference entry point, naming/selection, runtime policy, authorization, and validation limitations.
-- Kept all five models `not_integrated`: their assay-supported fold-0 results have negative MCC and AUROC below 0.5, and no real score can be reproduced in C3 until the missing handoff requirements are resolved.
-- Confirmed all 93 current C3 tests pass with 68 subtests, including source-evidence checksum verification, exact five-model coverage, integration-gate enforcement, PU-Bagging discrepancy retention, and deterministic report generation.
-- Completed Task 3.24 with the versioned `c3_aop_bcs_score_normalization_v1` registry covering AnOxPePred's two native channels, Multi-AOP, AOPxSVM, AOP-DRL, all five Component 2 PU-AOP configurations, and the non-experimental dummy.
-- Implemented fixed pointwise normalization that preserves documented native `[0,1]` scores unchanged, rejects non-finite and out-of-contract inputs, and guarantees usable values remain within `[0,1]`.
-- Prohibited batch-wise min-max scaling so a native score maps identically regardless of batch composition and original-versus-perturbed differences cannot change with unrelated samples.
-- Defined PU-AOP M4's evidence-supported exception: retain the raw Elkan-Noto corrected score and separately use fixed clipping to `[0,1]` for bounded comparisons; no fitted or batch-derived mapping is allowed.
-- Kept AnOxPePred's FRS and Chelator channels separate pending a prespecified scalar endpoint, and retained every real predictor mapping as operationally unverified until a real score is reproduced through C3.
-- Validated the normalization implementation over all 20,072 original/perturbed dummy score values from 10,036 rows: native and usable ranges were both `0.075–1.0`, with zero out-of-range or transformed values; this remains software-testing evidence only.
-- Confirmed all 100 current C3 tests pass with 74 subtests after one transient Windows/OneDrive cache-file lock on the first full-suite run and a clean complete rerun.
-- Completed Task 3.25 by selecting the configured 20-peptide PP1 pilot from all 734 redox-eligible audit subjects using master seed `42` and the row-order-independent `greedy_coverage_then_seeded_sha256_v1` algorithm.
-- Versioned the selected subject table as `c3_aop_bcs_pp1_pilot_v1`, retaining original source, evidence, raw-record, CD-HIT, sequence-length, and redox-pattern provenance plus selection rank, seed, hash, stratum, and newly covered criteria.
-- Covered all four available length bands from 3 to 36 residues, 12 distinct lengths, every W/Y/H/M/C residue, five single-type and 15 multiple-type patterns, and 20 distinct exact redox patterns.
-- Preferred E1 direct-assay evidence after coverage requirements, yielding 18 E1 and 2 E2 subjects while retaining representation from AnOxPePred and both Multi-AOP source datasets.
-- Exported the exact 449 pilot-linked variants—54 P1, 150 P2, and 245 P3 records—in deterministic subject/type/position order for subsequent pilot scoring and behavioural metrics.
-- Added checksum-backed selection evidence and tests proving fixed-size selection, seed retention, required coverage, subject/variant linkage, source-order independence, and byte-identical regeneration.
-- Confirmed all 104 current C3 tests pass with 74 subtests.
+- Created the versioned Task 3.24 score-normalization registry covering AnOxPePred, Multi-AOP, AOPxSVM, AOP-DRL, all five Component 2 PU-AOP model families, and the non-experimental C3 dummy.
+- Preserved native `[0,1]` values through identity mappings and defined the only currently required non-probability mapping: retain PU-AOP M4's raw Elkan-Noto corrected score while separately applying the fixed pointwise `clip(raw, 0, 1)` usable representation.
+- Explicitly prohibited batch-wise min-max, percentile, z-score, and invented sigmoid transformations so original-versus-perturbed differences cannot change with batch composition.
+- Verified all 20,072 original/perturbed dummy score values across 10,036 rows are already within `[0,1]` (observed range `0.075–1.0`) and remain unchanged; this is software validation only, while every real predictor remains pending retained real-score verification.
+- Confirmed all seven focused Task 3.24 tests pass with six subtests. The broader C3 run passed 91 tests and 74 subtests, with four unrelated pre-existing byte-reproducibility failures caused by CRLF line endings in older Task 3.19–3.22 committed artifacts.
+- Created the versioned `c3_aop_bcs_pp1_pilot_v1` dataset by deterministically selecting 20 of the 734 eligible audit subjects using master seed `42` and a row-order-independent coverage-first/SHA-256 tie-break algorithm.
+- Represented 12 distinct sequence lengths from 3 to 36 amino acids across all four fixed length bands, all five W/Y/H/M/C redox residues, five single-type and 15 multiple-type redox patterns, 20 distinct exact redox patterns, both E1 and E2 evidence, and multiple source datasets.
+- Exported the 20 provenance-preserving pilot subjects and all 449 linked perturbations: 54 P1, 150 P2, and 245 P3 variants.
+- Added a checksum-backed pilot report recording the frozen seed, selection algorithm, source and output hashes, coverage counts, and a passing validation result; regeneration is byte-identical and independent of candidate row order.
+- Confirmed all four focused Task 3.25 tests pass. The broader C3 run passed 95 tests and 74 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Re-audited the BCS3 restart boundary after Tasks 3.24–3.25: every normalization, pilot-selection, pilot-data, and upstream scored-data prerequisite exists and is tracked; Git object integrity passes; all five Task 3.25 code/test/data objects exactly match the previously validated BCS2 implementation; and the combined scoring, normalization, and pilot test set passes 16 tests with six subtests.
+- Implemented the Task 3.26 DeltaScore pipeline with the frozen definition `Score(original) - Score(perturbed)` and a separately stored absolute magnitude for every pilot perturbation.
+- Joined all 449 versioned pilot variants to the committed scored dataset by unique variant ID, revalidated every perturbation field, and applied the Task 3.24 pointwise normalization contract before calculating differences.
+- Exported `c3_aop_bcs_pp1_pilot_dummy_delta_scores_v1` covering 20 subjects and 54 P1, 150 P2, and 245 P3 perturbations; 278 signed differences are positive, 171 are negative, and none are zero for the software dummy.
+- Added a checksum-backed DeltaScore report with score definition and interpretation, source/output hashes, counts and ranges, three passing hand-checked examples, and automatic validation of finite values and absolute magnitudes.
+- Preserved the non-experimental boundary throughout: every row is labelled software-testing-only and the report explicitly states that the dummy DeltaScores are not scientific results.
+- Confirmed all four focused Task 3.26 tests pass with seven subtests. The broader C3 run passed 99 tests and 81 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.27 prediction classification with an explicit dummy-only decision rule: usable scores `>= 0.5` are class 1 and scores `< 0.5` are class 0; the exact threshold boundary is automatically tested.
+- Classified the original and perturbed usable score for every one of the 449 pilot variants and stored the decision threshold, comparator, both classes, flip indicator, and flip direction per record.
+- Detected 48 software-only prediction flips: 32 positive-to-negative and 16 negative-to-positive, producing an overall dummy PFR of `48/449 = 0.10690423162583519`.
+- Calculated type-specific dummy PFR values: P1 `11/54 = 0.2037037037037037`, P2 `13/150 = 0.08666666666666667`, and P3 `24/245 = 0.09795918367346938`.
+- Added a checksum-backed PFR report with class counts, overall/type-specific denominators and flip counts, direction counts, boundary checks, and a policy requiring each future real predictor to provide its own verified decision rule.
+- Preserved the non-experimental boundary in every prediction-flip row and in the report; the dummy threshold and PFR must not be treated as scientific predictor results.
+- Confirmed all four focused Task 3.27 tests pass with three subtests. The broader C3 run passed 103 tests and 84 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.28 IR calculation directly from the versioned DeltaScore artifact, restricting eligibility to the 150 P2 conservative substitutions.
+- Loaded the frozen primary delta `0.05` from `research_config.toml` and applied the exact strict rule `|DeltaScore| < delta`; equality with `0.05` is explicitly verified as non-invariant.
+- Marked 140 P2 edits invariant and 10 non-invariant, producing a software-only dummy IR of `140/150 = 0.9333333333333333`.
+- Exported the provenance-preserving P2 invariance table and a checksum-backed report containing the metric definition, delta source, counts, rate, strict boundary checks, and validation results.
+- Preserved the non-experimental boundary in every invariance row and in the report; this dummy IR validates the metric pipeline and is not a scientific reliability result.
+- Confirmed all four focused Task 3.28 tests pass with three subtests. The broader C3 run passed 107 tests and 87 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.29 FSR calculation directly from the versioned DeltaScore artifact, restricting eligibility to the 54 P1 redox-disruption substitutions.
+- Loaded the frozen primary delta `0.05` from `research_config.toml` and applied the exact strict insufficient-response rule `|DeltaScore| < delta`; equality with `0.05` is explicitly verified as a sufficient response.
+- Marked 28 P1 edits as insufficient responses and 26 as sufficient, producing a software-only dummy FSR of `28/54 = 0.5185185185185185`.
+- Exported the provenance-preserving P1 response table and a checksum-backed report containing the metric definition, delta source, counts, rate, strict boundary checks, and validation results.
+- Preserved the non-experimental boundary in every FSR row and in the report; this dummy FSR validates the metric pipeline and is not a scientific reliability result.
+- Confirmed all four focused Task 3.29 tests pass with three subtests. The broader C3 run passed 111 tests and 90 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.30 using the frozen formula `BCS = IR × (1 - FSR)` with strict finite `[0,1]` validation for both component rates and the resulting score.
+- Combined the validated Task 3.28 dummy IR `140/150 = 0.9333333333333333` and Task 3.29 dummy FSR `28/54 = 0.5185185185185185`, producing a preliminary pilot BCS of `0.44938271604938274`.
+- Added a versioned, deterministic BCS report that pins both source reports by path, dataset version, and SHA-256 checksum and rejects failed validation, mismatched predictor metadata, different source datasets, or inconsistent delta thresholds.
+- Verified the BCS formula with explicit manual examples, confirmed the result is within `[0,1]`, and preserved clear labels that the dummy value is software-testing-only and is not a scientific result or final conclusion.
+- Confirmed all four focused Task 3.30 tests pass with six subtests. The broader C3 run passed 115 tests and 96 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.31 as a configurable sensitivity runner that reads the frozen `sensitivity_deltas` and `primary_delta` values instead of hard-coding analysis thresholds.
+- Recalculated P2 IR, P1 FSR, and preliminary BCS reproducibly at all configured thresholds: `0.02` gives IR `0.7066666666666667`, FSR `0.2962962962962963`, and BCS `0.497283950617284`; primary `0.05` reproduces IR `0.9333333333333333`, FSR `0.5185185185185185`, and BCS `0.44938271604938274`; `0.10` gives IR `0.98`, FSR `0.7777777777777778`, and BCS `0.21777777777777776`.
+- Added a deterministic, checksum-backed delta-sensitivity report with per-threshold counts, strict `< delta` boundary semantics, one explicit primary result, range validation, predictor metadata, and source provenance.
+- Verified equality is excluded at each of `0.02`, `0.05`, and `0.10`, invalid threshold configurations are rejected, and repeated generation returns identical report content.
+- Kept the sensitivity outputs explicitly software-testing-only and documented that PP1 demonstrates configurability rather than making a full robustness interpretation, which remains later-study work.
+- Confirmed all five focused Task 3.31 tests pass with eight subtests. The broader C3 run passed 120 tests and 104 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.32 as a deterministic count-quality review over the versioned 20-subject PP1 pilot and its 449 perturbations.
+- Reconciled the global counts as 54 P1, 150 P2, and 245 P3 variants, with all three types non-zero and every per-subject actual count matching the frozen P1/P2/P3 generator rules.
+- Confirmed every pilot subject has at least one variant and found no unexpected zero-variant cases; `C3-ANOX-000205` (`WHH`) correctly has zero P2 variants because it contains no non-redox position eligible for P2.
+- Added an explicit 20% PP1 quality-control dominance flag, documented as a pragmatic non-inferential cutoff; no sequence exceeds it, and the largest contributor is `C3-ANOX-000467` with 64/449 variants (`0.14253897550111358`).
+- Exported a checksum-backed per-subject count table and JSON report containing expected/actual type counts, shares, equal-share ratios, zero-case classifications, source provenance, and validation results.
+- Confirmed all four focused Task 3.32 tests pass. The broader C3 run passed 124 tests and 104 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Completed Task 3.33 by manually selecting and inspecting six representative pilot variants: two P1, two P2, and two P3 examples spanning short and long peptides, different positions, and distinct residue changes.
+- Verified row by row that each declared one-based position is the only changed position, the original and substituted residues match their sequences, the perturbed sequence reconstructs exactly, and sequence length remains unchanged.
+- Independently reproduced the two P2 selections and their Biopython BLOSUM62 scores: `L1I` scores 2 and `V6I` scores 3 under the frozen deterministic selection rule.
+- Independently recomputed every selected original score, perturbed score, and DeltaScore using the deterministic dummy scorer, and confirmed the two P3 examples retain master seed `42` and their random metadata.
+- Added a versioned machine-readable inspection record and a concise PP1-ready Markdown table, both clearly labelled as software-testing evidence rather than scientific AOP results.
+- Confirmed all four focused Task 3.33 tests pass with six subtests. The broader C3 run passed 128 tests and 110 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Completed Task 3.34 by generating four deterministic, dependency-free SVG figures from the validated PP1 pilot artifacts: shared-scale P1/P2/P3 absolute DeltaScore distributions, six inspected original-versus-perturbed score examples, an IR/FSR/BCS summary, and a perturbation-type prediction-flip comparison.
+- Used all 449 generated pilot perturbations for the distribution figure (54 P1, 150 P2, and 245 P3), the six Task 3.33 inspected examples for the score comparison, and the validated Task 3.27–3.30 reports for PFR, IR, FSR, and BCS values.
+- Exported the metric summary as both SVG and CSV and added a checksum-backed visualization manifest recording every source and output path, SHA-256 checksum, count, metric value, and validation result.
+- Applied shared axes and direct labels and placed the visible warning `PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS` on every figure, preserving the distinction between software pipeline evidence and future real-predictor experimental results.
+- Verified that all requested outputs exist, use only generated results, retain the preliminary/testing-only classification, parse as valid SVG, reproduce byte-for-byte, and match their authoritative metric reports.
+- Confirmed all four focused Task 3.34 tests pass with four subtests. The broader C3 run passed 132 tests and 114 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Completed Task 3.35 by implementing a deterministic PP1 run-manifest generator that cross-checks the authoritative selection, scoring, perturbation, metric, inspection, count-review, and visualization reports before writing provenance.
+- Created the versioned `c3_aop_bcs_pp1_dummy_pilot_run_v1` manifest with run date `2026-10-19`, PP1 dataset version, dummy predictor identity/version/scoring method, and the full Git commit `ca77c59b2c9ccb1cbb221528659d15789e139715` containing the manifest generator.
+- Recorded master seed `42`, redox set W/Y/H/M/C, primary delta `0.05`, sensitivity deltas, and the complete P2 BLOSUM62 rule: non-redox positions, minimum score `>= 1`, frozen exclusions, highest-score selection, and alphabetical tie-breaking.
+- Reconciled 20 pilot peptides and 449 perturbations (54 P1, 150 P2, and 245 P3) independently across the pilot, DeltaScore, count-review, and CSV artifacts.
+- Recorded zero rejected full-pipeline perturbations and zero missing or failed pilot scores, derived from the selected perturbation count and the validated finite DeltaScore count rather than an unsupported manual claim.
+- Pinned the research configuration, BLOSUM62 support record, dummy predictor definition, 12 authoritative source reports, and 12 versioned result/figure artifacts with paths, formats, byte sizes, record counts where applicable, and SHA-256 checksums.
+- Preserved the explicit classification that this is preliminary dummy software-testing evidence, not a scientific result, and that real-predictor experimental scoring remains pending.
+- Confirmed all seven focused Task 3.35 tests pass with 24 subtests, including commit validation, cross-report reconciliation, artifact completeness, checksum coverage, and byte-identical canonical regeneration. The broader C3 run passed 139 tests and 138 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Completed Task 3.36 by freezing `c3_aop_bcs_shap_faithfulness_v1`, a residue-level schema that links one predictor's SHAP value to the matching P1 alanine-scan DeltaScore through sequence, predictor, one-based position, residue, and P1 variant identity.
+- Defined and validated all required fields: sequence ID and sequence, predictor ID/version, residue position and residue, signed SHAP and absolute SHAP, signed P1 DeltaScore and absolute P1 DeltaScore, plus KernelSHAP backend/version, background-dataset version, and random seed provenance.
+- Preserved signed values for directional interpretation while defining the later primary comparison as Pearson correlation of `|SHAP_i|` with `|DeltaScore_i|` at matched P1 redox-residue positions, evaluated per predictor.
+- Added strict record and join validation for uppercase standard sequences, one-based positions, residue/sequence agreement, membership in the frozen redox set, matching predictor and P1 metadata, alanine replacement, finite numeric values, exact absolute magnitudes, and duplicate P1 positions.
+- Prepared a predictor-independent `KernelShapRequest` / `KernelShapBackend` / `KernelShapExplanation` module boundary connected to the Task 3.19 predictor interface, requiring exactly one finite explanation value per sequence position.
+- Added deterministic machine-readable schema and human-readable implementation-plan artifacts, both explicitly recording that no concrete KernelSHAP backend, SHAP dependency, SHAP execution, or scientific SHAP result is required for Task 3.36 or PP1.
+- Deferred scientifically consequential choices—background selection, concrete backend verification, real-predictor execution, and correlation interpretation—until the required real predictors and experiment design are ready.
+- Confirmed all six focused Task 3.36 tests pass with nine subtests, including schema coverage, protocol conformance, P1 pairing, invalid-join rejection, deterministic generation, and committed-artifact reproduction. The broader C3 run passed 145 tests and 147 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.25 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.36 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.26: Calculate DeltaScore
+## Current task — Task 3.37: Update implementation documentation
 
-**Status:** Not started.
+**Status:** Not started; next task.
 
 Next work:
 
-- compute `DeltaScore = Score(original) - Score(perturbed)` for every pilot perturbation;
-- store the signed and absolute score differences;
-- verify calculations against independently hand-checked examples;
-- retain the non-experimental boundary while only dummy scores are available.
+- update the architecture and repository-structure documentation to match the implemented C3 system;
+- document dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, and configuration/usage instructions.

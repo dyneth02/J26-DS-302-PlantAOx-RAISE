@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "pipeline_version": "c3_aop_bcs_delta_score_v1",
+  "dataset_version": "c3_aop_bcs_pp1_pilot_dummy_delta_scores_v1",
+  "created_on": "2026-10-19",
+  "definition": {
+    "delta_score": "original_usable_score - perturbed_usable_score",
+    "absolute_delta_score": "abs(delta_score)",
+    "interpretation": {
+      "positive": "perturbation decreased the usable predictor score",
+      "negative": "perturbation increased the usable predictor score",
+      "zero": "no usable score change"
+    }
+  },
+  "predictor": {
+    "predictor_id": "c3_software_smoke_test_dummy",
+    "display_name": "C3 software smoke-test dummy (NON-EXPERIMENTAL)",
+    "version": "1.0.0",
+    "scoring_method": "position_weighted_alphabetical_residue_rank_checksum",
+    "software_testing_only": true,
+    "score_contract_id": "c3_dummy_smoke_score",
+    "normalization_mapping": "identity_0_1",
+    "scientific_result": false
+  },
+  "sources": {
+    "scored_perturbations": {
+      "path": "data/processed/c3_aop_bcs/dummy_scored_perturbations_v1.csv",
+      "record_count": 10036,
+      "sha256": "b60356473370d9376701488548cb7a2075c885ec6274c7c997f763a4a034f13e"
+    },
+    "pilot_perturbations": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_perturbations_v1.csv",
+      "record_count": 449,
+      "sha256": "ee7f2c78915187cdb5dc3701318bc4ba7ed94e7e77cff4e2f9c38fffbf62cb86"
+    }
+  },
+  "counts": {
+    "delta_score_count": 449,
+    "unique_subject_count": 20,
+    "by_perturbation_type": {
+      "P1": 54,
+      "P2": 150,
+      "P3": 245
+    },
+    "positive_delta_count": 278,
+    "negative_delta_count": 171,
+    "zero_delta_count": 0
+  },
+  "range": {
+    "delta_score_min": -0.23999999999999994,
+    "delta_score_max": 0.475,
+    "absolute_delta_score_min": 0.00030030030030031574,
+    "absolute_delta_score_max": 0.475
+  },
+  "hand_checked_examples": [
+    {
+      "original_score": 0.8,
+      "perturbed_score": 0.3,
+      "expected_delta_score": 0.5,
+      "expected_absolute_delta_score": 0.5,
+      "actual_delta_score": 0.5,
+      "actual_absolute_delta_score": 0.5,
+      "passed": true
+    },
+    {
+      "original_score": 0.25,
+      "perturbed_score": 0.4,
+      "expected_delta_score": -0.15,
+      "expected_absolute_delta_score": 0.15,
+      "actual_delta_score": -0.15000000000000002,
+      "actual_absolute_delta_score": 0.15000000000000002,
+      "passed": true
+    },
+    {
+      "original_score": 0.6,
+      "perturbed_score": 0.6,
+      "expected_delta_score": 0.0,
+      "expected_absolute_delta_score": 0.0,
+      "actual_delta_score": 0.0,
+      "actual_absolute_delta_score": 0.0,
+      "passed": true
+    }
+  ],
+  "validation": {
+    "status": "PASS",
+    "all_pilot_variants_joined_once": true,
+    "all_values_finite": true,
+    "all_absolute_values_non_negative": true,
+    "all_absolute_values_match_signed_magnitude": true,
+    "hand_checks_passed": true,
+    "software_testing_only_preserved": true
+  },
+  "output": {
+    "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_delta_scores_v1.csv",
+    "record_count": 449,
+    "fields": [
+      "score_schema_version",
+      "predictor_id",
+      "predictor_display_name",
+      "predictor_version",
+      "scoring_method",
+      "software_testing_only",
+      "schema_version",
+      "variant_id",
+      "sequence_id",
+      "original_sequence",
+      "position",
+      "original_residue",
+      "substituted_residue",
+      "perturbed_sequence",
+      "perturbation_type",
+      "blosum62_score",
+      "random_seed",
+      "random_metadata",
+      "original_score",
+      "perturbed_score",
+      "normalization_schema_version",
+      "score_contract_id",
+      "normalization_mapping",
+      "original_usable_score",
+      "perturbed_usable_score",
+      "delta_score",
+      "absolute_delta_score"
+    ],
+    "sha256": "d14e56a5cf0f1d7a6958e01628de64bcae4665217067d8c34a218ac94c8e9e55"
+  }
+}

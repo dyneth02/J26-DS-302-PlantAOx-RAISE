@@ -1,0 +1,4 @@
+metric,value,numerator,denominator,interpretation
+IR,0.9333333333333333,140,150,P2 edits with |DeltaScore| < 0.05
+FSR,0.5185185185185185,28,54,P1 edits with |DeltaScore| < 0.05
+BCS,0.44938271604938274,,,IR x (1 - FSR)

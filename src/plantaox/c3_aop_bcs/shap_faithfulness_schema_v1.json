@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "schema_id": "c3_aop_bcs_shap_faithfulness_v1",
+  "record_semantics": "one record links one predictor's SHAP value at one redox residue to the matching P1 alanine-scan DeltaScore",
+  "fields": [
+    {
+      "name": "schema_version",
+      "type": "string",
+      "description": "fixed schema version"
+    },
+    {
+      "name": "sequence_id",
+      "type": "string",
+      "description": "stable peptide identifier"
+    },
+    {
+      "name": "sequence",
+      "type": "string",
+      "description": "uppercase original peptide sequence"
+    },
+    {
+      "name": "predictor_id",
+      "type": "string",
+      "description": "common-interface predictor identifier"
+    },
+    {
+      "name": "predictor_version",
+      "type": "string",
+      "description": "frozen predictor/model version"
+    },
+    {
+      "name": "residue_position",
+      "type": "integer",
+      "description": "one-based P1 residue position"
+    },
+    {
+      "name": "residue",
+      "type": "string",
+      "description": "original redox residue at residue_position"
+    },
+    {
+      "name": "p1_variant_id",
+      "type": "string",
+      "description": "linked alanine-scan variant identifier"
+    },
+    {
+      "name": "shap_value",
+      "type": "number",
+      "description": "signed per-residue KernelSHAP value"
+    },
+    {
+      "name": "absolute_shap_value",
+      "type": "number",
+      "description": "abs(shap_value)"
+    },
+    {
+      "name": "p1_delta_score",
+      "type": "number",
+      "description": "signed Score(original) - Score(P1 variant)"
+    },
+    {
+      "name": "absolute_p1_delta_score",
+      "type": "number",
+      "description": "abs(p1_delta_score)"
+    },
+    {
+      "name": "kernel_shap_backend",
+      "type": "string",
+      "description": "stable backend identifier"
+    },
+    {
+      "name": "kernel_shap_version",
+      "type": "string",
+      "description": "backend/dependency version"
+    },
+    {
+      "name": "background_dataset_version",
+      "type": "string",
+      "description": "frozen SHAP background version"
+    },
+    {
+      "name": "random_seed",
+      "type": "integer",
+      "description": "seed used by explanation procedure"
+    }
+  ],
+  "primary_comparison": {
+    "x": "absolute_shap_value",
+    "y": "absolute_p1_delta_score",
+    "notation": "|SHAP_i| vs |DeltaScore_i|",
+    "planned_measure": "Pearson correlation r",
+    "scope": "P1 redox-residue positions, evaluated per predictor",
+    "interpretation": "higher positive association supports attribution faithfulness; signed values remain stored for directional interpretation"
+  },
+  "kernel_shap_boundary": {
+    "request_type": "KernelShapRequest",
+    "backend_protocol": "KernelShapBackend",
+    "result_type": "KernelShapExplanation",
+    "required_output": "exactly one finite SHAP value per sequence position",
+    "predictor_contract": "Task 3.19 Predictor interface",
+    "concrete_backend_implemented": false,
+    "shap_dependency_required_for_task_3_36": false
+  },
+  "validation_rules": [
+    "residue_position is one-based and within sequence",
+    "residue matches sequence at residue_position and belongs to the redox set",
+    "P1 row matches sequence, predictor, version, position, residue, and alanine replacement",
+    "SHAP and DeltaScore values are finite",
+    "absolute values equal the magnitudes of their signed values",
+    "each sequence/predictor/P1 position occurs at most once"
+  ],
+  "pp1_scope": {
+    "status": "SCHEMA_AND_MODULE_BOUNDARY_ONLY",
+    "complete_shap_experiment_required_for_pp1": false,
+    "scientific_shap_results_produced": false,
+    "deferred_work": [
+      "select and freeze a scientifically justified KernelSHAP background",
+      "implement and verify a concrete KernelSHAP backend",
+      "run real integrated predictors",
+      "calculate and statistically interpret faithfulness correlations"
+    ]
+  }
+}
