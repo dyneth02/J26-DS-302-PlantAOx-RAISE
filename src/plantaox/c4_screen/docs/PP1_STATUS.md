@@ -31,4 +31,4 @@ Real embedding import and dependent phases have not run because these five files
 - `ref_cloud.npy`
 - `ref_cloud_sequences.csv`
 
-No local ESM-2 load/download was attempted. Accordingly, no real embedding counts, AD parameters, tier fractions, scored cards, dashboard results, or full-data output checksum manifest are available. The import stage fails with a specific missing-file list. Synthetic tests passed: 6 tests in `tests/c4_screen/test_downstream_pipeline.py`.
+No local ESM-2 load/download was attempted. Accordingly, no real embedding counts, AD parameters, tier fractions, scored cards, dashboard results, or full-data output checksum manifest are available. The import stage fails with a specific missing-file list. Synthetic tests passed: 7 tests in `tests/c4_screen/test_downstream_pipeline.py`; the full `tests/c4_screen` suite passed 12 tests.

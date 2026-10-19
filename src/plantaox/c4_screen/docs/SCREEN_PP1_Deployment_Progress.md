@@ -57,7 +57,7 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 - **Done and unchanged:** Gate 1 candidate generation. The task inventory, provisional interface spec, progress file, Colab notebook, existing mock utility, and project outputs were inspected.
 - **Blocked (real Phase 1 import):** Missing `data/interim/c4_screen/embeddings/c4_esm2_t33_650M.npy`, `c4_embedding_index.parquet`, `c4_embedding_manifest.json`, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. The CLI reports all five exact paths. Do not load or download ESM-2 locally.
 - **Implemented and synthetically verified:** strict embedding handoff validation; supplied-cloud metadata checks; LOO AD calibration and tiering; diagnostics including mean-centering checks on degeneracy without threshold tuning; existing mock generator/validator integration; sequence-key joins; scoring; cards; MOCK-labelled summary and offline dashboard.
-- **Verification:** `tests/c4_screen/test_downstream_pipeline.py` — 6 passed. These tests use synthetic fixtures only and do not establish real-data metrics or full-corpus outputs.
+- **Verification:** `tests/c4_screen/test_downstream_pipeline.py` — 7 passed; all `tests/c4_screen` tests — 12 passed. These tests use synthetic fixtures only and do not establish real-data metrics or full-corpus outputs.
 - **In Progress:** Production stages are wired into `python -m plantaox.c4_screen.run`; full-data `all`, diagnostics, score/cards, dashboard, and freeze verification wait on the five Colab handoff files.
 - **Constraint:** Layer-33 mean-residue pooling remains a C4 assumption pending C1 confirmation. Reference cloud source is `mock_cloud`; signals are `mock`. No PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS results are claimed.
 
