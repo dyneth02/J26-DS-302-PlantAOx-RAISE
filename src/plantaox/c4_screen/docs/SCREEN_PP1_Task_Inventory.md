@@ -441,6 +441,6 @@ The inventory was synchronized on 19 October 2026 after production verification.
 
 ## Current work session — C4 backend API (19 October 2026)
 
-- **Status: In Progress.** A read-only FastAPI surface is being added under the existing `backend/app/api/v1`, `schemas`, and `services` component pattern, with fixture-backed API tests under `tests/backend/c4_screen/`. This is an application integration layer over frozen C4 outputs; it does not change the screening pipeline.
+- **Status: Done for the API phase.** A read-only FastAPI surface is implemented under `backend/app/api/v1/c4_screen`, with component schemas/services and fixture-backed tests under `tests/backend/c4_screen/`. It is integrated at the shared `/api/v1` composition root and reads the frozen C4 artifacts without changing the screening pipeline.
 - API responses must preserve the current provenance: `cloud_source=mock_cloud`, signal sources=`mock`, and no retrieval metrics computed on mock inputs.
-- Acceptance remains pending until endpoint and fixture tests are run.
+- Verification: `pytest tests/backend/c4_screen -q -p no:cacheprovider` passed (8 tests), including a smoke test against this checkout’s frozen outputs. API behavior covers data/meta, funnel, tier/AD/length summaries, candidate filters/details, cards, abstained candidates, and CSV export.
