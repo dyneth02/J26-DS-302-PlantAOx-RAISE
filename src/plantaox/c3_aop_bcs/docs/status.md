@@ -130,11 +130,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.28 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.29: Calculate False Sensitivity Rate (FSR)
+## Current task — Task 3.29: Calculate False Sensitivity Rate (FSR)
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - restrict the calculation to P1 redox-disruption variants;
 - apply the configured primary threshold `delta = 0.05` to `|DeltaScore|`;
