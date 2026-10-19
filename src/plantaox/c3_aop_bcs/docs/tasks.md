@@ -808,13 +808,13 @@
 ## Task 3.34 — Create preliminary visualizations
 
 ### Subtasks
-- [ ] Create simple plots/tables such as:
-  - [ ] P1/P2/P3 `|DeltaScore|` distributions;
-  - [ ] original vs perturbed score examples;
-  - [ ] preliminary IR/FSR/BCS table;
-  - [ ] prediction-flip comparison.
-- [ ] Use only actual generated results.
-- [ ] Mark results as pilot/preliminary.
+- [x] Create simple plots/tables such as:
+  - [x] P1/P2/P3 `|DeltaScore|` distributions;
+  - [x] original vs perturbed score examples;
+  - [x] preliminary IR/FSR/BCS table;
+  - [x] prediction-flip comparison.
+- [x] Use only actual generated results.
+- [x] Mark results as pilot/preliminary.
 
 ### Deliverable
 - PP1-ready preliminary figures.

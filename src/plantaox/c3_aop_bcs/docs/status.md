@@ -156,16 +156,20 @@
 - Independently recomputed every selected original score, perturbed score, and DeltaScore using the deterministic dummy scorer, and confirmed the two P3 examples retain master seed `42` and their random metadata.
 - Added a versioned machine-readable inspection record and a concise PP1-ready Markdown table, both clearly labelled as software-testing evidence rather than scientific AOP results.
 - Confirmed all four focused Task 3.33 tests pass with six subtests. The broader C3 run passed 128 tests and 110 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Completed Task 3.34 by generating four deterministic, dependency-free SVG figures from the validated PP1 pilot artifacts: shared-scale P1/P2/P3 absolute DeltaScore distributions, six inspected original-versus-perturbed score examples, an IR/FSR/BCS summary, and a perturbation-type prediction-flip comparison.
+- Used all 449 generated pilot perturbations for the distribution figure (54 P1, 150 P2, and 245 P3), the six Task 3.33 inspected examples for the score comparison, and the validated Task 3.27–3.30 reports for PFR, IR, FSR, and BCS values.
+- Exported the metric summary as both SVG and CSV and added a checksum-backed visualization manifest recording every source and output path, SHA-256 checksum, count, metric value, and validation result.
+- Applied shared axes and direct labels and placed the visible warning `PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS` on every figure, preserving the distinction between software pipeline evidence and future real-predictor experimental results.
+- Verified that all requested outputs exist, use only generated results, retain the preliminary/testing-only classification, parse as valid SVG, reproduce byte-for-byte, and match their authoritative metric reports.
+- Confirmed all four focused Task 3.34 tests pass with four subtests. The broader C3 run passed 132 tests and 114 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.33 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.34 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.34: Create preliminary visualizations
+## Current task — Task 3.35: Create run manifests and provenance records
 
-**Status:** In progress.
+**Status:** Not started; next task.
 
-Current work:
+Next work:
 
-- create pilot/preliminary P1/P2/P3 absolute DeltaScore distributions;
-- create original-versus-perturbed score examples;
-- create a preliminary IR/FSR/BCS summary table and prediction-flip comparison;
-- use only generated artifacts and retain explicit dummy/software-testing labels.
+- record the dataset and predictor versions, code commit, random seed, redox set, BLOSUM62 rule, primary delta, peptide and perturbation counts, failures or missing scores, and run date;
+- keep the PP1 result files versioned and traceable through a reproducible run manifest.
