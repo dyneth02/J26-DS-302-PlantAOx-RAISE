@@ -23,7 +23,7 @@
 
 ## Current execution state
 
-The project owner reports these five files are now supplied in `data/interim/c4_screen/embeddings/`; validation and production execution are pending:
+The project owner reports these five files are supplied, but the embedding directory is absent from this checkout. The ordered production attempt therefore remains blocked:
 
 - `c4_esm2_t33_650M.npy`
 - `c4_embedding_index.parquet`
@@ -31,4 +31,6 @@ The project owner reports these five files are now supplied in `data/interim/c4_
 - `ref_cloud.npy`
 - `ref_cloud_sequences.csv`
 
-No local ESM-2 load/download is needed or permitted. Until the ordered production run completes, actual embedded counts, AD parameters, tier fractions, cards, and output checksums are unreported. Prior synthetic tests passed: 7 tests in `tests/c4_screen/test_downstream_pipeline.py`; the `tests/c4_screen` suite passed 12 tests before the supplied handoff was available.
+`embed-import` stopped before row-ID hash validation, so no hash formula comparison was needed. `cloud` failed on the missing sequence CSV; downstream `ad`, `signals`, `score`, `cards`, and `dashboard` stages lacked their required inputs/artifacts. No local ESM-2 load/download was attempted. Consequently, actual embedded counts, mu/sigma/t1/t2, tier fractions, real-data cards, and full downstream checksum freeze are unavailable. A blocked-state [checksum manifest](../../../../data/interim/c4_screen/c4_output_manifest.json) hashes the nine existing Gate 1 outputs and lists the missing inputs.
+
+Verification: `tests/c4_screen` passed **12** tests. Full repository `pytest -q`: **552 passed, 38 skipped, 32 failed, 98 errors** (17 subtests passed). Failures/errors include unrelated C2 artifact/model-dependent tests; C2 ESM tests attempted to download their 35M checkpoint but could not write to the configured user cache (`PermissionError`). Six tracked C2 data outputs modified by that test run were restored afterward.

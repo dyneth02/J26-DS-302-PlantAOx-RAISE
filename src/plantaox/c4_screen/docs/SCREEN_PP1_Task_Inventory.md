@@ -16,7 +16,7 @@
 
 ## Repository Status Audit — 19 October 2026
 
-The inventory was synchronized with repository evidence on 19 October 2026. Gate 1 candidate generation is complete and must remain unchanged. The current plan supersedes local ESM-2 download, owner contract follow-ups, and a real-cloud source ladder where indicated below. The supplied 500-sequence cloud is MOCK. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) and [`PP1_STATUS.md`](PP1_STATUS.md) for exact runtime status.
+The inventory was synchronized with repository evidence on 19 October 2026. Gate 1 candidate generation is complete and must remain unchanged. The current plan supersedes local ESM-2 download, owner contract follow-ups, and a real-cloud source ladder where indicated below. The project owner reports the embedding handoff is supplied, but this checkout does not contain `data/interim/c4_screen/embeddings/`; production import remains blocked. The supplied 500-sequence cloud is MOCK. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) and [`PP1_STATUS.md`](PP1_STATUS.md) for exact runtime status.
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 
