@@ -1,0 +1,39 @@
+# Component 1 (AOP-ProCon): parameters of the accepted pipeline (Steps 1-8).
+# Values are the ones the notebooks in notebooks/c1_procon actually used; change a value only together with a re-run.
+
+benchmark:
+  build: S2 v3
+  fingerprint: 47d9c2a2fff63eb1        # asserted by every notebook
+  primary_mode: strict                 # strict | extended | strict_ge4
+  split: homology-grouped 2-fold split
+
+embeddings:
+  model: esm2_t33_650M_UR50D           # also 35M, 150M and 3B for the scale sweep
+  layer: last
+  dimension: 1280
+  pooling: max-pool below 10 aa, mean-pool from 10 aa
+
+pairs:                                  # Step 3
+  percentile: 10
+  k: 8
+  fit_fold: 0
+  seed: 42
+
+training:                               # Step 4
+  head: {type: linear, input: 1280, output: 128}
+  temperature: 0.2                      # the proposal's 0.07 collapses in the sweep (found_errors E-007)
+  prototype_push_away_lambda: 5.0       # the proposal's 0.1 collapses in the sweep (found_errors E-007)
+  uniformity_weight: 1.5
+  seed: 42
+
+evaluation:                             # Steps 5 and 6
+  probe:
+    cv: repeated grouped CV             # whole homology groups per fold
+    folds: 5
+    repeats: 10
+    null_noise_seeds: 20
+    classifier: {type: logistic_regression, C: 1.0, class_weight: balanced, standardise: inside_training_fold}
+  retrieval:
+    queries: MC-active peptides of the held-out fold
+    metric: average precision
+  seeds_per_recipe: 5

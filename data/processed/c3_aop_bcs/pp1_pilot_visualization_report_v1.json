@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "visualization_version": "c3_aop_bcs_pp1_preliminary_visualizations_v1",
+  "created_on": "2026-10-19",
+  "classification": {
+    "pilot_preliminary": true,
+    "software_testing_only": true,
+    "scientific_result": false,
+    "visible_warning": "PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS"
+  },
+  "sources": {
+    "delta_scores": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_delta_scores_v1.csv",
+      "sha256": "d14e56a5cf0f1d7a6958e01628de64bcae4665217067d8c34a218ac94c8e9e55"
+    },
+    "manual_examples": {
+      "path": "data/processed/c3_aop_bcs/pp1_manual_variant_inspection_v1.json",
+      "sha256": "5220f168c26e169ec10b73a8f5fcb60d1be27c75b26b0e252b0cc58587f0f60a"
+    },
+    "invariance_rate": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_ir_report_v1.json",
+      "sha256": "9c192e2fadf3002f037d33b2aee479cbd204288b7d29e33180391898eb92e0fc"
+    },
+    "false_sensitivity_rate": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_fsr_report_v1.json",
+      "sha256": "79c0cc337e6248149971832cd496b3a02c2cd6b86b585f0c01485e77fc5193e5"
+    },
+    "preliminary_bcs": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_bcs_report_v1.json",
+      "sha256": "d35e79a0360b0f9637d8564c3f4f5f66539cdb0bc408ebd88c34743b1912bf2e"
+    },
+    "prediction_flips": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_pfr_report_v1.json",
+      "sha256": "0d64fac07d1b7a5489eb58774d9ef19cb53f99222cb496f6bf2d5e2e13d29332"
+    }
+  },
+  "data_summary": {
+    "delta_score_record_count": 449,
+    "perturbation_counts": {
+      "P1": 54,
+      "P2": 150,
+      "P3": 245
+    },
+    "inspected_example_count": 6,
+    "primary_delta": 0.05,
+    "invariance_rate": 0.9333333333333333,
+    "false_sensitivity_rate": 0.5185185185185185,
+    "preliminary_bcs": 0.44938271604938274,
+    "prediction_flip_rates": {
+      "P1": 0.2037037037037037,
+      "P2": 0.08666666666666667,
+      "P3": 0.09795918367346938
+    }
+  },
+  "outputs": {
+    "absolute_delta_distributions": {
+      "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_absolute_delta_distributions_v1.svg",
+      "format": "svg",
+      "sha256": "557ab5366dc27e39f317904c077533b7d74acebd1c41b9d45227da53a4e893e3"
+    },
+    "original_vs_perturbed_examples": {
+      "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_score_examples_v1.svg",
+      "format": "svg",
+      "sha256": "3e1fb3dc9e76960adb13ee41ab68f098df195ff4a8658c9358bdf2a8f6e65bdb"
+    },
+    "metric_summary_table": {
+      "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_metric_summary_v1.svg",
+      "format": "svg",
+      "sha256": "9761e84a03093056b314ab4c2d6ed21558033f14d5011e24f23cd8cd5f15c814"
+    },
+    "prediction_flip_comparison": {
+      "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_prediction_flip_comparison_v1.svg",
+      "format": "svg",
+      "sha256": "6908162834d6d69ef9a7c64ac42a4875ef88f7a5003406ae36edff36dfef1f25"
+    },
+    "metric_summary_data": {
+      "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_metric_summary_v1.csv",
+      "format": "csv",
+      "sha256": "8c6c4933557748862d273c327b7b0fd2853705950bffc2c39b415d13b7f1c518"
+    }
+  },
+  "validation": {
+    "status": "PASS",
+    "all_requested_visualizations_created": true,
+    "only_generated_results_used": true,
+    "all_figures_visibly_labelled_preliminary": true,
+    "all_sources_passed_validation": true,
+    "software_testing_only_preserved": true,
+    "not_a_scientific_result": true
+  }
+}

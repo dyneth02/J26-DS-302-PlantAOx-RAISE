@@ -1,0 +1,264 @@
+{
+  "schema_version": "1.0",
+  "run_id": "c3_aop_bcs_pp1_dummy_pilot_run_v1",
+  "run_date": "2026-10-19",
+  "classification": {
+    "pilot_preliminary": true,
+    "software_testing_only": true,
+    "scientific_result": false,
+    "real_predictor_scoring_completed": false,
+    "warning": "PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS; real-predictor experimental scoring remains pending."
+  },
+  "code": {
+    "git_commit": "ca77c59b2c9ccb1cbb221528659d15789e139715",
+    "commit_resolution": "git rev-parse HEAD before canonical manifest generation"
+  },
+  "dataset": {
+    "version": "c3_aop_bcs_pp1_pilot_v1",
+    "subject_count": 20,
+    "source_dataset_version": "c3_aop_bcs_redox_eligible_v1"
+  },
+  "predictor": {
+    "predictor_id": "c3_software_smoke_test_dummy",
+    "display_name": "C3 software smoke-test dummy (NON-EXPERIMENTAL)",
+    "version": "1.0.0",
+    "scoring_method": "position_weighted_alphabetical_residue_rank_checksum",
+    "software_testing_only": true,
+    "scientific_aop_predictor": false
+  },
+  "configuration": {
+    "source": {
+      "path": "src/plantaox/c3_aop_bcs/research_config.toml",
+      "format": "toml",
+      "sha256": "00204e3512c05e194b378567c4740a53c23770c2688cf9e487bbbc2f14e93150",
+      "size_bytes": 247
+    },
+    "random_seed": 42,
+    "redox_residues": [
+      "W",
+      "Y",
+      "H",
+      "M",
+      "C"
+    ],
+    "primary_delta": 0.05,
+    "sensitivity_deltas": [
+      0.02,
+      0.05,
+      0.1
+    ],
+    "blosum62": {
+      "support_manifest": {
+        "path": "src/plantaox/c3_aop_bcs/blosum62_support_v1.json",
+        "format": "json",
+        "sha256": "457725719b90125c948a035efea487a75bba1583d9bbd49b6bc46c0d39c61e96",
+        "size_bytes": 1956
+      },
+      "matrix": "BLOSUM62",
+      "minimum_score": 1,
+      "eligible_positions": "non-redox positions only",
+      "excluded_candidates": [
+        "original_residue",
+        "A",
+        "W",
+        "Y",
+        "H",
+        "M",
+        "C"
+      ],
+      "selection": "highest-scoring eligible replacement",
+      "tie_break": "highest BLOSUM62 score, then alphabetical residue code ascending"
+    }
+  },
+  "counts": {
+    "peptides": 20,
+    "perturbations_total": 449,
+    "perturbations_by_type": {
+      "P1": 54,
+      "P2": 150,
+      "P3": 245
+    }
+  },
+  "failures_and_missing_scores": {
+    "rejected_full_pipeline_perturbations": 0,
+    "pilot_perturbations_without_finite_scores": 0,
+    "failed_pilot_scores": 0,
+    "derivation": "selected pilot perturbation count minus validated finite DeltaScore count; the scoring and DeltaScore reports both passed validation"
+  },
+  "provenance": {
+    "predictor_definition": {
+      "path": "src/plantaox/c3_aop_bcs/dummy_predictor_v1.json",
+      "format": "json",
+      "sha256": "288b69e36be9ee77937367f240ec4ebfb015991635e3c617ead21b30459df95d",
+      "size_bytes": 1302
+    },
+    "source_reports": {
+      "perturbation_pipeline": {
+        "path": "data/processed/c3_aop_bcs/combined_perturbation_pipeline_report_v1.json",
+        "format": "json",
+        "sha256": "482b4795c7bca8e2717e7ff571b79f38ae763c0a1fe5a311f65fe1f179c9e3ca",
+        "size_bytes": 3183
+      },
+      "predictor_scoring": {
+        "path": "data/processed/c3_aop_bcs/dummy_predictor_scoring_report_v1.json",
+        "format": "json",
+        "sha256": "611f99e4272265772f90b56aa71b769612b986a8a046aa94d6fd64d84dc43e65",
+        "size_bytes": 2265
+      },
+      "pilot_selection": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_report_v1.json",
+        "format": "json",
+        "sha256": "1c5fc9eaed49cb7ae7821e9040c57d5ff0811d2426ac74834bc382c6da9be495",
+        "size_bytes": 4306
+      },
+      "delta_score": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_delta_score_report_v1.json",
+        "format": "json",
+        "sha256": "c148f6d8e7415a36081f3f6fa95ddf6de7743f86b2bdba5e3bb30bba3038046c",
+        "size_bytes": 3895
+      },
+      "prediction_flip": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_pfr_report_v1.json",
+        "format": "json",
+        "sha256": "0d64fac07d1b7a5489eb58774d9ef19cb53f99222cb496f6bf2d5e2e13d29332",
+        "size_bytes": 4232
+      },
+      "invariance_rate": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_ir_report_v1.json",
+        "format": "json",
+        "sha256": "9c192e2fadf3002f037d33b2aee479cbd204288b7d29e33180391898eb92e0fc",
+        "size_bytes": 2855
+      },
+      "false_sensitivity_rate": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_fsr_report_v1.json",
+        "format": "json",
+        "sha256": "79c0cc337e6248149971832cd496b3a02c2cd6b86b585f0c01485e77fc5193e5",
+        "size_bytes": 3024
+      },
+      "preliminary_bcs": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_bcs_report_v1.json",
+        "format": "json",
+        "sha256": "d35e79a0360b0f9637d8564c3f4f5f66539cdb0bc408ebd88c34743b1912bf2e",
+        "size_bytes": 2835
+      },
+      "delta_sensitivity": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_delta_sensitivity_report_v1.json",
+        "format": "json",
+        "sha256": "7c83e317496953dedab2e121f0a3d1edf11c76dfbce3fad8f255943493ad6b3a",
+        "size_bytes": 2713
+      },
+      "perturbation_count_review": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_perturbation_count_report_v1.json",
+        "format": "json",
+        "sha256": "148eefc09441a9a6d043af6ee4fe9e2f1610d567b77cf7886ed65c11a4948872",
+        "size_bytes": 2884
+      },
+      "manual_variant_inspection": {
+        "path": "data/processed/c3_aop_bcs/pp1_manual_variant_inspection_v1.json",
+        "format": "json",
+        "sha256": "5220f168c26e169ec10b73a8f5fcb60d1be27c75b26b0e252b0cc58587f0f60a",
+        "size_bytes": 8513
+      },
+      "preliminary_visualizations": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_visualization_report_v1.json",
+        "format": "json",
+        "sha256": "72a4d1fb5ac9631179973cf7e449195441d29c105ef8181bb4a564d778ecfbef",
+        "size_bytes": 3523
+      }
+    },
+    "versioned_results": {
+      "pilot_subjects": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_subjects_v1.csv",
+        "format": "csv",
+        "sha256": "28de8c89c4b67404031858bdd0631b30049ce594789ad8e65e186852d5f469de",
+        "size_bytes": 6950,
+        "record_count": 20
+      },
+      "pilot_perturbations": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_perturbations_v1.csv",
+        "format": "csv",
+        "sha256": "ee7f2c78915187cdb5dc3701318bc4ba7ed94e7e77cff4e2f9c38fffbf62cb86",
+        "size_bytes": 89186,
+        "record_count": 449
+      },
+      "delta_scores": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_delta_scores_v1.csv",
+        "format": "csv",
+        "sha256": "d14e56a5cf0f1d7a6958e01628de64bcae4665217067d8c34a218ac94c8e9e55",
+        "size_bytes": 239840,
+        "record_count": 449
+      },
+      "prediction_flips": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_prediction_flips_v1.csv",
+        "format": "csv",
+        "sha256": "d6a1464c41cdf45a6f95fd62d6aca896cb572c50f72a61d5ef276fe3094d276a",
+        "size_bytes": 259070,
+        "record_count": 449
+      },
+      "p2_invariance": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_p2_invariance_v1.csv",
+        "format": "csv",
+        "sha256": "f8eba6b099f416abdd59b4e3b40e441a103ab4c2c341f61ed4f3b1738cfc9c88",
+        "size_bytes": 74204,
+        "record_count": 150
+      },
+      "p1_insufficient_response": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_p1_insufficient_response_v1.csv",
+        "format": "csv",
+        "sha256": "08c960ce5358a48dbfe538bff91b13edb7e5b5a02dfb5c80eebf0f3a72c19bfd",
+        "size_bytes": 26152,
+        "record_count": 54
+      },
+      "perturbation_counts": {
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_perturbation_counts_v1.csv",
+        "format": "csv",
+        "sha256": "e856285fcf69132f4f317670f72ac245436b6c1719a00b4727e1f299c005345a",
+        "size_bytes": 3159,
+        "record_count": 20
+      },
+      "metric_summary_data": {
+        "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_metric_summary_v1.csv",
+        "format": "csv",
+        "sha256": "8c6c4933557748862d273c327b7b0fd2853705950bffc2c39b415d13b7f1c518",
+        "size_bytes": 218,
+        "record_count": 3
+      },
+      "absolute_delta_distributions": {
+        "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_absolute_delta_distributions_v1.svg",
+        "format": "svg",
+        "sha256": "557ab5366dc27e39f317904c077533b7d74acebd1c41b9d45227da53a4e893e3",
+        "size_bytes": 12170
+      },
+      "score_examples": {
+        "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_score_examples_v1.svg",
+        "format": "svg",
+        "sha256": "3e1fb3dc9e76960adb13ee41ab68f098df195ff4a8658c9358bdf2a8f6e65bdb",
+        "size_bytes": 6228
+      },
+      "metric_summary_figure": {
+        "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_metric_summary_v1.svg",
+        "format": "svg",
+        "sha256": "9761e84a03093056b314ab4c2d6ed21558033f14d5011e24f23cd8cd5f15c814",
+        "size_bytes": 4436
+      },
+      "prediction_flip_figure": {
+        "path": "data/processed/c3_aop_bcs/figures/pp1_pilot_prediction_flip_comparison_v1.svg",
+        "format": "svg",
+        "sha256": "6908162834d6d69ef9a7c64ac42a4875ef88f7a5003406ae36edff36dfef1f25",
+        "size_bytes": 4533
+      }
+    }
+  },
+  "validation": {
+    "status": "PASS",
+    "all_available_source_validations_passed": true,
+    "dataset_counts_reconciled": true,
+    "perturbation_type_counts_reconciled": true,
+    "predictor_identity_reconciled": true,
+    "all_required_artifacts_exist": true,
+    "all_artifacts_have_sha256": true,
+    "no_missing_pilot_scores": true,
+    "software_testing_only_preserved": true,
+    "not_a_scientific_result": true
+  }
+}

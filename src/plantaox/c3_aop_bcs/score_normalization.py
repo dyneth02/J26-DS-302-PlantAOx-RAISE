@@ -230,4 +230,3 @@ def write_normalization_report(
 
 if __name__ == "__main__":
     write_normalization_report()
-

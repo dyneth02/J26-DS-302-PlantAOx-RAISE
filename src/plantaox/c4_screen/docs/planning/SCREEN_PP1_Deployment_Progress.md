@@ -12,15 +12,15 @@
 | Repository scaffold | Done for PP1 scope | Implemented Gate 1 candidate generation and downstream embedding import, cloud metadata, AD tiering, mock-signal integration, scoring, cards, dashboard, and diagnostics in the established `src/` and `tests/` layout. |
 | Proteome inputs | Done for Gate 1 | Four unchanged reviewed FASTAs are in `data/raw/c4_screen/proteomes/`; original UniProt-named downloads are retained under `source_downloads/`. URL, access date, file size, SHA-256, release, and counts are in `metadata/c4_data_registry.csv`; exclusions are in `metadata/c4_protein_exclusions.csv`. |
 | Dependencies and environment | Done for C4 run | Required C4 dependencies are installed. Local CUDA is unavailable; the validated ESM-2 handoff manifest reports Colab Tesla T4. No local ESM-2 load/download was performed. |
-| Candidate generation (FR1 / Gate 1) | Done | `python -m plantaox.c4_screen.run all` generated candidate Parquet/FASTA, membership, funnel, and funnel-only summary. The C4 suite passes 12 tests; two complete runs matched across all 34 files in the generated tree. All 152,259 sequences are unique and all 266,361 parent-coordinate provenance links were checked against source FASTAs. Optional BIOPEP web comparison and C1/C2 handoff remain pending. |
+| Candidate generation (FR1 / Gate 1) | Done | `python -m plantaox.c4_screen.run all` generated candidate Parquet/FASTA, membership, funnel, and funnel-only summary. The C4 suite passes 15 tests; two cached all-stage runs matched across all 35 generated files. All 152,259 sequences are unique and all 266,361 parent-coordinate provenance links were checked against source FASTAs. BIOPEP comparison is deferred; a FASTA handoff draft is prepared, but external delivery is not independently verified. |
 | Embeddings and AD tiers (FR2) | Done against MOCK cloud | 152,259/152,259 candidate embeddings validated; cloud N=500 (`mock_cloud`). `mu=0.0185099002`, `sigma=0.0097886926`, `t1=0.0282985928`, `t2=0.0380872854`. No plant has >95% in one tier; no threshold tuning. |
-| PDSS (FR3) | Pending | No implementation or results. Planned stretch/later analysis. |
+| PDSS (FR3) | Deferred | Not meaningful against current MOCK cloud; denominator definition requires supervisor guidance. No value computed or reported. |
 | Signal integration and combined score (FR4) | Done with MOCK signals | `signals` and `score` completed, joining on sequence; all sources are `mock`; Tier 3 CS is zero. No retrieval metrics are computed on mock signals. |
 | Cross-predictor audit (FR5) | Pending | No implementation or predictor outputs are present. Later milestone. |
 | Retrieval evaluation (FR6) | Pending | No held-out evaluation set, metric implementation, or results are present. Later milestone. |
 | Evidence cards (FR7) | Done with MOCK signals | `cards.json` has top-50 Tier 1/2 candidates per plant, abstained Tier 3 examples, mock source labels, and ten injected rice demo cases. |
 | Dashboard | Done with MOCK data | Offline `c4_dashboard.html` and full summary generated from the validated production outputs. |
-| PP1 freeze, report, and presentation | In Progress | Presentation target is 21 October 2026. A checksummed manifest covers 33 generated artifacts and SHA-256-only hashes for all five supplied handoff inputs. Two `all` runs matched across 34 compared files (33 artifacts plus the output manifest). C4 diagnostics include Spearman length associations, cloud/candidate length distributions, and a separate mean-centering sensitivity; baseline thresholds/tiers are unchanged. `pytest tests/c4_screen`: 12 passed; no repository-wide suite was run. Slide numbers are in `PP1_NUMBERS.md`. |
+| PP1 technical freeze and report | Done with limitations; presentation/rehearsal pending | Presentation target is 21 October 2026. A checksummed output manifest covers 34 generated artifacts and SHA-256-only hashes for all five supplied handoff inputs. Two cached `all --reuse-inputs --signals mock` runs matched across 35 compared generated files (34 listed artifacts plus the manifest). C4 diagnostics include Spearman length associations, cloud/candidate length distributions, and a separate mean-centering sensitivity; baseline thresholds/tiers are unchanged. `pytest tests/c4_screen`: 15 passed; no repository-wide suite was run. Slide numbers are in `PP1_NUMBERS.md`. |
 
 ## Gate 1 observed funnel
 
@@ -40,7 +40,7 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 - The C4 Python package is at `src/plantaox/c4_screen/`, and tests are at `tests/c4_screen/`.
 - The C4 package now contains the Gate 1 candidate-generation modules and configuration; tests include unit and mock-signal integration coverage.
 - Installed pyteomics 5.0.1 rules were verified as `pepsin ph1.3` and `trypsin`; pyteomics `icleave` offsets preserve parent coordinates.
-- Four reviewed-only UniProt query results are present with release/query, sizes, and hashes in `SCREEN_PP1_DATA_AND_OUTPUTS.md`; canonical raw files byte-match the downloads.
+- Four reviewed-only UniProt query results are present with release/query, sizes, and hashes in `../technical/SCREEN_PP1_Data_and_outputs.md`; canonical raw files byte-match the downloads.
 - The original reviewed input counts were 439 soybean, 4,197 rice, 159 rapeseed, and 110 olive. These are source protein records, not peptide candidate counts.
 - The local project environment reports no CUDA device. No ESM-2 weights were downloaded or loaded locally; the supplied Colab embedding handoff was validated and imported.
 - The top-level project `README.md` is empty; the Component 4 entry point and command documentation are in `src/plantaox/c4_screen/docs/README.md`.
@@ -58,9 +58,9 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 - **Production stages:** `embed-import`, `cloud`, `ad`, `signals`, `score`, `cards`, `dashboard` completed in order. Import validated the manifest hash and exact candidate/index peptide_id+sequence order. Hash uses SHA-256 of newline-joined sequences in index order, matching the manifest recipe.
 - **Counts:** 152,259 candidates embedded; zero unembedded. Cloud N=500, `source=mock_cloud`. Signal inputs and BCS have `source=mock`.
 - **AD:** `mu=0.0185099002`, `sigma=0.0097886926`, `t1=0.0282985928`, `t2=0.0380872854`. Highest single-tier fraction is rice Tier 1 at 56.99%; no plant exceeds 95%. The requested joint mean-centering sensitivity was run separately; baseline tiers and thresholds were not changed or tuned.
-- **Artifacts:** AD tiers, parameters, diagnostics, cloud metadata, mock signals/manifest, ranking, cards, summary, offline dashboard, and the output checksum manifest (33 generated files plus five handoff-input SHA-256 values) exist under `data/interim/c4_screen/`.
-- **Verification:** only `pytest tests/c4_screen` was run: 12 passed. No full repository suite was run in this work session.
-- **Constraint:** Layer-33 mean-residue pooling remains a C4 assumption pending C1 confirmation. The reference cloud is MOCK; signal results/cards are mock demonstrations, not biological evidence. No PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS results are claimed.
+- **Artifacts:** AD tiers, parameters, diagnostics, cloud metadata, mock signals/manifest, ranking, cards, summary, offline dashboard, and the output checksum manifest (34 generated output artifacts plus hashes-only records for five handoff inputs) exist under `data/interim/c4_screen/`.
+- **Verification:** only `pytest tests/c4_screen` was run: 15 passed. No full repository suite was run in this work session.
+- **Constraint:** Layer-33 mean-residue pooling remains a C4 assumption pending C1 confirmation. The reference cloud is MOCK; signal results/cards are mock demonstrations, not biological evidence. No retrieval-evaluation results are claimed from mock inputs; PDSS remains deferred.
 
 ## Next actions
 
@@ -73,6 +73,7 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 Use **Done** only when the inventory's defined output and acceptance evidence are present and verified. **In Progress** means a partial artifact exists but acceptance is incomplete. **Pending** means there is no implementation/output evidence or the work is explicitly later scope. Update this file and the task inventory together when status changes.
 
 
+<<<<<<< HEAD:src/plantaox/c4_screen/docs/SCREEN_PP1_Deployment_Progress.md
 ## Current work session — C4 backend API (19 October 2026)
 
 | Workstream | Status | Evidence / next step |
@@ -86,3 +87,30 @@ Use **Done** only when the inventory's defined output and acceptance evidence ar
 |---|---|---|
 | Shared API router + frontend registry/routes | Done | C4 API router is included in `backend/app/api/v1/router.py`; `frontend/src/app/router.tsx` spreads `c4ScreenRoutes` and `frontend/src/config/components.ts` registers `/c4`. API fixture/platform checks: 10 passed. Commit: `32eecde`. |
 | C4 frontend feature acceptance | In Progress | C4 views and shared API helpers are committed under `frontend/src/features/c4-screen/` and `frontend/src/lib/api/`. Frontend tests/build remain unverified because offline dependency installation failed: `xml-name-validator@5.0.0` is uncached (`ENOTCACHED`). Keep Bucket 6 unchecked until those checks run. |
+=======
+## Follow-up status — real-cloud discovery and remaining freeze work (19 October 2026)
+
+| Work item | Status | Evidence / next step |
+|---|---|---|
+| C2 real-positive reference discovery | Done (sequence selection) | Read-only C2 frozen `pp1_baseline_v1/aop_positives_cdhit90.parquet`; filtered 925 CD-HIT representatives to 912 unique standard-alphabet sequences of length 3–20 (E1=478, E2=434). Handoff CSV is `data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv`; SHA-256 is recorded in the decision log. Real-cloud embeddings remain pending. |
+| Production cloud/tier outputs | Pending real cloud; current MOCK remains authoritative | No matching embeddings exist for the 912-row cloud, so the existing 500-row `mock_cloud` and frozen outputs were not changed. |
+| Weight sweep and synthetic ranking assertions | Done | Seeded 2,000-row synthetic cloud test; w1 sweep at 0.25/0.5/0.75; Tier 3 zero and CS bounds verified in C4 tests. |
+| NFR2 timing | Done | Rice N=140,813: tiering 18.562604 s, scoring/ranking 1.644521 s, total 20.207124 s (one local host run). |
+| PP1 technical report, demo, slides, logbook and FASTA handoff note | Done (drafts) | All are present in C4 docs; future 20–21 Oct logbook entries remain prompts. FASTA handoff is draft only; no owner message sent. |
+| Freeze package and local tag | Pending | Requires focused test pass, checksummed C4-only manifest/report, and annotated local tag. Checkout branch is `feat/c4-Screen1`; requested `c4/pp1-final` branch is unavailable and branch switching is prohibited by the task constraints. |
+
+
+## Current update — replacement reference cloud (19 October 2026)
+
+| Work item | Status | Evidence / next step |
+|---|---|---|
+| Replacement real-cloud handoff validation and production rerun | In Progress | `ref_cloud.npy` and `ref_cloud_sequences.csv` are present under `data/interim/c4_screen/embeddings/`; validate provenance, shape, sequence alignment, and checksums with `embed-import`, then run cloud, AD, mock signals, score, cards, dashboard, and two reproducibility runs. Existing mock-cloud outputs/backups are retained for sensitivity comparison. No replacement-cloud results are verified yet. |
+
+
+## Current work session — claimed replacement cloud verification (19 October 2026)
+
+- **Status: Blocked.** The files currently present at `data/interim/c4_screen/embeddings/ref_cloud.npy` and `ref_cloud_sequences.csv` are the previous MOCK handoff, not the claimed C2 FR1 cloud. The array is `(500, 1280)` float16; the metadata contains 500 rows, all `source=mock_cloud`, `evidence_tier=MOCK`, and IDs beginning `MOCK`.
+- SHA-256: `ref_cloud.npy` = `6469e03b85760f8e7659b776589f792d9b37aabbafda5333cd7464e3beee948`; `ref_cloud_sequences.csv` = `5e547f189759312d809de4ab3980875c5626d179f255026af0ff1c0ce1694bc0`. No `*_mock.*` backup files are present in the embeddings directory.
+- The real-cloud stages (`embed-import`, `cloud`, `ad`, `signals`, `score`, `cards`, `dashboard`) and the two-run reproducibility check were not run because the real cloud handoff is absent. Existing mock outputs were left untouched; no new real-cloud metrics or PP1 materials were generated.
+- **Needed to resume:** replace both cloud files with the C2-positive sequence list and its matching Colab embeddings (same row order, one embedding per CSV row), and provide the mock backups in `*_mock.*` if they are to be retained for direct comparison. Then validate the source metadata and array dimensions before running production.
+>>>>>>> 9a1be7e842bf3663cbee11067fa0dd01ec9b2571:src/plantaox/c4_screen/docs/planning/SCREEN_PP1_Deployment_Progress.md

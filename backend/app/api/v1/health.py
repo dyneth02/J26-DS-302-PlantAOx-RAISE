@@ -12,7 +12,8 @@ COMPONENTS: list[ComponentInfo] = [
         code="C1",
         title="AOP-ProCon",
         owner_note="Mechanism-aware representation and prototype analysis",
-        status="not_integrated",
+        status="implemented",
+        base_path="/api/v1/c1",
     ),
     ComponentInfo(
         id="c2_pu",

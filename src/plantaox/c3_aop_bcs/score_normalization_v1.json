@@ -14,15 +14,21 @@
   "source_evidence": [
     {
       "path": "src/plantaox/c3_aop_bcs/predictor_access_status_v1.json",
-      "sha256": "97e12602f709c24ff8b6c4e2d7d05fe8263cd9a21ecb4d9f3da2b7c4f42994fe"
-    },
-    {
-      "path": "src/plantaox/c3_aop_bcs/pu_aop_five_model_audit_v1.json",
-      "sha256": "ceb0f0a4ce8d39deb180c30fdb7d4d1196692c12d93af6c444109ee292d8dafb"
+      "sha256": "3ed6e56f0eff6fce6da9f014444aa897fbd3f6f39e001259e745b77dadfca7e0"
     },
     {
       "path": "src/plantaox/c3_aop_bcs/dummy_predictor_v1.json",
-      "sha256": "b9696fc3f9d2a75b57502d696b05a18e66f1f70777d710ce8e8e75b59010ec41"
+      "sha256": "288b69e36be9ee77937367f240ec4ebfb015991635e3c617ead21b30459df95d"
+    },
+    {
+      "path": "data/processed/c2_pu/C2_PP1_FREEZE_MANIFEST.json",
+      "sha256": "f22ce2806d7c8bc2868482611d99c24d38778e8fb2a22544bfefc92bc015870b",
+      "access": "read-only Component 2 evidence"
+    },
+    {
+      "path": "src/plantaox/c2_pu/baseline_evaluation.py",
+      "sha256": "038095e2e14e7290d905add021c63fbb418298faa7ac1c354e5820b5861d3030",
+      "access": "read-only Component 2 evidence"
     }
   ],
   "score_contracts": [
@@ -174,7 +180,7 @@
       "c3_scalar_selected": true,
       "operational_status": "documented_pending_component_2_handoff",
       "experimental_allowed": false,
-      "note": "Checkpoint/reference fixture are unavailable and the 10-versus-100-estimator contradiction remains unresolved."
+      "note": "Checkpoint/reference fixture are unavailable and the estimator-count contradiction remains unresolved."
     },
     {
       "score_id": "c3_dummy_smoke_score",

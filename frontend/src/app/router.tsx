@@ -2,6 +2,7 @@ import { createBrowserRouter, Outlet } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { PlatformOverviewPage } from "@/app/pages/PlatformOverviewPage";
 import { NotIntegratedPage } from "@/app/pages/NotIntegratedPage";
+import { c1ProconRoutes } from "@/features/c1-procon/routes";
 import { c2PuRoutes } from "@/features/c2-pu/routes";
 import { c4ScreenRoutes } from "@/features/c4-screen/routes";
 
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <PlatformOverviewPage /> },
       { path: "not-integrated/:componentId", element: <NotIntegratedPage /> },
+      ...c1ProconRoutes,
       ...c2PuRoutes,
       ...c4ScreenRoutes,
     ],

@@ -680,15 +680,15 @@
 ## Task 3.26 — Calculate DeltaScore
 
 ### Subtasks
-- [ ] For each perturbation compute:
+- [x] For each perturbation compute:
 
   `DeltaScore_i = Score(original) - Score(perturbed_i)`
 
-- [ ] Also store:
+- [x] Also store:
 
   `|DeltaScore_i|`
 
-- [ ] Verify calculations using hand-checked examples.
+- [x] Verify calculations using hand-checked examples.
 
 ### Deliverable
 - Per-position DeltaScore results.
@@ -698,11 +698,11 @@
 ## Task 3.27 — Detect prediction flips and calculate PFR
 
 ### Subtasks
-- [ ] Define/record the decision threshold used by each predictor.
-- [ ] Determine the original class.
-- [ ] Determine the perturbed class.
-- [ ] Record whether a flip occurs.
-- [ ] Compute PFR for the required groups.
+- [x] Define/record the decision threshold used by each predictor.
+- [x] Determine the original class.
+- [x] Determine the perturbed class.
+- [x] Record whether a flip occurs.
+- [x] Compute PFR for the required groups.
 
 ### Deliverable
 - Prediction-flip results.
@@ -712,12 +712,12 @@
 ## Task 3.28 — Calculate Invariance Rate (IR)
 
 ### Subtasks
-- [ ] Restrict the calculation to P2 variants.
-- [ ] Using the primary threshold `delta = 0.05`, mark a conservative edit invariant when:
+- [x] Restrict the calculation to P2 variants.
+- [x] Using the primary threshold `delta = 0.05`, mark a conservative edit invariant when:
 
   `|DeltaScore| < delta`
 
-- [ ] Calculate the fraction of invariant P2 edits.
+- [x] Calculate the fraction of invariant P2 edits.
 
 ### Deliverable
 - Preliminary IR for each working pilot predictor.
@@ -727,12 +727,12 @@
 ## Task 3.29 — Calculate False Sensitivity Rate (FSR)
 
 ### Subtasks
-- [ ] Restrict the calculation to P1 variants.
-- [ ] Using `delta = 0.05`, mark insufficient response when:
+- [x] Restrict the calculation to P1 variants.
+- [x] Using `delta = 0.05`, mark insufficient response when:
 
   `|DeltaScore| < delta`
 
-- [ ] Calculate the fraction of P1 edits showing insufficient response.
+- [x] Calculate the fraction of P1 edits showing insufficient response.
 
 ### Deliverable
 - Preliminary FSR for each working pilot predictor.
@@ -742,13 +742,13 @@
 ## Task 3.30 — Calculate preliminary BCS
 
 ### Subtasks
-- [ ] Compute:
+- [x] Compute:
 
   `BCS = IR × (1 - FSR)`
 
-- [ ] Check that BCS falls in the expected range.
-- [ ] Verify the formula with small manually calculated examples.
-- [ ] Report PP1 values as **preliminary pilot values**, not final conclusions.
+- [x] Check that BCS falls in the expected range.
+- [x] Verify the formula with small manually calculated examples.
+- [x] Report PP1 values as **preliminary pilot values**, not final conclusions.
 
 ### Deliverable
 - Preliminary pilot BCS.
@@ -758,13 +758,13 @@
 ## Task 3.31 — Prepare delta-sensitivity support
 
 ### Subtasks
-- [ ] Ensure the metric code can accept:
-  - [ ] 0.02;
-  - [ ] 0.05;
-  - [ ] 0.10.
-- [ ] Use `0.05` as the primary PP1 result.
-- [ ] If time permits, demonstrate that the pipeline can rerun the other thresholds.
-- [ ] Leave the full robustness interpretation for the later study.
+- [x] Ensure the metric code can accept:
+  - [x] 0.02;
+  - [x] 0.05;
+  - [x] 0.10.
+- [x] Use `0.05` as the primary PP1 result.
+- [x] If time permits, demonstrate that the pipeline can rerun the other thresholds.
+- [x] Leave the full robustness interpretation for the later study.
 
 ### Deliverable
 - Configurable threshold-analysis code.
@@ -776,11 +776,11 @@
 ## Task 3.32 — Review perturbation counts
 
 ### Subtasks
-- [ ] Count P1 variants.
-- [ ] Count P2 variants.
-- [ ] Count P3 variants.
-- [ ] Check for unexpected zero-variant cases.
-- [ ] Check whether any sequence dominates the generated dataset.
+- [x] Count P1 variants.
+- [x] Count P2 variants.
+- [x] Count P3 variants.
+- [x] Check for unexpected zero-variant cases.
+- [x] Check whether any sequence dominates the generated dataset.
 
 ### Deliverable
 - Perturbation summary table.
@@ -790,15 +790,15 @@
 ## Task 3.33 — Manually inspect example variants
 
 ### Subtasks
-- [ ] Select representative P1 examples.
-- [ ] Select representative P2 examples.
-- [ ] Select representative P3 examples.
-- [ ] Verify:
-  - [ ] mutation position;
-  - [ ] original/new residue;
-  - [ ] resulting sequence;
-  - [ ] BLOSUM62 score for P2;
-  - [ ] original and perturbed predictor scores.
+- [x] Select representative P1 examples.
+- [x] Select representative P2 examples.
+- [x] Select representative P3 examples.
+- [x] Verify:
+  - [x] mutation position;
+  - [x] original/new residue;
+  - [x] resulting sequence;
+  - [x] BLOSUM62 score for P2;
+  - [x] original and perturbed predictor scores.
 
 ### Deliverable
 - Hand-verified examples for PP1 slides/demo.
@@ -808,13 +808,13 @@
 ## Task 3.34 — Create preliminary visualizations
 
 ### Subtasks
-- [ ] Create simple plots/tables such as:
-  - [ ] P1/P2/P3 `|DeltaScore|` distributions;
-  - [ ] original vs perturbed score examples;
-  - [ ] preliminary IR/FSR/BCS table;
-  - [ ] prediction-flip comparison.
-- [ ] Use only actual generated results.
-- [ ] Mark results as pilot/preliminary.
+- [x] Create simple plots/tables such as:
+  - [x] P1/P2/P3 `|DeltaScore|` distributions;
+  - [x] original vs perturbed score examples;
+  - [x] preliminary IR/FSR/BCS table;
+  - [x] prediction-flip comparison.
+- [x] Use only actual generated results.
+- [x] Mark results as pilot/preliminary.
 
 ### Deliverable
 - PP1-ready preliminary figures.
@@ -824,19 +824,19 @@
 ## Task 3.35 — Create run manifests and provenance records
 
 ### Subtasks
-- [ ] Record:
-  - [ ] dataset version;
-  - [ ] predictor version;
-  - [ ] code commit;
-  - [ ] random seed;
-  - [ ] redox set;
-  - [ ] BLOSUM62 rule;
-  - [ ] delta threshold;
-  - [ ] peptide count;
-  - [ ] perturbation counts;
-  - [ ] failures/missing scores;
-  - [ ] run date.
-- [ ] Keep result files versioned and traceable.
+- [x] Record:
+  - [x] dataset version;
+  - [x] predictor version;
+  - [x] code commit;
+  - [x] random seed;
+  - [x] redox set;
+  - [x] BLOSUM62 rule;
+  - [x] delta threshold;
+  - [x] peptide count;
+  - [x] perturbation counts;
+  - [x] failures/missing scores;
+  - [x] run date.
+- [x] Keep result files versioned and traceable.
 
 ### Deliverable
 - Reproducible run manifest.
@@ -848,21 +848,21 @@
 ## Task 3.36 — Prepare the SHAP-faithfulness data structure
 
 ### Subtasks
-- [ ] Define fields for:
-  - [ ] sequence ID;
-  - [ ] predictor;
-  - [ ] residue position;
-  - [ ] residue;
-  - [ ] SHAP value;
-  - [ ] absolute SHAP;
-  - [ ] P1 DeltaScore;
-  - [ ] absolute DeltaScore.
-- [ ] Confirm the later analysis will compare:
+- [x] Define fields for:
+  - [x] sequence ID;
+  - [x] predictor;
+  - [x] residue position;
+  - [x] residue;
+  - [x] SHAP value;
+  - [x] absolute SHAP;
+  - [x] P1 DeltaScore;
+  - [x] absolute DeltaScore.
+- [x] Confirm the later analysis will compare:
 
   `|SHAP_i|` vs `|DeltaScore_i|`
 
-- [ ] Prepare the code/module boundary for KernelSHAP.
-- [ ] Do not make the complete SHAP experiment a blocker for PP1.
+- [x] Prepare the code/module boundary for KernelSHAP.
+- [x] Do not make the complete SHAP experiment a blocker for PP1.
 
 ### Deliverable
 - SHAP-faithfulness implementation plan/schema.
@@ -1141,7 +1141,7 @@ Preliminary BCS
 Reproducible pilot results
 ```
 
-A concise explanation for PP1 is:
+gitA concise explanation for PP1 is:
 
 > “I have implemented the core AOP-BCS behavioural-audit pipeline. The system prepares a validated AOP subject set, identifies the fixed W/Y/H/M/C redox positions, generates and validates P1, P2 and P3 one-position perturbations, sends original and perturbed sequences through available AOP predictors, records score changes and prediction flips, and calculates preliminary IR, FSR and BCS values. The full five-predictor experiment, statistical hypothesis testing and SHAP-faithfulness analysis continue after PP1.”
 

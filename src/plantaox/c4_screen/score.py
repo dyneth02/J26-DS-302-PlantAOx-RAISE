@@ -34,3 +34,16 @@ def score_candidates(joined: pd.DataFrame, memberships: pd.DataFrame, candidates
         ordered = eligible.loc[indices].sort_values(["CS", "sequence"], ascending=[False, True], kind="stable")
         eligible.loc[ordered.index, "rank"] = range(1, len(ordered) + 1)
     return eligible.sort_values(["plant", "rank", "sequence"], kind="stable").reset_index(drop=True)
+
+
+def weight_sweep(joined: pd.DataFrame, memberships: pd.DataFrame, candidates: pd.DataFrame,
+                 config: dict, w1_values=(0.25, 0.5, 0.75)) -> dict[float, pd.DataFrame]:
+    """Run deterministic sensitivity scores; the configured default is not mutated."""
+    results = {}
+    for w1 in w1_values:
+        weight = float(w1)
+        if weight not in (0.25, 0.5, 0.75):
+            raise ValueError("weight sweep supports w1 in {0.25, 0.5, 0.75}")
+        sweep_config = {**config, "weights": {"w1": weight, "w2": 1.0 - weight}}
+        results[weight] = score_candidates(joined, memberships, candidates, sweep_config)
+    return results

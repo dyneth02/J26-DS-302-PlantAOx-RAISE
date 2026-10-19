@@ -24,8 +24,8 @@ export const COMPONENT_REGISTRY: ComponentDescriptor[] = [
     title: "AOP-ProCon",
     shortTitle: "C1 — AOP-ProCon",
     ownerNote: "Mechanism-aware representation and prototype analysis",
-    status: "not_integrated",
-    basePath: null,
+    status: "implemented",
+    basePath: "/c1",
   },
   {
     id: "c2_pu",
