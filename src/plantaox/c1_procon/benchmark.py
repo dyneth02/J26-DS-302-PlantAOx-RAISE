@@ -65,3 +65,15 @@ def load_benchmark(path: str | Path | None = None, verify: bool = True) -> pd.Da
         if found != EXPECTED_FINGERPRINT:
             raise BenchmarkMismatchError(f"fingerprint {found} is not the frozen S2 build v3 ({EXPECTED_FINGERPRINT})")
     return s2
+
+
+def strict_pool(s2: pd.DataFrame) -> pd.DataFrame:
+    """Mechanism-active peptides with per-peptide (strict) evidence, with the 0/1 target ``y``.
+
+    ``y`` is 1 for MC-active peptides (labels ``MC`` or ``FRS;MC``) and 0 for FRS-only peptides. GEN (mechanism not
+    established) is never part of this pool, and it does not mean inactive.
+    """
+    mech = s2[s2["labels"].str.contains("FRS|MC")]
+    pool = mech[mech["strict_evidence"].astype(str) == "True"].copy()
+    pool["y"] = pool["labels"].str.contains("MC").astype(int)
+    return pool.reset_index(drop=True)
