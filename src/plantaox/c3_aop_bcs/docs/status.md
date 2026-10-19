@@ -108,16 +108,22 @@
 - Added a checksum-backed pilot report recording the frozen seed, selection algorithm, source and output hashes, coverage counts, and a passing validation result; regeneration is byte-identical and independent of candidate row order.
 - Confirmed all four focused Task 3.25 tests pass. The broader C3 run passed 95 tests and 74 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Re-audited the BCS3 restart boundary after Tasks 3.24–3.25: every normalization, pilot-selection, pilot-data, and upstream scored-data prerequisite exists and is tracked; Git object integrity passes; all five Task 3.25 code/test/data objects exactly match the previously validated BCS2 implementation; and the combined scoring, normalization, and pilot test set passes 16 tests with six subtests.
+- Implemented the Task 3.26 DeltaScore pipeline with the frozen definition `Score(original) - Score(perturbed)` and a separately stored absolute magnitude for every pilot perturbation.
+- Joined all 449 versioned pilot variants to the committed scored dataset by unique variant ID, revalidated every perturbation field, and applied the Task 3.24 pointwise normalization contract before calculating differences.
+- Exported `c3_aop_bcs_pp1_pilot_dummy_delta_scores_v1` covering 20 subjects and 54 P1, 150 P2, and 245 P3 perturbations; 278 signed differences are positive, 171 are negative, and none are zero for the software dummy.
+- Added a checksum-backed DeltaScore report with score definition and interpretation, source/output hashes, counts and ranges, three passing hand-checked examples, and automatic validation of finite values and absolute magnitudes.
+- Preserved the non-experimental boundary throughout: every row is labelled software-testing-only and the report explicitly states that the dummy DeltaScores are not scientific results.
+- Confirmed all four focused Task 3.26 tests pass with seven subtests. The broader C3 run passed 99 tests and 81 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.25 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.26 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.26: Calculate DeltaScore
+## Next task — Task 3.27: Detect prediction flips and calculate PFR
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- compute `DeltaScore = Score(original) - Score(perturbed)` for every scored perturbation;
-- store the corresponding absolute DeltaScore value;
-- preserve predictor, sequence, perturbation, and testing-status provenance;
-- verify the calculation using explicit hand-checked examples before generating the versioned result artifact.
+- define and record the applicable decision threshold for each scored predictor;
+- classify the original and perturbed scores and detect label changes;
+- store a per-perturbation flip indicator;
+- calculate Prediction Flip Rate overall and by perturbation type while preserving the dummy run's software-only status.

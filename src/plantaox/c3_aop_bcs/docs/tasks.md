@@ -680,15 +680,15 @@
 ## Task 3.26 — Calculate DeltaScore
 
 ### Subtasks
-- [ ] For each perturbation compute:
+- [x] For each perturbation compute:
 
   `DeltaScore_i = Score(original) - Score(perturbed_i)`
 
-- [ ] Also store:
+- [x] Also store:
 
   `|DeltaScore_i|`
 
-- [ ] Verify calculations using hand-checked examples.
+- [x] Verify calculations using hand-checked examples.
 
 ### Deliverable
 - Per-position DeltaScore results.
