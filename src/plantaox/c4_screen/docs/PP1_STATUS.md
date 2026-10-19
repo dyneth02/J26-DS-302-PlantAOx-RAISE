@@ -19,7 +19,7 @@
 
 - The reference cloud is a 500-sequence, composition-biased synthetic placeholder with seed 42 and source `mock_cloud`.
 - C1 SIM, C2 probability, and C3 BCS stand-ins have source `mock`. Any dashboard/card/summary generated from these values must display a permanent mock notice.
-- Injected mock examples are demonstrations, not findings. Do not report PARRS, Recall@K, MRR, EF@1%, or ARR on mock signals. PDSS is not implemented; its denominator concern remains open.
+- Injected mock examples are demonstrations, not findings. No retrieval-evaluation results are present for mock inputs. The PDSS method remains deferred pending a meaningful real-reference definition.
 
 ## Production verification — 19 October 2026
 
@@ -55,7 +55,7 @@ Tier fractions by plant and length bin:
 | Soybean | 3–10 | 11,763 | 53.90% | 31.19% | 14.91% |
 | Soybean | 11–20 | 1,705 | 64.34% | 18.83% | 16.83% |
 
-No plant exceeded the >95% single-tier degeneracy criterion (maximum fraction: rice 56.99%). The separately requested joint mean-centering sensitivity was run; its overall T1/T2/T3 fractions were 9.41%/18.87%/71.73%. Production thresholds and tiers remain unchanged. All signal sources are `mock`; cloud source is `mock_cloud`. Ten injected demonstration sequences were tagged, all among rice Tier 3 abstentions. They are demonstrations, not evidence; no PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS was computed.
+No plant exceeded the >95% single-tier degeneracy criterion (maximum fraction: rice 56.99%). The separately requested joint mean-centering sensitivity was run; its overall T1/T2/T3 fractions were 9.41%/18.87%/71.73%. Production thresholds and tiers remain unchanged. All signal sources are `mock`; cloud source is `mock_cloud`. Ten injected demonstration sequences were tagged, all among rice Tier 3 abstentions. They are demonstrations, not evidence; no retrieval-performance result is reported from mock inputs.
 
 Three highest-CS card examples (MOCK signals/cloud):
 
@@ -67,4 +67,14 @@ Three highest-CS card examples (MOCK signals/cloud):
 
 Abstained examples (Tier 3, RED, CS=0): olive `AEATDAQ`; olive `AEG`; rice `AGMEEVDMDEEVRPEF` (injected demonstration case).
 
-`tests/c4_screen` passed **12 tests**. Two consecutive `python -m plantaox.c4_screen.run all` runs matched SHA-256 for all 32 compared pipeline outputs. The manifest `data/interim/c4_screen/c4_output_manifest.json` checksums generated output files and records SHA-256 only for each of the five handoff inputs; none of the binary handoff files are copied into the manifest or Git. Diagnostics include per-plant Spearman `d_AD`/length correlations and length distributions. A separate joint mean-centering sensitivity yielded overall T1/T2/T3 fractions 9.41%/18.87%/71.73%; baseline tiers and thresholds were not changed. `pytest tests/c4_screen`: 12 passed; the full repository suite was not run. See `PP1_NUMBERS.md` for slide-ready figures.
+`tests/c4_screen` passed **15 tests**. Two consecutive `python -m plantaox.c4_screen.run all --reuse-inputs --signals mock` runs matched SHA-256 for all 35 compared generated files (34 output-manifest entries plus the manifest). The manifest `data/interim/c4_screen/c4_output_manifest.json` checksums generated output files and records SHA-256 only for each of the five handoff inputs; none of the binary handoff files are copied into the manifest or Git. Diagnostics include per-plant Spearman `d_AD`/length correlations and length distributions. A separate joint mean-centering sensitivity yielded overall T1/T2/T3 fractions 9.41%/18.87%/71.73%; baseline tiers and thresholds were not changed. `pytest tests/c4_screen`: 15 passed; the full repository suite was not run. See `PP1_NUMBERS.md` for slide-ready figures.
+
+
+## C4 PP1 follow-up freeze work — 19 October 2026
+
+- A read-only search found C2 frozen PP1 CD-HIT representatives. A 912-sequence E1/E2, standard-alphabet, 3–20 AA list is staged at `data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv` (E1=478, E2=434). Source label is provisional C2 baseline v1, pending replacement by C1 AOP-BenchPos. Its SHA-256 is recorded in `decision_log.md`. These sequences are not embedded yet; production remains on MOCK cloud N=500.
+- Cached rice performance (N=140,813): AD tiering 18.562604 s; mock-signal scoring/ranking 1.644521 s; total 20.207124 s. This is one host/run, below the five-minute NFR2 target.
+- `all --reuse-inputs --signals mock` and `all --reuse-inputs --signals dummy` are supported; dummy aliases mock. Two mock runs had matching SHA-256 across 35 files. The `--reuse-inputs` mode skips network proteome download and candidate regeneration, preserving Gate 1 outputs.
+- C4-only tests: 15 passed. A seeded 2,000-row synthetic cloud-near-positive sandbox and mock/real signal-source swap fixture are tests only. Mock signal correlations were measured without tuning; details are in the technical report.
+- Freeze docs, acceptance reports and handoff draft are listed in `C4_PP1_HANDOVER.md`; integrity hashes are in `C4_PP1_FREEZE_MANIFEST.json`. No external message has been sent.
+- Checkout branch is `feat/c4-Screen1`; the requested `c4/pp1-final` branch was not checked out, and branch switching was prohibited. Release tag `c4-pp1-v2` points to this current branch's freeze commit.
