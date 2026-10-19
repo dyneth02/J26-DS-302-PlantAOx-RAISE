@@ -68,3 +68,9 @@ Three highest-CS card examples (MOCK signals/cloud):
 Abstained examples (Tier 3, RED, CS=0): olive `AEATDAQ`; olive `AEG`; rice `AGMEEVDMDEEVRPEF` (injected demonstration case).
 
 `tests/c4_screen` passed **12 tests**. Two consecutive `python -m plantaox.c4_screen.run all` runs matched SHA-256 for all 32 compared pipeline outputs. The manifest `data/interim/c4_screen/c4_output_manifest.json` checksums generated output files and records SHA-256 only for each of the five handoff inputs; none of the binary handoff files are copied into the manifest or Git. Diagnostics include per-plant Spearman `d_AD`/length correlations and length distributions. A separate joint mean-centering sensitivity yielded overall T1/T2/T3 fractions 9.41%/18.87%/71.73%; baseline tiers and thresholds were not changed. `pytest tests/c4_screen`: 12 passed; the full repository suite was not run. See `PP1_NUMBERS.md` for slide-ready figures.
+
+## Application integration status — 19 October 2026
+
+- **Shared route integration: Done.** The read-only C4 API is mounted under `/api/v1`; the React app registers the C4 feature routes and `/c4` component entry. These changes are in commit `32eecde`.
+- **API/platform verification: Done.** The C4 API fixture tests and shared platform route test passed together: 10 passed.
+- **Frontend build/test acceptance: In Progress.** Frontend tests and production build have not been verified. `npm ci --offline` could not complete because `xml-name-validator@5.0.0` is absent from the local cache (`ENOTCACHED`). This does not change the pipeline evidence above.

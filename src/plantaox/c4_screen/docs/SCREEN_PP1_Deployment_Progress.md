@@ -84,4 +84,5 @@ Use **Done** only when the inventory's defined output and acceptance evidence ar
 
 | Workstream | Status | Evidence / next step |
 |---|---|---|
-| C4 frontend feature, API client, and route registration | In Progress | C4 views and route/component registration are implemented under `frontend/src/features/c4-screen/`; shared API helpers are present because existing app imports require them. Backend fixture/platform tests pass (10 passed). Frontend tests/build are unverified because `npm ci --offline` could not fetch uncached `xml-name-validator@5.0.0` (`ENOTCACHED`); rerun after dependencies are available. |
+| Shared API router + frontend registry/routes | Done | C4 API router is included in `backend/app/api/v1/router.py`; `frontend/src/app/router.tsx` spreads `c4ScreenRoutes` and `frontend/src/config/components.ts` registers `/c4`. API fixture/platform checks: 10 passed. Commit: `32eecde`. |
+| C4 frontend feature acceptance | In Progress | C4 views and shared API helpers are committed under `frontend/src/features/c4-screen/` and `frontend/src/lib/api/`. Frontend tests/build remain unverified because offline dependency installation failed: `xml-name-validator@5.0.0` is uncached (`ENOTCACHED`). Keep Bucket 6 unchecked until those checks run. |
