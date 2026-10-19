@@ -12,7 +12,7 @@
 | Proteome inputs | Done for Gate 1 | Four unchanged reviewed FASTAs are in `data/raw/c4_screen/proteomes/`; original UniProt-named downloads are retained under `source_downloads/`. URL, access date, file size, SHA-256, release, and counts are in `metadata/c4_data_registry.csv`; exclusions are in `metadata/c4_protein_exclusions.csv`. |
 | Dependencies and environment | In Progress | The requested fair-esm, biopython, pyteomics, pandas, pyarrow, scikit-learn, and pytest packages are installed in `.venv`, and `requirements.txt` now records the environment via `pip freeze`. CUDA is unavailable (`False`); the ESM-2 download remains incomplete and model loading is not verified. `tests/c4_screen/check_gpu.py` is a probe, not a pipeline acceptance test. |
 | Candidate generation (FR1 / Gate 1) | Done | `python -m plantaox.c4_screen.run all` generated candidate Parquet/FASTA, membership, funnel, and funnel-only summary. Five focused tests pass. A repeated full run produced byte-identical SHA-256 values for all nine outputs. All 152,259 sequences are unique and all 266,361 parent-coordinate provenance links were checked against the source FASTAs. Optional BIOPEP web comparison and C1/C2 handoff remain pending. |
-| Embeddings and AD tiers (FR2) | Pending | No ESM-2 embedding pipeline, reference cloud, fitted parameters, tier table, diagnostics, or validation evidence is present. |
+| Embeddings and AD tiers (FR2) | In Progress | The requested Colab/import workflow and provisional mock-cloud AD pipeline are being assessed. Per instruction, no ESM-2 model will be loaded or downloaded locally. Embedding artifact presence and schema are not yet verified. |
 | PDSS (FR3) | Pending | No implementation or results. Planned stretch/later analysis. |
 | Signal integration and combined score (FR4) | Pending | No C1/C2 signal contract, scoring, abstention, or dummy signal artifacts are present. |
 | Cross-predictor audit (FR5) | Pending | No implementation or predictor outputs are present. Later milestone. |
@@ -51,18 +51,19 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 - Open scientific decisions include the cloud-distance calibration and `d_norm` definition, the potentially unstable PDSS denominator, BCS warning/strata thresholds, C1 embedding recipe confirmation, and disjointness of reference and held-out sets. Resolve and record before treating resulting numbers as validated.
 - The proposal and analysis include target metrics (PARRS, PDSS, ARR, Recall@K, MRR, EF@1%) and novelty statements. They are planned outcomes and claims to validate, not current results.
 
-## Current work session
+## Current work session — embedding/AD and mock integration
 
-- **Done:** Gate 1 implementation, deterministic full run (all nine artifacts byte-identical on repeat), actual protein exclusions/funnel counts, output integrity checks across every candidate provenance link, and focused tests (5 passed).
-- **Pending:** Optional one-protein BIOPEP-UWM comparison and delivery of `candidates.fasta` to C1/C2 owners. The planner and `C4_Interface_Spec_v0.1_PROVISIONAL.md` named in the request were not found in this clone.
-- **Out of scope / Pending:** ESM embeddings, AD tiers, scoring, and frontend. CUDA is unavailable and model weights remain unverified.
+- **Done:** Gate 1 remains complete and unchanged. The interface spec and Colab notebook named for this phase are present in the working tree.
+- **In Progress:** Validate whether Colab embedding/cloud artifacts exist and whether their shapes, index order, and manifest hashes meet the requested import contract. Use synthetic fixtures if the files are absent.
+- **Pending:** Cloud metadata, AD tiers and diagnostics, mock signal validation, scoring/cards, summary/dashboard, and consolidated `all` stage. Each stays blocked on its direct prerequisites only.
+- **Constraint:** Do not load, download, or run ESM-2 locally. The requested embedding recipe remains a C4 assumption pending C1 confirmation. Do not compute evaluation metrics on mock signals.
 
 ## Next actions
 
-1. Optionally spot-check one protein against BIOPEP-UWM and record any observed differences.
-2. Share `data/interim/c4_screen/candidates.fasta` with C1/C2 owners through the approved project workflow.
-3. Confirm the ESM-2 model/layer/pooling contract before starting embeddings/AD.
-4. Keep any future mock signal outputs labelled `source="mock"`; do not calculate evaluation metrics on them.
+1. Inspect the interface contract, Colab notebook, mock signal utility, and cached embedding/cloud artifacts.
+2. Import embeddings only after verifying the required candidate/index/manifest contracts; report missing files exactly.
+3. Implement the reference-cloud metadata, AD, and downstream mock-only demo stages with deterministic synthetic tests where cached arrays are absent.
+4. Keep every mock signal/cloud output visibly labelled and exclude mock data from retrieval-performance metrics.
 
 ## Status rule
 
