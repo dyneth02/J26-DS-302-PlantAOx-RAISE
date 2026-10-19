@@ -136,11 +136,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.29 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.30: Calculate preliminary BCS
+## Current task — Task 3.30: Calculate preliminary BCS
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - combine the Task 3.28 IR and Task 3.29 FSR using `BCS = IR × (1 - FSR)`;
 - verify that the result is within the expected `[0,1]` range;
