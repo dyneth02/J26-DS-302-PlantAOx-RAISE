@@ -109,16 +109,30 @@ def test_score_decreases_with_greater_ad_distance_when_other_signals_are_fixed()
 def test_weight_sweep_runs_and_synthetic_planted_set_ranks_above_random():
     # Test-only 2,000-row sandbox; these constructed records are not project outputs.
     rng = np.random.default_rng(42)
-    n, planted = 2000, 20
-    sequences = [f"A{'C' if i % 2 else 'D'}{'E' if i % 3 else 'F'}{i:04d}" for i in range(n)]
-    joined = pd.DataFrame({"peptide_id": [f"p{i:04d}" for i in range(n)], "sequence": sequences,
-        "d_norm": np.r_[rng.uniform(0.0, .2, planted), rng.uniform(.2, 1.0, n-planted)],
-        "tier": np.r_[np.ones(planted, dtype=int), rng.choice([1, 2, 3], n-planted)],
-        "embedded": True, "SIM_C1": np.r_[rng.uniform(.85, 1, planted), rng.uniform(0, .8, n-planted)],
-        "PROB_C2": np.r_[rng.uniform(.85, 1, planted), rng.uniform(0, .8, n-planted)],
-        "SIM_C1_source": "mock", "PROB_C2_source": "mock", "cloud_source": "mock_cloud"})
-    memberships = pd.DataFrame({"peptide_id": joined.peptide_id, "plant": "synthetic"})
-    candidates = joined[["peptide_id", "sequence"]].copy()
+    n, planted, dim = 2000, 20, 16
+    alphabet = "ACDEFGHIKLMNPQRSTVWY"
+    def encode(i):
+        chars = []
+        for _ in range(6):
+            chars.append(alphabet[i % len(alphabet)])
+            i //= len(alphabet)
+        return "".join(chars)
+    sequences = [encode(i) for i in range(n)]
+    ids = [f"p{i:04d}" for i in range(n)]
+    center = np.r_[1.0, np.zeros(dim - 1)]
+    cloud = (center + rng.normal(0, .01, size=(80, dim))).astype(np.float32)
+    # The first 20 planted positives are close to the synthetic cloud centroid;
+    # the remaining candidates point away from it and serve as random negatives.
+    vectors = np.vstack([center + rng.normal(0, .005, size=(planted, dim)),
+                         -center + rng.normal(0, .05, size=(n-planted, dim))]).astype(np.float32)
+    candidates = pd.DataFrame({"peptide_id": ids, "sequence": sequences})
+    tiers, _, _ = assign_tiers(candidates, candidates.copy(), vectors, cloud, cloud_source="mock_cloud")
+    joined = tiers.copy()
+    joined["SIM_C1"] = np.r_[rng.uniform(.85, 1, planted), rng.uniform(0, .4, n-planted)]
+    joined["PROB_C2"] = np.r_[rng.uniform(.85, 1, planted), rng.uniform(0, .4, n-planted)]
+    joined["SIM_C1_source"] = "mock"
+    joined["PROB_C2_source"] = "mock"
+    memberships = pd.DataFrame({"peptide_id": ids, "plant": "synthetic"})
     default = {"weights": {"w1": .5, "w2": .5}}
     results = weight_sweep(joined, memberships, candidates, default)
     assert set(results) == {.25, .5, .75}
@@ -127,7 +141,7 @@ def test_weight_sweep_runs_and_synthetic_planted_set_ranks_above_random():
         assert ranked.CS.between(0, 1).all()
         assert ranked.loc[ranked.tier == 3, "CS"].eq(0).all()
         top = set(ranked.nsmallest(planted, "rank").peptide_id)
-        assert len(top.intersection(joined.head(planted).peptide_id)) >= planted * .9
+        assert top == set(ids[:planted])
 
 
 def test_sequence_key_real_signal_swap_in_procedure(tmp_path):
