@@ -1,0 +1,318 @@
+{
+  "schema_version": "c3_pu_aop_five_model_audit_v1",
+  "audit_date": "2026-10-19",
+  "audit_scope": "Read-only handoff-readiness audit of the five Component 2 models accepted by c2_pp1_freeze_v1",
+  "component_2_mutation_policy": "Component 2 files were inspected but not modified",
+  "overall_status": "blocked_for_verified_c3_scoring",
+  "overall_finding": "The repository documents five technically accepted fold-0 model configurations, but this checkout lacks all five checkpoint binaries and the fold-0 feature cache. No model has a C3-reproducible reference-score fixture, so none can yet be marked integrated.",
+  "source_evidence": [
+    {
+      "path": "data/processed/c2_pu/C2_PP1_FREEZE_MANIFEST.json",
+      "sha256": "f22ce2806d7c8bc2868482611d99c24d38778e8fb2a22544bfefc92bc015870b",
+      "role": "frozen release contract and accepted model list"
+    },
+    {
+      "path": "data/processed/c2_pu/C2_PP1_ARTIFACT_INVENTORY.csv",
+      "sha256": "8df86f5865452d5453a7e4adee322a058918ea7999dbff932e4d88b322288ed2",
+      "role": "historical artifact inventory from the Component 2 freeze environment"
+    },
+    {
+      "path": "data/processed/c2_pu/fr3_descriptor_schema.json",
+      "sha256": "f10ec94620890ec8d19e05fc71a03b77a686c234411eb565d92347cc31c86c54",
+      "role": "15-descriptor schema"
+    },
+    {
+      "path": "data/processed/c2_pu/fr3_fusion_schema.json",
+      "sha256": "397d0aaeacd3133271c08809fe5158f05dfa2a8abcc2fdb6c8f928419af1f17d",
+      "role": "495-feature order"
+    },
+    {
+      "path": "data/processed/c2_pu/fr3_fusion_scalers.json",
+      "sha256": "83a414b29e1ba057e36a9de4fb1efb5858933ae2feb2c75713555fddcbb90169",
+      "role": "fold-specific z-score parameters"
+    },
+    {
+      "path": "data/processed/c2_pu/fr4_baseline_model_provenance.json",
+      "sha256": "42a17463e6a66da9745bfc6426de32e4eb1e9fb597c43878ef10ecab2dc62920",
+      "role": "accepted model provenance"
+    },
+    {
+      "path": "data/processed/c2_pu/fr4_baseline_evaluation_fold0.json",
+      "sha256": "23f0b8dac7e794f6c9a5e4a678df6607b19b17c1d7fba51d0c93302fc307a458",
+      "role": "common fold-0 evaluation and score semantics"
+    }
+  ],
+  "shared_preprocessing_contract": {
+    "input": "uppercase peptide using only the 20 standard amino acids",
+    "length_range_inclusive": [3, 50],
+    "feature_schema": "fusion_v1",
+    "feature_dimension": 495,
+    "feature_order": "480 ESM-2 dimensions followed by 15 descriptors in descriptors_v1 order",
+    "esm2": {
+      "model": "esm2_t12_35M_UR50D",
+      "layer": 12,
+      "dimension": 480,
+      "pooling": "mean over residue representations only; BOS, EOS, and PAD excluded",
+      "dtype": "float32",
+      "inference_mode": "eval and no_grad"
+    },
+    "descriptor_names": [
+      "length",
+      "molecular_weight",
+      "net_charge_ph7",
+      "isoelectric_point",
+      "gravy",
+      "aromaticity",
+      "instability_index",
+      "aliphatic_index",
+      "hydrophobic_moment",
+      "frac_charged",
+      "frac_polar",
+      "frac_hydrophobic",
+      "frac_positive",
+      "frac_negative",
+      "frac_proline"
+    ],
+    "scaling": "apply fold-0 mean and standard deviation from fr3_fusion_scalers.json; do not refit",
+    "score_orientation": "higher means stronger support for the positive/AOP class",
+    "evaluation_threshold": 0.5,
+    "calibration_warning": "Scores are not calibrated biological probabilities"
+  },
+  "models": [
+    {
+      "model_id": "M1",
+      "name": "PN",
+      "architecture": "BinaryMlp 495->128->64->1",
+      "training_positive_tiers": "E1",
+      "training_unlabeled_policy": "C1 treated as assumed negative, not a confirmed inactive class",
+      "fold_id": 0,
+      "checkpoint_path": "data/interim/c2_pu/fr4_pn_baseline_runs/fr4_pn_baseline_fold0__20261014T223957Z/checkpoint_best.pt",
+      "checkpoint_sha256": "1c5208ac97de0ecd6d29107b114cd9fd424593be725acaa8304465f4100cae1c",
+      "checkpoint_available_in_current_checkout": false,
+      "summary_path": "data/processed/c2_pu/fr4_pn_baseline_fold0_summary.json",
+      "summary_sha256": "2fa5f4b9258bcc133e9a295c6c9c5ac5f63f175580d4ef81460551a1b414d034",
+      "native_score": "sigmoid probability-like output from the single logit",
+      "bounded_score": "same as native score in [0,1]",
+      "assay_supported_fold0": {
+        "n_positive": 124,
+        "n_inactive_control": 38,
+        "mcc": -0.18325866528039952,
+        "auroc": 0.2541383701188455
+      },
+      "c3_integration_status": "not_integrated"
+    },
+    {
+      "model_id": "M2",
+      "name": "Direct-clamped nnPU",
+      "architecture": "BinaryMlp 495->128->64->1",
+      "training_positive_tiers": "E1+E2",
+      "training_unlabeled_policy": "C1 remains unlabeled",
+      "fold_id": 0,
+      "positive_prior": 0.1,
+      "positive_prior_status": "provisional",
+      "checkpoint_path": "data/interim/c2_pu/fr4_nnpu_baseline_runs/fr4_nnpu_baseline_fold0__20261014T223923Z/checkpoint_best.pt",
+      "checkpoint_sha256": "37eb6840143a9eabe336ca5ff7ad5b08380132707fb2ce5b089ad6ab46e3f2bc",
+      "checkpoint_available_in_current_checkout": false,
+      "summary_path": "data/processed/c2_pu/fr4_nnpu_baseline_fold0_summary.json",
+      "summary_sha256": "46a8ea4ae107b7bdac8a85a2f54d623f54d8d5a3fd69c6869270dd8323096e47",
+      "native_score": "sigmoid probability-like output from the single logit",
+      "bounded_score": "same as native score in [0,1]",
+      "assay_supported_fold0": {
+        "n_positive": 124,
+        "n_inactive_control": 38,
+        "mcc": -0.04362827256608702,
+        "auroc": 0.32353565365025466
+      },
+      "c3_integration_status": "not_integrated"
+    },
+    {
+      "model_id": "M3",
+      "name": "Corrective nnPU",
+      "architecture": "BinaryMlp 495->128->64->1",
+      "training_positive_tiers": "E1+E2",
+      "training_unlabeled_policy": "C1 remains unlabeled",
+      "fold_id": 0,
+      "positive_prior": 0.1,
+      "positive_prior_status": "provisional",
+      "beta": 0.0,
+      "gamma": 1.0,
+      "checkpoint_path": "data/interim/c2_pu/fr4_nnpu_corrective_runs/fr4_nnpu_corrective_fold0__20261014T221912Z/checkpoint_best.pt",
+      "checkpoint_sha256": "d4446b4dff90b1d1ce3d2c03fa314bd0a65134e6621cf3c01f3a9332442307dd",
+      "checkpoint_available_in_current_checkout": false,
+      "summary_path": "data/processed/c2_pu/fr4_nnpu_corrective_fold0_summary.json",
+      "summary_sha256": "4d85b396311aa20ef37cde2118cdffa1fa5e25388b6d31dd9a60028cd9a11099",
+      "native_score": "sigmoid probability-like output from the single logit",
+      "bounded_score": "same as native score in [0,1]",
+      "assay_supported_fold0": {
+        "n_positive": 124,
+        "n_inactive_control": 38,
+        "mcc": -0.2498140237465507,
+        "auroc": 0.32236842105263164
+      },
+      "c3_integration_status": "not_integrated"
+    },
+    {
+      "model_id": "M4",
+      "name": "Two-Step PU",
+      "architecture": "pulearn + LogisticRegression",
+      "training_positive_tiers": "E1+E2",
+      "training_unlabeled_policy": "C1 remains unlabeled",
+      "fold_id": 0,
+      "estimated_c": 0.708530843257904,
+      "checkpoint_path": "data/interim/c2_pu/fr4_two_step_pu_baseline_runs/fr4_two_step_pu_baseline_fold0__20261014T224037Z/checkpoint_best.joblib",
+      "checkpoint_sha256": "975f1414e935f7080ea69005dea7a6a98a654efbd07559e9e2be635b94d65978",
+      "checkpoint_available_in_current_checkout": false,
+      "summary_path": "data/processed/c2_pu/fr4_two_step_pu_baseline_fold0_summary.json",
+      "summary_sha256": "c5d4806cd5f9a4f32c99c3d53893bce7316ec73508caadd836c2dcf3d990ad81",
+      "native_score": "Elkan-Noto corrected class-1 score; finite values can exceed 1",
+      "bounded_score": "clip native score to [0,1] only for threshold and Brier calculations",
+      "raw_out_of_bounds_fraction_all_evaluation_pools": 0.063522,
+      "assay_supported_fold0": {
+        "n_positive": 124,
+        "n_inactive_control": 38,
+        "mcc": -0.16938919531853894,
+        "auroc": 0.28183361629881154
+      },
+      "c3_integration_status": "not_integrated"
+    },
+    {
+      "model_id": "M5",
+      "name": "PU-Bagging",
+      "architecture": "pulearn + LogisticRegression",
+      "training_positive_tiers": "E1+E2",
+      "training_unlabeled_policy": "C1 remains unlabeled",
+      "fold_id": 0,
+      "accepted_run_n_estimators": 10,
+      "accepted_run_max_samples": 1.0,
+      "checkpoint_path": "data/interim/c2_pu/fr4_pu_bagging_baseline_runs/fr4_pu_bagging_baseline_fold0__20261014T224032Z/checkpoint_best.joblib",
+      "checkpoint_sha256": "2d11c0c0455122f8e52db0b9fc401d2dc5a14708c73858183f98bbf4f590aee5",
+      "checkpoint_available_in_current_checkout": false,
+      "summary_path": "data/processed/c2_pu/fr4_pu_bagging_baseline_fold0_summary.json",
+      "summary_sha256": "e89905455989213d3fb98e856d37864ec32bf3324550faeb7189c7762a822f31",
+      "native_score": "class-1 predict_proba output",
+      "bounded_score": "same as native score in [0,1]",
+      "configuration_discrepancy": "The accepted run summary records n_estimators=10, while IMPLEMENTATION_STATUS.md and the PP1 planner record n_estimators=100",
+      "assay_supported_fold0": {
+        "n_positive": 124,
+        "n_inactive_control": 38,
+        "mcc": -0.24953493707741828,
+        "auroc": 0.30050933786078105
+      },
+      "c3_integration_status": "not_integrated"
+    }
+  ],
+  "current_checkout": {
+    "all_five_checkpoint_paths_exist": false,
+    "fold0_scaled_feature_cache_path": "data/interim/c2_pu/fr3_fold0_scaled_features.npz",
+    "fold0_scaled_feature_cache_exists": false,
+    "documented_external_backup_root": "C:/Users/metal/Documents/SLIIT Research/Data/C2-PP1-baseline-data",
+    "documented_external_backup_root_exists_on_current_machine": false,
+    "historical_inventory_warning": "available_locally=true describes the freeze author's environment and is not evidence that the artifact exists in this checkout",
+    "prototype_is_not_substitute": "prototype/artifacts/c2/pu_model.joblib is explicitly prototype_mode and descriptor-only"
+  },
+  "environment_comparison": {
+    "component_2_recorded": {
+      "python": "3.11.14",
+      "numpy": "2.4.6",
+      "pandas": "3.0.5",
+      "pyarrow": "25.0.1",
+      "torch": "2.14.0+cpu",
+      "scikit_learn": "1.9.0",
+      "pulearn": "0.2.0",
+      "joblib": "1.6.0"
+    },
+    "current_project_venv": {
+      "python": "3.13.7",
+      "numpy": "2.4.6",
+      "pandas": "3.0.6",
+      "torch": "2.14.1",
+      "scikit_learn": "1.9.0",
+      "pulearn": "0.2.0",
+      "joblib": "1.6.0",
+      "fair_esm": "missing"
+    },
+    "exact_reproduction_status": "not_verified"
+  },
+  "missing_or_unresolved": [
+    {
+      "id": "C2-HANDOFF-01",
+      "severity": "blocking",
+      "applies_to": ["M1", "M2", "M3", "M4", "M5"],
+      "missing": "The five checkpoint binaries are absent from the current checkout",
+      "needed": "Provide the exact checkpoint files and verify each against the frozen SHA-256"
+    },
+    {
+      "id": "C2-HANDOFF-02",
+      "severity": "blocking",
+      "applies_to": ["M1", "M2", "M3", "M4", "M5"],
+      "missing": "No per-model reference fixture gives a peptide, expected native score, and numerical tolerance",
+      "needed": "Export at least one independently generated reference score for every accepted model"
+    },
+    {
+      "id": "C2-HANDOFF-03",
+      "severity": "blocking_for_new_sequence_features",
+      "applies_to": ["M1", "M2", "M3", "M4", "M5"],
+      "missing": "fair-esm is not declared in requirements.txt and is not installed in the current project environment",
+      "needed": "Freeze the fair-esm package/version and make the ESM-2 model weights available reproducibly"
+    },
+    {
+      "id": "C2-HANDOFF-04",
+      "severity": "high",
+      "applies_to": ["M1", "M2", "M3", "M4", "M5"],
+      "missing": "The pretrained ESM-2 weight identity/hash and portable cache provenance are not included in the freeze manifest",
+      "needed": "Record the exact pretrained weight artifact identity, retrieval method, and checksum"
+    },
+    {
+      "id": "C2-HANDOFF-05",
+      "severity": "high",
+      "applies_to": ["M5"],
+      "missing": "PU-Bagging estimator count conflicts across accepted run evidence and planning/status documentation",
+      "needed": "Component 2 must confirm that the frozen M5 checkpoint is the 10-estimator run or replace/correct the handoff evidence"
+    },
+    {
+      "id": "C2-HANDOFF-06",
+      "severity": "high",
+      "applies_to": ["M1", "M2", "M3", "M4", "M5"],
+      "missing": "There is no frozen, read-only sequence-to-five-scores inference entry point",
+      "needed": "Provide or approve a wrapper that performs validation, feature extraction, fold-0 scaling, model loading, and native-score output"
+    },
+    {
+      "id": "C2-HANDOFF-07",
+      "severity": "decision_required",
+      "applies_to": ["M1", "M2", "M3", "M4", "M5"],
+      "missing": "No model is designated as the single PU-AOP handoff model, and no naming policy says whether all five should be exposed separately",
+      "needed": "Choose one model or approve five separately named predictor configurations"
+    },
+    {
+      "id": "C2-HANDOFF-08",
+      "severity": "high",
+      "applies_to": ["M1", "M2", "M3", "M4", "M5"],
+      "missing": "A formal batch-size, per-sequence failure, and resource policy is not frozen",
+      "needed": "Document batch behavior, CPU/GPU expectations, invalid-input handling, and partial-failure behavior"
+    },
+    {
+      "id": "C2-HANDOFF-09",
+      "severity": "decision_required",
+      "applies_to": ["M1", "M2", "M3", "M4", "M5"],
+      "missing": "Internal project use, redistribution, and publication authorization for model and ESM-2 artifacts is not recorded",
+      "needed": "Record the permitted C3/PP1 use and artifact-sharing boundary"
+    },
+    {
+      "id": "C2-HANDOFF-10",
+      "severity": "scientific_limitation",
+      "applies_to": ["M1", "M2", "M3", "M4", "M5"],
+      "missing": "Reliable biological discrimination, calibration, and five-fold validation have not been established",
+      "needed": "Retain the fold-0/technical-baseline label; do not claim validated AOP probability or superiority"
+    }
+  ],
+  "integration_gate": {
+    "ready": false,
+    "requirements": [
+      "All selected checkpoint bytes are present and hash-verified",
+      "The exact feature-extraction environment and ESM-2 weights are reproducible",
+      "Each selected model reproduces its independent reference score within tolerance",
+      "The PU-Bagging estimator-count contradiction is resolved",
+      "The model-selection/naming and use-authorization decisions are recorded"
+    ]
+  }
+}
