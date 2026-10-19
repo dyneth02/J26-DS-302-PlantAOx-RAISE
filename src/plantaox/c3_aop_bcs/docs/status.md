@@ -121,16 +121,22 @@
 - Added a checksum-backed PFR report with class counts, overall/type-specific denominators and flip counts, direction counts, boundary checks, and a policy requiring each future real predictor to provide its own verified decision rule.
 - Preserved the non-experimental boundary in every prediction-flip row and in the report; the dummy threshold and PFR must not be treated as scientific predictor results.
 - Confirmed all four focused Task 3.27 tests pass with three subtests. The broader C3 run passed 103 tests and 84 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.28 IR calculation directly from the versioned DeltaScore artifact, restricting eligibility to the 150 P2 conservative substitutions.
+- Loaded the frozen primary delta `0.05` from `research_config.toml` and applied the exact strict rule `|DeltaScore| < delta`; equality with `0.05` is explicitly verified as non-invariant.
+- Marked 140 P2 edits invariant and 10 non-invariant, producing a software-only dummy IR of `140/150 = 0.9333333333333333`.
+- Exported the provenance-preserving P2 invariance table and a checksum-backed report containing the metric definition, delta source, counts, rate, strict boundary checks, and validation results.
+- Preserved the non-experimental boundary in every invariance row and in the report; this dummy IR validates the metric pipeline and is not a scientific reliability result.
+- Confirmed all four focused Task 3.28 tests pass with three subtests. The broader C3 run passed 107 tests and 87 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.27 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.28 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.28: Calculate Invariance Rate (IR)
+## Next task — Task 3.29: Calculate False Sensitivity Rate (FSR)
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- restrict the calculation to P2 conservative substitutions;
+- restrict the calculation to P1 redox-disruption variants;
 - apply the configured primary threshold `delta = 0.05` to `|DeltaScore|`;
-- mark a P2 edit invariant only when `|DeltaScore| < delta`;
-- calculate preliminary IR while preserving the dummy run's software-only status.
+- mark a P1 edit as an insufficient response when `|DeltaScore| < delta`;
+- calculate preliminary FSR while preserving the dummy run's software-only status.

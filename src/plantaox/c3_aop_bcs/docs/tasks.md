@@ -712,12 +712,12 @@
 ## Task 3.28 — Calculate Invariance Rate (IR)
 
 ### Subtasks
-- [ ] Restrict the calculation to P2 variants.
-- [ ] Using the primary threshold `delta = 0.05`, mark a conservative edit invariant when:
+- [x] Restrict the calculation to P2 variants.
+- [x] Using the primary threshold `delta = 0.05`, mark a conservative edit invariant when:
 
   `|DeltaScore| < delta`
 
-- [ ] Calculate the fraction of invariant P2 edits.
+- [x] Calculate the fraction of invariant P2 edits.
 
 ### Deliverable
 - Preliminary IR for each working pilot predictor.
