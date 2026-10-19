@@ -124,11 +124,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.27 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.28: Calculate Invariance Rate (IR)
+## Current task — Task 3.28: Calculate Invariance Rate (IR)
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - restrict the calculation to P2 conservative substitutions;
 - apply the configured primary threshold `delta = 0.05` to `|DeltaScore|`;
