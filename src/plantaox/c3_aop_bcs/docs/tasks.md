@@ -727,12 +727,12 @@
 ## Task 3.29 — Calculate False Sensitivity Rate (FSR)
 
 ### Subtasks
-- [ ] Restrict the calculation to P1 variants.
-- [ ] Using `delta = 0.05`, mark insufficient response when:
+- [x] Restrict the calculation to P1 variants.
+- [x] Using `delta = 0.05`, mark insufficient response when:
 
   `|DeltaScore| < delta`
 
-- [ ] Calculate the fraction of P1 edits showing insufficient response.
+- [x] Calculate the fraction of P1 edits showing insufficient response.
 
 ### Deliverable
 - Preliminary FSR for each working pilot predictor.
