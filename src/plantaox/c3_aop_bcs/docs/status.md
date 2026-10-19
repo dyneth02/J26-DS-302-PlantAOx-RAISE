@@ -105,11 +105,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.24 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.25: Create the PP1 pilot subset
+## Current task — Task 3.25: Create the PP1 pilot subset
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - select approximately 10–30 peptides reproducibly using the fixed research seed;
 - represent multiple sequence lengths and redox-residue patterns;
