@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "pipeline_version": "c3_aop_bcs_false_sensitivity_rate_v1",
+  "dataset_version": "c3_aop_bcs_pp1_pilot_dummy_p1_insufficient_response_v1",
+  "created_on": "2026-10-19",
+  "source_dataset_version": "c3_aop_bcs_pp1_pilot_dummy_delta_scores_v1",
+  "definition": {
+    "eligible_perturbation_type": "P1",
+    "delta_source": "research_config.toml research.primary_delta",
+    "delta": 0.05,
+    "insufficient_response_rule": "absolute_delta_score < delta",
+    "boundary_rule": "an edit with absolute_delta_score == delta is a sufficient response",
+    "false_sensitivity_rate": "insufficient_response_p1_count / evaluated_p1_count"
+  },
+  "predictor": {
+    "predictor_id": "c3_software_smoke_test_dummy",
+    "display_name": "C3 software smoke-test dummy (NON-EXPERIMENTAL)",
+    "version": "1.0.0",
+    "scoring_method": "position_weighted_alphabetical_residue_rank_checksum",
+    "software_testing_only": true,
+    "scientific_result": false
+  },
+  "source": {
+    "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_delta_scores_v1.csv",
+    "record_count": 449,
+    "p1_record_count": 54,
+    "sha256": "d14e56a5cf0f1d7a6958e01628de64bcae4665217067d8c34a218ac94c8e9e55"
+  },
+  "result": {
+    "evaluated_p1_count": 54,
+    "insufficient_response_p1_count": 28,
+    "sufficient_response_p1_count": 26,
+    "false_sensitivity_rate": 0.5185185185185185
+  },
+  "boundary_checks": [
+    {
+      "absolute_delta_score": 0.049999999999999996,
+      "expected_insufficient_response": true,
+      "actual_insufficient_response": true
+    },
+    {
+      "absolute_delta_score": 0.05,
+      "expected_insufficient_response": false,
+      "actual_insufficient_response": false
+    }
+  ],
+  "validation": {
+    "status": "PASS",
+    "only_p1_records": true,
+    "all_rows_classified": true,
+    "counts_reconcile": true,
+    "fsr_within_zero_to_one": true,
+    "strict_boundary_verified": true,
+    "software_testing_only_preserved": true
+  },
+  "output": {
+    "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_p1_insufficient_response_v1.csv",
+    "record_count": 54,
+    "fields": [
+      "score_schema_version",
+      "predictor_id",
+      "predictor_display_name",
+      "predictor_version",
+      "scoring_method",
+      "software_testing_only",
+      "schema_version",
+      "variant_id",
+      "sequence_id",
+      "original_sequence",
+      "position",
+      "original_residue",
+      "substituted_residue",
+      "perturbed_sequence",
+      "perturbation_type",
+      "blosum62_score",
+      "random_seed",
+      "random_metadata",
+      "original_score",
+      "perturbed_score",
+      "normalization_schema_version",
+      "score_contract_id",
+      "normalization_mapping",
+      "original_usable_score",
+      "perturbed_usable_score",
+      "delta_score",
+      "absolute_delta_score",
+      "insufficient_response_delta",
+      "insufficient_response_comparator",
+      "insufficient_response"
+    ],
+    "sha256": "08c960ce5358a48dbfe538bff91b13edb7e5b5a02dfb5c80eebf0f3a72c19bfd"
+  }
+}
