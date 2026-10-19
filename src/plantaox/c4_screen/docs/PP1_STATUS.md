@@ -1,6 +1,6 @@
 # Component 4 PP1 status: real, provisional, and mock
 
-**Snapshot:** 19 October 2026. This records repository evidence, not supervisor approval.
+**Snapshot:** 19 October 2026. PP1 presentation target: **21 October 2026** (supersedes the earlier 26 October draft). This records repository evidence, not supervisor approval.
 
 ## Real and verified
 
@@ -21,9 +21,9 @@
 - C1 SIM, C2 probability, and C3 BCS stand-ins have source `mock`. Any dashboard/card/summary generated from these values must display a permanent mock notice.
 - Injected mock examples are demonstrations, not findings. Do not report PARRS, Recall@K, MRR, EF@1%, or ARR on mock signals. PDSS is not implemented; its denominator concern remains open.
 
-## Current execution blocker
+## Current execution state
 
-Real embedding import and dependent phases have not run because these five files are absent from `data/interim/c4_screen/embeddings/`:
+The project owner reports these five files are now supplied in `data/interim/c4_screen/embeddings/`; validation and production execution are pending:
 
 - `c4_esm2_t33_650M.npy`
 - `c4_embedding_index.parquet`
@@ -31,4 +31,4 @@ Real embedding import and dependent phases have not run because these five files
 - `ref_cloud.npy`
 - `ref_cloud_sequences.csv`
 
-No local ESM-2 load/download was attempted. Accordingly, no real embedding counts, AD parameters, tier fractions, scored cards, dashboard results, or full-data output checksum manifest are available. The import stage fails with a specific missing-file list. Synthetic tests passed: 7 tests in `tests/c4_screen/test_downstream_pipeline.py`; the full `tests/c4_screen` suite passed 12 tests.
+No local ESM-2 load/download is needed or permitted. Until the ordered production run completes, actual embedded counts, AD parameters, tier fractions, cards, and output checksums are unreported. Prior synthetic tests passed: 7 tests in `tests/c4_screen/test_downstream_pipeline.py`; the `tests/c4_screen` suite passed 12 tests before the supplied handoff was available.

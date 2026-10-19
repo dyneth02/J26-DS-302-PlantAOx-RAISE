@@ -7,7 +7,7 @@
 **Purpose:** Supervisor-visible tracking of implementation, verification, and PP1 evidence  
 **Planning date:** 18 October 2026  
 **Execution window:** **2 working days** — Day 1 = Sun 18 Oct, Day 2 = Mon 19 Oct *(20–25 Oct is unscheduled contingency, not planned work)*  
-**PP1 presentation target:** 26 October 2026 *(from the project Gantt chart; confirm against the official schedule)*  
+**PP1 presentation target:** 21 October 2026 *(current date supplied by the project owner; supersedes the Gantt draft date)*  
 **PP1 checklist submission target:** 30 October 2026 *(from the project Gantt chart; confirm against the official schedule)*  
 **Primary completion targets:** Function A (FR1 + FR2) and Function B (FR4 + FR7, running on dummy C1/C2/C3 signals)  
 **Stretch target:** Preliminary PDSS per plant (FR3), then real fold-0 PROB_C2 from the C2 owner
@@ -16,7 +16,7 @@
 
 ## Repository Status Audit — 19 October 2026
 
-The inventory was synchronized with repository evidence on 19 October 2026. Gate 1 candidate generation is complete and must remain unchanged. Downstream import is blocked by five absent Colab handoff files: `c4_esm2_t33_650M.npy`, `c4_embedding_index.parquet`, `c4_embedding_manifest.json`, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. Do not run or download ESM-2 locally. Import, cloud metadata, AD, mock integration, score/cards, summary, and static dashboard code now have synthetic verification, but this does not satisfy full-data acceptance. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) and [`PP1_STATUS.md`](PP1_STATUS.md) for exact status.
+The inventory was synchronized with repository evidence on 19 October 2026. Gate 1 candidate generation is complete and must remain unchanged. The current plan supersedes local ESM-2 download, owner contract follow-ups, and a real-cloud source ladder where indicated below. The supplied 500-sequence cloud is MOCK. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) and [`PP1_STATUS.md`](PP1_STATUS.md) for exact runtime status.
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 
@@ -68,7 +68,7 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 
 ## 1.1 — Environment and Repository Scaffold `[D1 AM · ~1 h]`
 - [x] Check CUDA availability in the project environment (result: `False`, 19 October 2026); verify `fair-esm`, `biopython`, `pyteomics`, `pandas`, `pyarrow`, `scikit-learn`, and `pytest` are installed. `requirements.txt` is generated from the active environment with `pip freeze` and records its installed versions.
-- [ ] **Start the `esm2_t33_650M_UR50D` weights download in the background** and verify it loads. The first-call download was initiated but has not completed; no model load is verified.
+- [ ] **SUPERSEDED:** Local `esm2_t33_650M_UR50D` weights download/load. Embeddings are supplied by the Colab handoff; no local ESM run is required or permitted.
 - [x] Create the Gate 1 package and `tests/c4_screen/` layout in the existing `src/plantaox` structure. Later-stage embed/AD/signals/score/cards modules are out of this task's scope.
 - [x] Create `config.yaml`: plants, seed = 42, enzyme order, length filter, w1 = w2 = 0.5, SD multiplier = 1.0, `signals.source: mock`, and C4-provisional BCS flags.
 - [x] Add and run the CLI entry point `python -m plantaox.c4_screen.run <stage>` with `download`, `digest`, and `all` stages.
@@ -82,11 +82,8 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 - [x] Save unchanged UniProt response files under `data/raw/c4_screen/proteomes/source_downloads/` with canonical plant-named copies in `proteomes/`; version their provenance with UniProt release, retrieval date, source query, and SHA-256. Keep raw sequence files local and ignored by Git.
 
 ## 1.3 — Inter-Component Contract Sync `[D1 AM · ~45 min]`
-- [ ] C1 owner: confirm ESM-2 recipe (layer 33, mean-pool over residues excluding BOS/EOS), reference-cloud file format, and whether an interim AOP-BenchPos file exists.
-- [ ] C2 owner: confirm the `c2_prob.parquet` format; ask whether the frozen fold-0 checkpoint can later score C4's candidate FASTA (stretch, must not block).
-- [ ] C3 owner: confirm the `c3_bcs.json` schema, length-bin stratification, and flag thresholds.
-- [ ] Agree the delivery of `candidates.fasta` from C4 to C1 and C2 owners.
-- [ ] Record all agreements in the supervisor decision log.
+- [ ] **SUPERSEDED:** Owner-by-owner contract follow-up replaced for this PP1 scope by `C4_Interface_Spec_v0.1_PROVISIONAL.md`; no replies are expected. Provisional choices remain C4-owned and must not be attributed to C1/C2/C3.
+- [ ] Candidate FASTA handoff to C1/C2 owners remains a separate coordination item.
 
 ## 1.4 — Design Decision Log `[D1 AM · ~15 min]`
 - [x] Log: reviewed-only proteome scope, pyteomics substitution, pepsin pH 1.3 rule, exact-match dedup policy, and C4-provisional BCS flag thresholds in `docs/decision_log.md`.
@@ -154,10 +151,8 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 - [ ] Cache as `.npy` with a peptide-ID index.
 
 ## 3.3 — Provisional Reference Cloud `[D1 PM · ~1 h]`
-- [ ] Obtain reference AOP positives by this ladder: (1) C1's interim AOP-BenchPos; (2) C2's frozen curated positives; (3) public sources (DFBP / BIOPEP-UWM / AnOxPePred benchmark positives).
-- [ ] Embed the reference positives with the identical recipe.
-- [ ] Record N, source, evidence-tier mix, and plant-derived fraction; label the cloud **"provisional"**.
-- [ ] Confirm the cloud and the future held-out plant AOP set will be kept disjoint; log the rule.
+- [ ] **SUPERSEDED:** Real-positive source ladder and cloud embedding. Use the supplied 500-sequence MOCK placeholder (`source="mock_cloud"`, seed 42); do not generate or embed a replacement cloud.
+- [ ] Validate supplied cloud files and record observed metadata/counts. Keep future held-out evaluation-set disjointness as an open requirement before any real evaluation.
 
 ## 3.4 — AD Parameter Fitting `[D1 EVE · ~45 min]`
 - [ ] Compute the cloud centroid.
@@ -197,13 +192,7 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 **Definition of done:** Deterministic, validated, clearly labelled stand-ins for SIM_C1, PROB_C2, and BCS that can be replaced by real files without code changes.
 
 ## 4.1 — Contract Schemas and Validator `[D2 AM · ~1 h]`
-- [ ] Define the four contract files:
-  - `ref_cloud.npy` + `ref_cloud_meta.csv` (N × 1280 float32; id, sequence, evidence tier, organism, is_plant)
-  - `c1_sim.parquet` (`peptide_id`, `SIM_C1` in [0,1], `source`)
-  - `c2_prob.parquet` (`peptide_id`, `PROB_C2` in [0,1], `evidence_tier` E1/E2/E3/U, `source`)
-  - `c3_bcs.json` (predictor, BCS, IR, FSR, BCS per length bin, version)
-- [ ] Implement a validator: 100% `peptide_id` coverage, value ranges, no NaN, embedding dimension 1280, model-name string match.
-- [ ] Make the validator fail loudly with a specific message per violation.
+- [x] Implemented behavior: supplied `ref_cloud.npy` + `ref_cloud_sequences.csv` normalize to `ref_cloud_meta.csv` columns `id, sequence, evidence_tier, source, is_plant`; candidate signals join on **sequence** (not peptide_id); values, source labels, coverage, cloud shape, manifest, and finite arrays are validated with specific errors.
 
 ## 4.2 — Rule-Based Dummy Signal Generation `[D2 AM · ~1 h]`
 - [ ] Compute a rule-based `aop_like` score from redox residues {W, Y, H, M, C}, hydrophobic fraction, and a short-length bonus.
@@ -216,8 +205,7 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 - [ ] Tag these rows in the data and in the UI as injected demonstration cases (a hypothesis to test, not a finding).
 
 ## 4.4 — BCS Placeholder Table `[D2 AM · ~15 min]`
-- [ ] Create a placeholder BCS by length bin (e.g., 3–5 AA: 0.42; 6–10 AA: 0.61; 11–20 AA: 0.78) so LOW, MEDIUM, and HIGH paths are all exercised.
-- [ ] Mark the table `source: dummy` and note thresholds pending C3-owner confirmation.
+- [x] Implemented behavior: use the existing mock generator's BCS strata keyed by length bin **3–10 / 11–20**; retain `source="mock"`. The LOW/MEDIUM/HIGH cutoffs 0.5/0.7 are explicitly C4-provisional.
 
 ## 4.5 — Synthetic Test Sandbox `[D2 AM · ~30 min]`
 - [ ] Generate about 2,000 peptides directly (no digestion) with known planted positives near the cloud for unit tests only.
@@ -239,8 +227,7 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 **Definition of done:** One command that turns tiered candidates plus signal files into a per-plant ranking, evidence cards, and a summary, with tests.
 
 ## 5.1 — Signal Ingestion `[D2 AM · ~30 min]`
-- [ ] Implement `signals.py`: join on `peptide_id`; fail loudly on missing rows, out-of-range values, or model-string mismatch.
-- [ ] Surface each signal's `source` (dummy/real) through to the outputs.
+- [x] Implemented behavior: join tier table, SIM_C1, and PROB_C2 by **sequence**; fail on missing/duplicate rows or out-of-range values; propagate each signal's `source` (`mock` for the current generator) into results/cards.
 
 ## 5.2 — Combined Score `[D2 AM · ~45 min]`
 - [ ] Compute `d_norm = min(d_AD / (μ + 2σ), 1)`.
