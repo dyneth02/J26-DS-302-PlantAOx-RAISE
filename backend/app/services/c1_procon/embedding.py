@@ -22,7 +22,7 @@ PAIR_SET_TEXT = {
     "ablation_physchem_only_pairs": "Control: pairs chosen by descriptors only, ignoring the mechanism label",
 }
 READING_GUIDE = [
-    "Each dot is one peptide, placed by a 2-D projection (PCA) of its embedding. Peptides that look alike to the model sit close together.",
+    "Each dot is one peptide, placed by a projection (PCA, shown in 2-D or 3-D) of its embedding. Peptides that look alike to the model sit close together.",
     "If the model had learned the mechanism, metal-chelating (MC-active) peptides would form their own region. They do not: they sit among the radical-scavenging (FRS-only) peptides.",
     "The strongest structure in the untrained embedding is peptide length: short and long peptides form separate clouds because ESM-2 vectors are pooled differently below and above 10 amino acids.",
     "Training pulls same-mechanism pairs together, but with so few positive examples the main head pulls everything together: nearly all pairs end up with cosine similarity 0.99 (collapse).",
@@ -42,7 +42,7 @@ def get_embedding() -> EmbeddingResponse:
             length=int(r["length"]),
             source_group=None if pd.isna(r["source_group"]) else str(r["source_group"]),
             strict_class=str(r["strict_class"]),
-            coords={key: [req(r[f"{key}_pc1"]), req(r[f"{key}_pc2"])] for key in SPACE_KEYS},
+            coords={key: [req(r[f"{key}_pc1"]), req(r[f"{key}_pc2"]), req(r[f"{key}_pc3"])] for key in SPACE_KEYS},
         )
         for _, r in proj.iterrows()
     ]
