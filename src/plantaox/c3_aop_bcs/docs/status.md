@@ -147,11 +147,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.31 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.32: Review perturbation counts
+## Current task — Task 3.32: Review perturbation counts
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - count P1, P2, and P3 variants in the pilot artifacts;
 - detect unexpected zero-variant cases;
