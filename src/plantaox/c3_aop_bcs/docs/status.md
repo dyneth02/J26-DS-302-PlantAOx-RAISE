@@ -111,11 +111,11 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.25 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.26: Calculate DeltaScore
+## Current task — Task 3.26: Calculate DeltaScore
 
-**Status:** Not started.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - compute `DeltaScore = Score(original) - Score(perturbed)` for every scored perturbation;
 - store the corresponding absolute DeltaScore value;
