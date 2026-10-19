@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "pipeline_version": "c3_aop_bcs_preliminary_bcs_v1",
+  "report_version": "c3_aop_bcs_pp1_pilot_dummy_bcs_v1",
+  "created_on": "2026-10-19",
+  "definition": {
+    "formula": "BCS = IR * (1 - FSR)",
+    "expected_range": "[0,1]",
+    "interpretation": "higher BCS indicates better behavioural consistency",
+    "scope": "preliminary PP1 software-pipeline pilot only"
+  },
+  "predictor": {
+    "predictor_id": "c3_software_smoke_test_dummy",
+    "display_name": "C3 software smoke-test dummy (NON-EXPERIMENTAL)",
+    "version": "1.0.0",
+    "scoring_method": "position_weighted_alphabetical_residue_rank_checksum",
+    "software_testing_only": true,
+    "scientific_result": false
+  },
+  "sources": {
+    "invariance_rate_report": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_ir_report_v1.json",
+      "dataset_version": "c3_aop_bcs_pp1_pilot_dummy_p2_invariance_v1",
+      "sha256": "9c192e2fadf3002f037d33b2aee479cbd204288b7d29e33180391898eb92e0fc"
+    },
+    "false_sensitivity_rate_report": {
+      "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_fsr_report_v1.json",
+      "dataset_version": "c3_aop_bcs_pp1_pilot_dummy_p1_insufficient_response_v1",
+      "sha256": "79c0cc337e6248149971832cd496b3a02c2cd6b86b585f0c01485e77fc5193e5"
+    },
+    "shared_delta": 0.05,
+    "shared_delta_source": "research_config.toml research.primary_delta"
+  },
+  "components": {
+    "invariance_rate": {
+      "evaluated_p2_count": 150,
+      "invariant_p2_count": 140,
+      "value": 0.9333333333333333
+    },
+    "false_sensitivity_rate": {
+      "evaluated_p1_count": 54,
+      "insufficient_response_p1_count": 28,
+      "value": 0.5185185185185185
+    }
+  },
+  "result": {
+    "preliminary_bcs": 0.44938271604938274,
+    "preliminary_pilot_value": true,
+    "software_testing_only": true,
+    "scientific_result": false,
+    "warning": "This value was produced with the non-experimental dummy predictor to validate the metric pipeline; it is not a final scientific conclusion."
+  },
+  "manual_formula_checks": [
+    {
+      "invariance_rate": 1.0,
+      "false_sensitivity_rate": 0.0,
+      "expected_bcs": 1.0,
+      "actual_bcs": 1.0
+    },
+    {
+      "invariance_rate": 0.8,
+      "false_sensitivity_rate": 0.25,
+      "expected_bcs": 0.6,
+      "actual_bcs": 0.6000000000000001
+    },
+    {
+      "invariance_rate": 0.0,
+      "false_sensitivity_rate": 0.5,
+      "expected_bcs": 0.0,
+      "actual_bcs": 0.0
+    }
+  ],
+  "validation": {
+    "status": "PASS",
+    "component_reports_passed": true,
+    "predictor_metadata_matches": true,
+    "source_dataset_matches": true,
+    "delta_matches": true,
+    "formula_recomputed": true,
+    "bcs_within_zero_to_one": true,
+    "manual_examples_passed": true,
+    "software_testing_only_preserved": true,
+    "not_a_scientific_result": true
+  }
+}
