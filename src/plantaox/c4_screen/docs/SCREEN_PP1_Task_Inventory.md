@@ -437,3 +437,10 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - **Appendix 2:** Logbook, including the earlier dashboard prototype entries.
 
 **Version:** 1.0 — PP1 execution-focused Planner breakdown, two-day window.
+
+
+## Current work session — C4 backend API (19 October 2026)
+
+- **Status: In Progress.** A read-only FastAPI surface is being added under the existing `backend/app/api/v1`, `schemas`, and `services` component pattern, with fixture-backed API tests under `tests/backend/c4_screen/`. This is an application integration layer over frozen C4 outputs; it does not change the screening pipeline.
+- API responses must preserve the current provenance: `cloud_source=mock_cloud`, signal sources=`mock`, and no retrieval metrics computed on mock inputs.
+- Acceptance remains pending until endpoint and fixture tests are run.

@@ -71,3 +71,10 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 ## Status rule
 
 Use **Done** only when the inventory's defined output and acceptance evidence are present and verified. **In Progress** means a partial artifact exists but acceptance is incomplete. **Pending** means there is no implementation/output evidence or the work is explicitly later scope. Update this file and the task inventory together when status changes.
+
+
+## Current work session — C4 backend API (19 October 2026)
+
+| Workstream | Status | Evidence / next step |
+|---|---|---|
+| Read-only C4 API and fixture tests | In Progress | Implementing as `backend.app.api.v1.c4_screen`, with component service/schemas and `tests/backend/c4_screen/`; fields are being mapped from the actual frozen parquets and JSON under `data/interim/c4_screen/`. Verification will use the focused fixture-backed API suite. |
