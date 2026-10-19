@@ -646,11 +646,11 @@
 ## Task 3.24 — Prepare score normalization
 
 ### Subtasks
-- [ ] Check each predictor's native output range.
-- [ ] Use native [0,1] probability scores where available.
-- [ ] Define/document any required score mapping for predictors that do not output probabilities.
-- [ ] Avoid batch-wise min-max scaling that would distort perturbation differences.
-- [ ] Confirm normalized/usable scores fall in the expected scale.
+- [x] Check each predictor's native output range.
+- [x] Use native [0,1] probability scores where available.
+- [x] Define/document any required score mapping for predictors that do not output probabilities.
+- [x] Avoid batch-wise min-max scaling that would distort perturbation differences.
+- [x] Confirm normalized/usable scores fall in the expected scale.
 
 ### Deliverable
 - Comparable predictor-score representation.
@@ -662,10 +662,10 @@
 ## Task 3.25 — Create the PP1 pilot subset
 
 ### Subtasks
-- [ ] Select a reproducible small subset of the audit dataset.
-- [ ] Use a fixed random seed.
-- [ ] Ensure multiple redox residues and sequence lengths are represented.
-- [ ] Use enough peptides to demonstrate the full workflow without running the final study.
+- [x] Select a reproducible small subset of the audit dataset.
+- [x] Use a fixed random seed.
+- [x] Ensure multiple redox residues and sequence lengths are represented.
+- [x] Use enough peptides to demonstrate the full workflow without running the final study.
 
 ### Suggested PP1 scale
 - approximately 10–30 peptides, depending on scoring cost and predictor access.

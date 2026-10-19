@@ -97,16 +97,38 @@
 - Recorded the dummy predictor ID, display name, version `1.0.0`, scoring method, testing-only classification, source/output/cache checksums, counts, and checkpoint policy in `dummy_predictor_scoring_report_v1.json`.
 - Preserved the Task 3.22 safety boundary in every scoring row: these dummy scores are software-testing evidence only and are not scientific AOP predictions or experimental results.
 - Confirmed all 88 current C3 tests pass with 68 subtests, including full production-artifact counts, schema, provenance, checksum, caching, interruption, and resume verification.
+- Completed a read-only audit of all five Component 2 models accepted by the `c2_pp1_freeze_v1` manifest: PN, Direct-clamped nnPU, Corrective nnPU, Two-Step PU, and PU-Bagging.
+- Added the checksum-pinned `c3_pu_aop_five_model_audit_v1` record and reproducible human-readable audit report without modifying any Component 2 file.
+- Confirmed that the five configurations share the frozen fold-0 495-feature contract, while preserving their distinct score semantics—especially Two-Step PU's raw corrected values that can exceed 1.
+- Verified that all five checkpoint binaries and the fold-0 scaled feature cache are absent from the current checkout, the documented external backup path is unavailable on this machine, and no per-model numerical reference-score fixture exists.
+- Identified the accepted PU-Bagging run's `n_estimators=10` versus Component 2 planning/status documentation's `n_estimators=100` as a handoff contradiction requiring Component 2 confirmation.
+- Recorded ten blocking, high-priority, decision, or scientific handoff findings covering artifacts, reference fixtures, `fair-esm` and ESM-2 weight provenance, inference entry point, naming/selection, runtime policy, authorization, and validation limitations.
+- Kept all five models `not_integrated`: their assay-supported fold-0 results have negative MCC and AUROC below 0.5, and no real score can be reproduced in C3 until the missing handoff requirements are resolved.
+- Confirmed all 93 current C3 tests pass with 68 subtests, including source-evidence checksum verification, exact five-model coverage, integration-gate enforcement, PU-Bagging discrepancy retention, and deterministic report generation.
+- Completed Task 3.24 with the versioned `c3_aop_bcs_score_normalization_v1` registry covering AnOxPePred's two native channels, Multi-AOP, AOPxSVM, AOP-DRL, all five Component 2 PU-AOP configurations, and the non-experimental dummy.
+- Implemented fixed pointwise normalization that preserves documented native `[0,1]` scores unchanged, rejects non-finite and out-of-contract inputs, and guarantees usable values remain within `[0,1]`.
+- Prohibited batch-wise min-max scaling so a native score maps identically regardless of batch composition and original-versus-perturbed differences cannot change with unrelated samples.
+- Defined PU-AOP M4's evidence-supported exception: retain the raw Elkan-Noto corrected score and separately use fixed clipping to `[0,1]` for bounded comparisons; no fitted or batch-derived mapping is allowed.
+- Kept AnOxPePred's FRS and Chelator channels separate pending a prespecified scalar endpoint, and retained every real predictor mapping as operationally unverified until a real score is reproduced through C3.
+- Validated the normalization implementation over all 20,072 original/perturbed dummy score values from 10,036 rows: native and usable ranges were both `0.075–1.0`, with zero out-of-range or transformed values; this remains software-testing evidence only.
+- Confirmed all 100 current C3 tests pass with 74 subtests after one transient Windows/OneDrive cache-file lock on the first full-suite run and a clean complete rerun.
+- Completed Task 3.25 by selecting the configured 20-peptide PP1 pilot from all 734 redox-eligible audit subjects using master seed `42` and the row-order-independent `greedy_coverage_then_seeded_sha256_v1` algorithm.
+- Versioned the selected subject table as `c3_aop_bcs_pp1_pilot_v1`, retaining original source, evidence, raw-record, CD-HIT, sequence-length, and redox-pattern provenance plus selection rank, seed, hash, stratum, and newly covered criteria.
+- Covered all four available length bands from 3 to 36 residues, 12 distinct lengths, every W/Y/H/M/C residue, five single-type and 15 multiple-type patterns, and 20 distinct exact redox patterns.
+- Preferred E1 direct-assay evidence after coverage requirements, yielding 18 E1 and 2 E2 subjects while retaining representation from AnOxPePred and both Multi-AOP source datasets.
+- Exported the exact 449 pilot-linked variants—54 P1, 150 P2, and 245 P3 records—in deterministic subject/type/position order for subsequent pilot scoring and behavioural metrics.
+- Added checksum-backed selection evidence and tests proving fixed-size selection, seed retention, required coverage, subject/variant linkage, source-order independence, and byte-identical regeneration.
+- Confirmed all 104 current C3 tests pass with 74 subtests.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.23 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.25 and the associated documentation and reproducibility updates.
 
-## Next task — Task 3.24: Prepare score normalization
+## Next task — Task 3.26: Calculate DeltaScore
 
 **Status:** Not started.
 
 Next work:
 
-- document each integrated predictor's native output range and score semantics;
-- preserve native `[0,1]` probabilities where available and define any justified fixed mapping for other score types;
-- prohibit batch-wise min-max scaling that would distort original-versus-perturbed differences;
-- validate the usable score scale while continuing to keep dummy smoke-test values outside scientific results.
+- compute `DeltaScore = Score(original) - Score(perturbed)` for every pilot perturbation;
+- store the signed and absolute score differences;
+- verify calculations against independently hand-checked examples;
+- retain the non-experimental boundary while only dummy scores are available.
