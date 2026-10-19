@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+<title id="title">Preliminary IR, FSR and BCS summary</title>
+<desc id="desc">Table and aligned bars summarize the primary delta 0.05 dummy-pipeline metrics.</desc>
+<rect width="1200" height="720" fill="#FFFFFF"/>
+<text x="60" y="54" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#172033">Preliminary IR, FSR and BCS summary</text>
+<rect x="60" y="72" width="1080" height="34" rx="4" fill="#FFF4D6"/>
+<text x="600" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#7A4D00">PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS</text>
+<rect x="80" y="150" width="1040" height="54" fill="#EEF2F7"/>
+<text x="105.00" y="184.00" text-anchor="start" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#172033">Metric</text>
+<text x="290.00" y="184.00" text-anchor="start" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#172033">Value</text>
+<text x="510.00" y="184.00" text-anchor="start" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#172033">Count</text>
+<text x="720.00" y="184.00" text-anchor="start" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#172033">Meaning</text>
+<rect x="80" y="204" width="1040" height="112" fill="#FFFFFF" stroke="#D8DEE8"/>
+<text x="105.00" y="247.00" text-anchor="start" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#5B3FD6">IR</text>
+<text x="290.00" y="247.00" text-anchor="start" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#172033">0.9333</text>
+<text x="510.00" y="247.00" text-anchor="start" font-family="Arial, sans-serif" font-size="15" font-weight="600" fill="#172033">140/150</text>
+<text x="720.00" y="247.00" text-anchor="start" font-family="Arial, sans-serif" font-size="13" font-weight="400" fill="#5F6B7A">P2 edits with |DeltaScore| &lt; 0.05</text>
+<rect x="290" y="265" width="300" height="14" rx="3" fill="#E5EAF1"/>
+<rect x="290" y="265" width="280.00" height="14" rx="3" fill="#5B3FD6"/>
+<rect x="80" y="316" width="1040" height="112" fill="#FFFFFF" stroke="#D8DEE8"/>
+<text x="105.00" y="359.00" text-anchor="start" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#5B3FD6">FSR</text>
+<text x="290.00" y="359.00" text-anchor="start" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#172033">0.5185</text>
+<text x="510.00" y="359.00" text-anchor="start" font-family="Arial, sans-serif" font-size="15" font-weight="600" fill="#172033">28/54</text>
+<text x="720.00" y="359.00" text-anchor="start" font-family="Arial, sans-serif" font-size="13" font-weight="400" fill="#5F6B7A">P1 edits with |DeltaScore| &lt; 0.05</text>
+<rect x="290" y="377" width="300" height="14" rx="3" fill="#E5EAF1"/>
+<rect x="290" y="377" width="155.56" height="14" rx="3" fill="#5B3FD6"/>
+<rect x="80" y="428" width="1040" height="112" fill="#FFFFFF" stroke="#D8DEE8"/>
+<text x="105.00" y="471.00" text-anchor="start" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#5B3FD6">BCS</text>
+<text x="290.00" y="471.00" text-anchor="start" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#172033">0.4494</text>
+<text x="510.00" y="471.00" text-anchor="start" font-family="Arial, sans-serif" font-size="15" font-weight="600" fill="#172033">composite</text>
+<text x="720.00" y="471.00" text-anchor="start" font-family="Arial, sans-serif" font-size="13" font-weight="400" fill="#5F6B7A">IR x (1 - FSR)</text>
+<rect x="290" y="489" width="300" height="14" rx="3" fill="#E5EAF1"/>
+<rect x="290" y="489" width="134.81" height="14" rx="3" fill="#5B3FD6"/>
+<text x="80.00" y="585.00" text-anchor="start" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#172033">Primary threshold: delta = 0.05</text>
+<text x="80.00" y="615.00" text-anchor="start" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#172033">BCS formula: IR x (1 - FSR) = 0.4494</text>
+<text x="60.00" y="694.00" text-anchor="start" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#5F6B7A">Higher IR and BCS are preferable; lower FSR is preferable. Do not interpret dummy values scientifically.</text>
+</svg>
