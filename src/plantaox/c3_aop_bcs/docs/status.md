@@ -175,9 +175,9 @@
 
 ## Current task — Task 3.36: Prepare the SHAP-faithfulness data structure
 
-**Status:** Not started; next task.
+**Status:** In progress.
 
-Next work:
+Current work:
 
 - define the sequence, predictor, residue-position, residue, SHAP-value, absolute-SHAP, P1 DeltaScore, and absolute-DeltaScore fields;
 - preserve the planned comparison of `|SHAP_i|` with `|DeltaScore_i|`;
