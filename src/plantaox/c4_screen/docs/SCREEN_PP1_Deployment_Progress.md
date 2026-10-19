@@ -12,13 +12,14 @@
 | Proteome inputs | Done for Gate 1 | Four unchanged reviewed FASTAs are in `data/raw/c4_screen/proteomes/`; original UniProt-named downloads are retained under `source_downloads/`. URL, access date, file size, SHA-256, release, and counts are in `metadata/c4_data_registry.csv`; exclusions are in `metadata/c4_protein_exclusions.csv`. |
 | Dependencies and environment | In Progress | The requested fair-esm, biopython, pyteomics, pandas, pyarrow, scikit-learn, and pytest packages are installed in `.venv`, and `requirements.txt` now records the environment via `pip freeze`. CUDA is unavailable (`False`); the ESM-2 download remains incomplete and model loading is not verified. `tests/c4_screen/check_gpu.py` is a probe, not a pipeline acceptance test. |
 | Candidate generation (FR1 / Gate 1) | Done | `python -m plantaox.c4_screen.run all` generated candidate Parquet/FASTA, membership, funnel, and funnel-only summary. Five focused tests pass. A repeated full run produced byte-identical SHA-256 values for all nine outputs. All 152,259 sequences are unique and all 266,361 parent-coordinate provenance links were checked against the source FASTAs. Optional BIOPEP web comparison and C1/C2 handoff remain pending. |
-| Embeddings and AD tiers (FR2) | In Progress; import blocked | Colab notebook exists, but all five specified import files are absent: candidate `.npy`, embedding index parquet, embedding manifest, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. No ESM-2 is loaded/downloaded locally. AD code will be developed and tested with synthetic arrays; no real candidate tier output can be produced without the cached artifacts. |
+| Embeddings and AD tiers (FR2) | In Progress; real import blocked | Import validation, cloud metadata validation, leave-one-out AD assignment, thresholds, diagnostic plotting, and degeneracy/mean-centering checks are implemented and tested synthetically. Production import reports the five absent handoff files by exact path. No ESM-2 is loaded/downloaded locally; no real candidate tiers or AD parameters exist. |
 | PDSS (FR3) | Pending | No implementation or results. Planned stretch/later analysis. |
-| Signal integration and combined score (FR4) | In Progress | The provisional interface spec is present, and the existing mock utility is `tests/c4_screen/fixtures/mock_signals.py`. Signal generation/validation and score/card implementation are planned against synthetic test data. No real signal files are present. |
+| Signal integration and combined score (FR4) | In Progress; synthetic contract verified | Existing mock utility is reused; sequence joins preserve source labels; score formula and Tier 3 zeroing are implemented and tested synthetically. No real signal files exist, and no retrieval metrics are computed on mock signals. |
 | Cross-predictor audit (FR5) | Pending | No implementation or predictor outputs are present. Later milestone. |
 | Retrieval evaluation (FR6) | Pending | No held-out evaluation set, metric implementation, or results are present. Later milestone. |
-| Evidence cards (FR7) | Pending | No card schema, generator, BCS integration, or example cards are present. |
-| Dashboard, PP1 freeze, report, and presentation | Pending | No C4 dashboard integration, freeze manifest, report, slides, or acceptance evidence is present. |
+| Evidence cards (FR7) | In Progress; synthetic contract verified | JSON top-50 and abstained-list card generation, C4-provisional BCS flags, provenance fields, and mock notices are implemented and tested synthetically; no real cards are generated. |
+| Dashboard | In Progress; synthetic artifact support | A self-contained, offline HTML dashboard and MOCK-labelled summary generator are implemented and synthetically tested. No dashboard populated with real project results exists. |
+| PP1 freeze, report, and presentation | Pending | No full-data checksummed output freeze or presentation evidence can be produced until the Colab handoff arrives. |
 
 ## Gate 1 observed funnel
 
@@ -51,18 +52,19 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 - Open scientific decisions include the cloud-distance calibration and `d_norm` definition, the potentially unstable PDSS denominator, BCS warning/strata thresholds, C1 embedding recipe confirmation, and disjointness of reference and held-out sets. Resolve and record before treating resulting numbers as validated.
 - The proposal and analysis include target metrics (PARRS, PDSS, ARR, Recall@K, MRR, EF@1%) and novelty statements. They are planned outcomes and claims to validate, not current results.
 
-## Current work session — embedding/AD and mock integration
+## Current work session — embedding/AD and mock integration (19 October 2026)
 
-- **Done:** Gate 1 remains complete and unchanged. Read the provisional interface spec, task inventory, progress report, Colab notebook, and existing mock utility. The current C4 app page is empty (0 bytes), so phase 6 requires a static offline dashboard if implemented.
-- **Blocked (Phase 1 import):** Missing `data/interim/c4_screen/embeddings/c4_esm2_t33_650M.npy`, `c4_embedding_index.parquet`, `c4_embedding_manifest.json`, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. Do not load or download ESM-2 locally.
-- **In Progress:** Implement synthetic-testable cloud metadata and AD routines, use the existing `tests/c4_screen/fixtures/mock_signals.py` rather than duplicating it, then implement mock-only scoring/cards/summary/dashboard.
-- **Pending:** Real cloud metadata and real-candidate AD tiers depend on the absent reference-cloud files; no full-candidate embedding/tiering result is claimed.
-- **Constraint:** Do not load, download, or run ESM-2 locally. The requested embedding recipe remains a C4 assumption pending C1 confirmation. Do not compute evaluation metrics on mock signals.
+- **Done and unchanged:** Gate 1 candidate generation. The task inventory, provisional interface spec, progress file, Colab notebook, existing mock utility, and project outputs were inspected.
+- **Blocked (real Phase 1 import):** Missing `data/interim/c4_screen/embeddings/c4_esm2_t33_650M.npy`, `c4_embedding_index.parquet`, `c4_embedding_manifest.json`, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. The CLI reports all five exact paths. Do not load or download ESM-2 locally.
+- **Implemented and synthetically verified:** strict embedding handoff validation; supplied-cloud metadata checks; LOO AD calibration and tiering; diagnostics including mean-centering checks on degeneracy without threshold tuning; existing mock generator/validator integration; sequence-key joins; scoring; cards; MOCK-labelled summary and offline dashboard.
+- **Verification:** `tests/c4_screen/test_downstream_pipeline.py` — 6 passed. These tests use synthetic fixtures only and do not establish real-data metrics or full-corpus outputs.
+- **In Progress:** Production stages are wired into `python -m plantaox.c4_screen.run`; full-data `all`, diagnostics, score/cards, dashboard, and freeze verification wait on the five Colab handoff files.
+- **Constraint:** Layer-33 mean-residue pooling remains a C4 assumption pending C1 confirmation. Reference cloud source is `mock_cloud`; signals are `mock`. No PARRS, Recall@K, MRR, EF@1%, ARR, or PDSS results are claimed.
 
 ## Next actions
 
-1. Obtain the five missing embedding/cloud files from the Colab handoff to unblock import and real-candidate AD tiers.
-2. Complete synthetic-unit coverage for cloud metadata, AD, score/card generation, mock validation, summary, and offline dashboard while inputs are absent.
+1. Obtain the five missing embedding/cloud files from the Colab handoff to unblock real import and AD tiers.
+2. Run the full test suite; after handoff, run all pipeline stages and record actual counts/parameters without fabricating results.
 3. Keep every mock signal/cloud output visibly labelled and exclude mock data from retrieval-performance metrics.
 
 ## Status rule

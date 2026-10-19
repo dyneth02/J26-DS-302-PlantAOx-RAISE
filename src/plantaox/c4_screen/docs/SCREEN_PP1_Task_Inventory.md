@@ -16,7 +16,7 @@
 
 ## Repository Status Audit — 19 October 2026
 
-The inventory was synchronized with repository evidence on 19 October 2026. Gate 1 candidate generation is complete and must remain unchanged. The current FR2/FR4 work is constrained by five absent Colab handoff files: `c4_esm2_t33_650M.npy`, `c4_embedding_index.parquet`, `c4_embedding_manifest.json`, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. Do not run or download ESM-2 locally; implement/test downstream algorithms with synthetic arrays while real import/tiering is blocked. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) for synchronized status.
+The inventory was synchronized with repository evidence on 19 October 2026. Gate 1 candidate generation is complete and must remain unchanged. Downstream import is blocked by five absent Colab handoff files: `c4_esm2_t33_650M.npy`, `c4_embedding_index.parquet`, `c4_embedding_manifest.json`, `ref_cloud.npy`, and `ref_cloud_sequences.csv`. Do not run or download ESM-2 locally. Import, cloud metadata, AD, mock integration, score/cards, summary, and static dashboard code now have synthetic verification, but this does not satisfy full-data acceptance. See [`SCREEN_PP1_Deployment_Progress.md`](SCREEN_PP1_Deployment_Progress.md) and [`PP1_STATUS.md`](PP1_STATUS.md) for exact status.
 
 > **Two-day reality check:** This plan needs roughly 11–13 focused hours per day. It is only feasible because the scope is deliberately narrow (see the FR map and the Cut List). If Gate 1 or Gate 2 fails, apply the Cut List immediately rather than extending the window.
 
@@ -90,8 +90,8 @@ The inventory was synchronized with repository evidence on 19 October 2026. Gate
 
 ## 1.4 — Design Decision Log `[D1 AM · ~15 min]`
 - [x] Log: reviewed-only proteome scope, pyteomics substitution, pepsin pH 1.3 rule, exact-match dedup policy, and C4-provisional BCS flag thresholds in `docs/decision_log.md`.
-- [ ] Log: μ_cloud/σ_cloud definition, `d_norm` definition, tier thresholds, and provisional-cloud policy before the embedding/AD stage.
-- [ ] Log: PDSS denominator concern for supervisor review before the PDSS stage.
+- [x] Log: μ_cloud/σ_cloud definition, `d_norm` definition, tier thresholds, and provisional-cloud policy before the embedding/AD stage. Logged as decisions; real parameters remain uncomputed pending inputs.
+- [x] Log: PDSS denominator concern for supervisor review before the PDSS stage. Concern recorded; supervisor review remains pending.
 
 **Setup evidence attachments:** environment lockfile, FASTA checksums, protein-count table, contract notes, decision log.
 
