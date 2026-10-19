@@ -646,11 +646,11 @@
 ## Task 3.24 — Prepare score normalization
 
 ### Subtasks
-- [ ] Check each predictor's native output range.
-- [ ] Use native [0,1] probability scores where available.
-- [ ] Define/document any required score mapping for predictors that do not output probabilities.
-- [ ] Avoid batch-wise min-max scaling that would distort perturbation differences.
-- [ ] Confirm normalized/usable scores fall in the expected scale.
+- [x] Check each predictor's native output range.
+- [x] Use native [0,1] probability scores where available.
+- [x] Define/document any required score mapping for predictors that do not output probabilities.
+- [x] Avoid batch-wise min-max scaling that would distort perturbation differences.
+- [x] Confirm normalized/usable scores fall in the expected scale.
 
 ### Deliverable
 - Comparable predictor-score representation.

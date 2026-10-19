@@ -97,16 +97,21 @@
 - Recorded the dummy predictor ID, display name, version `1.0.0`, scoring method, testing-only classification, source/output/cache checksums, counts, and checkpoint policy in `dummy_predictor_scoring_report_v1.json`.
 - Preserved the Task 3.22 safety boundary in every scoring row: these dummy scores are software-testing evidence only and are not scientific AOP predictions or experimental results.
 - Confirmed all 88 current C3 tests pass with 68 subtests, including full production-artifact counts, schema, provenance, checksum, caching, interruption, and resume verification.
+- Created the versioned Task 3.24 score-normalization registry covering AnOxPePred, Multi-AOP, AOPxSVM, AOP-DRL, all five Component 2 PU-AOP model families, and the non-experimental C3 dummy.
+- Preserved native `[0,1]` values through identity mappings and defined the only currently required non-probability mapping: retain PU-AOP M4's raw Elkan-Noto corrected score while separately applying the fixed pointwise `clip(raw, 0, 1)` usable representation.
+- Explicitly prohibited batch-wise min-max, percentile, z-score, and invented sigmoid transformations so original-versus-perturbed differences cannot change with batch composition.
+- Verified all 20,072 original/perturbed dummy score values across 10,036 rows are already within `[0,1]` (observed range `0.075–1.0`) and remain unchanged; this is software validation only, while every real predictor remains pending retained real-score verification.
+- Confirmed all seven focused Task 3.24 tests pass with six subtests. The broader C3 run passed 91 tests and 74 subtests, with four unrelated pre-existing byte-reproducibility failures caused by CRLF line endings in older Task 3.19–3.22 committed artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.23 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.24 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.24: Prepare score normalization
+## Next task — Task 3.25: Create the PP1 pilot subset
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- document each integrated predictor's native output range and score semantics;
-- preserve native `[0,1]` probabilities where available and define any justified fixed mapping for other score types;
-- prohibit batch-wise min-max scaling that would distort original-versus-perturbed differences;
-- validate the usable score scale while continuing to keep dummy smoke-test values outside scientific results.
+- select approximately 10–30 peptides reproducibly using the fixed research seed;
+- represent multiple sequence lengths and redox-residue patterns;
+- retain source/provenance fields and version the selected pilot records;
+- verify that the subset is sufficient to demonstrate the complete PP1 workflow without presenting dummy scores as scientific results.
