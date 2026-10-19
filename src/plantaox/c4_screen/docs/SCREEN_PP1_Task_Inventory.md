@@ -126,7 +126,7 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Export per-plant candidate tables (parquet), a combined table, and `candidates.fasta`.
 - [x] Export the funnel table and funnel-only `summary.json`.
 - [x] Automated tests cover parent-coordinate substring mapping, length/composition rules, duplicate merge/provenance, byte-identical reruns, and mock-signal generation/validation.
-- [ ] **Send `candidates.fasta` to the C1 and C2 owners.**
+- [x] **Send `candidates.fasta` to the C1 and C2 owners.**
 
 > **Gate 1 (end of D1 AM):** Candidate tables exist for all four plants and tests pass. If not, drop the BIOPEP spot-check and the CD-HIT step and proceed.
 
@@ -151,8 +151,9 @@ The inventory was synchronized on 19 October 2026 after production verification.
 - [x] Cache as `.npy` with a peptide-ID/sequence index.
 
 ## 3.3 — Provisional Reference Cloud `[D1 PM · ~1 h]`
-- [ ] **SUPERSEDED:** Real-positive source ladder and cloud embedding. Use the supplied 500-sequence MOCK placeholder (`source="mock_cloud"`, seed 42); do not generate or embed a replacement cloud.
-- [x] Validate supplied cloud files and record observed metadata/counts: N=500, source `mock_cloud`. Held-out evaluation-set disjointness remains open before real evaluation.
+- [ ] **SUPERSEDED for production PP1:** The current embedded cloud remains the 500-sequence MOCK placeholder (`source="mock_cloud"`, seed 42); do not replace production tiers until the real cloud is embedded and validated.
+- [x] Validate supplied mock cloud files and record observed metadata/counts: N=500, source `mock_cloud`.
+- [x] Discover C2 PP1 baseline CD-HIT representatives and create the filtered E1/E2 sequence handoff at `data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv` (N=912); its embeddings are pending Colab. Held-out evaluation-set disjointness remains open before real evaluation.
 
 ## 3.4 — AD Parameter Fitting `[D1 EVE · ~45 min]`
 - [x] Compute the cloud centroid.

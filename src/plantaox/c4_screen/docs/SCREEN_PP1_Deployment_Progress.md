@@ -71,3 +71,15 @@ The reviewed inputs contained 4,905 records; 57 were excluded and 4,848 were dig
 ## Status rule
 
 Use **Done** only when the inventory's defined output and acceptance evidence are present and verified. **In Progress** means a partial artifact exists but acceptance is incomplete. **Pending** means there is no implementation/output evidence or the work is explicitly later scope. Update this file and the task inventory together when status changes.
+
+
+## Follow-up status — real-cloud discovery and remaining freeze work (19 October 2026)
+
+| Work item | Status | Evidence / next step |
+|---|---|---|
+| C2 real-positive reference discovery | Done (sequence selection) | Read-only C2 frozen `pp1_baseline_v1/aop_positives_cdhit90.parquet`; filtered 925 CD-HIT representatives to 912 unique standard-alphabet sequences of length 3–20 (E1=478, E2=434). Handoff CSV is `data/interim/c4_screen/embeddings_staging/ref_cloud_sequences_real.csv`; SHA-256 is recorded in the decision log. Real-cloud embeddings remain pending. |
+| Production cloud/tier outputs | Pending real cloud; current MOCK remains authoritative | No matching embeddings exist for the 912-row cloud, so the existing 500-row `mock_cloud` and frozen outputs were not changed. |
+| Weight sweep and synthetic ranking assertions | In Progress | Scoring implementation accepts tested sensitivity weights; focused C4 tests pending. |
+| NFR2 timing | Pending | Measure cached rice tiering + scoring/ranking; record exact elapsed time and environment. |
+| PP1 technical report, demo, slides, logbook and FASTA handoff note | Pending | Draft documents are being prepared from verified artifacts only; no owner messages will be sent. |
+| Freeze package and local tag | Pending | Requires focused test pass, checksummed C4-only manifest/report, and annotated local tag. Checkout branch is `feat/c4-Screen1`; requested `c4/pp1-final` branch is unavailable and branch switching is prohibited by the task constraints. |
