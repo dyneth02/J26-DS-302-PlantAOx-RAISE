@@ -698,11 +698,11 @@
 ## Task 3.27 — Detect prediction flips and calculate PFR
 
 ### Subtasks
-- [ ] Define/record the decision threshold used by each predictor.
-- [ ] Determine the original class.
-- [ ] Determine the perturbed class.
-- [ ] Record whether a flip occurs.
-- [ ] Compute PFR for the required groups.
+- [x] Define/record the decision threshold used by each predictor.
+- [x] Determine the original class.
+- [x] Determine the perturbed class.
+- [x] Record whether a flip occurs.
+- [x] Compute PFR for the required groups.
 
 ### Deliverable
 - Prediction-flip results.

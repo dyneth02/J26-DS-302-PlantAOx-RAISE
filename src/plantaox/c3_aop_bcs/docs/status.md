@@ -114,16 +114,23 @@
 - Added a checksum-backed DeltaScore report with score definition and interpretation, source/output hashes, counts and ranges, three passing hand-checked examples, and automatic validation of finite values and absolute magnitudes.
 - Preserved the non-experimental boundary throughout: every row is labelled software-testing-only and the report explicitly states that the dummy DeltaScores are not scientific results.
 - Confirmed all four focused Task 3.26 tests pass with seven subtests. The broader C3 run passed 99 tests and 81 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
+- Implemented Task 3.27 prediction classification with an explicit dummy-only decision rule: usable scores `>= 0.5` are class 1 and scores `< 0.5` are class 0; the exact threshold boundary is automatically tested.
+- Classified the original and perturbed usable score for every one of the 449 pilot variants and stored the decision threshold, comparator, both classes, flip indicator, and flip direction per record.
+- Detected 48 software-only prediction flips: 32 positive-to-negative and 16 negative-to-positive, producing an overall dummy PFR of `48/449 = 0.10690423162583519`.
+- Calculated type-specific dummy PFR values: P1 `11/54 = 0.2037037037037037`, P2 `13/150 = 0.08666666666666667`, and P3 `24/245 = 0.09795918367346938`.
+- Added a checksum-backed PFR report with class counts, overall/type-specific denominators and flip counts, direction counts, boundary checks, and a policy requiring each future real predictor to provide its own verified decision rule.
+- Preserved the non-experimental boundary in every prediction-flip row and in the report; the dummy threshold and PFR must not be treated as scientific predictor results.
+- Confirmed all four focused Task 3.27 tests pass with three subtests. The broader C3 run passed 103 tests and 84 subtests; the only four failures remain the previously documented CRLF byte-reproducibility issues in older Task 3.19–3.22 artifacts.
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
-- Maintained focused Git commits for Tasks 3.3–3.26 and the associated documentation and reproducibility updates.
+- Maintained focused Git commits for Tasks 3.3–3.27 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.27: Detect prediction flips and calculate PFR
+## Next task — Task 3.28: Calculate Invariance Rate (IR)
 
-**Status:** In progress.
+**Status:** Not started.
 
-Current work:
+Next work:
 
-- define and record the applicable decision threshold for each scored predictor;
-- classify the original and perturbed scores and detect label changes;
-- store a per-perturbation flip indicator;
-- calculate Prediction Flip Rate overall and by perturbation type while preserving the dummy run's software-only status.
+- restrict the calculation to P2 conservative substitutions;
+- apply the configured primary threshold `delta = 0.05` to `|DeltaScore|`;
+- mark a P2 edit invariant only when `|DeltaScore| < delta`;
+- calculate preliminary IR while preserving the dummy run's software-only status.
