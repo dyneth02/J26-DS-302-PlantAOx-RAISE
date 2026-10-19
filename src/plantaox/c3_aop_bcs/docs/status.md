@@ -167,9 +167,10 @@
 
 ## Current task — Task 3.35: Create run manifests and provenance records
 
-**Status:** Not started; next task.
+**Status:** In progress.
 
-Next work:
+Current work:
 
+- audit the validated PP1 artifacts and their existing provenance records;
 - record the dataset and predictor versions, code commit, random seed, redox set, BLOSUM62 rule, primary delta, peptide and perturbation counts, failures or missing scores, and run date;
-- keep the PP1 result files versioned and traceable through a reproducible run manifest.
+- pin versioned PP1 result files with paths and checksums in a reproducible run manifest.
