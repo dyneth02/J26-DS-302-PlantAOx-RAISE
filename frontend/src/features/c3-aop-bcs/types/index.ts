@@ -12,6 +12,12 @@ export interface PredictorStatus { id: string; name: string; tier: "primary" | "
 export interface SourceArtifact { label: string; path: string; sha256: string }
 export interface Provenance { runId: string; runDate: string; datasetVersion: string; predictorVersion: string; codeCommit: string; validationStatus: string; missingScores: number; sourceArtifacts: SourceArtifact[] }
 export interface FigureEvidence { sourcePath: string; file: string; sha256: string }
+export interface DeltaDistributionBin { label: string; binStart: number; binEnd: number; binMidpoint: number; P1: number; P2: number; P3: number }
+export interface ScoreExamplePoint { label: string; perturbationType: "P1" | "P2" | "P3"; original: number; perturbed: number }
+export interface MetricChartPoint { metric: "IR" | "FSR" | "BCS" | "PFR"; value: number }
+export interface PredictionFlipPoint { type: "P1" | "P2" | "P3"; rate: number; flips: number; total: number }
+export interface ChartSource { path: string; sha256: string; recordCount: number }
+export interface ChartData { absoluteDeltaDistribution: DeltaDistributionBin[]; scoreExamples: ScoreExamplePoint[]; metricSummary: MetricChartPoint[]; predictionFlips: PredictionFlipPoint[]; source: ChartSource }
 
 export interface DashboardPayload {
   schemaVersion: string;
@@ -29,4 +35,5 @@ export interface DashboardPayload {
   predictors: PredictorStatus[];
   provenance: Provenance;
   figures: FigureEvidence[];
+  chartData: ChartData;
 }

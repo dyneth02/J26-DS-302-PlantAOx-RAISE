@@ -16,3 +16,11 @@
   background: var(--color-success-bg);
   color: var(--color-success-text);
 }
+.c3-aop-bcs .c3-chart {
+  width: 100%;
+  height: 300px;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .c3-aop-bcs .c3-chart { height: 260px; }
+}

@@ -35,6 +35,9 @@ async def test_dashboard_preserves_the_artifact_backed_contract(client):
         "fullVariants": 10036,
     }
     assert [item["pilotCount"] for item in payload["perturbations"]] == [54, 150, 245]
+    assert payload["chartData"]["source"]["recordCount"] == 449
+    assert len(payload["chartData"]["absoluteDeltaDistribution"]) == 10
+    assert [item["type"] for item in payload["chartData"]["predictionFlips"]] == ["P1", "P2", "P3"]
     assert {item["perturbation_type"] for item in payload["examples"]} == {"P1", "P2", "P3"}
     assert payload["classification"]["software_testing_only"] is True
     assert payload["classification"]["scientific_result"] is False

@@ -140,6 +140,49 @@ class FigureEvidence(BaseModel):
     sha256: str
 
 
+class DeltaDistributionBin(BaseModel):
+    label: str
+    binStart: float = Field(ge=0)
+    binEnd: float = Field(gt=0)
+    binMidpoint: float = Field(ge=0)
+    P1: float = Field(ge=0, le=1)
+    P2: float = Field(ge=0, le=1)
+    P3: float = Field(ge=0, le=1)
+
+
+class ScoreExamplePoint(BaseModel):
+    label: str
+    perturbationType: Literal["P1", "P2", "P3"]
+    original: float = Field(ge=0, le=1)
+    perturbed: float = Field(ge=0, le=1)
+
+
+class MetricChartPoint(BaseModel):
+    metric: Literal["IR", "FSR", "BCS", "PFR"]
+    value: float = Field(ge=0, le=1)
+
+
+class PredictionFlipPoint(BaseModel):
+    type: Literal["P1", "P2", "P3"]
+    rate: float = Field(ge=0, le=1)
+    flips: int = Field(ge=0)
+    total: int = Field(ge=0)
+
+
+class ChartSource(BaseModel):
+    path: str
+    sha256: str
+    recordCount: int = Field(ge=0)
+
+
+class ChartData(BaseModel):
+    absoluteDeltaDistribution: list[DeltaDistributionBin]
+    scoreExamples: list[ScoreExamplePoint]
+    metricSummary: list[MetricChartPoint]
+    predictionFlips: list[PredictionFlipPoint]
+    source: ChartSource
+
+
 class DashboardResponse(BaseModel):
     schemaVersion: str
     apiVersion: str
@@ -156,6 +199,7 @@ class DashboardResponse(BaseModel):
     predictors: list[PredictorStatus]
     provenance: Provenance
     figures: list[FigureEvidence]
+    chartData: ChartData
 
 
 class DashboardSectionResponse(BaseModel):

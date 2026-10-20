@@ -22,7 +22,7 @@ SECTION_KEYS: dict[str, tuple[str, ...]] = {
     "overview": ("overview", "configuration", "classification", "provenance"),
     "dataset": ("datasetFunnel", "coverage", "overview", "provenance"),
     "perturbations": ("perturbations", "configuration", "overview", "classification"),
-    "metrics": ("metrics", "sensitivity", "figures", "classification"),
+    "metrics": ("metrics", "sensitivity", "chartData", "figures", "classification"),
     "explorer": ("examples", "perturbations", "classification"),
     "predictors": ("predictors", "classification"),
     "evidence": ("provenance", "figures", "classification"),
