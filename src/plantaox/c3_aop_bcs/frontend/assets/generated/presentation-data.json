@@ -1,0 +1,497 @@
+{
+  "schemaVersion": "1.0",
+  "presentationId": "c3_aop_bcs_pp1_progress_presentation_v1",
+  "evidenceDate": "2026-10-19",
+  "classification": {
+    "pilot_preliminary": true,
+    "software_testing_only": true,
+    "scientific_result": false,
+    "real_predictor_scoring_completed": false,
+    "warning": "PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS; real-predictor experimental scoring remains pending."
+  },
+  "configuration": {
+    "seed": 42,
+    "redoxResidues": [
+      "W",
+      "Y",
+      "H",
+      "M",
+      "C"
+    ],
+    "primaryDelta": 0.05,
+    "sensitivityDeltas": [
+      0.02,
+      0.05,
+      0.1
+    ],
+    "blosumMinimum": 1
+  },
+  "overview": {
+    "pilotSubjects": 20,
+    "pilotVariants": 449,
+    "fullEligibleSubjects": 734,
+    "fullVariants": 10036
+  },
+  "datasetFunnel": [
+    {
+      "label": "Standardized candidates",
+      "count": 3946,
+      "detail": "merged source records"
+    },
+    {
+      "label": "Clean unique sequences",
+      "count": 1473,
+      "detail": "valid 3–50 aa peptides"
+    },
+    {
+      "label": "CD-HIT representatives",
+      "count": 1046,
+      "detail": "90% identity clusters"
+    },
+    {
+      "label": "Redox-eligible subjects",
+      "count": 734,
+      "detail": "contains W, Y, H, M or C"
+    },
+    {
+      "label": "PP1 pilot subjects",
+      "count": 20,
+      "detail": "seeded coverage sample"
+    }
+  ],
+  "coverage": {
+    "lengthRange": "3–36 aa",
+    "distinctLengths": 12,
+    "redoxResidues": [
+      "W",
+      "Y",
+      "H",
+      "M",
+      "C"
+    ],
+    "evidenceTiers": [
+      "E1",
+      "E2"
+    ],
+    "maximumVariantShare": 0.14253897550111358
+  },
+  "perturbations": [
+    {
+      "id": "P1",
+      "title": "Redox disruption",
+      "subtitle": "Alanine scanning",
+      "question": "Does the score change when a redox-active residue is removed?",
+      "rule": "Replace each W/Y/H/M/C position with alanine.",
+      "fullCount": 1180,
+      "pilotCount": 54,
+      "tone": "coral"
+    },
+    {
+      "id": "P2",
+      "title": "Conservative control",
+      "subtitle": "BLOSUM62-guided",
+      "question": "Does the score remain stable under a similar-residue edit?",
+      "rule": "Use the highest eligible BLOSUM62 replacement with score ≥ 1.",
+      "fullCount": 3276,
+      "pilotCount": 150,
+      "tone": "teal"
+    },
+    {
+      "id": "P3",
+      "title": "Random control",
+      "subtitle": "Seeded substitution",
+      "question": "How does the response compare with a reproducible random edit?",
+      "rule": "Choose a different standard residue using master seed 42.",
+      "fullCount": 5580,
+      "pilotCount": 245,
+      "tone": "violet"
+    }
+  ],
+  "metrics": {
+    "primaryDelta": 0.05,
+    "invarianceRate": 0.9333333333333333,
+    "invariantCount": 140,
+    "invariantDenominator": 150,
+    "falseSensitivityRate": 0.5185185185185185,
+    "insufficientCount": 28,
+    "insufficientDenominator": 54,
+    "preliminaryBcs": 0.44938271604938274,
+    "overallPfr": 0.10690423162583519,
+    "flipCount": 48,
+    "flipDenominator": 449,
+    "pfrByType": {
+      "P1": 0.2037037037037037,
+      "P2": 0.08666666666666667,
+      "P3": 0.09795918367346938
+    }
+  },
+  "sensitivity": [
+    {
+      "delta": 0.02,
+      "primary": false,
+      "ir": 0.7066666666666667,
+      "fsr": 0.2962962962962963,
+      "bcs": 0.497283950617284
+    },
+    {
+      "delta": 0.05,
+      "primary": true,
+      "ir": 0.9333333333333333,
+      "fsr": 0.5185185185185185,
+      "bcs": 0.44938271604938274
+    },
+    {
+      "delta": 0.1,
+      "primary": false,
+      "ir": 0.98,
+      "fsr": 0.7777777777777778,
+      "bcs": 0.21777777777777776
+    }
+  ],
+  "examples": [
+    {
+      "variant_id": "C3-ANOX-000205-P1-01-WA",
+      "sequence_id": "C3-ANOX-000205",
+      "perturbation_type": "P1",
+      "original_sequence": "WHH",
+      "position": 1,
+      "original_residue": "W",
+      "substituted_residue": "A",
+      "mutation": "W1A",
+      "perturbed_sequence": "AHH",
+      "blosum62_score": null,
+      "random_seed": null,
+      "original_score": 0.45,
+      "perturbed_score": 0.3,
+      "delta_score": 0.15000000000000002,
+      "absolute_delta_score": 0.15000000000000002,
+      "changed_positions": [
+        1
+      ],
+      "checks": {
+        "declared_position_matches_only_change": true,
+        "original_residue_matches_position": true,
+        "substituted_residue_matches_position": true,
+        "resulting_sequence_reconstructed": true,
+        "sequence_length_unchanged": true,
+        "original_score_recomputed": true,
+        "perturbed_score_recomputed": true,
+        "delta_score_recomputed": true,
+        "p1_rule_verified": true,
+        "p2_blosum62_score_verified": true,
+        "p3_seed_metadata_present": true
+      },
+      "inspection_status": "PASS"
+    },
+    {
+      "variant_id": "C3-ANOX-000467-P1-24-YA",
+      "sequence_id": "C3-ANOX-000467",
+      "perturbation_type": "P1",
+      "original_sequence": "SFGAKNAVKNGLQKLRNQCQANNYQGPFCDIFKKNP",
+      "position": 24,
+      "original_residue": "Y",
+      "substituted_residue": "A",
+      "mutation": "Y24A",
+      "perturbed_sequence": "SFGAKNAVKNGLQKLRNQCQANNAQGPFCDIFKKNP",
+      "blosum62_score": null,
+      "random_seed": null,
+      "original_score": 0.46996996996997,
+      "perturbed_score": 0.43573573573573576,
+      "delta_score": 0.03423423423423422,
+      "absolute_delta_score": 0.03423423423423422,
+      "changed_positions": [
+        24
+      ],
+      "checks": {
+        "declared_position_matches_only_change": true,
+        "original_residue_matches_position": true,
+        "substituted_residue_matches_position": true,
+        "resulting_sequence_reconstructed": true,
+        "sequence_length_unchanged": true,
+        "original_score_recomputed": true,
+        "perturbed_score_recomputed": true,
+        "delta_score_recomputed": true,
+        "p1_rule_verified": true,
+        "p2_blosum62_score_verified": true,
+        "p3_seed_metadata_present": true
+      },
+      "inspection_status": "PASS"
+    },
+    {
+      "variant_id": "C3-MAOP-AOPP-001031-P2-01-LI",
+      "sequence_id": "C3-MAOP-AOPP-001031",
+      "perturbation_type": "P2",
+      "original_sequence": "LAQGTFLQPHQ",
+      "position": 1,
+      "original_residue": "L",
+      "substituted_residue": "I",
+      "mutation": "L1I",
+      "perturbed_sequence": "IAQGTFLQPHQ",
+      "blosum62_score": 2,
+      "random_seed": null,
+      "original_score": 0.5424242424242425,
+      "perturbed_score": 0.5409090909090909,
+      "delta_score": 0.0015151515151515804,
+      "absolute_delta_score": 0.0015151515151515804,
+      "changed_positions": [
+        1
+      ],
+      "checks": {
+        "declared_position_matches_only_change": true,
+        "original_residue_matches_position": true,
+        "substituted_residue_matches_position": true,
+        "resulting_sequence_reconstructed": true,
+        "sequence_length_unchanged": true,
+        "original_score_recomputed": true,
+        "perturbed_score_recomputed": true,
+        "delta_score_recomputed": true,
+        "p1_rule_verified": true,
+        "p2_blosum62_score_verified": true,
+        "p3_seed_metadata_present": true
+      },
+      "inspection_status": "PASS"
+    },
+    {
+      "variant_id": "C3-ANOX-000074-P2-06-VI",
+      "sequence_id": "C3-ANOX-000074",
+      "perturbation_type": "P2",
+      "original_sequence": "PMDYMVT",
+      "position": 6,
+      "original_residue": "V",
+      "substituted_residue": "I",
+      "mutation": "V6I",
+      "perturbed_sequence": "PMDYMIT",
+      "blosum62_score": 3,
+      "random_seed": null,
+      "original_score": 0.725,
+      "perturbed_score": 0.6178571428571429,
+      "delta_score": 0.1071428571428571,
+      "absolute_delta_score": 0.1071428571428571,
+      "changed_positions": [
+        6
+      ],
+      "checks": {
+        "declared_position_matches_only_change": true,
+        "original_residue_matches_position": true,
+        "substituted_residue_matches_position": true,
+        "resulting_sequence_reconstructed": true,
+        "sequence_length_unchanged": true,
+        "original_score_recomputed": true,
+        "perturbed_score_recomputed": true,
+        "delta_score_recomputed": true,
+        "p1_rule_verified": true,
+        "p2_blosum62_score_verified": true,
+        "p3_seed_metadata_present": true
+      },
+      "inspection_status": "PASS"
+    },
+    {
+      "variant_id": "C3-MAOP-ANOXPP-000940-P3-01-LQ",
+      "sequence_id": "C3-MAOP-ANOXPP-000940",
+      "perturbation_type": "P3",
+      "original_sequence": "LRTLPM",
+      "position": 1,
+      "original_residue": "L",
+      "substituted_residue": "Q",
+      "mutation": "L1Q",
+      "perturbed_sequence": "QRTLPM",
+      "blosum62_score": null,
+      "random_seed": 42,
+      "original_score": 0.6238095238095238,
+      "perturbed_score": 0.6333333333333333,
+      "delta_score": -0.00952380952380949,
+      "absolute_delta_score": 0.00952380952380949,
+      "changed_positions": [
+        1
+      ],
+      "checks": {
+        "declared_position_matches_only_change": true,
+        "original_residue_matches_position": true,
+        "substituted_residue_matches_position": true,
+        "resulting_sequence_reconstructed": true,
+        "sequence_length_unchanged": true,
+        "original_score_recomputed": true,
+        "perturbed_score_recomputed": true,
+        "delta_score_recomputed": true,
+        "p1_rule_verified": true,
+        "p2_blosum62_score_verified": true,
+        "p3_seed_metadata_present": true
+      },
+      "inspection_status": "PASS"
+    },
+    {
+      "variant_id": "C3-ANOX-000467-P3-36-PG",
+      "sequence_id": "C3-ANOX-000467",
+      "perturbation_type": "P3",
+      "original_sequence": "SFGAKNAVKNGLQKLRNQCQANNYQGPFCDIFKKNP",
+      "position": 36,
+      "original_residue": "P",
+      "substituted_residue": "G",
+      "mutation": "P36G",
+      "perturbed_sequence": "SFGAKNAVKNGLQKLRNQCQANNYQGPFCDIFKKNG",
+      "blosum62_score": null,
+      "random_seed": 42,
+      "original_score": 0.46996996996997,
+      "perturbed_score": 0.45105105105105103,
+      "delta_score": 0.018918918918918948,
+      "absolute_delta_score": 0.018918918918918948,
+      "changed_positions": [
+        36
+      ],
+      "checks": {
+        "declared_position_matches_only_change": true,
+        "original_residue_matches_position": true,
+        "substituted_residue_matches_position": true,
+        "resulting_sequence_reconstructed": true,
+        "sequence_length_unchanged": true,
+        "original_score_recomputed": true,
+        "perturbed_score_recomputed": true,
+        "delta_score_recomputed": true,
+        "p1_rule_verified": true,
+        "p2_blosum62_score_verified": true,
+        "p3_seed_metadata_present": true
+      },
+      "inspection_status": "PASS"
+    }
+  ],
+  "predictors": [
+    {
+      "id": "aopxsvm",
+      "name": "AOPxSVM",
+      "tier": "primary",
+      "order": 1,
+      "readiness": "best_first-integration_candidate",
+      "status": "not_integrated",
+      "rationale": "The public repository bundles the SVM, scaler, selected-feature table, and inference code; it exposes one unambiguous positive-class probability and has a reachable web form. Its main risk is reproducing the legacy Python 3.7/scikit-learn 1.0.2 joblib environment."
+    },
+    {
+      "id": "anoxpepred",
+      "name": "AnOxPePred",
+      "tier": "primary",
+      "order": 2,
+      "readiness": "model-available_semantics-decision-needed",
+      "status": "not_integrated",
+      "rationale": "Public source and TensorFlow checkpoint files are available and the DTU service is reachable, but the legacy TensorFlow environment must be reproduced and the two-output FRS/Chelator model requires a frozen scalar-score choice for C3."
+    },
+    {
+      "id": "pu_aop",
+      "name": "PU-AOP (Component 2)",
+      "tier": "primary",
+      "order": 3,
+      "readiness": "conditional_on_frozen_handoff",
+      "status": "not_integrated",
+      "rationale": "PU-AOP is scientifically central to the project and local source/manifests exist, but Component 2 must select the frozen model and provide the ignored checkpoint, compatible feature resources, runtime contract, and reference score before C3 integration."
+    },
+    {
+      "id": "multi_aop",
+      "name": "Multi-AOP",
+      "tier": "secondary",
+      "order": 4,
+      "readiness": "deferred_environment-and-licence-risk",
+      "status": "not_integrated",
+      "rationale": "Code and checkpoints exist, but the PyTorch Geometric/RDKit/xLSTM environment, hard-coded paths, 2-30 versus 50-residue behavior, and missing repository licence create more PP1 risk than the primary candidates."
+    },
+    {
+      "id": "aop_drl",
+      "name": "AOP-DRL",
+      "tier": "secondary",
+      "order": 5,
+      "readiness": "blocked_missing-inference-assets",
+      "status": "not_integrated",
+      "rationale": "The public repository lacks a trained checkpoint and complete inference package, the published endpoint is not serving AOP-DRL, and the stated non-commercial restriction requires clarification."
+    }
+  ],
+  "provenance": {
+    "runId": "c3_aop_bcs_pp1_dummy_pilot_run_v1",
+    "runDate": "2026-10-19",
+    "datasetVersion": "c3_aop_bcs_pp1_pilot_v1",
+    "predictorVersion": "c3_software_smoke_test_dummy@1.0.0",
+    "codeCommit": "ca77c59b2c9ccb1cbb221528659d15789e139715",
+    "validationStatus": "PASS",
+    "missingScores": 0,
+    "sourceArtifacts": [
+      {
+        "label": "cleaning",
+        "path": "data/processed/c3_aop_bcs/sequence_cleaning_report_v1.json",
+        "sha256": "709e9920fec70e2115b94183be0091beb703ce76f2ab0b2c5133224f1bcb869a"
+      },
+      {
+        "label": "deduplication",
+        "path": "data/processed/c3_aop_bcs/cd_hit_deduplication_report_v1.json",
+        "sha256": "4c815c49344649c439792f5be4fe96b9356e090557a09da8abffecfafe22b22f"
+      },
+      {
+        "label": "eligibility",
+        "path": "data/processed/c3_aop_bcs/redox_eligibility_report_v1.json",
+        "sha256": "dec7f66ab673ebb09e34b105b4c2522f713514c6bbd24cf5e5a82a1be12c5f23"
+      },
+      {
+        "label": "perturbations",
+        "path": "data/processed/c3_aop_bcs/combined_perturbation_pipeline_report_v1.json",
+        "sha256": "482b4795c7bca8e2717e7ff571b79f38ae763c0a1fe5a311f65fe1f179c9e3ca"
+      },
+      {
+        "label": "pilot",
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_report_v1.json",
+        "sha256": "1c5fc9eaed49cb7ae7821e9040c57d5ff0811d2426ac74834bc382c6da9be495"
+      },
+      {
+        "label": "pfr",
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_pfr_report_v1.json",
+        "sha256": "0d64fac07d1b7a5489eb58774d9ef19cb53f99222cb496f6bf2d5e2e13d29332"
+      },
+      {
+        "label": "bcs",
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_bcs_report_v1.json",
+        "sha256": "d35e79a0360b0f9637d8564c3f4f5f66539cdb0bc408ebd88c34743b1912bf2e"
+      },
+      {
+        "label": "sensitivity",
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_dummy_delta_sensitivity_report_v1.json",
+        "sha256": "7c83e317496953dedab2e121f0a3d1edf11c76dfbce3fad8f255943493ad6b3a"
+      },
+      {
+        "label": "countReview",
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_perturbation_count_report_v1.json",
+        "sha256": "148eefc09441a9a6d043af6ee4fe9e2f1610d567b77cf7886ed65c11a4948872"
+      },
+      {
+        "label": "inspection",
+        "path": "data/processed/c3_aop_bcs/pp1_manual_variant_inspection_v1.json",
+        "sha256": "5220f168c26e169ec10b73a8f5fcb60d1be27c75b26b0e252b0cc58587f0f60a"
+      },
+      {
+        "label": "manifest",
+        "path": "data/processed/c3_aop_bcs/pp1_pilot_run_manifest_v1.json",
+        "sha256": "c49ce2a322c1e2bbfcfc340cb8c706d774a98bdf725fc9115f8319ac763b82a8"
+      },
+      {
+        "label": "predictorPriority",
+        "path": "src/plantaox/c3_aop_bcs/predictor_priority_v1.json",
+        "sha256": "2f1ee67a9ea9c34af66a50f160a0761c17307aa7261f99f243bb9885e29a3511"
+      }
+    ]
+  },
+  "figures": [
+    {
+      "sourcePath": "data/processed/c3_aop_bcs/figures/pp1_pilot_absolute_delta_distributions_v1.svg",
+      "file": "assets/generated/pp1_pilot_absolute_delta_distributions_v1.svg",
+      "sha256": "557ab5366dc27e39f317904c077533b7d74acebd1c41b9d45227da53a4e893e3"
+    },
+    {
+      "sourcePath": "data/processed/c3_aop_bcs/figures/pp1_pilot_score_examples_v1.svg",
+      "file": "assets/generated/pp1_pilot_score_examples_v1.svg",
+      "sha256": "3e1fb3dc9e76960adb13ee41ab68f098df195ff4a8658c9358bdf2a8f6e65bdb"
+    },
+    {
+      "sourcePath": "data/processed/c3_aop_bcs/figures/pp1_pilot_metric_summary_v1.svg",
+      "file": "assets/generated/pp1_pilot_metric_summary_v1.svg",
+      "sha256": "9761e84a03093056b314ab4c2d6ed21558033f14d5011e24f23cd8cd5f15c814"
+    },
+    {
+      "sourcePath": "data/processed/c3_aop_bcs/figures/pp1_pilot_prediction_flip_comparison_v1.svg",
+      "file": "assets/generated/pp1_pilot_prediction_flip_comparison_v1.svg",
+      "sha256": "6908162834d6d69ef9a7c64ac42a4875ef88f7a5003406ae36edff36dfef1f25"
+    }
+  ]
+}

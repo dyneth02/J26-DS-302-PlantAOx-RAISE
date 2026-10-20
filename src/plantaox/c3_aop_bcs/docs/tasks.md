@@ -1011,6 +1011,58 @@ Capture evidence of:
 
 ---
 
+## Task 3.43 — Build the AOP-BCS progress-presentation frontend
+
+### Subtasks
+- [x] Review the shared frontend structure, navigation, card, badge, typography, spacing, colour, and responsive-layout patterns without modifying other components.
+- [x] Review the C3 task/status records and authoritative PP1 artifacts before defining the presentation content.
+- [x] Create a standalone responsive frontend entirely under `src/plantaox/c3_aop_bcs/frontend/`.
+- [x] Present the research problem, AOP-BCS concept, dataset pipeline, P1/P2/P3 methodology, pilot metrics, predictor readiness, limitations, and next work as a coherent presentation narrative.
+- [x] Populate the interface only from versioned C3 evidence and clearly label every dummy-predictor value as software-testing-only and non-scientific.
+- [x] Add an interactive real-artifact perturbation explorer and accessible presentation navigation.
+- [x] Match the established PlantAOx design language while keeping the C3 frontend visually distinctive and presentation-ready.
+- [x] Add local launch instructions and automated checks for content integrity and scope safety.
+- [x] Validate desktop and mobile layouts and confirm no files outside `c3_aop_bcs` were changed.
+
+### Deliverable
+- Presentation-ready standalone AOP-BCS frontend backed by the versioned PP1 artifacts.
+
+---
+
+## Task 3.44 — Align the AOP-BCS frontend with the shared research dashboard
+
+### Subtasks
+- [x] Re-audit the shared application shell, component navigation, cards, badges, stat tiles, tables, charts, explorer controls, provenance, and limitation patterns without modifying them.
+- [x] Replace the presentation-oriented one-page layout with the same compact dashboard shell used by the other components.
+- [x] Add component-level dashboard views for overview, dataset, perturbations, pilot metrics, variant explorer, predictor status, and evidence.
+- [x] Reuse the shared PlantAOx colour tokens, typography scale, spacing, card treatment, responsive breakpoints, and light/dark behavior.
+- [x] Preserve the generated C3 evidence adapter and populate every dashboard view only from versioned C3 artifacts.
+- [x] Keep dummy-predictor results visibly labelled as software-testing-only and non-scientific in every relevant view.
+- [x] Update automated checks and local instructions for the dashboard navigation and content structure.
+- [x] Validate dashboard interactions and responsive layouts and confirm no file outside `c3_aop_bcs` changed.
+
+### Deliverable
+- Standalone AOP-BCS research dashboard matching the established Component 1, 2, and 4 frontend patterns.
+
+---
+
+## Task 3.45 — Connect the AOP-BCS dashboard to a C3 backend
+
+### Subtasks
+- [x] Re-read the C3 task/status records and audit the shared FastAPI conventions without modifying shared or other-component files.
+- [x] Create a C3-owned FastAPI application with health and dashboard-data endpoints under `/api/v1/c3`.
+- [x] Load dashboard responses from the authoritative versioned C3 artifacts and validate required evidence before responding.
+- [x] Serve the C3 dashboard and its generated figures from the same backend process so local use requires one command and no CORS workaround.
+- [x] Replace the frontend's static snapshot dependency with the C3 dashboard API and add visible loading/error/backend-status states.
+- [x] Add focused backend/API and frontend contract tests, including missing-artifact failure behavior and scientific-boundary checks.
+- [x] Update the C3 frontend run instructions and document the shared-router integration boundary imposed by the component-only edit scope.
+- [x] Run automated tests and browser verification, then confirm that no file outside `c3_aop_bcs` changed.
+
+### Deliverable
+- A locally runnable AOP-BCS dashboard backed by live, validated C3 artifact APIs, entirely contained within `src/plantaox/c3_aop_bcs/`.
+
+---
+
 # PP1 Quality Gate
 
 Before considering the PP1 implementation stage complete, verify the following.

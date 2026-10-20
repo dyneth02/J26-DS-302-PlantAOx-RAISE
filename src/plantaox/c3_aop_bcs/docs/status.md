@@ -1,6 +1,6 @@
 # Component 3 (AOP-BCS) Status
 
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-20
 
 ## Completed work
 
@@ -181,11 +181,54 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.36 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.37: Update implementation documentation
+## Completed work — Task 3.43: Build the AOP-BCS progress-presentation frontend
 
-**Status:** Not started; next task.
+**Status:** Completed and verified on 2026-10-20.
 
-Next work:
+- Reviewed the shared React/Vite shell and the read-only Component 1, 2, and 4 interfaces, then carried their teal/slate research-dashboard language, bordered cards, evidence badges, typography, spacing, responsive navigation, and explicit limitation states into a standalone C3 presentation.
+- Created the complete frontend under `src/plantaox/c3_aop_bcs/frontend/`; no shared frontend or other component file was changed.
+- Built an eight-section presentation narrative covering the research gap, AOP-BCS concept, dataset funnel, P1/P2/P3 methodology, dummy-only pilot metrics, inspected variants, predictor readiness, limitations, provenance, and next scientific work.
+- Added deterministic generation from 12 versioned C3 reports plus checksum-verified copies of the four Task 3.34 SVG figures; the generated snapshot retains 20 pilot subjects, 449 variants, and the 54/150/245 P1/P2/P3 split.
+- Added an interactive explorer for all six Task 3.33 examples, with sequence-level mutation highlighting, one-based position, P2 BLOSUM62 or P3 seed metadata, dummy original/perturbed scores, DeltaScore, and validation status.
+- Added accessible section navigation, mobile navigation, light/dark themes, keyboard focus states, reduced-motion support, a presentation mode, responsive layouts, and dependency-free local serving.
+- Kept a persistent visible warning and repeated local warnings that IR, FSR, BCS, PFR, scores, and DeltaScores are dummy software-testing evidence only and are not scientific AOP findings.
+- Added `npm run generate`, `npm run validate`, and `npm test`; validation passes for content integrity, safety classification, predictor state, interaction hooks, mobile rules, source scope, copied-figure checksums, and C3-only working-tree scope.
+- Visually checked the rendered narrow/mobile layout, light/dark themes, and P1/P2 explorer switching in the local browser; checked the desktop layout rules and presentation structure through the automated validation.
 
-- update the architecture and repository-structure documentation to match the implemented C3 system;
-- document dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, and configuration/usage instructions.
+## Completed work — Task 3.44: Align the AOP-BCS frontend with the shared research dashboard
+
+**Status:** Completed and verified on 2026-10-20.
+
+- Re-audited the read-only shared shell, header, sidebar, component tab bars, cards, badges, stat tiles, tables, charts, explorer controls, provenance indicators, and limitation panels across Components 1, 2, and 4.
+- Replaced the presentation-oriented scrolling interface with the same compact dashboard structure used by the other components: persistent platform sidebar, application header, component heading, and component-level tabs.
+- Added seven route-like dashboard views—Overview, Dataset, Perturbations, Pilot metrics, Variant explorer, Predictors, and Evidence—using accessible hash navigation without requiring changes to the shared router.
+- Reused the shared PlantAOx CSS variable names, teal/slate colour system, typography scale, card/header treatment, badges, stat tiles, tables, light/dark behavior, and `760px` mobile-navigation breakpoint.
+- Preserved the deterministic adapter over 12 versioned C3 reports and four checksum-verified SVG figures; no display value is invented or read from another component.
+- Kept the global software-testing banner and repeated scientific-boundary panels wherever dummy scores or metrics appear.
+- Preserved the six-example P1/P2/P3 explorer with real artifact identifiers, sequences, mutation positions, BLOSUM62/seed metadata, score comparison, and inspection status.
+- Updated the local README and automated checks for all seven dashboard routes, shared design tokens, explorer/hash interactions, responsive rules, evidence classification, checksums, and C3-only edit scope.
+- Verified Overview, Pilot metrics, and Variant explorer navigation in the local browser, confirmed light/dark rendering, and confirmed the local page returns HTTP 200.
+- Confirmed `npm test` passes and the redesign changes only files under `src/plantaox/c3_aop_bcs/`.
+
+## Completed work — Task 3.45: Connect the AOP-BCS dashboard to a C3 backend
+
+**Status:** Completed and verified on 2026-10-20.
+
+- Re-read the C3 task/status records and audited the shared FastAPI composition, route prefixes, service separation, and test patterns without modifying any shared or other-component file.
+- Added the C3-owned FastAPI application in `dashboard_backend.py`, exposing health, complete dashboard, seven section-specific, and allow-listed SVG figure routes under `/api/v1/c3`.
+- Built every API response directly from the 12 authoritative versioned C3 reports, recalculating source/figure SHA-256 values and failing closed for missing evidence, unreconciled counts, failed BCS validation, invalid inspected-example coverage, or an unsafe scientific classification.
+- Served `index.html`, JavaScript, styles, assets, figures, and JSON from one Uvicorn process so the browser and API share an origin and require no CORS workaround.
+- Connected the dashboard to `/api/v1/c3/dashboard`, added visible connecting/connected/unavailable status states, and retained an actionable error panel if the backend cannot supply evidence.
+- Replaced the old static development command with a cross-platform Node launcher that locates the repository virtual environment and starts Uvicorn; `npm run dev` now launches the complete application at `http://127.0.0.1:4313`.
+- Added five focused API contract tests covering the frontend/health path, full dashboard contract, section and figure routes, missing-artifact failure, and rejection of a tampered scientific classification; all five pass.
+- Confirmed `npm test` passes, including deterministic artifact generation, frontend syntax, API URL/status hooks, dashboard structure, scientific boundary, checksums, and edit-scope validation.
+- Verified the running application through real HTTP requests: health returned `ok`, 12 source artifacts, 20 pilot peptides, 449 pilot variants, and API version `c3-dashboard-api-v1`.
+- Verified the browser-rendered Overview and Pilot metrics routes, the four backend-served figures, and the visible green `Backend connected` state.
+- Ran the complete C3 regression suite: 154 tests and all 147 subtests pass; five older byte-reproducibility assertions remain failing only because committed Task 3.19–3.22/3.33 text artifacts use CRLF while their generators emit LF. These pre-existing line-ending mismatches are unrelated to the dashboard/backend integration and their versioned artifacts were not rewritten.
+- Confirmed all tracked implementation changes remain in paths containing `c3_aop_bcs`; the reusable C3 router is ready for later shared-router registration, which remains outside the strict C3-only edit scope.
+
+## Next task — Task 3.37: Update implementation documentation
+
+**Status:** Not started.
+
+Next work: update the architecture diagram and main implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, API/dashboard architecture, and general configuration/usage instructions.

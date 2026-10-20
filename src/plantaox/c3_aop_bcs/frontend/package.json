@@ -1,0 +1,12 @@
+{
+  "name": "c3-aop-bcs-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node scripts/generate-data.mjs",
+    "validate": "node --check app.js && node --check scripts/generate-data.mjs && node --check scripts/start-backend.mjs && node --check scripts/validate.mjs && node scripts/validate.mjs",
+    "test": "npm run generate && npm run validate",
+    "dev": "node scripts/start-backend.mjs"
+  }
+}

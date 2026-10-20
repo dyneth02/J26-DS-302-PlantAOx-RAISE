@@ -1,0 +1,3 @@
+# Generated evidence must remain byte-identical to the checksum-pinned sources.
+assets/generated/*.json -text
+assets/generated/*.svg -text
