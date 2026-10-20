@@ -227,19 +227,25 @@
 - Ran the complete C3 regression suite: 154 tests and all 147 subtests pass; five older byte-reproducibility assertions remain failing only because committed Task 3.19–3.22/3.33 text artifacts use CRLF while their generators emit LF. These pre-existing line-ending mismatches are unrelated to the dashboard/backend integration and their versioned artifacts were not rewritten.
 - Confirmed all tracked implementation changes remain in paths containing `c3_aop_bcs`; the reusable C3 router is ready for later shared-router registration, which remains outside the strict C3-only edit scope.
 
+## Completed work — Task 3.46: Rebuild the C3 frontend using the shared React application structure
+
+**Status:** Completed and verified on 2026-10-20.
+
+- Re-read the C3 task/status records and completed a read-only audit of the shared frontend, including its React/Vite configuration, application router, feature routes, layout and research components, API utilities, styling tokens, responsive behavior, and tests.
+- Replaced the C3 legacy plain-JavaScript page with React 19, TypeScript, Vite 8, Tailwind CSS 4, and React Router while keeping every implementation file under `c3_aop_bcs`.
+- Reproduced the shared directory conventions with `app`, reusable `components/layout`, `components/ui`, `components/research`, `features/c3-aop-bcs`, `lib/api`, and `styles` modules.
+- Implemented typed Overview, Dataset, Perturbations, Pilot metrics, Variant explorer, Predictors, and Evidence routes in the same dashboard shell used by the other components.
+- Added shared-style header, sidebar, component navigation, cards, badges, stat tiles, loading/error/empty states, limitations panels, responsive desktop/mobile behavior, and light/dark theme handling.
+- Connected the React service layer to the existing `/api/v1/c3` evidence contract through the Vite proxy; retained visible connecting, connected, and unavailable states.
+- Converted the C3 FastAPI process to an API-only service on port 4314 and added a cross-platform one-command launcher for the API plus Vite frontend on port 4313.
+- Preserved the global and local software-testing warnings. Dummy IR, FSR, BCS, PFR, scores, and DeltaScores remain explicitly excluded from scientific interpretation.
+- Added four frontend component/router/API-state tests; all four pass.
+- Confirmed the TypeScript production build succeeds and transforms 1,960 modules; confirmed all five focused backend contract tests pass.
+- Verified the live Overview, Pilot metrics, Perturbations, and interactive Variant explorer routes against the real C3 API, including four figure responses, P3 seed metadata, responsive narrow/desktop layouts, and the visible `Backend connected` state. Browser console inspection returned no warnings or errors.
+- Confirmed the shared root frontend, shared backend, and every other component remained unchanged.
+
 ## Next task — Task 3.37: Update implementation documentation
 
 **Status:** Not started.
 
-Next work: update the architecture diagram and main implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, API/dashboard architecture, and general configuration/usage instructions.
-
-## In progress — Task 3.46: Rebuild the C3 frontend using the shared React application structure
-
-**Status:** In progress from 2026-10-20.
-
-- Re-read the task and status records and completed a second read-only audit of the shared frontend.
-- Confirmed the shared application uses React 19, TypeScript, Vite 8, Tailwind CSS 4, React Router route objects, typed component services, shared `apiGet`/`useApi`, and reusable research UI primitives.
-- Confirmed C1, C2, and C4 use feature-local `pages`, `components`, `services`, `types`, and `routes.tsx` directories under one shared shell.
-- Preserved the strict edit boundary: the C3 frontend will be restructured inside `src/plantaox/c3_aop_bcs/frontend`; the shared `frontend/` and other components remain read-only.
-
-Next work: implement the typed React structure, connect it to the existing C3 API, validate tests/build, and verify the complete application in the browser.
+Next work: update the architecture diagram and main implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, React/API dashboard architecture, and configuration/usage instructions.

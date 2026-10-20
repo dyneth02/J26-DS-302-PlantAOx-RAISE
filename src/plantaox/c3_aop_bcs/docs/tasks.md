@@ -1067,14 +1067,14 @@ Capture evidence of:
 
 ### Subtasks
 - [x] Re-audit the shared React/Vite architecture, routes, component registry, UI primitives, API client, data-state handling, styling tokens, tests, and startup workflow without modifying shared files.
-- [ ] Replace the standalone plain-JavaScript page with a React 19, TypeScript, Vite, Tailwind CSS, and React Router application inside `c3_aop_bcs/frontend`.
-- [ ] Mirror the shared directory structure: `app`, `components/layout`, `components/ui`, `components/research`, `features/c3-aop-bcs`, `lib/api`, and `styles`.
-- [ ] Split Overview, Dataset, Perturbations, Pilot metrics, Variant explorer, Predictors, and Evidence into typed route-level pages.
-- [ ] Reuse shared-style Card, Badge, StatTile, DataState, LimitationsPanel, header, sidebar, and component-nav patterns.
-- [ ] Connect typed C3 services to `/api/v1/c3` and preserve loading, unavailable, and error states.
-- [ ] Preserve every software-testing-only warning and prevent dummy outputs from being presented as scientific evidence.
-- [ ] Add component/API/router tests, production build validation, and a one-command C3 frontend/backend development launcher.
-- [ ] Verify the responsive application in the browser and confirm no file outside a `c3_aop_bcs` path changed.
+- [x] Replace the standalone plain-JavaScript page with a React 19, TypeScript, Vite, Tailwind CSS, and React Router application inside `c3_aop_bcs/frontend`.
+- [x] Mirror the shared directory structure: `app`, `components/layout`, `components/ui`, `components/research`, `features/c3-aop-bcs`, `lib/api`, and `styles`.
+- [x] Split Overview, Dataset, Perturbations, Pilot metrics, Variant explorer, Predictors, and Evidence into typed route-level pages.
+- [x] Reuse shared-style Card, Badge, StatTile, DataState, LimitationsPanel, header, sidebar, and component-nav patterns.
+- [x] Connect typed C3 services to `/api/v1/c3` and preserve loading, unavailable, and error states.
+- [x] Preserve every software-testing-only warning and prevent dummy outputs from being presented as scientific evidence.
+- [x] Add component/API/router tests, production build validation, and a one-command C3 frontend/backend development launcher.
+- [x] Verify the responsive application in the browser and confirm no file outside a `c3_aop_bcs` path changed.
 
 ### Deliverable
 - A typed, tested AOP-BCS React dashboard following the same structure and behavior conventions as the shared PlantAOx frontend while remaining inside the authorized C3 scope.
