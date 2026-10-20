@@ -1,4 +1,4 @@
-const DATA_URL = "assets/generated/presentation-data.json";
+const DATA_URL = "/api/v1/c3/dashboard";
 const ROUTES = ["overview", "dataset", "perturbations", "metrics", "explorer", "predictors", "evidence"];
 const formatNumber = new Intl.NumberFormat("en-US");
 const percent = (value, digits = 1) => `${(value * 100).toFixed(digits)}%`;
@@ -12,6 +12,12 @@ const escapeHtml = (value) => String(value)
 let evidence;
 let explorerType = "P1";
 let explorerIndex = 0;
+
+function setBackendStatus(state, label) {
+  const status = document.querySelector("#backend-status");
+  status.className = `badge ${state === "online" ? "badge-success" : state === "error" ? "badge-danger" : "badge-warning"}`;
+  status.textContent = label;
+}
 
 function card(title, subtitle, body, className = "") {
   return `<article class="card ${className}">
@@ -138,7 +144,7 @@ function evidenceView() {
   ].map(([label, value]) => `<div><span>${label}</span><code>${escapeHtml(value)}</code></div>`).join("");
   const artifacts = evidence.provenance.sourceArtifacts.map((row) => `<tr><th scope="row">${escapeHtml(row.label)}</th><td><code>${escapeHtml(row.path)}</code></td><td><code>${row.sha256.slice(0, 12)}…</code></td><td><span class="badge badge-success">present</span></td></tr>`).join("");
   return `
-    ${card("Research evidence & reproducibility", "This dashboard reads a deterministic snapshot generated from versioned C3 reports.", `<div class="stat-grid">${statTile("Source reports", evidence.provenance.sourceArtifacts.length)}${statTile("Generated figures", evidence.figures.length)}${statTile("Validation", evidence.provenance.validationStatus)}${statTile("Missing pilot scores", evidence.provenance.missingScores)}</div>`)}
+    ${card("Research evidence & reproducibility", "The C3 backend validates and reads these versioned reports for every dashboard request.", `<div class="stat-grid">${statTile("Source reports", evidence.provenance.sourceArtifacts.length)}${statTile("Generated figures", evidence.figures.length)}${statTile("Validation", evidence.provenance.validationStatus)}${statTile("Missing pilot scores", evidence.provenance.missingScores)}</div>`)}
     ${card("Run provenance", "Frozen software-pilot identity.", `<div class="provenance-grid">${provenanceRows}</div>`)}
     ${card("Tracked source reports", "Checksums are regenerated and verified before the local dashboard is served.", `<div class="table-wrap"><table><thead><tr><th>Category</th><th>File</th><th>SHA-256</th><th>Present</th></tr></thead><tbody>${artifacts}</tbody></table></div>`)}
     ${card("Current limitations", "Open scientific dependencies remain visible.", `<ul><li>No real predictor has produced a retained score through the C3 interface.</li><li>PU-AOP depends on a frozen Component 2 handoff.</li><li>The current IR, FSR, BCS, PFR, and ΔScore values have no biological interpretation.</li><li>The KernelSHAP backend and full faithfulness experiment remain later work.</li></ul>`, "limitations")}`;
@@ -189,7 +195,15 @@ function initialiseShell() {
 }
 
 initialiseShell();
-fetch(DATA_URL)
+setBackendStatus("connecting", "Backend connecting");
+fetch(DATA_URL, { cache: "no-store", headers: { Accept: "application/json" } })
   .then((response) => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.json(); })
-  .then((data) => { evidence = data; renderRoute(); })
-  .catch((error) => { document.querySelector("#dashboard-view").innerHTML = `<article class="card error-card"><h3>Could not load Component 3 evidence</h3><p>${escapeHtml(error.message)}</p><code>Run npm run generate</code></article>`; });
+  .then((data) => {
+    evidence = data;
+    setBackendStatus("online", "Backend connected");
+    renderRoute();
+  })
+  .catch((error) => {
+    setBackendStatus("error", "Backend unavailable");
+    document.querySelector("#dashboard-view").innerHTML = `<article class="card error-card"><h3>Could not load Component 3 evidence</h3><p>${escapeHtml(error.message)}</p><code>Start the complete application with npm run dev</code></article>`;
+  });

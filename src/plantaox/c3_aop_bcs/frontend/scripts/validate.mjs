@@ -38,6 +38,8 @@ for (const token of ["--color-bg", "--color-surface", "--color-border", "--color
   assert(css.includes(token), `Shared PlantAOx token ${token} is missing.`);
 }
 assert(app.includes("renderExplorerDetail") && app.includes("hashchange"), "Interactive explorer or dashboard navigation is missing.");
+assert(app.includes('const DATA_URL = "/api/v1/c3/dashboard"'), "Dashboard must load evidence from the C3 backend API.");
+assert(app.includes("setBackendStatus") && html.includes('id="backend-status"'), "Backend connection status is missing.");
 assert(!html.includes("Presentation mode") && !app.includes("presentation-mode"), "Presentation-only controls must not remain in the dashboard.");
 
 for (const figure of data.figures) {

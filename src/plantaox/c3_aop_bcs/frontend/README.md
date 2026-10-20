@@ -1,6 +1,6 @@
 # AOP-BCS research dashboard
 
-This is the standalone Component 3 dashboard. It remains inside `c3_aop_bcs` because the shared application router, component registry, and shared UI package are outside the permitted C3 edit scope.
+This is the standalone Component 3 dashboard and its C3-owned FastAPI backend. Both remain inside `c3_aop_bcs` because the shared application router, component registry, and shared UI package are outside the permitted C3 edit scope.
 
 The dashboard deliberately follows the existing PlantAOx-RAISE frontend patterns:
 
@@ -17,7 +17,7 @@ All content is generated from versioned Component 3 artifacts. Current IR, FSR, 
 
 ## Run locally
 
-Node.js is the only runtime dependency; no package installation is required.
+Use the repository virtual environment after installing the dependencies declared in the root `pyproject.toml`. Node.js is used only as the convenient one-command launcher and for frontend validation.
 
 ```powershell
 cd src/plantaox/c3_aop_bcs/frontend
@@ -26,6 +26,13 @@ npm run dev
 ```
 
 Open `http://127.0.0.1:4313`.
+
+`npm run dev` starts Uvicorn and serves both the dashboard and `/api/v1/c3/*` from the same origin. The header must show **Backend connected**. Useful API checks are:
+
+- `GET /api/v1/c3/health`
+- `GET /api/v1/c3/dashboard`
+- `GET /api/v1/c3/sections/{overview|dataset|perturbations|metrics|explorer|predictors|evidence}`
+- `GET /api/v1/c3/figures/{filename}`
 
 To use another port in PowerShell:
 
@@ -46,7 +53,7 @@ npm run dev
 
 ## Data and validation
 
-`npm run generate` reads 12 authoritative C3 JSON reports, copies four checksum-verified C3 SVG figures, and writes `assets/generated/presentation-data.json` as the deterministic browser snapshot.
+The FastAPI backend reads and validates 12 authoritative C3 JSON reports on request and serves the original four C3 SVG figures through allow-listed routes. The browser does not use the generated JSON snapshot at runtime. `npm run generate` remains a deterministic offline cross-check and creates `assets/generated/presentation-data.json` for validation only.
 
 `npm run validate` checks:
 
@@ -64,6 +71,11 @@ npm run dev
 - `index.html` — shared-style dashboard shell, sidebar, header, and tab navigation.
 - `styles.css` — PlantAOx-aligned tokens, cards, tables, controls, and responsive layout.
 - `app.js` — seven dashboard views, routing, theme, navigation, and perturbation explorer.
+- `../dashboard_backend.py` — live artifact adapter, `/api/v1/c3` routes, and same-origin dashboard server.
 - `scripts/generate-data.mjs` — deterministic C3 artifact adapter.
 - `scripts/validate.mjs` — content, design, interaction, provenance, checksum, and scope checks.
-- `scripts/serve.mjs` — dependency-free local HTTP server.
+- `scripts/start-backend.mjs` — cross-platform launcher for the repository virtual environment and Uvicorn.
+
+## Shared application boundary
+
+The module exports a reusable FastAPI `router`, so the shared API can later include it under `/api/v1/c3`. That registration requires editing the repository-wide backend router and frontend component registry, which this task intentionally does not do because the authorized scope is limited to `c3_aop_bcs`. The standalone C3 application is fully functional without those edits.

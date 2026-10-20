@@ -67,6 +67,7 @@ a { color: inherit; }
 .content-shell { min-width: 0; flex: 1; margin-left: var(--sidebar-width); }
 .app-header { position: sticky; top: 0; z-index: 30; display: flex; height: 4rem; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding: 0 1.5rem; background: color-mix(in srgb, var(--color-surface) 94%, transparent); backdrop-filter: blur(12px); }
 .header-title { display: flex; align-items: center; gap: .5rem; }
+.header-actions { display: flex; align-items: center; gap: .75rem; }
 .app-header h1 { margin: 0; font-size: 1.125rem; font-weight: 650; }
 .icon-button { display: grid; width: 2.25rem; height: 2.25rem; place-content: center; border: 1px solid var(--color-border); border-radius: .5rem; background: var(--color-surface); cursor: pointer; }
 .menu-button { display: none; }
