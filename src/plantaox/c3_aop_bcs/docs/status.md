@@ -232,3 +232,14 @@
 **Status:** Not started.
 
 Next work: update the architecture diagram and main implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, API/dashboard architecture, and general configuration/usage instructions.
+
+## In progress — Task 3.46: Rebuild the C3 frontend using the shared React application structure
+
+**Status:** In progress from 2026-10-20.
+
+- Re-read the task and status records and completed a second read-only audit of the shared frontend.
+- Confirmed the shared application uses React 19, TypeScript, Vite 8, Tailwind CSS 4, React Router route objects, typed component services, shared `apiGet`/`useApi`, and reusable research UI primitives.
+- Confirmed C1, C2, and C4 use feature-local `pages`, `components`, `services`, `types`, and `routes.tsx` directories under one shared shell.
+- Preserved the strict edit boundary: the C3 frontend will be restructured inside `src/plantaox/c3_aop_bcs/frontend`; the shared `frontend/` and other components remain read-only.
+
+Next work: implement the typed React structure, connect it to the existing C3 API, validate tests/build, and verify the complete application in the browser.
