@@ -244,8 +244,19 @@
 - Verified the live Overview, Pilot metrics, Perturbations, and interactive Variant explorer routes against the real C3 API, including four figure responses, P3 seed metadata, responsive narrow/desktop layouts, and the visible `Backend connected` state. Browser console inspection returned no warnings or errors.
 - Confirmed the shared root frontend, shared backend, and every other component remained unchanged.
 
-## Next task — Task 3.37: Update implementation documentation
+## Completed — Task 3.47: Integrate AOP-BCS into the shared repository frontend
 
-**Status:** Not started.
+**Status:** Completed and verified on 2026-10-21.
 
-Next work: update the architecture diagram and main implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, React/API dashboard architecture, and configuration/usage instructions.
+- Re-read the C3 tracking records and the shared-platform integration guide.
+- Audited the root React/Vite frontend, component registry, router, shell/sidebar/header, shared research UI, API utilities, existing C1/C2/C4 feature modules, tests, and backend proxy behavior.
+- Confirmed the intended shared structure is `frontend/src/features/c3-aop-bcs/` with one route registration and one C3 registry update.
+- Added the C3 feature-local types, API service, hook, shell, navigation, scientific-warning boundary, seven dashboard pages, route module, styling, and tests under `frontend/src/features/c3-aop-bcs/`.
+- Registered `/c3`, marked only C3 as implemented, and added the narrow `/api/v1/c3` development proxy plus `npm run dev:c3` launcher.
+- Reused the shared shell, navigation, theme, cards, badges, data states, limitation panel, and API utilities while keeping every C1, C2, and C4 feature file unchanged.
+- Preserved the stored-example-only Variant Explorer decision and the testing-only scientific boundary.
+- Verified all 21 shared-frontend tests across 11 test files, the production frontend build, and all 5 focused C3 backend tests.
+- Verified the live shared `/c3` dashboard, all six subroutes, proxied API health/data, stored P1/P2/P3 examples, and browser console with no warnings or errors.
+- Committed the implementation as `65cbcdc` (`feat(c3): integrate AOP-BCS into shared frontend`).
+
+Next work: resume Task 3.37 implementation-documentation updates when requested.

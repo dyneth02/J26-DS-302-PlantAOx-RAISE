@@ -1081,6 +1081,23 @@ Capture evidence of:
 
 ---
 
+## Task 3.47 — Integrate AOP-BCS into the shared repository frontend
+
+### Subtasks
+- [x] Re-read the shared-platform integration guide and audit the current root `frontend/` structure, component registry, router, shared UI, API client, tests, and Vite proxy.
+- [x] Create `frontend/src/features/c3-aop-bcs/` using the same feature-local types, services, components, pages, hooks, and routes structure as the other components.
+- [x] Reuse the shared application shell, Card, Badge, DataState, LimitationsPanel, API client, theme, and navigation patterns.
+- [x] Register the C3 route module at `/c3` and mark only the C3 frontend registry entry as implemented.
+- [x] Connect `/api/v1/c3` requests to the existing C3 artifact-backed API during shared-frontend development.
+- [x] Preserve all software-testing-only warnings and the stored-example Variant Explorer behavior.
+- [x] Add shared-frontend tests for C3 routing, API integration, and scientific-boundary rendering.
+- [x] Verify frontend tests, production build, live shared-dashboard behavior, responsive layout, and edit scope.
+
+### Deliverable
+- AOP-BCS available from the repository-level shared frontend at `/c3`, following the same structure and UI conventions as Components 1, 2, and 4.
+
+---
+
 # PP1 Quality Gate
 
 Before considering the PP1 implementation stage complete, verify the following.
