@@ -4,6 +4,7 @@ import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { PlatformOverviewPage } from "@/app/pages/PlatformOverviewPage";
 import { c2PuRoutes } from "@/features/c2-pu/routes";
+import { c3AopBcsRoutes } from "@/features/c3-aop-bcs/routes";
 import { Outlet } from "react-router-dom";
 
 function buildTestRouter(initialPath: string) {
@@ -16,7 +17,7 @@ function buildTestRouter(initialPath: string) {
             <Outlet />
           </AppShell>
         ),
-        children: [{ index: true, element: <PlatformOverviewPage /> }, ...c2PuRoutes],
+        children: [{ index: true, element: <PlatformOverviewPage /> }, ...c2PuRoutes, ...c3AopBcsRoutes],
       },
     ],
     { initialEntries: [initialPath] }
@@ -75,5 +76,14 @@ describe("application shell + routing", () => {
     await waitFor(() => expect(screen.getByText("PU-AOP")).toBeInTheDocument());
     expect(screen.getByRole("navigation", { name: "Component 02 sections" })).toBeInTheDocument();
     expect(screen.getByText("FROZEN — READY WITH LIMITATIONS")).toBeInTheDocument();
+  });
+
+  it("registers C3 routes in the shared shell", () => {
+    global.fetch = vi.fn(() => new Promise(() => undefined)) as unknown as typeof fetch;
+    render(<RouterProvider router={buildTestRouter("/c3")} />);
+
+    expect(screen.getByText("AOP-BCS")).toBeInTheDocument();
+    expect(screen.getByText("SOFTWARE-TESTING DATA ONLY")).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Component 03 sections" })).toBeInTheDocument();
   });
 });

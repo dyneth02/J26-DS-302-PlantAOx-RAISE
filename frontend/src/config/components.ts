@@ -42,8 +42,8 @@ export const COMPONENT_REGISTRY: ComponentDescriptor[] = [
     title: "AOP-BCS",
     shortTitle: "C3 — AOP-BCS",
     ownerNote: "Predictor behavioral-consistency and reliability auditing",
-    status: "not_integrated",
-    basePath: null,
+    status: "implemented",
+    basePath: "/c3",
   },
   {
     id: "c4_plantaop_screen",
