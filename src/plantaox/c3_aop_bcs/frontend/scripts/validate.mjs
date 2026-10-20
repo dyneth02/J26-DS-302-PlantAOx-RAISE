@@ -27,13 +27,18 @@ for (const type of ["P1", "P2", "P3"]) {
 }
 assert(data.predictors.every((row) => row.status === "not_integrated"), "No real predictor may be shown as integrated.");
 assert(data.provenance.sourceArtifacts.every((row) => row.path.includes("c3_aop_bcs")), "A non-C3 source entered the snapshot.");
-assert(html.includes("Software validation only") && html.includes("not scientific"), "Visible safety labels are missing.");
-for (const section of ["overview", "problem", "data", "method", "results", "explorer", "readiness", "provenance"]) {
-  assert(html.includes(`id="${section}"`), `Presentation section ${section} is missing.`);
+assert(html.includes("SOFTWARE-TESTING DATA ONLY") && html.includes("not scientific"), "Visible safety labels are missing.");
+for (const route of ["overview", "dataset", "perturbations", "metrics", "explorer", "predictors", "evidence"]) {
+  assert(html.includes(`data-route="${route}"`), `Dashboard route ${route} is missing.`);
+  assert(app.includes(`${route}View`), `Dashboard renderer ${route}View is missing.`);
 }
 assert(!/(https?:)?\/\//i.test(html), "The standalone page must not load external resources.");
 assert(css.includes("@media (max-width: 760px)"), "Mobile layout rules are missing.");
-assert(app.includes("renderVariantExplorer") && app.includes("IntersectionObserver"), "Interactive explorer or navigation is missing.");
+for (const token of ["--color-bg", "--color-surface", "--color-border", "--color-text", "--color-text-muted", "--color-primary", "--color-accent"]) {
+  assert(css.includes(token), `Shared PlantAOx token ${token} is missing.`);
+}
+assert(app.includes("renderExplorerDetail") && app.includes("hashchange"), "Interactive explorer or dashboard navigation is missing.");
+assert(!html.includes("Presentation mode") && !app.includes("presentation-mode"), "Presentation-only controls must not remain in the dashboard.");
 
 for (const figure of data.figures) {
   const content = await readFile(join(frontendDirectory, figure.file));
@@ -50,4 +55,4 @@ const changedPaths = statusEntries.map((entry) => entry.slice(3).replaceAll("\\"
 const outOfScope = changedPaths.filter((path) => !path.includes("c3_aop_bcs"));
 assert(outOfScope.length === 0, `Out-of-scope working-tree changes detected: ${outOfScope.join(", ")}`);
 
-console.log("PASS: presentation content, evidence boundary, interaction hooks, mobile rules, and copied-figure checksums validated.");
+console.log("PASS: dashboard routes, shared design tokens, evidence boundary, explorer interaction, mobile rules, scope, and figure checksums validated.");

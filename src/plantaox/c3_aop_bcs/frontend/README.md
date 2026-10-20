@@ -1,16 +1,23 @@
-# AOP-BCS PP1 progress presentation
+# AOP-BCS research dashboard
 
-This is the standalone Component 3 presentation frontend. It deliberately lives inside `c3_aop_bcs` because the shared React application and the other component frontends are outside the permitted edit scope.
+This is the standalone Component 3 dashboard. It remains inside `c3_aop_bcs` because the shared application router, component registry, and shared UI package are outside the permitted C3 edit scope.
 
-The interface follows the shared PlantAOx-RAISE visual language—teal research accents, slate surfaces, bordered cards, evidence badges, compact provenance, responsive navigation, and explicit limitation states—without changing the shared frontend.
+The dashboard deliberately follows the existing PlantAOx-RAISE frontend patterns:
+
+- persistent platform sidebar and compact application header;
+- component-level tab navigation;
+- teal/slate shared colour variables and light/dark themes;
+- compact bordered cards, uppercase card headers, badges, and stat tiles;
+- responsive tables, charts, explorer controls, evidence panels, and limitation notices;
+- mobile navigation at the shared `760px` breakpoint.
 
 ## Evidence boundary
 
-All content is generated from versioned Component 3 artifacts. The current IR, FSR, BCS, PFR, score, and DeltaScore values use the deterministic software smoke-test dummy. They verify the pipeline only and are **not scientific AOP results**. All real predictors remain not integrated until a real finite score and its retained evidence pass the C3 integration gate.
+All content is generated from versioned Component 3 artifacts. Current IR, FSR, BCS, PFR, score, and DeltaScore values use the deterministic software smoke-test dummy. They verify the pipeline only and are **not scientific AOP results**. Every real predictor remains `not_integrated` until a finite real score and its evidence pass the C3 integration gate.
 
 ## Run locally
 
-Node.js is the only runtime dependency; there are no third-party packages to install.
+Node.js is the only runtime dependency; no package installation is required.
 
 ```powershell
 cd src/plantaox/c3_aop_bcs/frontend
@@ -27,32 +34,36 @@ $env:C3_FRONTEND_PORT = 4400
 npm run dev
 ```
 
-## Data flow
+## Dashboard views
 
-`npm run generate` reads 12 authoritative C3 JSON reports and copies four checksum-verified C3 SVG figures into `assets/generated/`. It writes one deterministic browser snapshot, `presentation-data.json`, containing:
+- **Overview** — objective, pilot counts, workflow, scientific status, and limitations.
+- **Dataset** — preparation funnel, pilot coverage, dominance review, and stage table.
+- **Perturbations** — P1/P2/P3 rules, counts, frozen configuration, and validation.
+- **Pilot metrics** — dummy-only IR, FSR, BCS, PFR, threshold sensitivity, and figures.
+- **Variant explorer** — six manually inspected P1/P2/P3 examples with mutation and score details.
+- **Predictors** — priorities, readiness, integration status, and PU-AOP dependency.
+- **Evidence** — run provenance, source-report checksums, and current limitations.
 
-- dataset funnel and pilot coverage;
-- full and pilot P1/P2/P3 counts;
-- dummy-only IR, FSR, BCS, PFR, and threshold sensitivity;
-- six manually inspected real-artifact variants;
-- frozen predictor priority/readiness records;
-- run metadata and source checksums.
+## Data and validation
 
-`npm run validate` confirms the evidence classification, counts, example coverage, predictor status, required narrative sections, mobile CSS, interaction hooks, copied-figure checksums, and that every current working-tree change remains under a path containing `c3_aop_bcs`.
+`npm run generate` reads 12 authoritative C3 JSON reports, copies four checksum-verified C3 SVG figures, and writes `assets/generated/presentation-data.json` as the deterministic browser snapshot.
 
-## Presentation controls
+`npm run validate` checks:
 
-- Use the left navigation—or the mobile menu—to move between the eight narrative sections.
-- Select P1, P2, or P3 in the variant explorer and use the arrow controls to inspect both verified examples.
-- Use **Presentation mode** for a wider projected layout.
-- Use the half-circle control to switch between light and dark themes.
-- The page includes a skip link, semantic landmarks, focus-visible states, reduced-motion support, and responsive layouts down to narrow mobile screens.
+- scientific/testing classification and pilot counts;
+- all seven dashboard routes and renderers;
+- shared PlantAOx design tokens and mobile breakpoint;
+- interactive explorer and hash navigation hooks;
+- predictor integration status;
+- copied-figure checksums;
+- absence of external page resources;
+- C3-only working-tree scope.
 
 ## Files
 
-- `index.html` — semantic presentation structure.
-- `styles.css` — standalone PlantAOx-aligned design system and responsive layout.
-- `app.js` — rendering, navigation, theme, presentation mode, and perturbation explorer.
+- `index.html` — shared-style dashboard shell, sidebar, header, and tab navigation.
+- `styles.css` — PlantAOx-aligned tokens, cards, tables, controls, and responsive layout.
+- `app.js` — seven dashboard views, routing, theme, navigation, and perturbation explorer.
 - `scripts/generate-data.mjs` — deterministic C3 artifact adapter.
-- `scripts/validate.mjs` — content, provenance, interaction, responsive, checksum, and scope checks.
+- `scripts/validate.mjs` — content, design, interaction, provenance, checksum, and scope checks.
 - `scripts/serve.mjs` — dependency-free local HTTP server.

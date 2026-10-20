@@ -1033,13 +1033,13 @@ Capture evidence of:
 
 ### Subtasks
 - [x] Re-audit the shared application shell, component navigation, cards, badges, stat tiles, tables, charts, explorer controls, provenance, and limitation patterns without modifying them.
-- [ ] Replace the presentation-oriented one-page layout with the same compact dashboard shell used by the other components.
-- [ ] Add component-level dashboard views for overview, dataset, perturbations, pilot metrics, variant explorer, predictor status, and evidence.
-- [ ] Reuse the shared PlantAOx colour tokens, typography scale, spacing, card treatment, responsive breakpoints, and light/dark behavior.
-- [ ] Preserve the generated C3 evidence adapter and populate every dashboard view only from versioned C3 artifacts.
-- [ ] Keep dummy-predictor results visibly labelled as software-testing-only and non-scientific in every relevant view.
-- [ ] Update automated checks and local instructions for the dashboard navigation and content structure.
-- [ ] Validate dashboard interactions and responsive layouts and confirm no file outside `c3_aop_bcs` changed.
+- [x] Replace the presentation-oriented one-page layout with the same compact dashboard shell used by the other components.
+- [x] Add component-level dashboard views for overview, dataset, perturbations, pilot metrics, variant explorer, predictor status, and evidence.
+- [x] Reuse the shared PlantAOx colour tokens, typography scale, spacing, card treatment, responsive breakpoints, and light/dark behavior.
+- [x] Preserve the generated C3 evidence adapter and populate every dashboard view only from versioned C3 artifacts.
+- [x] Keep dummy-predictor results visibly labelled as software-testing-only and non-scientific in every relevant view.
+- [x] Update automated checks and local instructions for the dashboard navigation and content structure.
+- [x] Validate dashboard interactions and responsive layouts and confirm no file outside `c3_aop_bcs` changed.
 
 ### Deliverable
 - Standalone AOP-BCS research dashboard matching the established Component 1, 2, and 4 frontend patterns.

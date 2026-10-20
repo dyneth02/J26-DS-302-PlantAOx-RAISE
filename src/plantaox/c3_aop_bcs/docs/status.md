@@ -195,13 +195,23 @@
 - Added `npm run generate`, `npm run validate`, and `npm test`; validation passes for content integrity, safety classification, predictor state, interaction hooks, mobile rules, source scope, copied-figure checksums, and C3-only working-tree scope.
 - Visually checked the rendered narrow/mobile layout, light/dark themes, and P1/P2 explorer switching in the local browser; checked the desktop layout rules and presentation structure through the automated validation.
 
-## Current task — Task 3.44: Align the AOP-BCS frontend with the shared research dashboard
+## Completed work — Task 3.44: Align the AOP-BCS frontend with the shared research dashboard
 
-**Status:** In progress (user-directed correction; Task 3.37 remains the next planned implementation task).
+**Status:** Completed and verified on 2026-10-20.
 
-Current work:
+- Re-audited the read-only shared shell, header, sidebar, component tab bars, cards, badges, stat tiles, tables, charts, explorer controls, provenance indicators, and limitation panels across Components 1, 2, and 4.
+- Replaced the presentation-oriented scrolling interface with the same compact dashboard structure used by the other components: persistent platform sidebar, application header, component heading, and component-level tabs.
+- Added seven route-like dashboard views—Overview, Dataset, Perturbations, Pilot metrics, Variant explorer, Predictors, and Evidence—using accessible hash navigation without requiring changes to the shared router.
+- Reused the shared PlantAOx CSS variable names, teal/slate colour system, typography scale, card/header treatment, badges, stat tiles, tables, light/dark behavior, and `760px` mobile-navigation breakpoint.
+- Preserved the deterministic adapter over 12 versioned C3 reports and four checksum-verified SVG figures; no display value is invented or read from another component.
+- Kept the global software-testing banner and repeated scientific-boundary panels wherever dummy scores or metrics appear.
+- Preserved the six-example P1/P2/P3 explorer with real artifact identifiers, sequences, mutation positions, BLOSUM62/seed metadata, score comparison, and inspection status.
+- Updated the local README and automated checks for all seven dashboard routes, shared design tokens, explorer/hash interactions, responsive rules, evidence classification, checksums, and C3-only edit scope.
+- Verified Overview, Pilot metrics, and Variant explorer navigation in the local browser, confirmed light/dark rendering, and confirmed the local page returns HTTP 200.
+- Confirmed `npm test` passes and the redesign changes only files under `src/plantaox/c3_aop_bcs/`.
 
-- re-audited the read-only shared shell, header, sidebar, component tab bars, cards, badges, stat tiles, tables, charts, explorer controls, provenance indicators, and limitation panels across Components 1, 2, and 4;
-- confirmed that the expected interface is a compact multi-view research dashboard rather than a presentation-led scrolling page;
-- retained the standalone C3 boundary because the shared router and component registry are outside the permitted edit scope;
-- next: replace the current C3 presentation layout with a PlantAOx-aligned dashboard while preserving the versioned evidence adapter and explicit dummy-only safety boundary.
+## Next task — Task 3.37: Update implementation documentation
+
+**Status:** Not started.
+
+Next work: update the architecture diagram and main implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, and general configuration/usage instructions. The frontend-specific dashboard instructions are complete in `frontend/README.md`.
