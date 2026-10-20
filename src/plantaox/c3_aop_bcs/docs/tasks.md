@@ -1011,6 +1011,24 @@ Capture evidence of:
 
 ---
 
+## Task 3.43 — Build the AOP-BCS progress-presentation frontend
+
+### Subtasks
+- [x] Review the shared frontend structure, navigation, card, badge, typography, spacing, colour, and responsive-layout patterns without modifying other components.
+- [x] Review the C3 task/status records and authoritative PP1 artifacts before defining the presentation content.
+- [ ] Create a standalone responsive frontend entirely under `src/plantaox/c3_aop_bcs/frontend/`.
+- [ ] Present the research problem, AOP-BCS concept, dataset pipeline, P1/P2/P3 methodology, pilot metrics, predictor readiness, limitations, and next work as a coherent presentation narrative.
+- [ ] Populate the interface only from versioned C3 evidence and clearly label every dummy-predictor value as software-testing-only and non-scientific.
+- [ ] Add an interactive real-artifact perturbation explorer and accessible presentation navigation.
+- [ ] Match the established PlantAOx design language while keeping the C3 frontend visually distinctive and presentation-ready.
+- [ ] Add local launch instructions and automated checks for content integrity and scope safety.
+- [ ] Validate desktop and mobile layouts and confirm no files outside `c3_aop_bcs` were changed.
+
+### Deliverable
+- Presentation-ready standalone AOP-BCS frontend backed by the versioned PP1 artifacts.
+
+---
+
 # PP1 Quality Gate
 
 Before considering the PP1 implementation stage complete, verify the following.

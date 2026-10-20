@@ -1,6 +1,6 @@
 # Component 3 (AOP-BCS) Status
 
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-20
 
 ## Completed work
 
@@ -181,11 +181,14 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.36 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.37: Update implementation documentation
+## Current task — Task 3.43: Build the AOP-BCS progress-presentation frontend
 
-**Status:** Not started; next task.
+**Status:** In progress (user-directed presentation work; Task 3.37 remains pending).
 
-Next work:
+Current work:
 
-- update the architecture and repository-structure documentation to match the implemented C3 system;
-- document dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, and configuration/usage instructions.
+- reviewed `tasks.md`, `status.md`, the shared React/Vite application shell, and the read-only Component 1, 2, and 4 page patterns;
+- confirmed that the shared application router and styling live outside the permitted C3 edit scope, so the presentation frontend will be standalone under `src/plantaox/c3_aop_bcs/frontend/`;
+- identified the authoritative C3 PP1 artifacts for counts, metrics, perturbation examples, predictor readiness, configuration, and provenance;
+- preserve the explicit boundary that the current IR, FSR, BCS, PFR, and DeltaScore values come from the non-experimental dummy predictor and are not scientific findings;
+- next: implement, validate, and document the responsive presentation frontend without modifying any other component.
