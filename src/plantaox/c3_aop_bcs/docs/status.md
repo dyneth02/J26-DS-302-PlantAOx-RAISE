@@ -181,14 +181,22 @@
 - Reorganized the PP1 checklist into six proposal-aligned phases and converted every subtask into an individually tracked Markdown checkbox.
 - Maintained focused Git commits for Tasks 3.3–3.36 and the associated documentation and reproducibility updates.
 
-## Current task — Task 3.43: Build the AOP-BCS progress-presentation frontend
+## Completed work — Task 3.43: Build the AOP-BCS progress-presentation frontend
 
-**Status:** In progress (user-directed presentation work; Task 3.37 remains pending).
+**Status:** Completed and verified on 2026-10-20.
 
-Current work:
+- Reviewed the shared React/Vite shell and the read-only Component 1, 2, and 4 interfaces, then carried their teal/slate research-dashboard language, bordered cards, evidence badges, typography, spacing, responsive navigation, and explicit limitation states into a standalone C3 presentation.
+- Created the complete frontend under `src/plantaox/c3_aop_bcs/frontend/`; no shared frontend or other component file was changed.
+- Built an eight-section presentation narrative covering the research gap, AOP-BCS concept, dataset funnel, P1/P2/P3 methodology, dummy-only pilot metrics, inspected variants, predictor readiness, limitations, provenance, and next scientific work.
+- Added deterministic generation from 12 versioned C3 reports plus checksum-verified copies of the four Task 3.34 SVG figures; the generated snapshot retains 20 pilot subjects, 449 variants, and the 54/150/245 P1/P2/P3 split.
+- Added an interactive explorer for all six Task 3.33 examples, with sequence-level mutation highlighting, one-based position, P2 BLOSUM62 or P3 seed metadata, dummy original/perturbed scores, DeltaScore, and validation status.
+- Added accessible section navigation, mobile navigation, light/dark themes, keyboard focus states, reduced-motion support, a presentation mode, responsive layouts, and dependency-free local serving.
+- Kept a persistent visible warning and repeated local warnings that IR, FSR, BCS, PFR, scores, and DeltaScores are dummy software-testing evidence only and are not scientific AOP findings.
+- Added `npm run generate`, `npm run validate`, and `npm test`; validation passes for content integrity, safety classification, predictor state, interaction hooks, mobile rules, source scope, copied-figure checksums, and C3-only working-tree scope.
+- Visually checked the rendered narrow/mobile layout, light/dark themes, and P1/P2 explorer switching in the local browser; checked the desktop layout rules and presentation structure through the automated validation.
 
-- reviewed `tasks.md`, `status.md`, the shared React/Vite application shell, and the read-only Component 1, 2, and 4 page patterns;
-- confirmed that the shared application router and styling live outside the permitted C3 edit scope, so the presentation frontend will be standalone under `src/plantaox/c3_aop_bcs/frontend/`;
-- identified the authoritative C3 PP1 artifacts for counts, metrics, perturbation examples, predictor readiness, configuration, and provenance;
-- preserve the explicit boundary that the current IR, FSR, BCS, PFR, and DeltaScore values come from the non-experimental dummy predictor and are not scientific findings;
-- next: implement, validate, and document the responsive presentation frontend without modifying any other component.
+## Next task — Task 3.37: Update implementation documentation
+
+**Status:** Not started.
+
+Next work: update the architecture diagram and implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, and general README/configuration instructions. The frontend-specific launch and evidence-generation instructions are already complete in `frontend/README.md`.

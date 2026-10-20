@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "generate": "node scripts/generate-data.mjs",
-    "validate": "node scripts/validate.mjs",
+    "validate": "node --check app.js && node --check scripts/generate-data.mjs && node --check scripts/serve.mjs && node --check scripts/validate.mjs && node scripts/validate.mjs",
     "test": "npm run generate && npm run validate",
     "dev": "node scripts/serve.mjs"
   }
