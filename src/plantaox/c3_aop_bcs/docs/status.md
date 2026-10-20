@@ -210,13 +210,25 @@
 - Verified Overview, Pilot metrics, and Variant explorer navigation in the local browser, confirmed light/dark rendering, and confirmed the local page returns HTTP 200.
 - Confirmed `npm test` passes and the redesign changes only files under `src/plantaox/c3_aop_bcs/`.
 
-## In progress — Task 3.45: Connect the AOP-BCS dashboard to a C3 backend
+## Completed work — Task 3.45: Connect the AOP-BCS dashboard to a C3 backend
 
-**Status:** In progress from 2026-10-20.
+**Status:** Completed and verified on 2026-10-20.
 
 - Re-read the C3 task/status records and audited the shared FastAPI composition, route prefixes, service separation, and test patterns without modifying any shared or other-component file.
-- Confirmed the existing C3 dashboard is currently served by a static Node server and reads a generated JSON snapshot rather than a backend endpoint.
-- Selected a C3-contained integration design: a FastAPI application under `src/plantaox/c3_aop_bcs/` will expose `/api/v1/c3` evidence endpoints and serve the existing dashboard from the same process.
-- This local application will be independently runnable now; registering its router in the repository-wide backend remains outside the strict C3-only edit scope.
+- Added the C3-owned FastAPI application in `dashboard_backend.py`, exposing health, complete dashboard, seven section-specific, and allow-listed SVG figure routes under `/api/v1/c3`.
+- Built every API response directly from the 12 authoritative versioned C3 reports, recalculating source/figure SHA-256 values and failing closed for missing evidence, unreconciled counts, failed BCS validation, invalid inspected-example coverage, or an unsafe scientific classification.
+- Served `index.html`, JavaScript, styles, assets, figures, and JSON from one Uvicorn process so the browser and API share an origin and require no CORS workaround.
+- Connected the dashboard to `/api/v1/c3/dashboard`, added visible connecting/connected/unavailable status states, and retained an actionable error panel if the backend cannot supply evidence.
+- Replaced the old static development command with a cross-platform Node launcher that locates the repository virtual environment and starts Uvicorn; `npm run dev` now launches the complete application at `http://127.0.0.1:4313`.
+- Added five focused API contract tests covering the frontend/health path, full dashboard contract, section and figure routes, missing-artifact failure, and rejection of a tampered scientific classification; all five pass.
+- Confirmed `npm test` passes, including deterministic artifact generation, frontend syntax, API URL/status hooks, dashboard structure, scientific boundary, checksums, and edit-scope validation.
+- Verified the running application through real HTTP requests: health returned `ok`, 12 source artifacts, 20 pilot peptides, 449 pilot variants, and API version `c3-dashboard-api-v1`.
+- Verified the browser-rendered Overview and Pilot metrics routes, the four backend-served figures, and the visible green `Backend connected` state.
+- Ran the complete C3 regression suite: 154 tests and all 147 subtests pass; five older byte-reproducibility assertions remain failing only because committed Task 3.19–3.22/3.33 text artifacts use CRLF while their generators emit LF. These pre-existing line-ending mismatches are unrelated to the dashboard/backend integration and their versioned artifacts were not rewritten.
+- Confirmed all tracked implementation changes remain in paths containing `c3_aop_bcs`; the reusable C3 router is ready for later shared-router registration, which remains outside the strict C3-only edit scope.
 
-Next work: implement the artifact-backed API, connect the browser dashboard to it, add focused tests and run instructions, then verify the complete frontend/backend path in the browser.
+## Next task — Task 3.37: Update implementation documentation
+
+**Status:** Not started.
+
+Next work: update the architecture diagram and main implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, API/dashboard architecture, and general configuration/usage instructions.
