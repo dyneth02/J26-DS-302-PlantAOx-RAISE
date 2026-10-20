@@ -14,12 +14,10 @@ from typing import Any, Final, Literal
 
 from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 
 
 COMPONENT_DIRECTORY: Final = Path(__file__).resolve().parent
 REPOSITORY_ROOT: Final = COMPONENT_DIRECTORY.parents[2]
-FRONTEND_DIRECTORY: Final = COMPONENT_DIRECTORY / "frontend"
 
 SOURCE_PATHS: Final[dict[str, str]] = {
     "cleaning": "data/processed/c3_aop_bcs/sequence_cleaning_report_v1.json",
@@ -287,30 +285,12 @@ app = FastAPI(
     version="1.0.0",
 )
 app.include_router(router)
-app.mount("/assets", StaticFiles(directory=FRONTEND_DIRECTORY / "assets"), name="c3-assets")
-
-
-@app.get("/app.js", include_in_schema=False, response_class=FileResponse)
-def frontend_script() -> FileResponse:
-    return FileResponse(FRONTEND_DIRECTORY / "app.js", media_type="text/javascript", headers={"Cache-Control": "no-store"})
-
-
-@app.get("/styles.css", include_in_schema=False, response_class=FileResponse)
-def frontend_styles() -> FileResponse:
-    return FileResponse(FRONTEND_DIRECTORY / "styles.css", media_type="text/css", headers={"Cache-Control": "no-store"})
-
-
-@app.get("/", include_in_schema=False, response_class=FileResponse)
-def frontend_index() -> FileResponse:
-    return FileResponse(FRONTEND_DIRECTORY / "index.html", media_type="text/html", headers={"Cache-Control": "no-store"})
-
-
 def main() -> None:
     """Run the self-contained C3 dashboard server."""
 
     import uvicorn
 
-    uvicorn.run("plantaox.c3_aop_bcs.dashboard_backend:app", host="127.0.0.1", port=4313, reload=False)
+    uvicorn.run("plantaox.c3_aop_bcs.dashboard_backend:app", host="127.0.0.1", port=4314, reload=False)
 
 
 if __name__ == "__main__":

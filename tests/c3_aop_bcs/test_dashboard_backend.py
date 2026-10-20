@@ -23,19 +23,14 @@ class DashboardBackendTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.client = TestClient(app)
 
-    def test_health_and_frontend_are_served_by_one_application(self):
+    def test_health_reports_the_live_artifact_contract(self):
         health = self.client.get("/api/v1/c3/health")
         self.assertEqual(health.status_code, 200)
         self.assertEqual(health.json()["status"], "ok")
         self.assertEqual(health.json()["component"], "c3_aop_bcs")
         self.assertEqual(health.json()["artifact_count"], 12)
 
-        page = self.client.get("/")
-        self.assertEqual(page.status_code, 200)
-        self.assertIn("AOP-BCS", page.text)
-        self.assertIn("SOFTWARE-TESTING DATA ONLY", page.text)
-        self.assertEqual(self.client.get("/app.js").status_code, 200)
-        self.assertEqual(self.client.get("/styles.css").status_code, 200)
+        self.assertEqual(health.json()["api_version"], "c3-dashboard-api-v1")
 
     def test_dashboard_contract_is_built_from_authoritative_artifacts(self):
         response = self.client.get("/api/v1/c3/dashboard")

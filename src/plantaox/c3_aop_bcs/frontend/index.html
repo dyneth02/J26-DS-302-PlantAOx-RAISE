@@ -6,82 +6,9 @@
     <meta name="description" content="PlantAOx-RAISE Component 3 AOP-BCS research dashboard" />
     <meta name="theme-color" content="#0f766e" />
     <title>AOP-BCS · PlantAOx-RAISE</title>
-    <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="app.js"></script>
   </head>
   <body>
-    <a class="skip-link" href="#main-content">Skip to dashboard</a>
-
-    <div class="app-shell">
-      <aside class="sidebar" id="sidebar">
-        <div class="brand">
-          <strong>PlantAOx-RAISE</strong>
-          <span>PP1 research demonstration</span>
-        </div>
-
-        <nav aria-label="Platform navigation">
-          <a class="sidebar-link muted-link" href="#overview">
-            <span class="nav-icon" aria-hidden="true">▦</span>
-            Platform overview
-          </a>
-        </nav>
-
-        <p class="sidebar-label">Components</p>
-        <nav aria-label="Component navigation" class="component-nav">
-          <span class="sidebar-link"><span class="nav-icon" aria-hidden="true">◇</span>C1 — AOP-ProCon</span>
-          <span class="sidebar-link"><span class="nav-icon" aria-hidden="true">◇</span>C2 — PU-AOP</span>
-          <a class="sidebar-link active" href="#overview" aria-current="page"><span class="nav-icon" aria-hidden="true">◇</span>C3 — AOP-BCS</a>
-          <span class="sidebar-link"><span class="nav-icon" aria-hidden="true">◇</span>C4 — PlantAOP-Screen</span>
-        </nav>
-      </aside>
-
-      <button class="nav-overlay" id="nav-overlay" type="button" aria-label="Close navigation"></button>
-
-      <div class="content-shell">
-        <header class="app-header">
-          <div class="header-title">
-            <button class="icon-button menu-button" id="menu-button" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
-            <h1>PlantAOx-RAISE</h1>
-          </div>
-          <div class="header-actions">
-            <span class="badge badge-warning" id="backend-status" role="status">Backend connecting</span>
-            <button class="icon-button" id="theme-button" type="button" aria-label="Toggle colour theme">◐</button>
-          </div>
-        </header>
-
-        <main id="main-content">
-          <section class="component-shell" aria-labelledby="component-title">
-            <div class="testing-banner" role="status">
-              <strong>SOFTWARE-TESTING DATA ONLY</strong>
-              <span>Dummy predictor outputs are pipeline evidence, not scientific AOP results.</span>
-            </div>
-
-            <div class="component-heading">
-              <div>
-                <p>Component 03</p>
-                <h2 id="component-title">AOP-BCS</h2>
-              </div>
-              <span class="badge badge-warning">Real predictor scoring pending</span>
-            </div>
-
-            <nav class="component-tabs" id="component-tabs" aria-label="Component 03 sections">
-              <a href="#overview" data-route="overview">Overview</a>
-              <a href="#dataset" data-route="dataset">Dataset</a>
-              <a href="#perturbations" data-route="perturbations">Perturbations</a>
-              <a href="#metrics" data-route="metrics">Pilot metrics</a>
-              <a href="#explorer" data-route="explorer">Variant explorer</a>
-              <a href="#predictors" data-route="predictors">Predictors</a>
-              <a href="#evidence" data-route="evidence">Evidence</a>
-            </nav>
-
-            <div id="dashboard-view" class="dashboard-view" aria-live="polite">
-              <div class="loading-state" aria-busy="true"><span></span><span></span><span></span></div>
-            </div>
-          </section>
-        </main>
-      </div>
-    </div>
-
-    <noscript>This dashboard requires JavaScript to load the versioned Component 3 evidence.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
