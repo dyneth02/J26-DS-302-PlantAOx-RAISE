@@ -210,8 +210,13 @@
 - Verified Overview, Pilot metrics, and Variant explorer navigation in the local browser, confirmed light/dark rendering, and confirmed the local page returns HTTP 200.
 - Confirmed `npm test` passes and the redesign changes only files under `src/plantaox/c3_aop_bcs/`.
 
-## Next task — Task 3.37: Update implementation documentation
+## In progress — Task 3.45: Connect the AOP-BCS dashboard to a C3 backend
 
-**Status:** Not started.
+**Status:** In progress from 2026-10-20.
 
-Next work: update the architecture diagram and main implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, and general configuration/usage instructions. The frontend-specific dashboard instructions are complete in `frontend/README.md`.
+- Re-read the C3 task/status records and audited the shared FastAPI composition, route prefixes, service separation, and test patterns without modifying any shared or other-component file.
+- Confirmed the existing C3 dashboard is currently served by a static Node server and reads a generated JSON snapshot rather than a backend endpoint.
+- Selected a C3-contained integration design: a FastAPI application under `src/plantaox/c3_aop_bcs/` will expose `/api/v1/c3` evidence endpoints and serve the existing dashboard from the same process.
+- This local application will be independently runnable now; registering its router in the repository-wide backend remains outside the strict C3-only edit scope.
+
+Next work: implement the artifact-backed API, connect the browser dashboard to it, add focused tests and run instructions, then verify the complete frontend/backend path in the browser.

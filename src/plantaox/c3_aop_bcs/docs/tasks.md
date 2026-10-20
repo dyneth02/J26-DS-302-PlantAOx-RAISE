@@ -1046,6 +1046,23 @@ Capture evidence of:
 
 ---
 
+## Task 3.45 — Connect the AOP-BCS dashboard to a C3 backend
+
+### Subtasks
+- [x] Re-read the C3 task/status records and audit the shared FastAPI conventions without modifying shared or other-component files.
+- [ ] Create a C3-owned FastAPI application with health and dashboard-data endpoints under `/api/v1/c3`.
+- [ ] Load dashboard responses from the authoritative versioned C3 artifacts and validate required evidence before responding.
+- [ ] Serve the C3 dashboard and its generated figures from the same backend process so local use requires one command and no CORS workaround.
+- [ ] Replace the frontend's static snapshot dependency with the C3 dashboard API and add visible loading/error/backend-status states.
+- [ ] Add focused backend/API and frontend contract tests, including missing-artifact failure behavior and scientific-boundary checks.
+- [ ] Update the C3 frontend run instructions and document the shared-router integration boundary imposed by the component-only edit scope.
+- [ ] Run automated tests and browser verification, then confirm that no file outside `c3_aop_bcs` changed.
+
+### Deliverable
+- A locally runnable AOP-BCS dashboard backed by live, validated C3 artifact APIs, entirely contained within `src/plantaox/c3_aop_bcs/`.
+
+---
+
 # PP1 Quality Gate
 
 Before considering the PP1 implementation stage complete, verify the following.
