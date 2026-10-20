@@ -195,8 +195,13 @@
 - Added `npm run generate`, `npm run validate`, and `npm test`; validation passes for content integrity, safety classification, predictor state, interaction hooks, mobile rules, source scope, copied-figure checksums, and C3-only working-tree scope.
 - Visually checked the rendered narrow/mobile layout, light/dark themes, and P1/P2 explorer switching in the local browser; checked the desktop layout rules and presentation structure through the automated validation.
 
-## Next task — Task 3.37: Update implementation documentation
+## Current task — Task 3.44: Align the AOP-BCS frontend with the shared research dashboard
 
-**Status:** Not started.
+**Status:** In progress (user-directed correction; Task 3.37 remains the next planned implementation task).
 
-Next work: update the architecture diagram and implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, and general README/configuration instructions. The frontend-specific launch and evidence-generation instructions are already complete in `frontend/README.md`.
+Current work:
+
+- re-audited the read-only shared shell, header, sidebar, component tab bars, cards, badges, stat tiles, tables, charts, explorer controls, provenance indicators, and limitation panels across Components 1, 2, and 4;
+- confirmed that the expected interface is a compact multi-view research dashboard rather than a presentation-led scrolling page;
+- retained the standalone C3 boundary because the shared router and component registry are outside the permitted edit scope;
+- next: replace the current C3 presentation layout with a PlantAOx-aligned dashboard while preserving the versioned evidence adapter and explicit dummy-only safety boundary.
