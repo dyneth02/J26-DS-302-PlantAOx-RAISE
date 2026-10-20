@@ -1,0 +1,12 @@
+{
+  "name": "c3-aop-bcs-presentation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node scripts/generate-data.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "npm run generate && npm run validate",
+    "dev": "node scripts/serve.mjs"
+  }
+}

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+<title id="title">Original vs perturbed scores - inspected examples</title>
+<desc id="desc">Scatter plot of six manually inspected dummy-score examples with a no-change diagonal.</desc>
+<rect width="1200" height="720" fill="#FFFFFF"/>
+<text x="60" y="54" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#172033">Original vs perturbed scores - inspected examples</text>
+<rect x="60" y="72" width="1080" height="34" rx="4" fill="#FFF4D6"/>
+<text x="600" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#7A4D00">PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS</text>
+<rect x="150.0" y="145.0" width="890.0" height="455.0" fill="none" stroke="#9AA6B5"/>
+<line x1="150.00" y1="145.0" x2="150.00" y2="600.0" stroke="#D8DEE8"/>
+<line x1="150.0" y1="600.00" x2="1040.0" y2="600.00" stroke="#D8DEE8"/>
+<text x="150.00" y="622.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.0</text>
+<text x="138.00" y="604.00" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.0</text>
+<line x1="328.00" y1="145.0" x2="328.00" y2="600.0" stroke="#D8DEE8"/>
+<line x1="150.0" y1="509.00" x2="1040.0" y2="509.00" stroke="#D8DEE8"/>
+<text x="328.00" y="622.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.2</text>
+<text x="138.00" y="513.00" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.2</text>
+<line x1="506.00" y1="145.0" x2="506.00" y2="600.0" stroke="#D8DEE8"/>
+<line x1="150.0" y1="418.00" x2="1040.0" y2="418.00" stroke="#D8DEE8"/>
+<text x="506.00" y="622.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.4</text>
+<text x="138.00" y="422.00" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.4</text>
+<line x1="684.00" y1="145.0" x2="684.00" y2="600.0" stroke="#D8DEE8"/>
+<line x1="150.0" y1="327.00" x2="1040.0" y2="327.00" stroke="#D8DEE8"/>
+<text x="684.00" y="622.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.6</text>
+<text x="138.00" y="331.00" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.6</text>
+<line x1="862.00" y1="145.0" x2="862.00" y2="600.0" stroke="#D8DEE8"/>
+<line x1="150.0" y1="236.00" x2="1040.0" y2="236.00" stroke="#D8DEE8"/>
+<text x="862.00" y="622.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.8</text>
+<text x="138.00" y="240.00" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">0.8</text>
+<line x1="1040.00" y1="145.0" x2="1040.00" y2="600.0" stroke="#D8DEE8"/>
+<line x1="150.0" y1="145.00" x2="1040.0" y2="145.00" stroke="#D8DEE8"/>
+<text x="1040.00" y="622.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">1.0</text>
+<text x="138.00" y="149.00" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#5F6B7A">1.0</text>
+<line x1="150.0" y1="600.0" x2="1040.0" y2="145.0" stroke="#5F6B7A" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="1032.00" y="165.00" text-anchor="end" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#5F6B7A">no change</text>
+<circle cx="550.50" cy="463.50" r="9" fill="#D55E00" stroke="#FFFFFF" stroke-width="2"/>
+<text x="550.50" y="450.50" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#D55E00">P1-1: W1A</text>
+<circle cx="568.27" cy="401.74" r="9" fill="#D55E00" stroke="#FFFFFF" stroke-width="2"/>
+<text x="568.27" y="425.74" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#D55E00">P1-2: Y24A</text>
+<circle cx="632.76" cy="353.89" r="9" fill="#0072B2" stroke="#FFFFFF" stroke-width="2"/>
+<text x="632.76" y="340.89" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#0072B2">P2-1: L1I</text>
+<circle cx="795.25" cy="318.88" r="9" fill="#0072B2" stroke="#FFFFFF" stroke-width="2"/>
+<text x="795.25" y="342.88" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#0072B2">P2-2: V6I</text>
+<circle cx="705.19" cy="311.83" r="9" fill="#009E73" stroke="#FFFFFF" stroke-width="2"/>
+<text x="705.19" y="298.83" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#009E73">P3-1: L1Q</text>
+<circle cx="568.27" cy="394.77" r="9" fill="#009E73" stroke="#FFFFFF" stroke-width="2"/>
+<text x="568.27" y="418.77" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#009E73">P3-2: P36G</text>
+<text x="595.00" y="645.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#172033">Original usable score</text>
+<text x="48" y="372" transform="rotate(-90 48 372)" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#172033">Perturbed usable score</text>
+<circle cx="770" cy="127" r="6" fill="#D55E00"/>
+<text x="782.00" y="132.00" text-anchor="start" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#172033">P1</text>
+<circle cx="875" cy="127" r="6" fill="#0072B2"/>
+<text x="887.00" y="132.00" text-anchor="start" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#172033">P2</text>
+<circle cx="980" cy="127" r="6" fill="#009E73"/>
+<text x="992.00" y="132.00" text-anchor="start" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#172033">P3</text>
+<text x="60.00" y="694.00" text-anchor="start" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#5F6B7A">Six examples from the Task 3.33 inspection evidence; diagonal indicates unchanged score.</text>
+</svg>
