@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="AOP-BCS Component 3 PP1 progress presentation" />
+    <meta name="theme-color" content="#0f766e" />
+    <title>AOP-BCS · Component 03</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to presentation</a>
+
+    <aside class="sidebar" id="sidebar" aria-label="Presentation navigation">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div>
+          <strong>PlantAOx-RAISE</strong>
+          <small>PP1 research demonstration</small>
+        </div>
+      </div>
+
+      <div class="component-lockup">
+        <span class="eyebrow">Component 03</span>
+        <h1>AOP-BCS</h1>
+        <p>Behavioural consistency scoring</p>
+      </div>
+
+      <nav class="section-nav" id="section-nav">
+        <a href="#overview" class="active"><span>01</span>Overview</a>
+        <a href="#problem"><span>02</span>Research gap</a>
+        <a href="#data"><span>03</span>Evidence base</a>
+        <a href="#method"><span>04</span>Perturbations</a>
+        <a href="#results"><span>05</span>Pilot metrics</a>
+        <a href="#explorer"><span>06</span>Variant explorer</a>
+        <a href="#readiness"><span>07</span>Predictor readiness</a>
+        <a href="#provenance"><span>08</span>Limits & next</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <span class="status-dot" aria-hidden="true"></span>
+        <div><strong>PP1 pipeline verified</strong><small>Real scoring pending</small></div>
+      </div>
+    </aside>
+
+    <div class="mobile-bar">
+      <button class="icon-button" id="menu-toggle" type="button" aria-label="Open presentation navigation" aria-expanded="false">☰</button>
+      <div><strong>AOP-BCS</strong><small>Component 03</small></div>
+      <button class="icon-button" id="theme-toggle-mobile" type="button" aria-label="Toggle colour theme">◐</button>
+    </div>
+    <button class="nav-scrim" id="nav-scrim" type="button" aria-label="Close presentation navigation"></button>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <span class="topbar-kicker">Progress presentation</span>
+          <strong>A reliability audit for antioxidant peptide predictors</strong>
+        </div>
+        <div class="topbar-actions">
+          <span class="data-chip"><span></span>Versioned C3 evidence</span>
+          <button class="secondary-button" id="presentation-toggle" type="button">Presentation mode</button>
+          <button class="icon-button" id="theme-toggle" type="button" aria-label="Toggle colour theme">◐</button>
+        </div>
+      </header>
+
+      <main id="main-content">
+        <div class="global-warning" role="status">
+          <strong>Software validation only</strong>
+          <span>All displayed scores and metrics use the deterministic dummy predictor. They are not scientific AOP findings.</span>
+        </div>
+
+        <section class="hero section" id="overview" data-section="overview">
+          <div class="hero-copy">
+            <span class="pill pill-accent">Component 03 · AOP-BCS</span>
+            <p class="display-kicker">From prediction to <em>behaviour</em></p>
+            <h2>Can an antioxidant peptide predictor stay consistent when one residue changes?</h2>
+            <p class="hero-lead">AOP-BCS audits model behaviour with controlled peptide perturbations—testing sensitivity where chemistry matters and stability where it should not.</p>
+            <div class="hero-actions">
+              <a class="primary-button" href="#method">Explore the method <span>↓</span></a>
+              <a class="text-link" href="#provenance">See evidence boundary →</a>
+            </div>
+          </div>
+          <div class="hero-visual" aria-label="Conceptual sequence perturbation diagram">
+            <div class="visual-label">Controlled mutation probe</div>
+            <div class="sequence-orbit">
+              <span class="orbit orbit-one"></span><span class="orbit orbit-two"></span>
+              <div class="sequence-ribbon" aria-hidden="true">
+                <b>W</b><i>Y</i><i>H</i><i>M</i><i>C</i><i>G</i><i>L</i>
+              </div>
+              <div class="mutation-node"><small>Δ score</small><strong>?</strong></div>
+            </div>
+            <div class="visual-legend"><span><i class="legend-redox"></i>Redox-aware</span><span><i class="legend-control"></i>Controlled comparison</span></div>
+          </div>
+          <div class="hero-stats" id="hero-stats" aria-label="Pilot overview"></div>
+        </section>
+
+        <section class="section story-grid" id="problem" data-section="problem">
+          <div class="section-heading sticky-heading">
+            <span class="section-number">02 / Research gap</span>
+            <h2>A high score is not enough.</h2>
+            <p>Conventional validation asks whether predictions are correct. AOP-BCS adds a second question: are they behaviourally credible under biologically motivated edits?</p>
+          </div>
+          <div class="story-content">
+            <article class="thesis-panel">
+              <span class="quote-mark" aria-hidden="true">“</span>
+              <p>A reliable predictor should react to redox-disrupting edits, remain stable under conservative edits, and behave differently from random controls.</p>
+              <div class="formula-strip">
+                <span>Behavioural consistency</span><strong>BCS = IR × (1 − FSR)</strong>
+              </div>
+            </article>
+            <div class="question-list">
+              <article><span>01</span><div><h3>Sensitivity</h3><p>Does the model respond when a redox-relevant residue is removed?</p></div></article>
+              <article><span>02</span><div><h3>Invariance</h3><p>Does it stay stable when a chemically conservative change is made?</p></div></article>
+              <article><span>03</span><div><h3>Context</h3><p>Are observed responses distinct from reproducible random substitutions?</p></div></article>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="data" data-section="data">
+          <div class="section-heading wide-heading">
+            <div><span class="section-number">03 / Evidence base</span><h2>A traceable path from candidates to audit subjects.</h2></div>
+            <p>Every stage is versioned, checksum-backed, and reproducible from the frozen C3 research configuration.</p>
+          </div>
+          <div class="funnel" id="dataset-funnel" aria-label="Dataset preparation funnel"></div>
+          <div class="evidence-note">
+            <div><span class="note-icon">✓</span><div><strong>Quality gate passed</strong><p>All 20 pilot subjects have valid perturbations; no sequence contributes more than the 20% QC threshold.</p></div></div>
+            <dl id="coverage-facts"></dl>
+          </div>
+        </section>
+
+        <section class="section" id="method" data-section="method">
+          <div class="section-heading wide-heading">
+            <div><span class="section-number">04 / Method</span><h2>Three edits. Three behavioural questions.</h2></div>
+            <p>The perturbation pipeline changes exactly one residue, preserves sequence length, validates every variant, and records its provenance.</p>
+          </div>
+          <div class="perturbation-grid" id="perturbation-cards"></div>
+          <div class="pipeline-band" id="pipeline-band"></div>
+        </section>
+
+        <section class="section results-section" id="results" data-section="results">
+          <div class="section-heading wide-heading">
+            <div><span class="section-number">05 / Software pilot</span><h2>The metric pipeline works end to end.</h2></div>
+            <span class="pill pill-warning">Dummy predictor · non-scientific</span>
+          </div>
+          <div class="metric-layout">
+            <div class="metric-scorecard" id="metric-scorecard"></div>
+            <div class="sensitivity-panel">
+              <div class="panel-heading"><div><span class="eyebrow">Threshold sensitivity</span><h3>BCS changes with δ</h3></div><span class="pill">Primary δ = 0.05</span></div>
+              <div class="sensitivity-chart" id="sensitivity-chart" role="img" aria-label="Preliminary BCS across three delta thresholds"></div>
+              <p class="chart-note">Demonstrates configurable, reproducible reruns—not robustness of a scientific predictor.</p>
+            </div>
+          </div>
+          <div class="figure-grid" id="figure-grid"></div>
+        </section>
+
+        <section class="section" id="explorer" data-section="explorer">
+          <div class="section-heading wide-heading">
+            <div><span class="section-number">06 / Evidence explorer</span><h2>Inspect a real generated variant.</h2></div>
+            <p>Six representative rows were manually selected and independently revalidated from the committed pilot artifact.</p>
+          </div>
+          <div class="explorer-shell">
+            <div class="explorer-toolbar">
+              <div class="segmented" id="variant-filter" aria-label="Filter example by perturbation type">
+                <button type="button" class="active" data-type="P1">P1</button><button type="button" data-type="P2">P2</button><button type="button" data-type="P3">P3</button>
+              </div>
+              <div class="explorer-pager"><button type="button" id="previous-example" aria-label="Previous example">←</button><span id="example-position">1 / 2</span><button type="button" id="next-example" aria-label="Next example">→</button></div>
+            </div>
+            <div id="variant-explorer" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="section" id="readiness" data-section="readiness">
+          <div class="section-heading wide-heading">
+            <div><span class="section-number">07 / Predictor readiness</span><h2>The audit is ready. Real predictors are not—yet.</h2></div>
+            <p>A predictor is never marked integrated until C3 retains a verified real score with its runtime and model evidence.</p>
+          </div>
+          <div class="readiness-layout">
+            <div class="predictor-list" id="predictor-list"></div>
+            <aside class="handoff-card">
+              <span class="eyebrow">Critical dependency</span>
+              <h3>PU-AOP handoff</h3>
+              <p>Component 2 must freeze one model and provide its checkpoint, preprocessing lineage, inference entry point, score semantics, and reference fixture.</p>
+              <div class="handoff-state"><span></span><div><strong>Handoff pending</strong><small>C3 will not guess the model</small></div></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="section final-section" id="provenance" data-section="provenance">
+          <div class="section-heading wide-heading">
+            <div><span class="section-number">08 / Evidence boundary</span><h2>What is proven—and what comes next.</h2></div>
+          </div>
+          <div class="boundary-grid">
+            <article class="boundary-card complete"><span>Verified now</span><h3>A reproducible audit pipeline</h3><ul><li>Versioned P1/P2/P3 generators</li><li>Scoring, caching, restart and metrics</li><li>Reproducibility, counts and visual checks</li><li>449-row pilot with zero missing scores</li></ul></article>
+            <article class="boundary-card pending"><span>Not claimed</span><h3>Scientific predictor reliability</h3><ul><li>No real predictor score is presented</li><li>Dummy outputs have no biological meaning</li><li>No cross-predictor conclusion is possible</li><li>SHAP experiment remains later work</li></ul></article>
+          </div>
+          <div class="next-step">
+            <div><span class="eyebrow">Next scientific milestone</span><h3>Replace the dummy with a verified real predictor.</h3><p>Start with AOPxSVM or AnOxPePred; add PU-AOP after its frozen Component 2 handoff. Then rerun the same immutable audit.</p></div>
+            <div class="next-sequence" aria-label="Next work sequence"><span class="done">Pipeline</span><i>→</i><span>Real score</span><i>→</i><span>Audit</span><i>→</i><span>Interpret</span></div>
+          </div>
+          <details class="provenance-details">
+            <summary>View run provenance</summary>
+            <div id="provenance-grid"></div>
+          </details>
+        </section>
+      </main>
+
+      <footer><span>PlantAOx-RAISE · Component 03</span><span id="footer-version">Loading versioned evidence…</span></footer>
+    </div>
+
+    <noscript>This presentation requires JavaScript to load the versioned C3 evidence snapshot.</noscript>
+  </body>
+</html>
