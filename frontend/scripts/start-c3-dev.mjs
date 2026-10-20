@@ -18,7 +18,7 @@ environment.OPENBLAS_NUM_THREADS ??= "1";
 
 const backend = spawn(
   python,
-  ["-m", "uvicorn", "plantaox.c3_aop_bcs.dashboard_backend:app", "--app-dir", join(repositoryRoot, "src"), "--host", "127.0.0.1", "--port", "4314"],
+  ["-m", "uvicorn", "backend.app.main:app", "--app-dir", repositoryRoot, "--host", "127.0.0.1", "--port", "8000"],
   { cwd: repositoryRoot, stdio: "inherit", env: environment },
 );
 const frontend = spawn(

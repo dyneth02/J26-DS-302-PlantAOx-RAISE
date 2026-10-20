@@ -28,7 +28,8 @@ COMPONENTS: list[ComponentInfo] = [
         code="C3",
         title="AOP-BCS",
         owner_note="Predictor behavioral-consistency and reliability auditing",
-        status="not_integrated",
+        status="implemented",
+        base_path="/api/v1/c3",
     ),
     ComponentInfo(
         id="c4_plantaop_screen",
