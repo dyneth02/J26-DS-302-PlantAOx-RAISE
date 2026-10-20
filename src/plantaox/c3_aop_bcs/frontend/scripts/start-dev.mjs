@@ -9,11 +9,14 @@ const repositoryRoot = resolve(scriptDirectory, "../../../../../");
 const windowsPython = join(repositoryRoot, ".venv", "Scripts", "python.exe");
 const unixPython = join(repositoryRoot, ".venv", "bin", "python");
 const python = existsSync(windowsPython) ? windowsPython : existsSync(unixPython) ? unixPython : "python";
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-const environment = { ...process.env, OPENBLAS_NUM_THREADS: process.env.OPENBLAS_NUM_THREADS ?? "1" };
+const vite = join(frontendDirectory, "node_modules", "vite", "bin", "vite.js");
+const environment = Object.fromEntries(
+  Object.entries(process.env).filter(([key, value]) => !key.startsWith("=") && typeof value === "string"),
+);
+environment.OPENBLAS_NUM_THREADS ??= "1";
 
 const backend = spawn(python, ["-m", "uvicorn", "plantaox.c3_aop_bcs.dashboard_backend:app", "--app-dir", join(repositoryRoot, "src"), "--host", "127.0.0.1", "--port", "4314"], { cwd: repositoryRoot, stdio: "inherit", env: environment });
-const frontend = spawn(npm, ["run", "dev:frontend"], { cwd: frontendDirectory, stdio: "inherit", env: environment });
+const frontend = spawn(process.execPath, [vite, "--host", "127.0.0.1", "--port", "4313"], { cwd: frontendDirectory, stdio: "inherit", env: environment });
 const children = [backend, frontend];
 let stopping = false;
 
