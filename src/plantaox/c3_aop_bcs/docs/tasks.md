@@ -1098,6 +1098,24 @@ Capture evidence of:
 
 ---
 
+## Task 3.48 — Integrate AOP-BCS into the shared repository backend
+
+### Subtasks
+- [x] Audit the repository-level FastAPI structure, component routers, schemas, services, shared error handling, registry, and backend tests.
+- [x] Add a typed C3 schema module under `backend/app/schemas/`.
+- [x] Add a C3 service adapter that reuses the existing validated C3 artifact builder without duplicating scientific logic.
+- [x] Add the shared `/api/v1/c3` health, dashboard, section, and allow-listed figure routes.
+- [x] Register the C3 router in the shared API composition root and mark C3 as implemented in the component registry.
+- [x] Use the shared `404` and `503 artifact_unavailable` error contracts for unknown resources and unavailable evidence.
+- [x] Point the shared frontend proxy and C3 development launcher at the repository-level backend on port `8000`.
+- [x] Add shared-backend C3 contract tests and verify the complete backend and frontend regression suites.
+- [x] Verify the live frontend-to-shared-backend flow and browser console.
+
+### Deliverable
+- AOP-BCS served by the same repository-level FastAPI backend as Components 1, 2, and 4 at `/api/v1/c3`.
+
+---
+
 # PP1 Quality Gate
 
 Before considering the PP1 implementation stage complete, verify the following.

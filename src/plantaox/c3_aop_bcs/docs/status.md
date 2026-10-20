@@ -259,4 +259,20 @@
 - Verified the live shared `/c3` dashboard, all six subroutes, proxied API health/data, stored P1/P2/P3 examples, and browser console with no warnings or errors.
 - Committed the implementation as `65cbcdc` (`feat(c3): integrate AOP-BCS into shared frontend`).
 
+## Completed — Task 3.48: Integrate AOP-BCS into the shared repository backend
+
+**Status:** Completed and verified on 2026-10-21.
+
+- Audited the shared FastAPI composition root, schemas, services, component routers, error contracts, platform registry, and backend tests without changing C1, C2, or C4 implementation files.
+- Added typed C3 schemas, a C3 service adapter, and C3 API routes under the same `backend/app/` structure used by the other components.
+- Reused `build_dashboard_payload()` as the single evidence-validation source instead of duplicating C3 research or artifact logic.
+- Registered health, dashboard, seven section, and allow-listed SVG figure endpoints under `/api/v1/c3`.
+- Marked C3 as `implemented` with base path `/api/v1/c3` in the shared component registry.
+- Mapped missing or invalid C3 evidence to the shared `503 artifact_unavailable` contract and unknown figures to the shared `404 not_found` contract.
+- Updated `npm run dev:c3` to launch the repository-level backend on port `8000` and the shared frontend on port `3000`; all `/api` requests now use the common Vite proxy.
+- Resolved pre-existing merge markers in the shared platform registry test while updating its expected C3 integration state.
+- Verified the complete shared-backend suite: 37 passed, 1 C4 artifact-dependent test skipped, and only the existing Starlette/httpx deprecation warning remained.
+- Verified all 21 shared-frontend tests, the production frontend build, the live shared API, the frontend proxy, the `/c3` dashboard, and a browser console with no warnings or errors.
+- Committed the implementation as `47d3aab` (`feat(c3): integrate AOP-BCS into shared backend`).
+
 Next work: resume Task 3.37 implementation-documentation updates when requested.
