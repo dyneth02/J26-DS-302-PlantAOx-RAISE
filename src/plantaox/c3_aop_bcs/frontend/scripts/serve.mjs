@@ -32,5 +32,5 @@ createServer(async (request, response) => {
     response.end("Not found");
   }
 }).listen(port, "127.0.0.1", () => {
-  console.log(`AOP-BCS presentation: http://127.0.0.1:${port}`);
+  console.log(`AOP-BCS dashboard: http://127.0.0.1:${port}`);
 });
