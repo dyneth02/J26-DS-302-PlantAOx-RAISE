@@ -275,4 +275,19 @@
 - Verified all 21 shared-frontend tests, the production frontend build, the live shared API, the frontend proxy, the `/c3` dashboard, and a browser console with no warnings or errors.
 - Committed the implementation as `47d3aab` (`feat(c3): integrate AOP-BCS into shared backend`).
 
+## Completed — Task 3.49: Replace static C3 metric images with interactive dashboard charts
+
+**Status:** Completed and verified on 2026-10-21.
+
+- Audited the native Recharts, shared Card, tooltip, legend, axis, responsive-container, and loading patterns used by the other component dashboards without changing their implementation files.
+- Replaced the four static SVG image embeds on the C3 Pilot metrics page with responsive native charts: P1/P2/P3 absolute-DeltaScore distributions, original-versus-perturbed score examples, the IR/FSR/BCS/PFR metric summary, and prediction-flip comparisons.
+- Built all chart values from the authoritative 449-row DeltaScore CSV and the validated C3 reports; added source path, SHA-256 checksum, and row-count provenance to the dashboard response and visible UI.
+- Added typed chart contracts across the C3 evidence builder, shared FastAPI schema/service, and shared React feature so the browser receives structured data instead of treating generated figures as screenshots.
+- Preserved the visible `PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS` boundary throughout the page and retained the existing versioned SVG files as provenance artifacts rather than frontend charts.
+- Added backend assertions for chart reconciliation and a frontend test confirming all four accessible charts render without any `img` element.
+- Verified the complete shared backend suite: 37 passed and 1 artifact-dependent test skipped; verified the complete shared frontend suite: 22 tests across 12 files passed; verified the production frontend build succeeds.
+- Verified the live `/c3/metrics` page with the real shared backend: all four charts render, the browser console is clean, and the 390-pixel mobile layout has no horizontal overflow.
+- Confirmed no Component 1, 2, or 4 implementation file was modified.
+- Committed the implementation as `803347b` (`feat(c3): replace static metric figures with interactive charts`).
+
 Next work: resume Task 3.37 implementation-documentation updates when requested.

@@ -1116,6 +1116,24 @@ Capture evidence of:
 
 ---
 
+## Task 3.49 — Replace static C3 metric images with interactive dashboard charts
+
+### Subtasks
+- [x] Audit the native chart patterns used by the other shared component dashboards without modifying their files.
+- [x] Build deterministic chart-ready data from the authoritative 449-row C3 DeltaScore artifact and validated metric reports.
+- [x] Expose typed chart data through the existing C3 dashboard and metrics API contracts.
+- [x] Replace the four static metric-image embeds with responsive Recharts visualizations for DeltaScore distributions, score examples, IR/FSR/BCS/PFR, and prediction flips.
+- [x] Preserve the pilot/dummy software-testing warning and display source-path, checksum, and row-count provenance.
+- [x] Add backend contract tests and frontend rendering tests that reject regression to image-based charts.
+- [x] Verify the complete shared backend and frontend test suites and the production frontend build.
+- [x] Verify live desktop and 390-pixel mobile rendering, zero horizontal overflow, and a clean browser console.
+- [x] Confirm no Component 1, 2, or 4 implementation file was modified.
+
+### Deliverable
+- A responsive, API-driven C3 metrics dashboard whose interactive charts follow the same shared Card/Recharts conventions as the other implemented components.
+
+---
+
 # PP1 Quality Gate
 
 Before considering the PP1 implementation stage complete, verify the following.
