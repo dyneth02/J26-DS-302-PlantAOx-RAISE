@@ -1,0 +1,1217 @@
+[
+  {
+    "method": "Bagging",
+    "seed": 42,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.20361574059384205,
+    "average_precision": 0.4103265186556303,
+    "auroc": 0.3483379501385042,
+    "precision": 0.4626865671641791,
+    "recall": 0.8157894736842105,
+    "f1": 0.5904761904761905,
+    "balanced_accuracy": 0.4342105263157895,
+    "brier_score_bounded": 0.4847507950314687,
+    "confusion_matrix": {
+      "tp": 31,
+      "tn": 2,
+      "fp": 36,
+      "fn": 7
+    },
+    "specificity": 0.05263157894736842
+  },
+  {
+    "method": "Bagging",
+    "seed": 42,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.261785157202368,
+    "average_precision": 0.4262587720664338,
+    "auroc": 0.3822714681440443,
+    "precision": 0.4461538461538462,
+    "recall": 0.7631578947368421,
+    "f1": 0.5631067961165048,
+    "balanced_accuracy": 0.4078947368421053,
+    "brier_score_bounded": 0.47675330683312156,
+    "confusion_matrix": {
+      "tp": 29,
+      "tn": 2,
+      "fp": 36,
+      "fn": 9
+    },
+    "specificity": 0.05263157894736842
+  },
+  {
+    "method": "Bagging",
+    "seed": 42,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.25912488071366013,
+    "average_precision": 0.6563160740248772,
+    "auroc": 0.26344086021505375,
+    "precision": 0.7094017094017094,
+    "recall": 0.6693548387096774,
+    "f1": 0.6887966804979253,
+    "balanced_accuracy": 0.3624551971326165,
+    "brier_score_bounded": 0.3450199187469204,
+    "confusion_matrix": {
+      "tp": 83,
+      "tn": 2,
+      "fp": 34,
+      "fn": 41
+    },
+    "specificity": 0.05555555555555555
+  },
+  {
+    "method": "Bagging",
+    "seed": 123,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.2335496832484569,
+    "average_precision": 0.4109108716182327,
+    "auroc": 0.34695290858725764,
+    "precision": 0.45454545454545453,
+    "recall": 0.7894736842105263,
+    "f1": 0.5769230769230769,
+    "balanced_accuracy": 0.42105263157894735,
+    "brier_score_bounded": 0.4873321118909626,
+    "confusion_matrix": {
+      "tp": 30,
+      "tn": 2,
+      "fp": 36,
+      "fn": 8
+    },
+    "specificity": 0.05263157894736842
+  },
+  {
+    "method": "Bagging",
+    "seed": 123,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.2335496832484569,
+    "average_precision": 0.42482298869693363,
+    "auroc": 0.378808864265928,
+    "precision": 0.45454545454545453,
+    "recall": 0.7894736842105263,
+    "f1": 0.5769230769230769,
+    "balanced_accuracy": 0.42105263157894735,
+    "brier_score_bounded": 0.47591778717644173,
+    "confusion_matrix": {
+      "tp": 30,
+      "tn": 2,
+      "fp": 36,
+      "fn": 8
+    },
+    "specificity": 0.05263157894736842
+  },
+  {
+    "method": "Bagging",
+    "seed": 123,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.25912488071366013,
+    "average_precision": 0.6578280421491067,
+    "auroc": 0.2627688172043011,
+    "precision": 0.7094017094017094,
+    "recall": 0.6693548387096774,
+    "f1": 0.6887966804979253,
+    "balanced_accuracy": 0.3624551971326165,
+    "brier_score_bounded": 0.3446735419800434,
+    "confusion_matrix": {
+      "tp": 83,
+      "tn": 2,
+      "fp": 34,
+      "fn": 41
+    },
+    "specificity": 0.05555555555555555
+  },
+  {
+    "method": "Bagging",
+    "seed": 2026,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.2850620368313789,
+    "average_precision": 0.4106481060541859,
+    "auroc": 0.35041551246537395,
+    "precision": 0.44776119402985076,
+    "recall": 0.7894736842105263,
+    "f1": 0.5714285714285714,
+    "balanced_accuracy": 0.40789473684210525,
+    "brier_score_bounded": 0.4779293359087123,
+    "confusion_matrix": {
+      "tp": 30,
+      "tn": 1,
+      "fp": 37,
+      "fn": 8
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "Bagging",
+    "seed": 2026,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.2850620368313789,
+    "average_precision": 0.42083286672845477,
+    "auroc": 0.3753462603878117,
+    "precision": 0.44776119402985076,
+    "recall": 0.7894736842105263,
+    "f1": 0.5714285714285714,
+    "balanced_accuracy": 0.40789473684210525,
+    "brier_score_bounded": 0.47359672877685055,
+    "confusion_matrix": {
+      "tp": 30,
+      "tn": 1,
+      "fp": 37,
+      "fn": 8
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "Bagging",
+    "seed": 2026,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.2928870801551794,
+    "average_precision": 0.6560775686671039,
+    "auroc": 0.2661290322580645,
+    "precision": 0.7008547008547008,
+    "recall": 0.6612903225806451,
+    "f1": 0.6804979253112033,
+    "balanced_accuracy": 0.34453405017921146,
+    "brier_score_bounded": 0.3451596753608112,
+    "confusion_matrix": {
+      "tp": 82,
+      "tn": 1,
+      "fp": 35,
+      "fn": 42
+    },
+    "specificity": 0.027777777777777776
+  },
+  {
+    "method": "Corrective",
+    "seed": 42,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.06757373783994859,
+    "average_precision": 0.39850138669748647,
+    "auroc": 0.32756232686980613,
+    "precision": 0.4931506849315068,
+    "recall": 0.9473684210526315,
+    "f1": 0.6486486486486487,
+    "balanced_accuracy": 0.48684210526315785,
+    "brier_score_bounded": 0.3883413079398804,
+    "confusion_matrix": {
+      "tp": 36,
+      "tn": 1,
+      "fp": 37,
+      "fn": 2
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "Corrective",
+    "seed": 42,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": 0.0,
+    "average_precision": 0.46426156218827946,
+    "auroc": 0.43628808864265933,
+    "precision": 0.5,
+    "recall": 0.9736842105263158,
+    "f1": 0.6607142857142857,
+    "balanced_accuracy": 0.5,
+    "brier_score_bounded": 0.37824381814702984,
+    "confusion_matrix": {
+      "tp": 37,
+      "tn": 1,
+      "fp": 37,
+      "fn": 1
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "Corrective",
+    "seed": 42,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.15839698777049716,
+    "average_precision": 0.6527268506814452,
+    "auroc": 0.25336021505376344,
+    "precision": 0.75,
+    "recall": 0.8467741935483871,
+    "f1": 0.7954545454545454,
+    "balanced_accuracy": 0.43727598566308246,
+    "brier_score_bounded": 0.2603456467944759,
+    "confusion_matrix": {
+      "tp": 105,
+      "tn": 1,
+      "fp": 35,
+      "fn": 19
+    },
+    "specificity": 0.027777777777777776
+  },
+  {
+    "method": "Corrective",
+    "seed": 123,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.15787724448766816,
+    "average_precision": 0.44726521830434096,
+    "auroc": 0.3898891966759003,
+    "precision": 0.4576271186440678,
+    "recall": 0.7105263157894737,
+    "f1": 0.5567010309278351,
+    "balanced_accuracy": 0.4342105263157895,
+    "brier_score_bounded": 0.3386942563489644,
+    "confusion_matrix": {
+      "tp": 27,
+      "tn": 6,
+      "fp": 32,
+      "fn": 11
+    },
+    "specificity": 0.15789473684210525
+  },
+  {
+    "method": "Corrective",
+    "seed": 123,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.03494282789073061,
+    "average_precision": 0.49403972867908874,
+    "auroc": 0.4736842105263159,
+    "precision": 0.49206349206349204,
+    "recall": 0.8157894736842105,
+    "f1": 0.6138613861386139,
+    "balanced_accuracy": 0.48684210526315785,
+    "brier_score_bounded": 0.3206067709459216,
+    "confusion_matrix": {
+      "tp": 31,
+      "tn": 6,
+      "fp": 32,
+      "fn": 7
+    },
+    "specificity": 0.15789473684210525
+  },
+  {
+    "method": "Corrective",
+    "seed": 123,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.20710526618048142,
+    "average_precision": 0.6656783783323323,
+    "auroc": 0.27419354838709675,
+    "precision": 0.7115384615384616,
+    "recall": 0.5967741935483871,
+    "f1": 0.6491228070175439,
+    "balanced_accuracy": 0.3817204301075269,
+    "brier_score_bounded": 0.2859618698337424,
+    "confusion_matrix": {
+      "tp": 74,
+      "tn": 6,
+      "fp": 30,
+      "fn": 50
+    },
+    "specificity": 0.16666666666666666
+  },
+  {
+    "method": "Corrective",
+    "seed": 2026,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.09917694073609294,
+    "average_precision": 0.4234575510787944,
+    "auroc": 0.3628808864265928,
+    "precision": 0.47540983606557374,
+    "recall": 0.7631578947368421,
+    "f1": 0.5858585858585859,
+    "balanced_accuracy": 0.4605263157894737,
+    "brier_score_bounded": 0.34296498369539075,
+    "confusion_matrix": {
+      "tp": 29,
+      "tn": 6,
+      "fp": 32,
+      "fn": 9
+    },
+    "specificity": 0.15789473684210525
+  },
+  {
+    "method": "Corrective",
+    "seed": 2026,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.06788442333021306,
+    "average_precision": 0.49200640650830596,
+    "auroc": 0.4833795013850416,
+    "precision": 0.4838709677419355,
+    "recall": 0.7894736842105263,
+    "f1": 0.6,
+    "balanced_accuracy": 0.4736842105263158,
+    "brier_score_bounded": 0.3183237055837375,
+    "confusion_matrix": {
+      "tp": 30,
+      "tn": 6,
+      "fp": 32,
+      "fn": 8
+    },
+    "specificity": 0.15789473684210525
+  },
+  {
+    "method": "Corrective",
+    "seed": 2026,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.20710526618048142,
+    "average_precision": 0.6663566414050882,
+    "auroc": 0.28158602150537637,
+    "precision": 0.7115384615384616,
+    "recall": 0.5967741935483871,
+    "f1": 0.6491228070175439,
+    "balanced_accuracy": 0.3817204301075269,
+    "brier_score_bounded": 0.28179905478103706,
+    "confusion_matrix": {
+      "tp": 74,
+      "tn": 6,
+      "fp": 30,
+      "fn": 50
+    },
+    "specificity": 0.16666666666666666
+  },
+  {
+    "method": "Direct",
+    "seed": 42,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": 0.0,
+    "average_precision": 0.41742191152961006,
+    "auroc": 0.3282548476454294,
+    "precision": 0.5,
+    "recall": 0.9736842105263158,
+    "f1": 0.6607142857142857,
+    "balanced_accuracy": 0.5,
+    "brier_score_bounded": 0.42780027197270465,
+    "confusion_matrix": {
+      "tp": 37,
+      "tn": 1,
+      "fp": 37,
+      "fn": 1
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "Direct",
+    "seed": 42,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": 0.11547005383792515,
+    "average_precision": 0.46718994213771303,
+    "auroc": 0.42590027700831024,
+    "precision": 0.5066666666666667,
+    "recall": 1.0,
+    "f1": 0.672566371681416,
+    "balanced_accuracy": 0.5131578947368421,
+    "brier_score_bounded": 0.41829892354475373,
+    "confusion_matrix": {
+      "tp": 38,
+      "tn": 1,
+      "fp": 37,
+      "fn": 0
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "Direct",
+    "seed": 42,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.04207566599781753,
+    "average_precision": 0.6530188488636792,
+    "auroc": 0.2533602150537635,
+    "precision": 0.7712418300653595,
+    "recall": 0.9516129032258065,
+    "f1": 0.851985559566787,
+    "balanced_accuracy": 0.48969534050179214,
+    "brier_score_bounded": 0.2462458640508157,
+    "confusion_matrix": {
+      "tp": 118,
+      "tn": 1,
+      "fp": 35,
+      "fn": 6
+    },
+    "specificity": 0.027777777777777776
+  },
+  {
+    "method": "Direct",
+    "seed": 123,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.17149858514250885,
+    "average_precision": 0.4209907923161761,
+    "auroc": 0.36703601108033246,
+    "precision": 0.47058823529411764,
+    "recall": 0.8421052631578947,
+    "f1": 0.6037735849056604,
+    "balanced_accuracy": 0.4473684210526315,
+    "brier_score_bounded": 0.38461313066091923,
+    "confusion_matrix": {
+      "tp": 32,
+      "tn": 2,
+      "fp": 36,
+      "fn": 6
+    },
+    "specificity": 0.05263157894736842
+  },
+  {
+    "method": "Direct",
+    "seed": 123,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.13650472655798704,
+    "average_precision": 0.46363372261592967,
+    "auroc": 0.4577562326869805,
+    "precision": 0.4782608695652174,
+    "recall": 0.868421052631579,
+    "f1": 0.616822429906542,
+    "balanced_accuracy": 0.4605263157894737,
+    "brier_score_bounded": 0.37046802767655573,
+    "confusion_matrix": {
+      "tp": 33,
+      "tn": 2,
+      "fp": 36,
+      "fn": 5
+    },
+    "specificity": 0.05263157894736842
+  },
+  {
+    "method": "Direct",
+    "seed": 123,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.22452515340308543,
+    "average_precision": 0.6571180615683446,
+    "auroc": 0.2685931899641577,
+    "precision": 0.7235772357723578,
+    "recall": 0.717741935483871,
+    "f1": 0.7206477732793523,
+    "balanced_accuracy": 0.3866487455197133,
+    "brier_score_bounded": 0.2681226533457617,
+    "confusion_matrix": {
+      "tp": 89,
+      "tn": 2,
+      "fp": 34,
+      "fn": 35
+    },
+    "specificity": 0.05555555555555555
+  },
+  {
+    "method": "Direct",
+    "seed": 2026,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.06757373783994859,
+    "average_precision": 0.4343260784433053,
+    "auroc": 0.3656509695290858,
+    "precision": 0.4931506849315068,
+    "recall": 0.9473684210526315,
+    "f1": 0.6486486486486487,
+    "balanced_accuracy": 0.48684210526315785,
+    "brier_score_bounded": 0.39361581022921827,
+    "confusion_matrix": {
+      "tp": 36,
+      "tn": 1,
+      "fp": 37,
+      "fn": 2
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "Direct",
+    "seed": 2026,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": 0.0,
+    "average_precision": 0.4688668767295793,
+    "auroc": 0.43490304709141275,
+    "precision": 0.5,
+    "recall": 0.9736842105263158,
+    "f1": 0.6607142857142857,
+    "balanced_accuracy": 0.5,
+    "brier_score_bounded": 0.3846505551755401,
+    "confusion_matrix": {
+      "tp": 37,
+      "tn": 1,
+      "fp": 37,
+      "fn": 1
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "Direct",
+    "seed": 2026,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.10545283989955931,
+    "average_precision": 0.6595908093707976,
+    "auroc": 0.26299283154121866,
+    "precision": 0.7619047619047619,
+    "recall": 0.9032258064516129,
+    "f1": 0.8265682656826568,
+    "balanced_accuracy": 0.46550179211469533,
+    "brier_score_bounded": 0.25462262962986604,
+    "confusion_matrix": {
+      "tp": 112,
+      "tn": 1,
+      "fp": 35,
+      "fn": 12
+    },
+    "specificity": 0.027777777777777776
+  },
+  {
+    "method": "PN",
+    "seed": 42,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.06757373783994859,
+    "average_precision": 0.40210657101452546,
+    "auroc": 0.33033240997229923,
+    "precision": 0.4931506849315068,
+    "recall": 0.9473684210526315,
+    "f1": 0.6486486486486487,
+    "balanced_accuracy": 0.48684210526315785,
+    "brier_score_bounded": 0.453732926719354,
+    "confusion_matrix": {
+      "tp": 36,
+      "tn": 1,
+      "fp": 37,
+      "fn": 2
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "PN",
+    "seed": 42,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.06757373783994859,
+    "average_precision": 0.4511953842237055,
+    "auroc": 0.4376731301939058,
+    "precision": 0.4931506849315068,
+    "recall": 0.9473684210526315,
+    "f1": 0.6486486486486487,
+    "balanced_accuracy": 0.48684210526315785,
+    "brier_score_bounded": 0.44974518568708927,
+    "confusion_matrix": {
+      "tp": 36,
+      "tn": 1,
+      "fp": 37,
+      "fn": 2
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "PN",
+    "seed": 42,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.15152449218950484,
+    "average_precision": 0.6489822658234923,
+    "auroc": 0.2569444444444444,
+    "precision": 0.75177304964539,
+    "recall": 0.8548387096774194,
+    "f1": 0.8,
+    "balanced_accuracy": 0.4413082437275986,
+    "brier_score_bounded": 0.28029775320067085,
+    "confusion_matrix": {
+      "tp": 106,
+      "tn": 1,
+      "fp": 35,
+      "fn": 18
+    },
+    "specificity": 0.027777777777777776
+  },
+  {
+    "method": "PN",
+    "seed": 123,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.19518001458970663,
+    "average_precision": 0.3948403075166645,
+    "auroc": 0.30470914127423826,
+    "precision": 0.4714285714285714,
+    "recall": 0.868421052631579,
+    "f1": 0.6111111111111112,
+    "balanced_accuracy": 0.4473684210526316,
+    "brier_score_bounded": 0.4579420620491288,
+    "confusion_matrix": {
+      "tp": 33,
+      "tn": 1,
+      "fp": 37,
+      "fn": 5
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "PN",
+    "seed": 123,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.06757373783994859,
+    "average_precision": 0.4482520436422875,
+    "auroc": 0.4328254847645429,
+    "precision": 0.4931506849315068,
+    "recall": 0.9473684210526315,
+    "f1": 0.6486486486486487,
+    "balanced_accuracy": 0.48684210526315785,
+    "brier_score_bounded": 0.44471288420908867,
+    "confusion_matrix": {
+      "tp": 36,
+      "tn": 1,
+      "fp": 37,
+      "fn": 2
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "PN",
+    "seed": 123,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.15839698777049716,
+    "average_precision": 0.644605602560419,
+    "auroc": 0.24551971326164873,
+    "precision": 0.75,
+    "recall": 0.8467741935483871,
+    "f1": 0.7954545454545454,
+    "balanced_accuracy": 0.43727598566308246,
+    "brier_score_bounded": 0.2788985813333264,
+    "confusion_matrix": {
+      "tp": 105,
+      "tn": 1,
+      "fp": 35,
+      "fn": 19
+    },
+    "specificity": 0.027777777777777776
+  },
+  {
+    "method": "PN",
+    "seed": 2026,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.1592234677302826,
+    "average_precision": 0.40757468357373694,
+    "auroc": 0.3441828254847646,
+    "precision": 0.4788732394366197,
+    "recall": 0.8947368421052632,
+    "f1": 0.6238532110091743,
+    "balanced_accuracy": 0.4605263157894737,
+    "brier_score_bounded": 0.45214722086299525,
+    "confusion_matrix": {
+      "tp": 34,
+      "tn": 1,
+      "fp": 37,
+      "fn": 4
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "PN",
+    "seed": 2026,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.11785113019775792,
+    "average_precision": 0.46450800296184513,
+    "auroc": 0.4688365650969529,
+    "precision": 0.4861111111111111,
+    "recall": 0.9210526315789473,
+    "f1": 0.6363636363636364,
+    "balanced_accuracy": 0.47368421052631576,
+    "brier_score_bounded": 0.44466018538907176,
+    "confusion_matrix": {
+      "tp": 35,
+      "tn": 1,
+      "fp": 37,
+      "fn": 3
+    },
+    "specificity": 0.02631578947368421
+  },
+  {
+    "method": "PN",
+    "seed": 2026,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.17167383215627308,
+    "average_precision": 0.655830436519017,
+    "auroc": 0.2748655913978495,
+    "precision": 0.7463768115942029,
+    "recall": 0.8306451612903226,
+    "f1": 0.7862595419847328,
+    "balanced_accuracy": 0.4292114695340502,
+    "brier_score_bounded": 0.27866243222893294,
+    "confusion_matrix": {
+      "tp": 103,
+      "tn": 1,
+      "fp": 35,
+      "fn": 21
+    },
+    "specificity": 0.027777777777777776
+  },
+  {
+    "method": "TwoStep",
+    "seed": 42,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": 0.0,
+    "average_precision": 0.40487219523840484,
+    "auroc": 0.342797783933518,
+    "precision": 0.5,
+    "recall": 1.0,
+    "f1": 0.6666666666666666,
+    "balanced_accuracy": 0.5,
+    "brier_score_bounded": 0.47265621250124457,
+    "confusion_matrix": {
+      "tp": 38,
+      "tn": 0,
+      "fp": 38,
+      "fn": 0
+    },
+    "specificity": 0.0
+  },
+  {
+    "method": "TwoStep",
+    "seed": 42,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.1643989873053573,
+    "average_precision": 0.4088723819725737,
+    "auroc": 0.3511080332409972,
+    "precision": 0.4864864864864865,
+    "recall": 0.9473684210526315,
+    "f1": 0.6428571428571429,
+    "balanced_accuracy": 0.47368421052631576,
+    "brier_score_bounded": 0.478381558672708,
+    "confusion_matrix": {
+      "tp": 36,
+      "tn": 0,
+      "fp": 38,
+      "fn": 2
+    },
+    "specificity": 0.0
+  },
+  {
+    "method": "TwoStep",
+    "seed": 42,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.1534264276484303,
+    "average_precision": 0.6528068676503861,
+    "auroc": 0.26814516129032256,
+    "precision": 0.7567567567567568,
+    "recall": 0.9032258064516129,
+    "f1": 0.8235294117647058,
+    "balanced_accuracy": 0.45161290322580644,
+    "brier_score_bounded": 0.2556815731741864,
+    "confusion_matrix": {
+      "tp": 112,
+      "tn": 0,
+      "fp": 36,
+      "fn": 12
+    },
+    "specificity": 0.0
+  },
+  {
+    "method": "TwoStep",
+    "seed": 123,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": 0.0,
+    "average_precision": 0.4050461778646904,
+    "auroc": 0.34002770083102496,
+    "precision": 0.5,
+    "recall": 1.0,
+    "f1": 0.6666666666666666,
+    "balanced_accuracy": 0.5,
+    "brier_score_bounded": 0.47552663015250024,
+    "confusion_matrix": {
+      "tp": 38,
+      "tn": 0,
+      "fp": 38,
+      "fn": 0
+    },
+    "specificity": 0.0
+  },
+  {
+    "method": "TwoStep",
+    "seed": 123,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": -0.11547005383792515,
+    "average_precision": 0.41096485937020466,
+    "auroc": 0.35803324099722994,
+    "precision": 0.49333333333333335,
+    "recall": 0.9736842105263158,
+    "f1": 0.6548672566371682,
+    "balanced_accuracy": 0.4868421052631579,
+    "brier_score_bounded": 0.4799152010438109,
+    "confusion_matrix": {
+      "tp": 37,
+      "tn": 0,
+      "fp": 38,
+      "fn": 1
+    },
+    "specificity": 0.0
+  },
+  {
+    "method": "TwoStep",
+    "seed": 123,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.13912166872805048,
+    "average_precision": 0.6525956968738251,
+    "auroc": 0.26657706093189965,
+    "precision": 0.76,
+    "recall": 0.9193548387096774,
+    "f1": 0.8321167883211679,
+    "balanced_accuracy": 0.4596774193548387,
+    "brier_score_bounded": 0.2512759918295835,
+    "confusion_matrix": {
+      "tp": 114,
+      "tn": 0,
+      "fp": 36,
+      "fn": 10
+    },
+    "specificity": 0.0
+  },
+  {
+    "method": "TwoStep",
+    "seed": 2026,
+    "kind": "descriptors",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": 0.0,
+    "average_precision": 0.40670156452393647,
+    "auroc": 0.34764542936288095,
+    "precision": 0.5,
+    "recall": 1.0,
+    "f1": 0.6666666666666666,
+    "balanced_accuracy": 0.5,
+    "brier_score_bounded": 0.4852924736441314,
+    "confusion_matrix": {
+      "tp": 38,
+      "tn": 0,
+      "fp": 38,
+      "fn": 0
+    },
+    "specificity": 0.0
+  },
+  {
+    "method": "TwoStep",
+    "seed": 2026,
+    "kind": "length",
+    "status": "defined",
+    "n": 76,
+    "class_counts": {
+      "positive": 38,
+      "negative": 38
+    },
+    "threshold": 0.5,
+    "mcc": 0.0,
+    "average_precision": 0.42015965053201454,
+    "auroc": 0.3850415512465374,
+    "precision": 0.5,
+    "recall": 1.0,
+    "f1": 0.6666666666666666,
+    "balanced_accuracy": 0.5,
+    "brier_score_bounded": 0.48827367896944973,
+    "confusion_matrix": {
+      "tp": 38,
+      "tn": 0,
+      "fp": 38,
+      "fn": 0
+    },
+    "specificity": 0.0
+  },
+  {
+    "method": "TwoStep",
+    "seed": 2026,
+    "kind": "exclude_two_annotation_conflicts",
+    "status": "defined",
+    "n": 160,
+    "class_counts": {
+      "positive": 124,
+      "negative": 36
+    },
+    "threshold": 0.5,
+    "mcc": -0.13154464973114796,
+    "average_precision": 0.6571102123219104,
+    "auroc": 0.27889784946236557,
+    "precision": 0.7615894039735099,
+    "recall": 0.9274193548387096,
+    "f1": 0.8363636363636363,
+    "balanced_accuracy": 0.4637096774193548,
+    "brier_score_bounded": 0.24971943217636072,
+    "confusion_matrix": {
+      "tp": 115,
+      "tn": 0,
+      "fp": 36,
+      "fn": 9
+    },
+    "specificity": 0.0
+  }
+]

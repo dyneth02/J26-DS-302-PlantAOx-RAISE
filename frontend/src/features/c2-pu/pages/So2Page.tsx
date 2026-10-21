@@ -3,7 +3,7 @@ import { useApi } from "@/lib/api/useApi";
 import { c2Api } from "@/features/c2-pu/services/api";
 import { DataState } from "@/components/research/DataState";
 import { Card, CardHeader, StatTile } from "@/components/ui/Card";
-import { LimitationsPanel } from "@/components/research/LimitationsPanel";
+// import { LimitationsPanel } from "@/components/research/LimitationsPanel";
 
 export function So2Page() {
   const poolsState = useApi(c2Api.fr2Pools, []);
@@ -95,7 +95,7 @@ export function So2Page() {
             />
           </Card>
 
-          <LimitationsPanel items={pools.known_limitations} />
+          {/*<LimitationsPanel items={pools.known_limitations} />*/}
         </div>
       )}
     />

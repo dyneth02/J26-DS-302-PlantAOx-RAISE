@@ -1,0 +1,132 @@
+[
+  {
+    "method": "Bagging",
+    "n_control_publications": 11,
+    "n_positive": 124,
+    "n_control": 38,
+    "original_peptide_intervals_reproduced": true,
+    "publication_cluster_percentile95": {
+      "mcc": [
+        -0.37917562269299987,
+        -0.10950434547540062
+      ],
+      "auroc": [
+        0.15222389643463496,
+        0.4209029377880184
+      ],
+      "recall": [
+        0.5806451612903226,
+        0.75
+      ],
+      "specificity": [
+        0.0,
+        0.17145320197044334
+      ]
+    },
+    "caveat": "Positive peptides resampled individually; only observed 11 control publications clustered. Not complete biological/family uncertainty."
+  },
+  {
+    "method": "Corrective",
+    "n_control_publications": 11,
+    "n_positive": 124,
+    "n_control": 38,
+    "original_peptide_intervals_reproduced": true,
+    "publication_cluster_percentile95": {
+      "mcc": [
+        -0.24946887554197333,
+        -0.03264929575423235
+      ],
+      "auroc": [
+        0.14778128408913824,
+        0.4245809553349875
+      ],
+      "recall": [
+        0.7741935483870968,
+        0.9032258064516129
+      ],
+      "specificity": [
+        0.0,
+        0.1111111111111111
+      ]
+    },
+    "caveat": "Positive peptides resampled individually; only observed 11 control publications clustered. Not complete biological/family uncertainty."
+  },
+  {
+    "method": "Direct",
+    "n_control_publications": 11,
+    "n_positive": 124,
+    "n_control": 38,
+    "original_peptide_intervals_reproduced": true,
+    "publication_cluster_percentile95": {
+      "mcc": [
+        -0.14664711502135327,
+        0.13362892718777017
+      ],
+      "auroc": [
+        0.13725713399503722,
+        0.4446062412342216
+      ],
+      "recall": [
+        0.9112903225806451,
+        0.9838709677419355
+      ],
+      "specificity": [
+        0.0,
+        0.11764705882352941
+      ]
+    },
+    "caveat": "Positive peptides resampled individually; only observed 11 control publications clustered. Not complete biological/family uncertainty."
+  },
+  {
+    "method": "PN",
+    "n_control_publications": 11,
+    "n_positive": 124,
+    "n_control": 38,
+    "original_peptide_intervals_reproduced": true,
+    "publication_cluster_percentile95": {
+      "mcc": [
+        -0.24270076581305297,
+        -0.016398841577106672
+      ],
+      "auroc": [
+        0.14071696378041879,
+        0.43247509309861193
+      ],
+      "recall": [
+        0.7903225806451613,
+        0.9112903225806451
+      ],
+      "specificity": [
+        0.0,
+        0.1111111111111111
+      ]
+    },
+    "caveat": "Positive peptides resampled individually; only observed 11 control publications clustered. Not complete biological/family uncertainty."
+  },
+  {
+    "method": "TwoStep",
+    "n_control_publications": 11,
+    "n_positive": 124,
+    "n_control": 38,
+    "original_peptide_intervals_reproduced": true,
+    "publication_cluster_percentile95": {
+      "mcc": [
+        -0.20991573146857864,
+        -0.0996866564934072
+      ],
+      "auroc": [
+        0.13336071512206546,
+        0.44046991315136474
+      ],
+      "recall": [
+        0.8548387096774194,
+        0.9516129032258065
+      ],
+      "specificity": [
+        0.0,
+        0.0
+      ]
+    },
+    "caveat": "Positive peptides resampled individually; only observed 11 control publications clustered. Not complete biological/family uncertainty."
+  }
+]

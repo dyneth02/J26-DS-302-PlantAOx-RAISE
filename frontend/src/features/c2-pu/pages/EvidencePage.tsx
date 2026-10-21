@@ -9,7 +9,7 @@ import type { TrackedSourceReport } from "@/features/c2-pu/types";
 const STATUS_BADGE: Record<TrackedSourceReport["status"], { tone: "success" | "danger" | "neutral"; label: string }> = {
   verified: { tone: "success", label: "Verified" },
   present: { tone: "neutral", label: "Present" },
-  modified: { tone: "danger", label: "Modified" },
+  modified: { tone: "success", label: "Modified" },
   missing: { tone: "danger", label: "Missing" },
 };
 

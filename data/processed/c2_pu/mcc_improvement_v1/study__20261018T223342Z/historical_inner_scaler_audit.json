@@ -1,0 +1,8 @@
+{
+  "fit_n": 710,
+  "optimization_n": 604,
+  "validation_n": 106,
+  "validation_ids_in_scaler_fit": 106,
+  "outer_test_ids_in_scaler_fit": 0,
+  "interpretation": "Internal validation informed scaling; outer GraphPart test did not. New protocol fixes inner isolation."
+}

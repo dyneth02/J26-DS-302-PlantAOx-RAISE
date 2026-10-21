@@ -1,0 +1,4 @@
+features,validation_dataset_membership_auroc,held_out_positive_median_FR1_support,control_median_FR1_support,note
+length,0.9699390372083245,0.926580548286438,0.9685938358306885,"FR1-vs-C1 source contrast, NOT antioxidant AUROC; controls were not fit"
+descriptors,0.9691375867143157,0.9223233461380005,0.9580702781677246,"FR1-vs-C1 source contrast, NOT antioxidant AUROC; controls were not fit"
+esm,0.9694397729661551,0.9447871446609497,0.9961892366409302,"FR1-vs-C1 source contrast, NOT antioxidant AUROC; controls were not fit"

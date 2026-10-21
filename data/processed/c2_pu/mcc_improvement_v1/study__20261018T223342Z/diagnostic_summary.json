@@ -1,0 +1,107 @@
+{
+  "groups": {
+    "training_positive": 576,
+    "validation_positive": 134,
+    "held_out_positive": 124,
+    "external_control": 38,
+    "C1_unlabeled": 3788,
+    "C2_unlabeled": 2000
+  },
+  "strongest_control_descriptor_shifts": [
+    {
+      "group": "external_control",
+      "feature": "molecular_weight",
+      "n_train": 576,
+      "n_group": 38,
+      "training_mean": 912.6907348632812,
+      "group_mean": 587.5492553710938,
+      "training_median": 717.2425537109375,
+      "group_median": 499.6005859375,
+      "ks": 0.3541666666666667,
+      "ks_p": 0.00016678568317550892,
+      "rank_biserial": 0.3531615734100342,
+      "p": 0.0002635229902807623,
+      "bh_q": 0.0007601624719637374
+    },
+    {
+      "group": "external_control",
+      "feature": "length",
+      "n_train": 576,
+      "n_group": 38,
+      "training_mean": 7.904513835906982,
+      "group_mean": 4.789473533630371,
+      "training_median": 6.0,
+      "group_median": 3.5,
+      "ks": 0.35215643274853803,
+      "ks_p": 0.0001858490051551508,
+      "rank_biserial": 0.35681653022766113,
+      "p": 0.00018645111413206905,
+      "bh_q": 0.0005593533423962072
+    },
+    {
+      "group": "external_control",
+      "feature": "frac_hydrophobic",
+      "n_train": 576,
+      "n_group": 38,
+      "training_mean": 0.3382489085197449,
+      "group_mean": 0.46945491433143616,
+      "training_median": 0.3333333432674408,
+      "group_median": 0.5,
+      "ks": 0.29605263157894735,
+      "ks_p": 0.0028876590418545184,
+      "rank_biserial": -0.32396745681762695,
+      "p": 0.0007667246973142028,
+      "bh_q": 0.0020537268678059
+    },
+    {
+      "group": "external_control",
+      "feature": "hydrophobic_moment",
+      "n_train": 576,
+      "n_group": 38,
+      "training_mean": 0.3405466675758362,
+      "group_mean": 0.4810171127319336,
+      "training_median": 0.2938117980957031,
+      "group_median": 0.4118497967720032,
+      "ks": 0.2829861111111111,
+      "ks_p": 0.00508383058560125,
+      "rank_biserial": -0.26059943437576294,
+      "p": 0.00709610665217042,
+      "bh_q": 0.01520594282607947
+    },
+    {
+      "group": "external_control",
+      "feature": "frac_charged",
+      "n_train": 576,
+      "n_group": 38,
+      "training_mean": 0.17226892709732056,
+      "group_mean": 0.2164473831653595,
+      "training_median": 0.1428571492433548,
+      "group_median": 0.2083333432674408,
+      "ks": 0.21125730994152048,
+      "ks_p": 0.07076895000989286,
+      "rank_biserial": -0.06757128238677979,
+      "p": 0.4752201437950134,
+      "bh_q": 0.5842870620430493
+    },
+    {
+      "group": "external_control",
+      "feature": "frac_polar",
+      "n_train": 576,
+      "n_group": 38,
+      "training_mean": 0.26438018679618835,
+      "group_mean": 0.19632413983345032,
+      "training_median": 0.25,
+      "group_median": 0.18333333730697632,
+      "ks": 0.20056652046783627,
+      "ks_p": 0.09799060190711739,
+      "rank_biserial": 0.17703759670257568,
+      "p": 0.06535929441452026,
+      "bh_q": 0.11399876932765163
+    }
+  ],
+  "pca_variance": [
+    0.161725252866745,
+    0.09879666566848755
+  ],
+  "caveat": "Associations; not causal evidence. Tests exploratory and peptide dependence unmodeled."
+}

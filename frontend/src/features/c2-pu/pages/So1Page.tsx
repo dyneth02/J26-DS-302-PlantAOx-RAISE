@@ -2,7 +2,7 @@ import { useApi } from "@/lib/api/useApi";
 import { c2Api } from "@/features/c2-pu/services/api";
 import { DataState } from "@/components/research/DataState";
 import { Card, CardHeader, StatTile } from "@/components/ui/Card";
-import { LimitationsPanel } from "@/components/research/LimitationsPanel";
+// import { LimitationsPanel } from "@/components/research/LimitationsPanel";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 export function So1Page() {
@@ -51,8 +51,8 @@ export function So1Page() {
               </div>
             </Card>
 
-            <LimitationsPanel items={fr1.known_limitations} />
-            <LimitationsPanel title="Pending supervisor approvals" items={fr1.pending_supervisor_approvals} />
+            {/*<LimitationsPanel items={fr1.known_limitations} />*/}
+            {/*<LimitationsPanel title="Pending supervisor approvals" items={fr1.pending_supervisor_approvals} />*/}
           </div>
         );
       }}

@@ -15,9 +15,9 @@ export function CurriculumPage() {
       render={(curriculum) => {
         const chartData = curriculum.stages.map((s) => ({
           stage: s.training_pool,
-          "Positive recovery": s.positive_recovery,
-          "External MCC": s.external_mcc,
-          "External AUROC": s.external_auroc,
+          "Positive recovery": s.positive_recovery.toFixed(3),
+          "External MCC": s.external_mcc.toFixed(3),
+          "External AUROC": s.external_auroc.toFixed(3),
         }));
 
         return (

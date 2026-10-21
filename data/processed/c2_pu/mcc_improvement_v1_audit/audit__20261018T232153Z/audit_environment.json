@@ -1,0 +1,12 @@
+{
+  "branch": "experiment/c2-mcc-improvement-v1",
+  "commit": "e630803940c49cef65a4b906bbd8600cf86dfd0f",
+  "git_status": "?? data/interim/c2_pu/mcc_improvement_v1/\n?? data/processed/c2_pu/mcc_improvement_v1/\n?? data/processed/c2_pu/mcc_improvement_v1_audit/\n?? src/plantaox/c2_pu/mcc_audit.py\n?? src/plantaox/c2_pu/mcc_study.py\n?? src/plantaox/c2_pu/mcc_study_plots.py\n?? src/plantaox/c2_pu/mcc_study_qa.py\n?? src/plantaox/c2_pu/mcc_study_report.py\n?? tests/c2_pu/test_mcc_study.py\n",
+  "python": "3.11.14",
+  "torch": "2.14.0+cpu",
+  "sklearn": "1.9.0",
+  "scipy": "1.17.1",
+  "study": "data\\processed\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z",
+  "training_performed": false,
+  "source_sha256": "86fbc11df3400a9b50c9416c0b38eae33697043d1f1fc83ec3135eb1f05e9c2d"
+}

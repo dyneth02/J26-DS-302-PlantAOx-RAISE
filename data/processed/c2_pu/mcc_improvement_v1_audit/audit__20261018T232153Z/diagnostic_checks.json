@@ -1,0 +1,9 @@
+{
+  "conditional_associations": 40,
+  "length_stratum_views": 300,
+  "descriptor_comparisons_verified": 75,
+  "amino_acid_comparisons_verified": 120,
+  "source_probes_verified": 3,
+  "new_training": false,
+  "control_publications": 11
+}

@@ -1,0 +1,11 @@
+{
+  "returncode": 1,
+  "runtime_seconds": 510.55963450000854,
+  "cwd": "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\qa_workspace",
+  "command": [
+    "C:\\Users\\metal\\Documents\\SLIIT Research\\Demo\\.venv\\Scripts\\python.exe",
+    "-c",
+    "import torch,pytest;torch.set_num_threads(1);raise SystemExit(pytest.main(['tests/c2_pu','-q','--tb=short','-p','no:cacheprovider']))"
+  ],
+  "note": "Historical writing tests isolated in copied workspace; WSL availability and Git-disposition portability may fail."
+}
