@@ -25,21 +25,6 @@ export function RetrievalPage() {
             color: r.kind === "baseline" ? C1_COLORS.baseline : C1_COLORS.trained,
           }));
         const untrained = data.representations.find((r) => r.representation === "RAW 650M")?.ap ?? 0;
-        const seedItems: BarItem[] = data.seeds.map((s) => ({
-          label: s.model,
-          value: s.ap_mean,
-          lo: s.ap_mean - s.ap_sd,
-          hi: s.ap_mean + s.ap_sd,
-          color: C1_COLORS.trained,
-          note: `${s.seeds_below_untrained}/${s.n_seeds} seeds below`,
-        }));
-        const scaleItems: BarItem[] = data.scale.flatMap((s) => [
-          { label: `${s.scale} untrained`, value: s.ap_untrained, color: C1_COLORS.baseline },
-          { label: `${s.scale} trained (${s.model})`, value: s.ap_trained_mean, color: C1_COLORS.trained },
-        ]);
-        const collapseItems: BarItem[] = data.collapse
-          .map((c) => ({ label: c.model, value: c.mean_cos_heldout, color: c.mean_cos_heldout > 0.95 ? C1_COLORS.bad : C1_COLORS.baseline }))
-          .sort((a, b) => b.value - a.value);
 
         return (
           <div className="space-y-6">
@@ -89,44 +74,6 @@ export function RetrievalPage() {
               />
             </Card>
 
-            <Card>
-              <CardHeader title="Step 6 - Stability across 5 random seeds" subtitle="Mean AP ± 1 SD per training recipe; the dashed lines are the untrained embedding and a random ranking." />
-              <HBarChart
-                items={seedItems}
-                min={0}
-                max={0.27}
-                decimals={3}
-                labelWidth={190}
-                refs={[
-                  { value: untrained, label: `untrained ESM-2 ${untrained.toFixed(3)}`, color: C1_COLORS.baseline },
-                  { value: data.chance_ap, label: `random ${data.chance_ap.toFixed(3)}` },
-                ]}
-                ariaLabel="Average precision per training recipe across seeds"
-              />
-              <div className="mt-4">
-                <Callout title="Why 0 of 25" tone="info">
-                  Each recipe was trained five times with different random seeds. Every one of the 25 runs ends below the untrained embedding, and the seed-to-seed spread is much smaller
-                  than the gap, so this is not bad luck.
-                </Callout>
-              </div>
-            </Card>
-
-            <Card>
-              <CardHeader title="Step 6 - Does a larger ESM-2 help?" subtitle="Untrained against trained AP at four model sizes (3 seeds)." />
-              <HBarChart items={scaleItems} min={0} max={0.27} decimals={3} labelWidth={230} refs={[{ value: data.chance_ap, label: "random ranking" }]} ariaLabel="Untrained and trained AP by ESM-2 size" />
-              <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
-                No benefit of scale was detected, and the trained head is below the untrained embedding at every size.
-              </p>
-            </Card>
-
-            <Card>
-              <CardHeader title="Embedding collapse on unseen peptides" subtitle="Average cosine similarity between held-out peptides; near 1 means almost every peptide gets the same embedding (red = above 0.95)." />
-              <HBarChart items={collapseItems} min={0} max={1} decimals={3} labelWidth={190} refs={[{ value: 0.95, label: "collapse threshold 0.95", color: C1_COLORS.muted }]} ariaLabel="Average cosine similarity per trained model" />
-              <SimpleTable
-                headers={["Model", "Mean cosine (held-out)", "Effective rank (held-out)"]}
-                rows={data.collapse.map((c) => [c.model, fmt(c.mean_cos_heldout), fmt(c.eff_rank_heldout, 1)])}
-              />
-            </Card>
           </div>
         );
       }}
