@@ -1,0 +1,3 @@
+# Isolated from the research .venv on purpose: MLflow pulls its own pandas/numpy/
+# scikit-learn/sqlalchemy versions, which must not disturb the frozen PP1 environment.
+mlflow==3.17.2
