@@ -7,7 +7,7 @@ EVALUATION_NOTE = (
     "Metrics are computed against 124 held-out positives vs 38 AnOxPePred "
     "assay-inactive external controls (fold 0 only). Scores are uncalibrated "
     "model outputs, not validated biological probabilities. All five "
-    "configurations show negative MCC and sub-0.5 AUROC on this evaluation — "
+    "configurations show negative MCC and sub-0.5 AUROC on this evaluation: "
     "a technically reproducible prototype, not a scientifically validated "
     "antioxidant-activity classifier."
 )

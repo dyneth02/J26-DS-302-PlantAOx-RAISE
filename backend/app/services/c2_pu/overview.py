@@ -31,10 +31,10 @@ def get_overview() -> OverviewResponse:
     }
 
     fr_milestones = {
-        "FR1": "Evidence-tiered positive-pool curation — accepted, frozen as pp1_baseline_v1",
-        "FR2": "Challenge-pool construction (C1/C2/C3) — accepted, frozen as pp2_baseline_v1",
-        "FR3": "Feature engineering (descriptors + ESM-2 fusion + fold scaling) — accepted",
-        "FR4": "Baseline classifiers + evidence-weighted curriculum — accepted with documented scientific limitations",
+        "SO1": "Evidence-tiered positive-pool curation: accepted, frozen as pp1_baseline_v1",
+        "SO2": "Challenge-pool construction (C1/C2/C3): accepted, frozen as pp2_baseline_v1",
+        "SO3": "Feature engineering (descriptors + ESM-2 fusion + fold scaling): accepted",
+        "SO4": "Baseline classifiers + evidence-weighted curriculum: accepted with documented scientific limitations",
     }
 
     caveats = ScientificCaveats(

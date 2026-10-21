@@ -36,7 +36,7 @@ def get_fr2_pools() -> Fr2PoolsResponse:
             description=(
                 "ESM-2 embedding-nearest hard challenges, built with fold-safe "
                 "training-only centroids. The full union is NOT a valid per-fold "
-                "challenge set — use the fold-specific endpoint."
+                "challenge set. Use the fold-specific endpoint."
             ),
             record_count=counts["c3_union_records"],
             unique_sequence_count=counts["c3_union_records"],
@@ -45,7 +45,7 @@ def get_fr2_pools() -> Fr2PoolsResponse:
             pool="external_control",
             description=(
                 "AnOxPePred assay-inactive peptides under recorded assay conditions. "
-                "Evaluation-only — kept separate from training/challenge pools, and "
+                "Evaluation-only; kept separate from training/challenge pools, and "
                 "not a claim of universal inactivity across all assays/conditions."
             ),
             record_count=counts["external_control_records"],
