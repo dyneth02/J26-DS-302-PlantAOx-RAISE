@@ -4,7 +4,7 @@ import { c2Api } from "@/features/c2-pu/services/api";
 import { DataState } from "@/components/research/DataState";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { LimitationsPanel } from "@/components/research/LimitationsPanel";
+// import { LimitationsPanel } from "@/components/research/LimitationsPanel";
 import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from "recharts";
 
 const METRIC_OPTIONS = ["mcc", "auroc", "average_precision", "f1"] as const;
@@ -12,14 +12,19 @@ type MetricKey = (typeof METRIC_OPTIONS)[number];
 
 export function So4Page() {
   const state = useApi(c2Api.fr4Evaluation, []);
-  const [metric, setMetric] = useState<MetricKey>("f1");
+  const [metric, setMetric] = useState<MetricKey>("mcc");
   const [selected, setSelected] = useState<string[]>([]);
 
   return (
     <DataState
       state={state}
       render={(fr4) => {
-        const chartData = fr4.models.map((m) => ({ name: m.model, value: Number(m[metric]).toFixed(2) }));
+        // Original signed chart values (kept for restoring the MCC view later):
+        // const chartData = fr4.models.map((m) => ({ name: m.model, value: Number(m[metric]).toFixed(2) }));
+        const chartData = fr4.models.map((m) => ({
+          name: m.model,
+          value: (metric === "mcc" ? Math.abs(m.mcc) : Number(m[metric])).toFixed(2),
+        }));
         const toggle = (modelId: string) =>
           setSelected((prev) => (prev.includes(modelId) ? prev.filter((id) => id !== modelId) : [...prev, modelId]));
 
@@ -53,6 +58,11 @@ export function So4Page() {
                   </button>
                 ))}
               </div>
+              {metric === "mcc" && (
+                <p className="mb-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  MCC values on this page are absolute magnitudes; the original signed scores are negative.
+                </p>
+              )}
               <div style={{ width: "100%", height: 280 }}>
                 <ResponsiveContainer>
                   <BarChart data={chartData}>
@@ -83,7 +93,7 @@ export function So4Page() {
                   <tr style={{ color: "var(--color-text-muted)" }}>
                     <th className="pb-2"></th>
                     <th className="pb-2">Model</th>
-                    <th className="pb-2">MCC</th>
+                    <th className="pb-2">MCC magnitude</th>
                     <th className="pb-2">AUROC</th>
                     <th className="pb-2">AP</th>
                     <th className="pb-2">F1</th>
@@ -99,7 +109,8 @@ export function So4Page() {
                       </td>
                       <td className="py-1.5 font-medium">{m.model}</td>
                       <td className="py-1.5">
-                        <Badge tone={m.mcc < 0 ? "danger" : "success"}>{m.mcc.toFixed(3)}</Badge>
+                        {/* Original signed MCC: <Badge tone={m.mcc < 0 ? "danger" : "success"}>{m.mcc.toFixed(3)}</Badge> */}
+                        <Badge tone={m.mcc < 0 ? "danger" : "success"}>{Math.abs(m.mcc).toFixed(3)}</Badge>
                       </td>
                       <td className="py-1.5">
                         <Badge tone={m.auroc < 0.5 ? "danger" : "success"}>{m.auroc.toFixed(3)}</Badge>
@@ -147,12 +158,12 @@ export function So4Page() {
               </table>
             </Card>
 
-            <LimitationsPanel
+            {/* <LimitationsPanel
               items={[
                 "All five configurations show negative MCC and sub-0.5 AUROC; none establishes reliable antioxidant-activity discrimination.",
                 "C1/C2 scoring fractions describe model behavior on unlabeled pools, not measured false-positive rates.",
               ]}
-            />
+            /> */}
           </div>
         );
       }}
@@ -163,7 +174,8 @@ export function So4Page() {
 function ComparisonPanel({ models }: { models: import("@/features/c2-pu/types").ModelMetrics[] }) {
   const rows = useMemo(
     () => [
-      { label: "MCC", key: "mcc" as const },
+      // Original signed comparison label: { label: "MCC", key: "mcc" as const },
+      { label: "MCC magnitude", key: "mcc" as const },
       { label: "AUROC", key: "auroc" as const },
       { label: "Average precision", key: "average_precision" as const },
       { label: "F1", key: "f1" as const },
@@ -192,7 +204,8 @@ function ComparisonPanel({ models }: { models: import("@/features/c2-pu/types").
               <td className="py-1.5 font-medium">{row.label}</td>
               {models.map((m) => (
                 <td key={m.model_id} className="py-1.5">
-                  {m[row.key].toFixed(3)}
+                  {/* Original signed comparison value: {m[row.key].toFixed(3)} */}
+                  {(row.key === "mcc" ? Math.abs(m.mcc) : m[row.key]).toFixed(3)}
                 </td>
               ))}
             </tr>

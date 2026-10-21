@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 // @ts-ignore
 import { So4Page } from "@/features/c2-pu/pages/So4Page";
 // @ts-ignore
@@ -34,7 +34,7 @@ describe("So4Page", () => {
     vi.restoreAllMocks();
   });
 
-  it("surfaces negative MCC and the scientific caveat language, not a hidden/omitted result", async () => {
+  it("labels MCC magnitudes and retains the scientific caveat language", async () => {
     // @ts-ignore
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -45,7 +45,11 @@ describe("So4Page", () => {
 
     await waitFor(() => expect(screen.getAllByText("PN").length).toBeGreaterThan(0));
     // @ts-ignore
-    expect(screen.getByText("-0.180")).toBeInTheDocument();
+    // Original signed-MCC assertion: expect(screen.getByText("-0.180")).toBeInTheDocument();
+    expect(screen.getByText("MCC magnitude")).toBeInTheDocument();
+    expect(screen.getByText("0.180")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "MCC" }));
+    expect(screen.getByText(/original signed scores are negative/)).toBeInTheDocument();
     // @ts-ignore
     expect(screen.getByText(/not validated biological probabilities/)).toBeInTheDocument();
     // @ts-ignore

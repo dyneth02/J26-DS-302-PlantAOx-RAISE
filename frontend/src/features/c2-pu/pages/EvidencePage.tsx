@@ -3,7 +3,7 @@ import { c2Api } from "@/features/c2-pu/services/api";
 import { DataState } from "@/components/research/DataState";
 import { Card, CardHeader, StatTile } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { LimitationsPanel } from "@/components/research/LimitationsPanel";
+// import { LimitationsPanel } from "@/components/research/LimitationsPanel";
 import { MlflowLauncher } from "@/features/c2-pu/components/MlflowLauncher";
 import type { TrackedSourceReport } from "@/features/c2-pu/types";
 
@@ -100,7 +100,7 @@ export function EvidencePage() {
             </Card>
           )}
 
-          <LimitationsPanel title="Open Supervisor Decisions" items={status.pending_decisions} />
+          {/* <LimitationsPanel title="Open Supervisor Decisions" items={status.pending_decisions} /> */}
         </div>
       )}
     />
