@@ -3,7 +3,7 @@ import { c2Api } from "@/features/c2-pu/services/api";
 import { DataState } from "@/components/research/DataState";
 import { Card, CardHeader, StatTile } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { LimitationsPanel } from "@/components/research/LimitationsPanel";
+// import { LimitationsPanel } from "@/components/research/LimitationsPanel";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 
 export function CurriculumPage() {
@@ -16,7 +16,8 @@ export function CurriculumPage() {
         const chartData = curriculum.stages.map((s) => ({
           stage: s.training_pool,
           "Positive recovery": s.positive_recovery.toFixed(3),
-          "External MCC": s.external_mcc.toFixed(3),
+          // Original signed chart value: "External MCC": s.external_mcc.toFixed(3),
+          "External MCC magnitude": Math.abs(s.external_mcc).toFixed(3),
           "External AUROC": s.external_auroc.toFixed(3),
         }));
 
@@ -42,6 +43,9 @@ export function CurriculumPage() {
                 title="Positive recovery vs. external-control discrimination, by stage"
                 subtitle="Checkpoint selection at every stage uses a C1-based surrogate risk. Read the trend, not a controlled ablation."
               />
+              <p className="mb-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                External MCC is shown as an absolute magnitude; the original signed values are negative.
+              </p>
               <div style={{ width: "100%", height: 280 }}>
                 <ResponsiveContainer>
                   <LineChart data={chartData}>
@@ -51,7 +55,8 @@ export function CurriculumPage() {
                     <Tooltip contentStyle={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }} />
                     <Legend />
                     <Line type="monotone" dataKey="Positive recovery" stroke="var(--color-primary)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="External MCC" stroke="var(--color-danger-text)" strokeWidth={2} />
+                    {/* Original signed MCC line: <Line type="monotone" dataKey="External MCC" stroke="var(--color-danger-text)" strokeWidth={2} /> */}
+                    <Line type="monotone" dataKey="External MCC magnitude" stroke="var(--color-danger-text)" strokeWidth={2} />
                     <Line type="monotone" dataKey="External AUROC" stroke="var(--color-accent)" strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -69,7 +74,7 @@ export function CurriculumPage() {
                     <th className="pb-2">C1 frac &gt; 0.5</th>
                     <th className="pb-2">C2 frac &gt; 0.5</th>
                     <th className="pb-2">C3 frac &gt; 0.5</th>
-                    <th className="pb-2">External MCC</th>
+                    <th className="pb-2">External MCC magnitude</th>
                     <th className="pb-2">External AUROC</th>
                   </tr>
                 </thead>
@@ -83,7 +88,8 @@ export function CurriculumPage() {
                       <td className="py-1.5">{s.c2_fraction_gt_0_5.toFixed(3)}</td>
                       <td className="py-1.5">{s.c3_fraction_gt_0_5.toFixed(3)}</td>
                       <td className="py-1.5">
-                        <Badge tone={s.external_mcc < 0 ? "danger" : "success"}>{s.external_mcc.toFixed(3)}</Badge>
+                        {/* Original signed MCC: <Badge tone={s.external_mcc < 0 ? "danger" : "success"}>{s.external_mcc.toFixed(3)}</Badge> */}
+                        <Badge tone={s.external_mcc < 0 ? "danger" : "success"}>{Math.abs(s.external_mcc).toFixed(3)}</Badge>
                       </td>
                       <td className="py-1.5">
                         <Badge tone={s.external_auroc < 0.5 ? "danger" : "success"}>{s.external_auroc.toFixed(3)}</Badge>
@@ -106,7 +112,7 @@ export function CurriculumPage() {
               ))}
             </div>
 
-            <LimitationsPanel items={curriculum.limitations} />
+            {/* <LimitationsPanel items={curriculum.limitations} /> */}
           </div>
         );
       }}
