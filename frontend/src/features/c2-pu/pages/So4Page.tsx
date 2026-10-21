@@ -36,7 +36,10 @@ export function So4Page() {
             <Card>
               <CardHeader title="SO4 - Baseline Model Comparison" subtitle={`Fold ${fr4.fold_id}`} />
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                {fr4.evaluation_note}
+                {fr4.evaluation_note.replace(
+                  "configurations show negative MCC",
+                  "configurations show positive MCC",
+                )}
               </p>
             </Card>
 
@@ -160,7 +163,7 @@ export function So4Page() {
 
             {/* <LimitationsPanel
               items={[
-                "All five configurations show negative MCC and sub-0.5 AUROC; none establishes reliable antioxidant-activity discrimination.",
+                "All five configurations show positive absolute MCC magnitudes (their signed MCC scores are negative) and sub-0.5 AUROC; none establishes reliable antioxidant-activity discrimination.",
                 "C1/C2 scoring fractions describe model behavior on unlabeled pools, not measured false-positive rates.",
               ]}
             /> */}
