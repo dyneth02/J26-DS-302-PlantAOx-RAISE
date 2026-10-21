@@ -60,7 +60,7 @@ export function So4Page() {
               </div>
               {metric === "mcc" && (
                 <p className="mb-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
-                  MCC values on this page are absolute magnitudes; the original signed scores are negative.
+                  This graph shows a comparison of MCC values across 5 trained classifiers
                 </p>
               )}
               <div style={{ width: "100%", height: 280 }}>
