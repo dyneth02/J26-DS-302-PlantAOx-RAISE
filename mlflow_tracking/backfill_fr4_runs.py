@@ -1,18 +1,21 @@
-"""Import the accepted, frozen C2 (PU-AOP) FR4 runs into a local MLflow store.
+"""Import C2 (PU-AOP) training runs into a local MLflow store: the accepted,
+frozen SO4 runs, the one failed curriculum attempt (marked FAILED), and every
+fit from the post-freeze MCC reliability study.
 
 READ-ONLY with respect to the research project: this script only *reads*
 files under data/processed/c2_pu and data/interim/c2_pu, and only *writes*
 inside mlflow_tracking/ (the SQLite store and artifact directory). It never
 imports plantaox, never retrains, and never touches a frozen artifact.
 
-Only the runs the frozen release actually accepted are imported -- each is
-located via the `run_dir` recorded in its accepted summary JSON. The many
-other timestamped run directories under data/interim/c2_pu are test-suite
-reruns, not experiments, and are deliberately ignored.
+Accepted SO4 runs are located via the `run_dir` recorded in each accepted
+summary JSON; MCC-study fits via the `run_dir` column of the study's
+all_evaluations.csv. The many other timestamped directories under
+data/interim/c2_pu are test-suite reruns or aborted pilot attempts, not
+experiments, and are deliberately ignored.
 
-Every imported run is tagged `provenance=backfilled_from_frozen_pp1` and keeps
-its original start time, so the MLflow UI never presents these as runs that
-were tracked live.
+Every imported run carries a `provenance` tag (backfilled_from_frozen_pp1 or
+backfilled_from_mcc_study) and keeps its original start time, so the MLflow
+UI never presents these as runs that were tracked live.
 
 Usage (from the repository root):
     mlflow_tracking/.venv/Scripts/python.exe mlflow_tracking/backfill_fr4_runs.py
@@ -149,6 +152,18 @@ def already_imported(client: MlflowClient, exp_id: str, key: str) -> bool:
     return bool(hits)
 
 
+def imported_keys(client: MlflowClient, exp_id: str) -> set[str]:
+    """One query for all keys -- avoids a search per run when importing 160+ runs."""
+    keys: set[str] = set()
+    token = None
+    while True:
+        page = client.search_runs([exp_id], max_results=1000, page_token=token)
+        keys.update(r.data.tags.get("backfill_key", "") for r in page)
+        token = page.token
+        if not token:
+            return keys
+
+
 def new_run(
     client: MlflowClient,
     exp_id: str,
@@ -192,14 +207,39 @@ def log_metrics(client: MlflowClient, run_id: str, values: dict, timestamp_ms: i
         client.log_batch(run_id, metrics=metrics[i : i + 1000])
 
 
-def log_epoch_history(client: MlflowClient, run_id: str, history: list[dict], start_ms: int, step_key: str = "epoch") -> int:
+_EPOCH_BOOKKEEPING = {"epoch", "stage_epoch", "global_epoch", "stage_index", "is_best"}
+
+
+def _epoch_scalars(row: dict, keys: tuple[str, ...] | None) -> dict[str, float]:
+    if keys is not None:
+        return {k: row[k] for k in keys if row.get(k) is not None}
+    return {
+        k: v
+        for k, v in row.items()
+        if k not in _EPOCH_BOOKKEEPING
+        and isinstance(v, (int, float))
+        and not isinstance(v, bool)
+        and not k.endswith("_count")
+        and not k.startswith("n_")
+    }
+
+
+def log_epoch_history(
+    client: MlflowClient,
+    run_id: str,
+    history: list[dict],
+    start_ms: int,
+    step_key: str = "epoch",
+    keys: tuple[str, ...] | None = EPOCH_METRIC_KEYS,
+) -> int:
+    """``keys=None`` logs every numeric top-level field (minus bookkeeping),
+    for runs whose JSONL schema differs by method."""
     metrics = []
     for index, row in enumerate(history):
         step = int(row.get(step_key, row.get("global_epoch", index)))
         ts = start_ms + step * 1000
-        for key in EPOCH_METRIC_KEYS:
-            if key in row and row[key] is not None:
-                metrics.append(Metric(key, float(row[key]), ts, step))
+        for key, value in _epoch_scalars(row, keys).items():
+            metrics.append(Metric(key, float(value), ts, step))
         if "is_best" in row:
             metrics.append(Metric("is_best_epoch", 1.0 if row["is_best"] else 0.0, ts, step))
     for i in range(0, len(metrics), 1000):
@@ -524,6 +564,203 @@ def import_curriculum(client: MlflowClient) -> int:
     return 4
 
 
+def import_failed_curriculum_attempt(client: MlflowClient) -> int:
+    """The first curriculum attempt crashed (Windows file lock while writing a
+    stage-2 checkpoint) and was rerun as the accepted run. It is recorded as a
+    FAILED run so the tracking history is complete, never as an accepted one."""
+    exp_id = get_experiment(client, EXP_CURRICULUM, "")
+    key = "curriculum::failed_attempt::20261015T103445Z"
+    if already_imported(client, exp_id, key):
+        print(f"  skip {key} (already imported)")
+        return 0
+
+    run_dir = INTERIM / "fr4_curriculum_runs" / "fr4_curriculum_fold0__20261015T103445Z"
+    if not run_dir.exists():
+        print("  failed curriculum attempt not present on this checkout; skipped")
+        return 0
+    manifest = read_json(run_dir / "run_manifest.json")
+    start_ms = run_start_ms(run_dir)
+
+    history: list[dict] = []
+    for stage_dir in ("stage_1_c1", "stage_2_c2", "stage_3_c3"):
+        history.extend(read_jsonl(run_dir / stage_dir / "epoch_metrics.jsonl"))
+
+    run = new_run(
+        client,
+        exp_id,
+        key=key,
+        name="Curriculum attempt (FAILED, not accepted)",
+        start_ms=start_ms,
+        tags={
+            "accepted": "false",
+            "original_run_dir": repo_relative(run_dir),
+            "exception_type": manifest.get("exception_type", ""),
+            "failure_note": "Crashed during stage C2 on a Windows file-permission error while "
+            "replacing checkpoint_last.pt; superseded by the accepted rerun "
+            "fr4_curriculum_fold0__20261015T103556Z.",
+        },
+    )
+    run_id = run.info.run_id
+    epochs = log_epoch_history(client, run_id, history, start_ms, step_key="global_epoch")
+    log_artifact_if_exists(client, run_id, run_dir / "run_manifest.json", "failure")
+    client.set_terminated(run_id, status="FAILED", end_time=start_ms + max(epochs, 1) * 1000)
+    print(f"  imported {key}: {epochs} epochs before failure")
+    return 1
+
+
+def import_mcc_study(client: MlflowClient) -> int:
+    """Post-freeze MCC reliability study: every fit in all_evaluations.csv (both
+    threshold policies), keyed and grouped by method/representation/fold/seed."""
+    study_root = PROCESSED / "mcc_improvement_v1"
+    studies = sorted(p for p in study_root.glob("study__*") if (p / "all_evaluations.csv").exists())
+    if not studies:
+        print("  no completed MCC study found; skipped")
+        return 0
+    study_dir = studies[-1]
+    study_id = study_dir.name
+    exp_name = f"C2 PU-AOP | MCC Reliability Study ({study_id})"
+    exp_id = get_experiment(
+        client,
+        exp_name,
+        "Post-PP1 study (not part of the c2_pp1_freeze_v1 release): five methods x three feature "
+        "representations x five outer GraphPart folds x three seeds, plus prior/batch/recipe "
+        "sensitivity and unlabeled-mixture follow-up runs. The study's own conclusion: the "
+        "negative-MCC issue remains unresolved; no selected method has consistently positive "
+        "MCC across the 15 fold/seed runs. All external metrics are retrospective on the same "
+        "38 assay-inactive controls, not independent validation. Selection and thresholds were "
+        "frozen on development data only. Use 'Group by' tags.method or tags.representation to "
+        "see dependent-run spreads (not confidence intervals).",
+    )
+
+    evaluations = read_csv_rows(study_dir / "all_evaluations.csv")
+    identity_cols = ("method", "representation", "fold", "seed", "prior", "batch", "phase", "selected",
+                     "protocol", "run_dir", "checkpoint_sha256", "runtime_seconds", "n_positive", "n_control")
+    metric_cols = ("threshold", "mcc", "average_precision", "auroc", "precision", "recall", "f1",
+                   "balanced_accuracy", "brier_score_bounded", "specificity", "tp", "tn", "fp", "fn",
+                   "positive_saturation_gt099", "control_saturation_gt099", "E1_recall", "E2_recall")
+    policy_prefix = {"fixed": "eval.fixed", "positive_recovery_heuristic": "eval.heuristic"}
+
+    fits: dict[str, dict] = {}
+    for row in evaluations:
+        fit = fits.setdefault(row["run_dir"], {"identity": {c: row[c] for c in identity_cols}, "metrics": {}})
+        prefix = policy_prefix.get(row["threshold_policy"], f"eval.{row['threshold_policy']}")
+        for col in metric_cols:
+            if row.get(col) not in (None, ""):
+                fit["metrics"][f"{prefix}.{col}"] = row[col]
+
+    done = imported_keys(client, exp_id)
+    created = 0
+    for rel_run_dir, fit in fits.items():
+        ident = fit["identity"]
+        key = f"mcc_study::{study_id}::{Path(rel_run_dir.replace(chr(92), '/')).name}"
+        if key in done:
+            continue
+        run_dir = REPO_ROOT / rel_run_dir.replace("\\", "/")
+        start_ms = run_start_ms(run_dir)
+
+        checkpoint = run_dir / "checkpoint_best.pt"
+        if not checkpoint.exists():
+            checkpoint = run_dir / "checkpoint_best.joblib"
+        if checkpoint.exists():
+            integrity = "verified" if sha256_file(checkpoint) == ident["checkpoint_sha256"] else "MISMATCH"
+        else:
+            integrity = "missing"
+
+        is_selected = ident["selected"].strip().lower() == "true"
+        run = new_run(
+            client,
+            exp_id,
+            key=key,
+            name=f"{ident['method']} | {ident['representation']} | f{ident['fold']} s{ident['seed']}"
+            + ("" if ident["phase"] == "main" else f" | {ident['phase']}"),
+            start_ms=start_ms,
+            tags={
+                "provenance": "backfilled_from_mcc_study",
+                "freeze_id": "n/a (post-freeze study)",
+                "release_tag": "n/a",
+                "fold_id": ident["fold"],
+                "study_id": study_id,
+                "method": ident["method"],
+                "representation": ident["representation"],
+                "seed": ident["seed"],
+                "phase": ident["phase"],
+                "selected": "true" if is_selected else "false",
+                "protocol": ident["protocol"],
+                "original_run_dir": repo_relative(run_dir),
+                "checkpoint_sha256": ident["checkpoint_sha256"],
+                "checkpoint_integrity": integrity,
+                "mlflow.note.content": "Retrospective assay-supported comparison reusing the original 38 "
+                "controls; not independent validation. 'selected' means chosen by fold-specific inner "
+                "validation before any external scoring.",
+            },
+        )
+        run_id = run.info.run_id
+
+        params = {
+            "method": ident["method"],
+            "representation": ident["representation"],
+            "fold": ident["fold"],
+            "seed": ident["seed"],
+            "prior": ident["prior"],
+            "batch_size": ident["batch"],
+            "phase": ident["phase"],
+        }
+        config_path = run_dir / "resolved_config.json"
+        if config_path.exists():
+            config = read_json(config_path)
+            for k in ("hidden_dims", "activation", "optimizer", "learning_rate", "weight_decay",
+                      "max_epochs", "validation_fraction", "feature_dim", "git_revision"):
+                if k in config:
+                    params[k] = config[k]
+        log_params(client, run_id, params)
+
+        end_ms = start_ms + int(float(ident["runtime_seconds"] or 1) * 1000)
+        extra = {"runtime_seconds": ident["runtime_seconds"], "n_positive": ident["n_positive"],
+                 "n_control": ident["n_control"]}
+        log_metrics(client, run_id, {**fit["metrics"], **extra}, end_ms)
+        log_epoch_history(client, run_id, read_jsonl(run_dir / "epoch_metrics.jsonl"), start_ms, keys=None)
+        log_artifact_if_exists(client, run_id, run_dir / "learning_curve.svg", "plots")
+        finish(client, run_id, end_ms)
+        created += 1
+
+    # One summary run carries the study's own reports and figures, so they are
+    # browsable next to the fits without being attached 161 times.
+    summary_key = f"mcc_study::{study_id}::summary"
+    if summary_key not in done:
+        run = new_run(
+            client,
+            exp_id,
+            key=summary_key,
+            name="Study reports and figures",
+            start_ms=run_start_ms(study_dir),
+            tags={
+                "provenance": "backfilled_from_mcc_study",
+                "freeze_id": "n/a (post-freeze study)",
+                "release_tag": "n/a",
+                "fold_id": "all",
+                "study_id": study_id,
+                "run_type": "study_summary",
+                "mlflow.note.content": "Container for the study's own reports and plots. Not a model fit; "
+                "exclude it (tags.run_type) when grouping fits.",
+            },
+        )
+        for name in ("FINAL_SCIENTIFIC_REPORT.md", "PP1_PRESENTATION_SUMMARY.md", "ROOT_CAUSE_DIAGNOSTIC.md",
+                     "THRESHOLD_INVESTIGATION.md", "SOURCE_BIAS_AND_ASSAY_MISMATCH.md",
+                     "FOLLOWUP_UNLABELED_MIXTURE_REPORT.md", "REPRODUCIBILITY_AND_TEST_REPORT.md",
+                     "all_evaluations.csv", "final_comparison_fold0_seed42.csv", "fold_variability.csv",
+                     "seed_variability.csv", "feature_comparison_five_folds_seed42.csv",
+                     "baseline_reproduction.json", "selection_frozen.json"):
+            log_artifact_if_exists(client, run.info.run_id, study_dir / name, "reports")
+        plots_dir = study_dir / "plots"
+        if plots_dir.exists():
+            client.log_artifacts(run.info.run_id, str(plots_dir), "plots")
+        finish(client, run.info.run_id, run_start_ms(study_dir) + 1000)
+        created += 1
+
+    print(f"  imported {created} new runs from {study_id} ({len(fits)} fits in all_evaluations.csv)")
+    return created
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument(
@@ -550,7 +787,13 @@ def main() -> None:
     n_prior = import_prior_sensitivity(client)
     print("Curriculum:")
     n_curr = import_curriculum(client)
-    print(f"Done. New runs created: baselines={n_base}, priors={n_prior}, curriculum={n_curr}")
+    n_curr += import_failed_curriculum_attempt(client)
+    print("MCC reliability study:")
+    n_study = import_mcc_study(client)
+    print(
+        f"Done. New runs created: baselines={n_base}, priors={n_prior}, "
+        f"curriculum={n_curr}, mcc_study={n_study}"
+    )
     print("Open the UI with:")
     print(f'  mlflow_tracking/.venv/Scripts/mlflow.exe ui --backend-store-uri "{TRACKING_URI}" --port 5000')
 

@@ -1,8 +1,9 @@
-# C2 PU-AOP: MLflow experiment view (SO4)
+# C2 PU-AOP: MLflow experiment view
 
-A separate, read-only MLflow view of the accepted SO4 runs from the frozen
-`c2_pp1_freeze_v1` release. It does not retrain anything, does not touch
-`data/` or `src/`, and is not connected to the React/FastAPI dashboard.
+A separate, read-only MLflow view of C2 training runs: the accepted SO4 runs
+from the frozen `c2_pp1_freeze_v1` release, plus the post-freeze MCC
+reliability study. It does not retrain anything, does not touch `data/` or
+`src/`, and is not connected to the React/FastAPI dashboard.
 
 ## What is imported
 
@@ -10,7 +11,13 @@ A separate, read-only MLflow view of the accepted SO4 runs from the frozen
 |---|---|
 | SO4 Baseline Comparison | M1 PN, M2 direct-clamped nnPU, M3 corrective nnPU, M4 Two-Step PU, M5 PU-Bagging |
 | SO4 nnPU Prior Sensitivity | pi = 0.05, 0.10 (accepted), 0.20 |
-| SO4 Evidence-Weighted Curriculum | parent run + nested stages C1, C2, C3 |
+| SO4 Evidence-Weighted Curriculum | parent run + nested stages C1, C2, C3; plus the first attempt, which crashed on a Windows file lock and is shown as FAILED (not accepted) |
+| MCC Reliability Study (`study__...`) | all 161 fits from `all_evaluations.csv` (5 methods x 3 representations x 5 folds x 3 seeds, plus sensitivity and follow-up runs) and one "Study reports and figures" run holding the study's reports and plots |
+
+The MCC study is post-freeze research, not part of the PP1 release; its runs
+are tagged `provenance=backfilled_from_mcc_study` and both threshold policies
+are logged (`eval.fixed.*`, `eval.heuristic.*`). Its external metrics reuse the
+same 38 controls, so they are retrospective, not independent validation.
 
 Each run has its hyperparameters, per-epoch training curves (neural models
 only; Two-Step PU and PU-Bagging are single-fit), the accepted external-control
@@ -51,3 +58,12 @@ metrics and configs); see `C2_PP1_HANDOVER.md` for recovering them.
   will not work offline.
 - In the curriculum experiment, the parent run's `stage_trajectory.*` charts
   show C1, C2, C3 as steps 1-3 on a single chart.
+- In the MCC study, paste this into the run search box to keep only the 75
+  fits chosen by inner validation (excludes sensitivity runs and the summary run):
+  `tags.selected = 'true' and tags.phase = 'main'`
+  Then use **Group by** -> `method` (or `representation`) and search the charts
+  for `eval.fixed.mcc`. The grouped values reproduce the five-folds x
+  three-seeds table in `FINAL_SCIENTIFIC_REPORT.md`; the spread is across
+  dependent runs, not a confidence interval.
+- The UI loads runs 100 at a time and charts only the visible (eye icon) runs,
+  so filter before comparing large groups.
