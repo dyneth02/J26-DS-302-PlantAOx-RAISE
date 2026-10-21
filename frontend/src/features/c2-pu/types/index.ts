@@ -127,6 +127,14 @@ export interface CurriculumResponse {
   limitations: string[];
 }
 
+export interface TrackedSourceReport {
+  label: string;
+  category: string;
+  path: string;
+  sha256: string | null;
+  status: "verified" | "modified" | "present" | "missing";
+}
+
 export interface ArtifactStatusResponse {
   freeze_id: string;
   release_tag: string;
@@ -136,4 +144,5 @@ export interface ArtifactStatusResponse {
   missing_count: number;
   missing_paths: string[];
   pending_decisions: string[];
+  tracked_source_reports: TrackedSourceReport[];
 }
