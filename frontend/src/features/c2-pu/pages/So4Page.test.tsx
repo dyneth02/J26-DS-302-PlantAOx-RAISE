@@ -7,7 +7,7 @@ import type { Fr4EvaluationResponse } from "@/features/c2-pu/types";
 
 const MOCK_RESPONSE: Fr4EvaluationResponse = {
   fold_id: 0,
-  evaluation_note: "Scores are uncalibrated model outputs, not validated biological probabilities.",
+  evaluation_note: "Scores are uncalibrated model outputs, not validated biological probabilities. All five configurations show negative MCC and sub-0.5 AUROC on this evaluation.",
   challenge_behavior_note: "it is not a measured false-positive rate.",
   challenge_score_fractions: { M1: { C1: 0.06, C2: 0.33 } },
   models: [
@@ -49,7 +49,7 @@ describe("So4Page", () => {
     expect(screen.getByText("MCC magnitude")).toBeInTheDocument();
     expect(screen.getByText("0.180")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "MCC" }));
-    expect(screen.getByText(/original signed scores are negative/)).toBeInTheDocument();
+    expect(screen.getByText(/positive absolute MCC magnitudes \(the signed MCC scores are negative\)/)).toBeInTheDocument();
     // @ts-ignore
     expect(screen.getByText(/not validated biological probabilities/)).toBeInTheDocument();
     // @ts-ignore
