@@ -5,19 +5,22 @@ export function LimitationsPanel({ title = "Known limitations", items }: { title
   if (items.length === 0) return null;
   return (
     <Card style={{ background: "var(--color-warning-bg)", borderColor: "var(--color-warning-border)" }}>
-      <div className="flex items-start gap-3">
-        <AlertTriangle size={18} style={{ color: "var(--color-warning-text)" }} className="mt-0.5 shrink-0" />
-        <div>
-          <p className="text-sm font-semibold" style={{ color: "var(--color-warning-text)" }}>
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-center gap-3">
+          <AlertTriangle size={18} style={{ color: "var(--color-warning-text)" }} className="shrink-0" />
+          <span className="flex-1 text-sm font-semibold" style={{ color: "var(--color-warning-text)" }}>
             {title}
-          </p>
-          <ul className="mt-2 list-disc space-y-1 pl-4 text-sm" style={{ color: "var(--color-warning-text)" }}>
-            {items.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
+          </span>
+          <span className="text-xs transition-transform group-open:rotate-90" style={{ color: "var(--color-warning-text)" }} aria-hidden>
+            ▸
+          </span>
+        </summary>
+        <ul className="mt-3 list-disc space-y-1 pl-9 text-sm" style={{ color: "var(--color-warning-text)" }}>
+          {items.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </details>
     </Card>
   );
 }
