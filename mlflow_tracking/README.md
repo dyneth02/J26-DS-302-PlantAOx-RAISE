@@ -39,10 +39,12 @@ uv pip install --python mlflow_tracking\.venv\Scripts\python.exe -r mlflow_track
 
 ```powershell
 mlflow_tracking\.venv\Scripts\python.exe mlflow_tracking\backfill_fr4_runs.py
-mlflow_tracking\.venv\Scripts\mlflow.exe ui --backend-store-uri sqlite:///mlflow_tracking/mlflow.db --port 5000 --workers 1
+mlflow_tracking\.venv\Scripts\mlflow.exe ui --backend-store-uri sqlite:///mlflow_tracking/mlflow.db --port 5003 --workers 1
 ```
 
-Open http://127.0.0.1:5000. Re-running the import is safe (already-imported
+Open http://127.0.0.1:5003, or click "Open MLflow UI" on the C2 dashboard's Evidence page
+(`/c2/evidence`) -- it checks whether MLflow is reachable and opens it in a new tab, or shows
+this command to copy if it isn't running yet. Re-running the import is safe (already-imported
 runs are skipped); add `--rebuild` to wipe and re-import. `--workers 1` avoids
 a Windows socket error in MLflow's default multi-worker mode.
 

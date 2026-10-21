@@ -4,6 +4,7 @@ import { DataState } from "@/components/research/DataState";
 import { Card, CardHeader, StatTile } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { LimitationsPanel } from "@/components/research/LimitationsPanel";
+import { MlflowLauncher } from "@/features/c2-pu/components/MlflowLauncher";
 import type { TrackedSourceReport } from "@/features/c2-pu/types";
 
 const STATUS_BADGE: Record<TrackedSourceReport["status"], { tone: "success" | "danger" | "neutral"; label: string }> = {
@@ -81,6 +82,11 @@ export function EvidencePage() {
                 })}
               </tbody>
             </table>
+          </Card>
+
+          <Card>
+            <CardHeader title="Experiment Tracking (MLflow)" />
+            <MlflowLauncher />
           </Card>
 
           {status.missing_count > 0 && (
