@@ -77,7 +77,8 @@ function LookupResult({ result }: { result: LookupResponse }) {
   );
 }
 
-export function LookupPage() {
+/** The search box and its result; shown on its own page and inside the map & lookup page. */
+export function LookupSearch() {
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");
 

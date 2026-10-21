@@ -2,12 +2,10 @@ import { NavLink } from "react-router-dom";
 
 const TABS = [
   { to: "/c1", label: "Overview", end: true },
-  { to: "/c1/dataset", label: "Step 1 - Benchmark" },
-  { to: "/c1/embedding", label: "Embeddings & contrastive learning" },
-  { to: "/c1/retrieval", label: "Steps 4-6 - Retrieval" },
-  { to: "/c1/probe", label: "Step 5 - Probe" },
-  { to: "/c1/confounds", label: "Step 8 - Confounds" },
-  { to: "/c1/lookup", label: "Peptide lookup" },
+  { to: "/c1/dataset", label: "Benchmark & leakage" },
+  { to: "/c1/retrieval", label: "Retrieval results" },
+  { to: "/c1/confounds", label: "Shortcut checks" },
+  { to: "/c1/map", label: "3-D map & lookup" },
   { to: "/c1/evidence", label: "Evidence" },
 ];
 

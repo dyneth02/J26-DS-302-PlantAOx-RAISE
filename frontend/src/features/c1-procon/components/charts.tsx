@@ -473,27 +473,30 @@ const CALLOUT: Record<Tone, { bg: string; border: string; text: string; icon: st
   bad: { bg: "var(--color-danger-bg)", border: "var(--color-danger-border)", text: "var(--color-danger-text)", icon: "✕" },
 };
 
-/** Plain-language "what this shows" box that sits above or below a chart. */
-export function Callout({ title, tone = "info", children }: { title: string; tone?: Tone; children: ReactNode }) {
+/** Plain-language note that opens on click. Closed by default so the page stays short in a demo. */
+export function Callout({ title, tone = "info", children, defaultOpen = false }: { title: string; tone?: Tone; children: ReactNode; defaultOpen?: boolean }) {
   const t = CALLOUT[tone];
   return (
-    <div className="flex gap-3 rounded-xl border p-4" style={{ background: t.bg, borderColor: t.border }}>
-      <span
-        className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-        style={{ background: t.border === "var(--color-primary)" ? "var(--color-primary)" : t.text }}
-        aria-hidden
-      >
-        {t.icon}
-      </span>
-      <div>
-        <p className="text-sm font-semibold" style={{ color: t.text }}>
+    <details className="group rounded-xl border p-4" style={{ background: t.bg, borderColor: t.border }} open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center gap-3">
+        <span
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+          style={{ background: t.border === "var(--color-primary)" ? "var(--color-primary)" : t.text }}
+          aria-hidden
+        >
+          {t.icon}
+        </span>
+        <span className="flex-1 text-sm font-semibold" style={{ color: t.text }}>
           {title}
-        </p>
-        <div className="mt-1 text-sm" style={{ color: tone === "info" ? "var(--color-text-muted)" : t.text }}>
-          {children}
-        </div>
+        </span>
+        <span className="text-xs transition-transform group-open:rotate-90" style={{ color: t.text }} aria-hidden>
+          ▸
+        </span>
+      </summary>
+      <div className="mt-2 pl-9 text-sm" style={{ color: tone === "info" ? "var(--color-text-muted)" : t.text }}>
+        {children}
       </div>
-    </div>
+    </details>
   );
 }
 

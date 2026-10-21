@@ -103,10 +103,10 @@ function PullTogetherIllustration() {
   );
 }
 
-function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
+export function EmbeddingBody({ data, mode = "full" }: { data: EmbeddingResponse; mode?: "full" | "map" }) {
   const [space, setSpace] = useState<SpaceKey>("esm2");
   const [colorBy, setColorBy] = useState<ColorBy>("class");
-  const [dimension, setDimension] = useState<Dimension>("2d");
+  const [dimension, setDimension] = useState<Dimension>(mode === "map" ? "3d" : "2d");
   const [hiddenGroups, setHiddenGroups] = useState<ReadonlySet<string>>(new Set());
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -185,6 +185,7 @@ function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
 
   return (
     <div className="space-y-6">
+      {mode === "full" && (
       <Card>
         <CardHeader
           title="Embeddings and contrastive learning - MC vs FRS"
@@ -216,7 +217,9 @@ function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
           </div>
         </div>
       </Card>
+      )}
 
+      {mode === "full" && (
       <Card>
         <CardHeader title="What the model is told to pull together" subtitle={`Strict mode training pairs; only positive pairs are used, no confirmed-negative peptides.`} />
         <HBarChart items={pairItems} max={Math.max(...pairItems.map((p) => p.value)) * 1.15} decimals={0} labelWidth={240} ariaLabel="Number of training pairs per pair set" />
@@ -237,6 +240,7 @@ function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
           ))}
         </div>
       </Card>
+      )}
 
       <Card>
         <CardHeader
@@ -287,6 +291,8 @@ function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
         </div>
       </Card>
 
+      {mode === "full" && (
+      <>
       <Card>
         <CardHeader
           title="Do MC peptides sit together?"
@@ -347,6 +353,8 @@ function EmbeddingBody({ data }: { data: EmbeddingResponse }) {
           </li>
         </ul>
       </Card>
+      </>
+      )}
     </div>
   );
 }

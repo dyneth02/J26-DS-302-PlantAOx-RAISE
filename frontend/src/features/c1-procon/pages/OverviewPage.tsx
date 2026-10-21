@@ -14,19 +14,6 @@ const FINDING_BADGES: ["warning" | "danger" | "neutral" | "success", string][] =
   ["warning", "no extra signal"],
 ];
 
-const GLOSSARY: [string, string][] = [
-  ["Peptide", "A short chain of amino acids, a small piece of a protein (mostly 3-10 letters here)."],
-  ["FRS / MC", "Two ways an antioxidant peptide can work: free-radical scavenging (neutralises harmful molecules) or metal chelation (grabs metal ions such as iron)."],
-  ["GEN", "Listed as antioxidant in a database, but the mechanism is not established. It does not mean inactive."],
-  ["ESM-2", "A pretrained protein language model. It turns a peptide into 1,280 numbers (an embedding). Used frozen, never retrained."],
-  ["Contrastive learning", "Training that pulls similar items together. Here: peptides of the same mechanism should become neighbours."],
-  ["Retrieval / AP", "Given one peptide, rank all others by similarity. Average precision (AP) scores how early the right ones appear; a random ranking scores 0.177."],
-  ["AAC-20", "Amino-acid composition: the share of each of the 20 amino acids in a peptide. The simplest baseline."],
-  ["AUROC", "Score from 0 to 1 for a classifier: 0.5 is random guessing, 1.0 is perfect."],
-  ["Leak / homology group", "Near-identical peptides on both sides of a split let a model memorise. Similar peptides are grouped (573 groups) and each group stays on one side."],
-  ["Collapse", "The model puts almost every peptide at nearly the same point, so it cannot tell them apart."],
-];
-
 export function OverviewPage() {
   const state = useApi(c1Api.overview, []);
 
@@ -63,7 +50,7 @@ export function OverviewPage() {
             ))}
           </div>
 
-          <Callout title="The one-sentence story" tone="info">
+          <Callout title="The one-sentence story" tone="info" defaultOpen>
             A clean, leak-checked benchmark was built, and a trained contrastive model was compared honestly with simple baselines. The simple baselines win, so the main
             contribution is the benchmark and the evaluation that shows why; the model itself still needs improvement.
           </Callout>
@@ -102,20 +89,6 @@ export function OverviewPage() {
                 </li>
               ))}
             </ol>
-          </Card>
-
-          <Card>
-            <CardHeader title="Plain-words glossary" subtitle="Terms used on the pages of this dashboard." />
-            <dl className="grid gap-x-8 gap-y-3 md:grid-cols-2">
-              {GLOSSARY.map(([term, text]) => (
-                <div key={term}>
-                  <dt className="text-sm font-semibold">{term}</dt>
-                  <dd className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                    {text}
-                  </dd>
-                </div>
-              ))}
-            </dl>
           </Card>
 
           <LimitationsPanel items={overview.caveats.known_limitations} />
