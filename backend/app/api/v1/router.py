@@ -10,12 +10,14 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from backend.app.api.v1 import health
-from backend.app.api.v1.c4_screen.router import router as c4_screen_router
 from backend.app.api.v1.c1_procon.router import router as c1_procon_router
 from backend.app.api.v1.c2_pu.router import router as c2_pu_router
+from backend.app.api.v1.c3_aop_bcs.router import router as c3_aop_bcs_router
+from backend.app.api.v1.c4_screen.router import router as c4_screen_router
 
 router = APIRouter(prefix="/api/v1")
 router.include_router(health.router)
 router.include_router(c1_procon_router)
 router.include_router(c2_pu_router)
+router.include_router(c3_aop_bcs_router)
 router.include_router(c4_screen_router)

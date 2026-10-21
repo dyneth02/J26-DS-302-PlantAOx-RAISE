@@ -227,8 +227,67 @@
 - Ran the complete C3 regression suite: 154 tests and all 147 subtests pass; five older byte-reproducibility assertions remain failing only because committed Task 3.19–3.22/3.33 text artifacts use CRLF while their generators emit LF. These pre-existing line-ending mismatches are unrelated to the dashboard/backend integration and their versioned artifacts were not rewritten.
 - Confirmed all tracked implementation changes remain in paths containing `c3_aop_bcs`; the reusable C3 router is ready for later shared-router registration, which remains outside the strict C3-only edit scope.
 
-## Next task — Task 3.37: Update implementation documentation
+## Completed work — Task 3.46: Rebuild the C3 frontend using the shared React application structure
 
-**Status:** Not started.
+**Status:** Completed and verified on 2026-10-20.
 
-Next work: update the architecture diagram and main implementation documentation for the actual repository structure, dataset preparation, P1/P2/P3 rules, predictor-integration status, current limitations, API/dashboard architecture, and general configuration/usage instructions.
+- Re-read the C3 task/status records and completed a read-only audit of the shared frontend, including its React/Vite configuration, application router, feature routes, layout and research components, API utilities, styling tokens, responsive behavior, and tests.
+- Replaced the C3 legacy plain-JavaScript page with React 19, TypeScript, Vite 8, Tailwind CSS 4, and React Router while keeping every implementation file under `c3_aop_bcs`.
+- Reproduced the shared directory conventions with `app`, reusable `components/layout`, `components/ui`, `components/research`, `features/c3-aop-bcs`, `lib/api`, and `styles` modules.
+- Implemented typed Overview, Dataset, Perturbations, Pilot metrics, Variant explorer, Predictors, and Evidence routes in the same dashboard shell used by the other components.
+- Added shared-style header, sidebar, component navigation, cards, badges, stat tiles, loading/error/empty states, limitations panels, responsive desktop/mobile behavior, and light/dark theme handling.
+- Connected the React service layer to the existing `/api/v1/c3` evidence contract through the Vite proxy; retained visible connecting, connected, and unavailable states.
+- Converted the C3 FastAPI process to an API-only service on port 4314 and added a cross-platform one-command launcher for the API plus Vite frontend on port 4313.
+- Preserved the global and local software-testing warnings. Dummy IR, FSR, BCS, PFR, scores, and DeltaScores remain explicitly excluded from scientific interpretation.
+- Added four frontend component/router/API-state tests; all four pass.
+- Confirmed the TypeScript production build succeeds and transforms 1,960 modules; confirmed all five focused backend contract tests pass.
+- Verified the live Overview, Pilot metrics, Perturbations, and interactive Variant explorer routes against the real C3 API, including four figure responses, P3 seed metadata, responsive narrow/desktop layouts, and the visible `Backend connected` state. Browser console inspection returned no warnings or errors.
+- Confirmed the shared root frontend, shared backend, and every other component remained unchanged.
+
+## Completed — Task 3.47: Integrate AOP-BCS into the shared repository frontend
+
+**Status:** Completed and verified on 2026-10-21.
+
+- Re-read the C3 tracking records and the shared-platform integration guide.
+- Audited the root React/Vite frontend, component registry, router, shell/sidebar/header, shared research UI, API utilities, existing C1/C2/C4 feature modules, tests, and backend proxy behavior.
+- Confirmed the intended shared structure is `frontend/src/features/c3-aop-bcs/` with one route registration and one C3 registry update.
+- Added the C3 feature-local types, API service, hook, shell, navigation, scientific-warning boundary, seven dashboard pages, route module, styling, and tests under `frontend/src/features/c3-aop-bcs/`.
+- Registered `/c3`, marked only C3 as implemented, and added the narrow `/api/v1/c3` development proxy plus `npm run dev:c3` launcher.
+- Reused the shared shell, navigation, theme, cards, badges, data states, limitation panel, and API utilities while keeping every C1, C2, and C4 feature file unchanged.
+- Preserved the stored-example-only Variant Explorer decision and the testing-only scientific boundary.
+- Verified all 21 shared-frontend tests across 11 test files, the production frontend build, and all 5 focused C3 backend tests.
+- Verified the live shared `/c3` dashboard, all six subroutes, proxied API health/data, stored P1/P2/P3 examples, and browser console with no warnings or errors.
+- Committed the implementation as `65cbcdc` (`feat(c3): integrate AOP-BCS into shared frontend`).
+
+## Completed — Task 3.48: Integrate AOP-BCS into the shared repository backend
+
+**Status:** Completed and verified on 2026-10-21.
+
+- Audited the shared FastAPI composition root, schemas, services, component routers, error contracts, platform registry, and backend tests without changing C1, C2, or C4 implementation files.
+- Added typed C3 schemas, a C3 service adapter, and C3 API routes under the same `backend/app/` structure used by the other components.
+- Reused `build_dashboard_payload()` as the single evidence-validation source instead of duplicating C3 research or artifact logic.
+- Registered health, dashboard, seven section, and allow-listed SVG figure endpoints under `/api/v1/c3`.
+- Marked C3 as `implemented` with base path `/api/v1/c3` in the shared component registry.
+- Mapped missing or invalid C3 evidence to the shared `503 artifact_unavailable` contract and unknown figures to the shared `404 not_found` contract.
+- Updated `npm run dev:c3` to launch the repository-level backend on port `8000` and the shared frontend on port `3000`; all `/api` requests now use the common Vite proxy.
+- Resolved pre-existing merge markers in the shared platform registry test while updating its expected C3 integration state.
+- Verified the complete shared-backend suite: 37 passed, 1 C4 artifact-dependent test skipped, and only the existing Starlette/httpx deprecation warning remained.
+- Verified all 21 shared-frontend tests, the production frontend build, the live shared API, the frontend proxy, the `/c3` dashboard, and a browser console with no warnings or errors.
+- Committed the implementation as `47d3aab` (`feat(c3): integrate AOP-BCS into shared backend`).
+
+## Completed — Task 3.49: Replace static C3 metric images with interactive dashboard charts
+
+**Status:** Completed and verified on 2026-10-21.
+
+- Audited the native Recharts, shared Card, tooltip, legend, axis, responsive-container, and loading patterns used by the other component dashboards without changing their implementation files.
+- Replaced the four static SVG image embeds on the C3 Pilot metrics page with responsive native charts: P1/P2/P3 absolute-DeltaScore distributions, original-versus-perturbed score examples, the IR/FSR/BCS/PFR metric summary, and prediction-flip comparisons.
+- Built all chart values from the authoritative 449-row DeltaScore CSV and the validated C3 reports; added source path, SHA-256 checksum, and row-count provenance to the dashboard response and visible UI.
+- Added typed chart contracts across the C3 evidence builder, shared FastAPI schema/service, and shared React feature so the browser receives structured data instead of treating generated figures as screenshots.
+- Preserved the visible `PP1 PILOT - DUMMY SOFTWARE TEST ONLY - NOT SCIENTIFIC RESULTS` boundary throughout the page and retained the existing versioned SVG files as provenance artifacts rather than frontend charts.
+- Added backend assertions for chart reconciliation and a frontend test confirming all four accessible charts render without any `img` element.
+- Verified the complete shared backend suite: 37 passed and 1 artifact-dependent test skipped; verified the complete shared frontend suite: 22 tests across 12 files passed; verified the production frontend build succeeds.
+- Verified the live `/c3/metrics` page with the real shared backend: all four charts render, the browser console is clean, and the 390-pixel mobile layout has no horizontal overflow.
+- Confirmed no Component 1, 2, or 4 implementation file was modified.
+- Committed the implementation as `803347b` (`feat(c3): replace static metric figures with interactive charts`).
+
+Next work: resume Task 3.37 implementation-documentation updates when requested.

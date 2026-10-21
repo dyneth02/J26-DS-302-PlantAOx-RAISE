@@ -7,19 +7,19 @@ the repository-wide backend or another component's files.
 
 from __future__ import annotations
 
+import csv
 from hashlib import sha256
 import json
+import math
 from pathlib import Path
 from typing import Any, Final, Literal
 
 from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 
 
 COMPONENT_DIRECTORY: Final = Path(__file__).resolve().parent
 REPOSITORY_ROOT: Final = COMPONENT_DIRECTORY.parents[2]
-FRONTEND_DIRECTORY: Final = COMPONENT_DIRECTORY / "frontend"
 
 SOURCE_PATHS: Final[dict[str, str]] = {
     "cleaning": "data/processed/c3_aop_bcs/sequence_cleaning_report_v1.json",
@@ -43,6 +43,7 @@ FIGURE_PATHS: Final[tuple[str, ...]] = (
     "data/processed/c3_aop_bcs/figures/pp1_pilot_prediction_flip_comparison_v1.svg",
 )
 FIGURE_LOOKUP: Final = {Path(path).name: path for path in FIGURE_PATHS}
+DELTA_SCORE_PATH: Final = "data/processed/c3_aop_bcs/pp1_pilot_dummy_delta_scores_v1.csv"
 
 DashboardSection = Literal[
     "overview", "dataset", "perturbations", "metrics", "explorer", "predictors", "evidence"
@@ -79,6 +80,97 @@ def _checksum(relative_path: str, repository_root: Path) -> str:
         return sha256(path.read_bytes()).hexdigest()
     except FileNotFoundError as error:
         raise DashboardArtifactError(f"Required C3 artifact is missing: {relative_path}") from error
+
+
+def _build_chart_data(
+    source: dict[str, dict[str, Any]], repository_root: Path
+) -> dict[str, Any]:
+    """Create deterministic, chart-ready summaries from authoritative pilot rows."""
+
+    path = _repository_path(DELTA_SCORE_PATH, repository_root)
+    try:
+        with path.open("r", encoding="utf-8", newline="") as csv_file:
+            rows = list(csv.DictReader(csv_file))
+    except OSError as error:
+        raise DashboardArtifactError(
+            f"Required C3 artifact is missing or unreadable: {DELTA_SCORE_PATH}"
+        ) from error
+
+    expected_count = source["pfr"]["pfr"]["overall"]["perturbation_count"]
+    if len(rows) != expected_count:
+        raise DashboardArtifactError("DeltaScore chart rows do not match the PFR denominator.")
+
+    kinds = ("P1", "P2", "P3")
+    counts = {kind: [0] * 10 for kind in kinds}
+    totals = {kind: 0 for kind in kinds}
+    for row in rows:
+        kind = row.get("perturbation_type")
+        if kind not in counts or row.get("software_testing_only") != "true":
+            raise DashboardArtifactError("DeltaScore chart rows failed classification validation.")
+        try:
+            value = float(row["absolute_delta_score"])
+        except (KeyError, TypeError, ValueError) as error:
+            raise DashboardArtifactError("DeltaScore chart rows contain an invalid value.") from error
+        if not math.isfinite(value) or value < 0:
+            raise DashboardArtifactError("Absolute DeltaScore values must be finite and non-negative.")
+        bin_index = min(int(value / 0.05), 9)
+        counts[kind][bin_index] += 1
+        totals[kind] += 1
+
+    expected_by_type = source["pfr"]["pfr"]["by_perturbation_type"]
+    if any(totals[kind] != expected_by_type[kind]["perturbation_count"] for kind in kinds):
+        raise DashboardArtifactError("DeltaScore chart type counts do not match the PFR report.")
+
+    distribution = []
+    for index in range(10):
+        start, end = index * 0.05, (index + 1) * 0.05
+        distribution.append(
+            {
+                "label": f"{start:.2f}–{end:.2f}",
+                "binStart": start,
+                "binEnd": end,
+                "binMidpoint": (start + end) / 2,
+                **{
+                    kind: counts[kind][index] / totals[kind]
+                    for kind in kinds
+                },
+            }
+        )
+
+    metrics = source["bcs"]
+    pfr = source["pfr"]["pfr"]
+    return {
+        "absoluteDeltaDistribution": distribution,
+        "scoreExamples": [
+            {
+                "label": f'{row["perturbation_type"]}: {row["mutation"]}',
+                "perturbationType": row["perturbation_type"],
+                "original": row["original_score"],
+                "perturbed": row["perturbed_score"],
+            }
+            for row in source["inspection"]["examples"]
+        ],
+        "metricSummary": [
+            {"metric": "IR", "value": metrics["components"]["invariance_rate"]["value"]},
+            {"metric": "FSR", "value": metrics["components"]["false_sensitivity_rate"]["value"]},
+            {"metric": "BCS", "value": metrics["result"]["preliminary_bcs"]},
+            {"metric": "PFR", "value": pfr["overall"]["prediction_flip_rate"]},
+        ],
+        "predictionFlips": [
+            {
+                "type": kind,
+                "rate": expected_by_type[kind]["prediction_flip_rate"],
+                "flips": expected_by_type[kind]["flip_count"],
+                "total": expected_by_type[kind]["perturbation_count"],
+            }
+            for kind in kinds
+        ],
+        "source": {
+            "path": DELTA_SCORE_PATH,
+            "sha256": _checksum(DELTA_SCORE_PATH, repository_root),
+            "recordCount": len(rows),
+        },
+    }
 
 
 def _validate_sources(source: dict[str, dict[str, Any]]) -> None:
@@ -225,6 +317,7 @@ def build_dashboard_payload(repository_root: Path = REPOSITORY_ROOT) -> dict[str
             for path in FIGURE_PATHS
         ],
     }
+    payload["chartData"] = _build_chart_data(source, repository_root)
     return payload
 
 
@@ -262,7 +355,7 @@ def dashboard_section(section: DashboardSection) -> dict[str, Any]:
         "overview": ("overview", "configuration", "classification", "provenance"),
         "dataset": ("datasetFunnel", "coverage", "overview", "provenance"),
         "perturbations": ("perturbations", "configuration", "overview", "classification"),
-        "metrics": ("metrics", "sensitivity", "figures", "classification"),
+        "metrics": ("metrics", "sensitivity", "chartData", "figures", "classification"),
         "explorer": ("examples", "perturbations", "classification"),
         "predictors": ("predictors", "classification"),
         "evidence": ("provenance", "figures", "classification"),
@@ -287,30 +380,12 @@ app = FastAPI(
     version="1.0.0",
 )
 app.include_router(router)
-app.mount("/assets", StaticFiles(directory=FRONTEND_DIRECTORY / "assets"), name="c3-assets")
-
-
-@app.get("/app.js", include_in_schema=False, response_class=FileResponse)
-def frontend_script() -> FileResponse:
-    return FileResponse(FRONTEND_DIRECTORY / "app.js", media_type="text/javascript", headers={"Cache-Control": "no-store"})
-
-
-@app.get("/styles.css", include_in_schema=False, response_class=FileResponse)
-def frontend_styles() -> FileResponse:
-    return FileResponse(FRONTEND_DIRECTORY / "styles.css", media_type="text/css", headers={"Cache-Control": "no-store"})
-
-
-@app.get("/", include_in_schema=False, response_class=FileResponse)
-def frontend_index() -> FileResponse:
-    return FileResponse(FRONTEND_DIRECTORY / "index.html", media_type="text/html", headers={"Cache-Control": "no-store"})
-
-
 def main() -> None:
     """Run the self-contained C3 dashboard server."""
 
     import uvicorn
 
-    uvicorn.run("plantaox.c3_aop_bcs.dashboard_backend:app", host="127.0.0.1", port=4313, reload=False)
+    uvicorn.run("plantaox.c3_aop_bcs.dashboard_backend:app", host="127.0.0.1", port=4314, reload=False)
 
 
 if __name__ == "__main__":

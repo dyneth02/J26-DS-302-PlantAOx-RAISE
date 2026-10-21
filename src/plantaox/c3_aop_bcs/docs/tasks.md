@@ -1063,6 +1063,77 @@ Capture evidence of:
 
 ---
 
+## Task 3.46 — Rebuild the C3 frontend using the shared React application structure
+
+### Subtasks
+- [x] Re-audit the shared React/Vite architecture, routes, component registry, UI primitives, API client, data-state handling, styling tokens, tests, and startup workflow without modifying shared files.
+- [x] Replace the standalone plain-JavaScript page with a React 19, TypeScript, Vite, Tailwind CSS, and React Router application inside `c3_aop_bcs/frontend`.
+- [x] Mirror the shared directory structure: `app`, `components/layout`, `components/ui`, `components/research`, `features/c3-aop-bcs`, `lib/api`, and `styles`.
+- [x] Split Overview, Dataset, Perturbations, Pilot metrics, Variant explorer, Predictors, and Evidence into typed route-level pages.
+- [x] Reuse shared-style Card, Badge, StatTile, DataState, LimitationsPanel, header, sidebar, and component-nav patterns.
+- [x] Connect typed C3 services to `/api/v1/c3` and preserve loading, unavailable, and error states.
+- [x] Preserve every software-testing-only warning and prevent dummy outputs from being presented as scientific evidence.
+- [x] Add component/API/router tests, production build validation, and a one-command C3 frontend/backend development launcher.
+- [x] Verify the responsive application in the browser and confirm no file outside a `c3_aop_bcs` path changed.
+
+### Deliverable
+- A typed, tested AOP-BCS React dashboard following the same structure and behavior conventions as the shared PlantAOx frontend while remaining inside the authorized C3 scope.
+
+---
+
+## Task 3.47 — Integrate AOP-BCS into the shared repository frontend
+
+### Subtasks
+- [x] Re-read the shared-platform integration guide and audit the current root `frontend/` structure, component registry, router, shared UI, API client, tests, and Vite proxy.
+- [x] Create `frontend/src/features/c3-aop-bcs/` using the same feature-local types, services, components, pages, hooks, and routes structure as the other components.
+- [x] Reuse the shared application shell, Card, Badge, DataState, LimitationsPanel, API client, theme, and navigation patterns.
+- [x] Register the C3 route module at `/c3` and mark only the C3 frontend registry entry as implemented.
+- [x] Connect `/api/v1/c3` requests to the existing C3 artifact-backed API during shared-frontend development.
+- [x] Preserve all software-testing-only warnings and the stored-example Variant Explorer behavior.
+- [x] Add shared-frontend tests for C3 routing, API integration, and scientific-boundary rendering.
+- [x] Verify frontend tests, production build, live shared-dashboard behavior, responsive layout, and edit scope.
+
+### Deliverable
+- AOP-BCS available from the repository-level shared frontend at `/c3`, following the same structure and UI conventions as Components 1, 2, and 4.
+
+---
+
+## Task 3.48 — Integrate AOP-BCS into the shared repository backend
+
+### Subtasks
+- [x] Audit the repository-level FastAPI structure, component routers, schemas, services, shared error handling, registry, and backend tests.
+- [x] Add a typed C3 schema module under `backend/app/schemas/`.
+- [x] Add a C3 service adapter that reuses the existing validated C3 artifact builder without duplicating scientific logic.
+- [x] Add the shared `/api/v1/c3` health, dashboard, section, and allow-listed figure routes.
+- [x] Register the C3 router in the shared API composition root and mark C3 as implemented in the component registry.
+- [x] Use the shared `404` and `503 artifact_unavailable` error contracts for unknown resources and unavailable evidence.
+- [x] Point the shared frontend proxy and C3 development launcher at the repository-level backend on port `8000`.
+- [x] Add shared-backend C3 contract tests and verify the complete backend and frontend regression suites.
+- [x] Verify the live frontend-to-shared-backend flow and browser console.
+
+### Deliverable
+- AOP-BCS served by the same repository-level FastAPI backend as Components 1, 2, and 4 at `/api/v1/c3`.
+
+---
+
+## Task 3.49 — Replace static C3 metric images with interactive dashboard charts
+
+### Subtasks
+- [x] Audit the native chart patterns used by the other shared component dashboards without modifying their files.
+- [x] Build deterministic chart-ready data from the authoritative 449-row C3 DeltaScore artifact and validated metric reports.
+- [x] Expose typed chart data through the existing C3 dashboard and metrics API contracts.
+- [x] Replace the four static metric-image embeds with responsive Recharts visualizations for DeltaScore distributions, score examples, IR/FSR/BCS/PFR, and prediction flips.
+- [x] Preserve the pilot/dummy software-testing warning and display source-path, checksum, and row-count provenance.
+- [x] Add backend contract tests and frontend rendering tests that reject regression to image-based charts.
+- [x] Verify the complete shared backend and frontend test suites and the production frontend build.
+- [x] Verify live desktop and 390-pixel mobile rendering, zero horizontal overflow, and a clean browser console.
+- [x] Confirm no Component 1, 2, or 4 implementation file was modified.
+
+### Deliverable
+- A responsive, API-driven C3 metrics dashboard whose interactive charts follow the same shared Card/Recharts conventions as the other implemented components.
+
+---
+
 # PP1 Quality Gate
 
 Before considering the PP1 implementation stage complete, verify the following.
