@@ -40,7 +40,7 @@ export function CurriculumPage() {
             <Card>
               <CardHeader
                 title="Positive recovery vs. external-control discrimination, by stage"
-                subtitle="Checkpoint selection at every stage uses a C1-based surrogate risk — read the trend, not a controlled ablation."
+                subtitle="Checkpoint selection at every stage uses a C1-based surrogate risk. Read the trend, not a controlled ablation."
               />
               <div style={{ width: "100%", height: 280 }}>
                 <ResponsiveContainer>

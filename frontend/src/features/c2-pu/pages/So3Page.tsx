@@ -5,7 +5,7 @@ import { DataState } from "@/components/research/DataState";
 import { Card, CardHeader, StatTile } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
-export function Fr3Page() {
+export function So3Page() {
   const state = useApi(c2Api.fr3Examples, []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -19,7 +19,7 @@ export function Fr3Page() {
           <div className="space-y-6">
             <Card>
               <CardHeader
-                title="FR3 — Feature engineering workbench"
+                title="SO3 - Feature Engineering Workbench"
                 subtitle={`Fold ${fr3.fold_id}. ${fr3.embedding_model}, ${fr3.embedding_dim}-dim embeddings fused with 15 physicochemical descriptors -> ${fr3.fused_dim} dims.`}
               />
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

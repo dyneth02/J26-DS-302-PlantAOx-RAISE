@@ -10,7 +10,7 @@ import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, Cartes
 const METRIC_OPTIONS = ["mcc", "auroc", "average_precision", "f1"] as const;
 type MetricKey = (typeof METRIC_OPTIONS)[number];
 
-export function Fr4Page() {
+export function So4Page() {
   const state = useApi(c2Api.fr4Evaluation, []);
   const [metric, setMetric] = useState<MetricKey>("f1");
   const [selected, setSelected] = useState<string[]>([]);
@@ -19,18 +19,14 @@ export function Fr4Page() {
     <DataState
       state={state}
       render={(fr4) => {
-        const chartData = fr4.models.map((m) => ({ name: m.model, value: m[metric].toFixed(3) }));
+        const chartData = fr4.models.map((m) => ({ name: m.model, value: m[metric] }));
         const toggle = (modelId: string) =>
           setSelected((prev) => (prev.includes(modelId) ? prev.filter((id) => id !== modelId) : [...prev, modelId]));
 
-        // @ts-ignore
-          // @ts-ignore
-          // @ts-ignore
-          // @ts-ignore
-          return (
+        return (
           <div className="space-y-6">
             <Card>
-              <CardHeader title="FR4 — Baseline model comparison" subtitle={`Fold ${fr4.fold_id}`} />
+              <CardHeader title="SO4 - Baseline Model Comparison" subtitle={`Fold ${fr4.fold_id}`} />
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
                 {fr4.evaluation_note}
               </p>
@@ -68,7 +64,7 @@ export function Fr4Page() {
                       {chartData.map((entry) => (
                         <Cell
                           key={entry.name}
-                          fill={Number(entry.value) < 0 ? "var(--color-danger-text)" : "var(--color-primary)"}
+                          fill={entry.value < 0 ? "var(--color-danger-text)" : "var(--color-primary)"}
                         />
                       ))}
                     </Bar>
@@ -139,8 +135,8 @@ export function Fr4Page() {
                     return (
                       <tr key={m.model_id} className="border-t" style={{ borderColor: "var(--color-border)" }}>
                         <td className="py-1.5">{m.model}</td>
-                        <td className="py-1.5">{fractions.C1?.toFixed(3) ?? "—"}</td>
-                        <td className="py-1.5">{fractions.C2?.toFixed(3) ?? "—"}</td>
+                        <td className="py-1.5">{fractions.C1?.toFixed(3) ?? "N/A"}</td>
+                        <td className="py-1.5">{fractions.C2?.toFixed(3) ?? "N/A"}</td>
                       </tr>
                     );
                   })}
@@ -150,7 +146,7 @@ export function Fr4Page() {
 
             <LimitationsPanel
               items={[
-                "All five configurations show negative MCC and sub-0.5 AUROC — none establishes reliable antioxidant-activity discrimination.",
+                "All five configurations show negative MCC and sub-0.5 AUROC; none establishes reliable antioxidant-activity discrimination.",
                 "C1/C2 scoring fractions describe model behavior on unlabeled pools, not measured false-positive rates.",
               ]}
             />

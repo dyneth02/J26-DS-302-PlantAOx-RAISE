@@ -5,7 +5,7 @@ import { Card, CardHeader, StatTile } from "@/components/ui/Card";
 import { LimitationsPanel } from "@/components/research/LimitationsPanel";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
-export function Fr1Page() {
+export function So1Page() {
   const state = useApi(c2Api.fr1Summary, []);
 
   return (
@@ -20,7 +20,7 @@ export function Fr1Page() {
           <div className="space-y-6">
             <Card>
               <CardHeader
-                title="FR1 — Evidence-tiered positive-pool curation"
+                title="SO1 - Evidence-Tiered Positive-Pool Curation"
                 subtitle={`Frozen as ${fr1.version_id}`}
               />
               <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">

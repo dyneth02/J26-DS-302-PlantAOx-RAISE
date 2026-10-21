@@ -5,7 +5,7 @@ import { DataState } from "@/components/research/DataState";
 import { Card, CardHeader, StatTile } from "@/components/ui/Card";
 import { LimitationsPanel } from "@/components/research/LimitationsPanel";
 
-export function Fr2Page() {
+export function So2Page() {
   const poolsState = useApi(c2Api.fr2Pools, []);
   const [foldId, setFoldId] = useState(0);
   const foldState = useApi(() => c2Api.fr2FoldChallenges(foldId), [foldId]);
@@ -17,7 +17,7 @@ export function Fr2Page() {
         <div className="space-y-6">
           <Card>
             <CardHeader
-              title="FR2 — Challenge-pool explorer"
+              title="SO2 - Challenge-Pool Explorer"
               subtitle={`Frozen as ${pools.version_id}. C1/C2/C3 are unlabeled, not confirmed non-antioxidant peptides.`}
             />
             <div className="grid gap-4 sm:grid-cols-2">
@@ -41,7 +41,7 @@ export function Fr2Page() {
           <Card>
             <CardHeader
               title="C3 fold-specific hard challenges"
-              subtitle={`${pools.c3_selected_per_fold.toLocaleString()} selected per fold out of ${pools.c3_ranking_total_rows.toLocaleString()} ranking rows — never the full union.`}
+              subtitle={`${pools.c3_selected_per_fold.toLocaleString()} selected per fold out of ${pools.c3_ranking_total_rows.toLocaleString()} ranking rows. Never the full union.`}
             />
             <div className="mb-4 flex items-center gap-2">
               <label htmlFor="fold-select" className="text-sm font-medium">

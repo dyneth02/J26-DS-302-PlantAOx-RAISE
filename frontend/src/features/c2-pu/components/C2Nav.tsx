@@ -2,10 +2,10 @@ import { NavLink } from "react-router-dom";
 
 const TABS = [
   { to: "/c2", label: "Overview", end: true },
-  { to: "/c2/fr1", label: "FR1 — Data curation" },
-  { to: "/c2/fr2", label: "FR2 — Challenge pools" },
-  { to: "/c2/fr3", label: "FR3 — Features" },
-  { to: "/c2/fr4", label: "FR4 — Model comparison" },
+  { to: "/c2/so1", label: "SO1 - Data Curation" },
+  { to: "/c2/so2", label: "SO2 - Challenge Pools" },
+  { to: "/c2/so3", label: "SO3 - Features" },
+  { to: "/c2/so4", label: "SO4 - Model Comparison" },
   { to: "/c2/curriculum", label: "Curriculum" },
   { to: "/c2/evidence", label: "Evidence" },
 ];

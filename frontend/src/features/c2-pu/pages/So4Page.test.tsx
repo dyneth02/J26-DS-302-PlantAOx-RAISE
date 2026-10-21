@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-// @ts-ignore
-import { Fr4Page } from "@/features/c2-pu/pages/Fr4Page";
-// @ts-ignore
+import { So4Page } from "@/features/c2-pu/pages/So4Page";
 import type { Fr4EvaluationResponse } from "@/features/c2-pu/types";
 
 const MOCK_RESPONSE: Fr4EvaluationResponse = {
@@ -29,7 +27,7 @@ const MOCK_RESPONSE: Fr4EvaluationResponse = {
   ],
 };
 
-describe("Fr4Page", () => {
+describe("So4Page", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -40,14 +38,11 @@ describe("Fr4Page", () => {
       json: async () => MOCK_RESPONSE,
     }) as unknown as typeof fetch;
 
-    render(<Fr4Page />);
+    render(<So4Page />);
 
     await waitFor(() => expect(screen.getAllByText("PN").length).toBeGreaterThan(0));
-    // @ts-ignore
     expect(screen.getByText("-0.180")).toBeInTheDocument();
-    // @ts-ignore
     expect(screen.getByText(/not validated biological probabilities/)).toBeInTheDocument();
-    // @ts-ignore
     expect(screen.getByText(/not a measured false-positive rate/)).toBeInTheDocument();
   });
 });
