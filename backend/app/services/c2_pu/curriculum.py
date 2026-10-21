@@ -7,7 +7,7 @@ LIMITATIONS = [
     "Checkpoint selection at every stage (including C2 and C3) uses a C1-based "
     "surrogate validation risk, not a stage-matched validation signal.",
     "This is a single weighted curriculum run (C1 -> C2 -> C3), not compared "
-    "against an unweighted baseline under matched conditions — stage-over-stage "
+    "against an unweighted baseline under matched conditions; stage-over-stage "
     "deltas should not be read as a controlled ablation.",
     "External-control MCC remains negative at every stage; later stages do not "
     "establish improved biological reliability, only different positive-recovery "

@@ -145,6 +145,17 @@ class CurriculumResponse(BaseModel):
     limitations: list[str]
 
 
+class TrackedSourceReport(BaseModel):
+    label: str
+    category: str
+    path: str
+    sha256: str | None
+    status: str
+    """One of 'verified' (hash matches the frozen manifest), 'modified'
+    (present but hash no longer matches), 'present' (present, no recorded
+    hash to check against), or 'missing'."""
+
+
 class ArtifactStatusResponse(BaseModel):
     freeze_id: str
     release_tag: str
@@ -154,3 +165,4 @@ class ArtifactStatusResponse(BaseModel):
     missing_count: int
     missing_paths: list[str]
     pending_decisions: list[str]
+    tracked_source_reports: list[TrackedSourceReport]

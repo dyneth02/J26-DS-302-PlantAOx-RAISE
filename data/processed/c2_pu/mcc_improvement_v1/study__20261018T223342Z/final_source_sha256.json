@@ -1,0 +1,7 @@
+{
+  "src\\plantaox\\c2_pu\\mcc_study.py": "782530b5089cfc203072a606037d38fa661cdd6fcf18c187195751cd7195dda9",
+  "src\\plantaox\\c2_pu\\mcc_study_plots.py": "d80512ecdfeceda7055d6e789e93bafcd2b481b60c34ff0d7078dfca514ece5f",
+  "src\\plantaox\\c2_pu\\mcc_study_qa.py": "69091df0ad1fa74415b2671ec14c8cfbb47d81fad96425f262a3c5f6769eb9d7",
+  "src\\plantaox\\c2_pu\\mcc_study_report.py": "6df774d8e4491ed55f458e39743c445ba2399d332843fd28e713342aa604d374",
+  "tests\\c2_pu\\test_mcc_study.py": "6a3a5504dd46db5bd1fd3fc311f9f90b0f5ac40fe8f57acea9796f37247b1f23"
+}

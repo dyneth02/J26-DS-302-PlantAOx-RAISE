@@ -1,0 +1,6 @@
+{
+  "paths": [
+    "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_PN_descriptors_f0_s42_pi0.1_b256__20261018T223356Z"
+  ],
+  "reason": "Initial alignment guard rejected consistent repeated C1 source IDs before training; corrected to verify consistency then align unique accepted cache IDs. No checkpoint or metrics existed for this setup attempt."
+}

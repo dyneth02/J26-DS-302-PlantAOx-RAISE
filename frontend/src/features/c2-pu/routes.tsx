@@ -2,10 +2,10 @@ import type { RouteObject } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { C2Nav } from "@/features/c2-pu/components/C2Nav";
 import { OverviewPage } from "@/features/c2-pu/pages/OverviewPage";
-import { Fr1Page } from "@/features/c2-pu/pages/Fr1Page";
-import { Fr2Page } from "@/features/c2-pu/pages/Fr2Page";
-import { Fr3Page } from "@/features/c2-pu/pages/Fr3Page";
-import { Fr4Page } from "@/features/c2-pu/pages/Fr4Page";
+import { So1Page } from "@/features/c2-pu/pages/So1Page";
+import { So2Page } from "@/features/c2-pu/pages/So2Page";
+import { So3Page } from "@/features/c2-pu/pages/So3Page";
+import { So4Page } from "@/features/c2-pu/pages/So4Page";
 import { CurriculumPage } from "@/features/c2-pu/pages/CurriculumPage";
 import { EvidencePage } from "@/features/c2-pu/pages/EvidencePage";
 
@@ -29,10 +29,10 @@ export const c2PuRoutes: RouteObject[] = [
     element: <C2Layout />,
     children: [
       { index: true, element: <OverviewPage /> },
-      { path: "fr1", element: <Fr1Page /> },
-      { path: "fr2", element: <Fr2Page /> },
-      { path: "fr3", element: <Fr3Page /> },
-      { path: "fr4", element: <Fr4Page /> },
+      { path: "so1", element: <So1Page /> },
+      { path: "so2", element: <So2Page /> },
+      { path: "so3", element: <So3Page /> },
+      { path: "so4", element: <So4Page /> },
       { path: "curriculum", element: <CurriculumPage /> },
       { path: "evidence", element: <EvidencePage /> },
     ],

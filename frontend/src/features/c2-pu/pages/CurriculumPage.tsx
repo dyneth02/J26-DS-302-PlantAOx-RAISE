@@ -15,9 +15,9 @@ export function CurriculumPage() {
       render={(curriculum) => {
         const chartData = curriculum.stages.map((s) => ({
           stage: s.training_pool,
-          "Positive recovery": s.positive_recovery,
-          "External MCC": s.external_mcc,
-          "External AUROC": s.external_auroc,
+          "Positive recovery": s.positive_recovery.toFixed(3),
+          "External MCC": s.external_mcc.toFixed(3),
+          "External AUROC": s.external_auroc.toFixed(3),
         }));
 
         return (
@@ -40,7 +40,7 @@ export function CurriculumPage() {
             <Card>
               <CardHeader
                 title="Positive recovery vs. external-control discrimination, by stage"
-                subtitle="Checkpoint selection at every stage uses a C1-based surrogate risk — read the trend, not a controlled ablation."
+                subtitle="Checkpoint selection at every stage uses a C1-based surrogate risk. Read the trend, not a controlled ablation."
               />
               <div style={{ width: "100%", height: 280 }}>
                 <ResponsiveContainer>

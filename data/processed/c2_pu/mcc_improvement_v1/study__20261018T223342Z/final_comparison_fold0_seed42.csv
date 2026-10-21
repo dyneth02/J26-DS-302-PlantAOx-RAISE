@@ -1,0 +1,6 @@
+model,original_mcc,new_mcc,auroc,sensitivity,specificity,representation,protocol,fold,seed,threshold,status
+PN,-0.1833,-0.1565094505929612,0.2542444821731748,0.8548387096774194,0.0263157894736842,fused,retrospective assay-supported; original controls reused,0,42,0.5,Unresolved on historical benchmark
+Direct,-0.0436,-0.0459955513702713,0.2497877758913412,0.9516129032258064,0.0263157894736842,esm,retrospective assay-supported; original controls reused,0,42,0.5,Unresolved on historical benchmark
+Corrective,-0.2498,-0.1634704932594239,0.2519100169779287,0.8467741935483871,0.0263157894736842,fused,retrospective assay-supported; original controls reused,0,42,0.5,Unresolved on historical benchmark
+TwoStep,-0.1694,-0.1565762722517625,0.2688879456706282,0.9032258064516128,0.0,descriptors,retrospective assay-supported; original controls reused,0,42,0.5,Unresolved on historical benchmark
+Bagging,-0.2495,-0.2667847165510054,0.2652801358234295,0.6693548387096774,0.0526315789473684,esm,retrospective assay-supported; original controls reused,0,42,0.5,Unresolved on historical benchmark

@@ -1,0 +1,177 @@
+[
+  {
+    "fold": 0,
+    "method": "PN",
+    "representation": "fused",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_PN_fused_f0_s42_pi0.1_b256__20261018T223639Z",
+    "selection_value": 0.36841267347335815
+  },
+  {
+    "fold": 0,
+    "method": "Direct",
+    "representation": "esm",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Direct_esm_f0_s42_pi0.1_b256__20261018T223646Z",
+    "selection_value": 0.08112482726573944
+  },
+  {
+    "fold": 0,
+    "method": "Corrective",
+    "representation": "fused",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Corrective_fused_f0_s42_pi0.1_b256__20261018T223657Z",
+    "selection_value": 0.07976900041103363
+  },
+  {
+    "fold": 0,
+    "method": "TwoStep",
+    "representation": "descriptors",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_TwoStep_descriptors_f0_s42_pi0.1_b256__20261018T223701Z",
+    "selection_value": -0.8376004997959627
+  },
+  {
+    "fold": 0,
+    "method": "Bagging",
+    "representation": "esm",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Bagging_esm_f0_s42_pi0.1_b256__20261018T223706Z",
+    "selection_value": -0.8835635394776277
+  },
+  {
+    "fold": 1,
+    "method": "PN",
+    "representation": "fused",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_PN_fused_f1_s42_pi0.1_b256__20261018T223830Z",
+    "selection_value": 0.2972314655780792
+  },
+  {
+    "fold": 1,
+    "method": "Direct",
+    "representation": "descriptors",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Direct_descriptors_f1_s42_pi0.1_b256__20261018T223832Z",
+    "selection_value": 0.055455125868320465
+  },
+  {
+    "fold": 1,
+    "method": "Corrective",
+    "representation": "fused",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Corrective_fused_f1_s42_pi0.1_b256__20261018T223843Z",
+    "selection_value": 0.07430647313594818
+  },
+  {
+    "fold": 1,
+    "method": "TwoStep",
+    "representation": "descriptors",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_TwoStep_descriptors_f1_s42_pi0.1_b256__20261018T223847Z",
+    "selection_value": -0.8926547456932874
+  },
+  {
+    "fold": 1,
+    "method": "Bagging",
+    "representation": "descriptors",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Bagging_descriptors_f1_s42_pi0.1_b256__20261018T223851Z",
+    "selection_value": -0.8961409948180912
+  },
+  {
+    "fold": 2,
+    "method": "PN",
+    "representation": "descriptors",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_PN_descriptors_f2_s42_pi0.1_b256__20261018T223905Z",
+    "selection_value": 1.5039997100830078
+  },
+  {
+    "fold": 2,
+    "method": "Direct",
+    "representation": "fused",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Direct_fused_f2_s42_pi0.1_b256__20261018T223916Z",
+    "selection_value": 0.15019628405570984
+  },
+  {
+    "fold": 2,
+    "method": "Corrective",
+    "representation": "fused",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Corrective_fused_f2_s42_pi0.1_b256__20261018T223926Z",
+    "selection_value": 0.15715795755386353
+  },
+  {
+    "fold": 2,
+    "method": "TwoStep",
+    "representation": "fused",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_TwoStep_fused_f2_s42_pi0.1_b256__20261018T223931Z",
+    "selection_value": -0.7335623802287179
+  },
+  {
+    "fold": 2,
+    "method": "Bagging",
+    "representation": "fused",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Bagging_fused_f2_s42_pi0.1_b256__20261018T223940Z",
+    "selection_value": -0.7445524978064753
+  },
+  {
+    "fold": 3,
+    "method": "PN",
+    "representation": "esm",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_PN_esm_f3_s42_pi0.1_b256__20261018T223948Z",
+    "selection_value": 0.30402934551239014
+  },
+  {
+    "fold": 3,
+    "method": "Direct",
+    "representation": "esm",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Direct_esm_f3_s42_pi0.1_b256__20261018T223956Z",
+    "selection_value": 0.014220738783478737
+  },
+  {
+    "fold": 3,
+    "method": "Corrective",
+    "representation": "esm",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Corrective_esm_f3_s42_pi0.1_b256__20261018T224008Z",
+    "selection_value": 0.03215203434228897
+  },
+  {
+    "fold": 3,
+    "method": "TwoStep",
+    "representation": "descriptors",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_TwoStep_descriptors_f3_s42_pi0.1_b256__20261018T224016Z",
+    "selection_value": -0.9542151191498264
+  },
+  {
+    "fold": 3,
+    "method": "Bagging",
+    "representation": "descriptors",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Bagging_descriptors_f3_s42_pi0.1_b256__20261018T224029Z",
+    "selection_value": -0.953910938799552
+  },
+  {
+    "fold": 4,
+    "method": "PN",
+    "representation": "esm",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_PN_esm_f4_s42_pi0.1_b256__20261018T224047Z",
+    "selection_value": 0.3231021463871002
+  },
+  {
+    "fold": 4,
+    "method": "Direct",
+    "representation": "esm",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Direct_esm_f4_s42_pi0.1_b256__20261018T224055Z",
+    "selection_value": 0.00807130616158247
+  },
+  {
+    "fold": 4,
+    "method": "Corrective",
+    "representation": "fused",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Corrective_fused_f4_s42_pi0.1_b256__20261018T224112Z",
+    "selection_value": 0.029872775077819824
+  },
+  {
+    "fold": 4,
+    "method": "TwoStep",
+    "representation": "descriptors",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_TwoStep_descriptors_f4_s42_pi0.1_b256__20261018T224116Z",
+    "selection_value": -0.8458633098725926
+  },
+  {
+    "fold": 4,
+    "method": "Bagging",
+    "representation": "esm",
+    "seed42_run_dir": "data\\interim\\c2_pu\\mcc_improvement_v1\\study__20261018T223342Z\\main_Bagging_esm_f4_s42_pi0.1_b256__20261018T224122Z",
+    "selection_value": -0.864151836911649
+  }
+]

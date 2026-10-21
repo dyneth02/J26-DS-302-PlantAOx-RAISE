@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 // @ts-ignore
-import { Fr4Page } from "@/features/c2-pu/pages/Fr4Page";
+import { So4Page } from "@/features/c2-pu/pages/So4Page";
 // @ts-ignore
 import type { Fr4EvaluationResponse } from "@/features/c2-pu/types";
 
@@ -29,18 +29,19 @@ const MOCK_RESPONSE: Fr4EvaluationResponse = {
   ],
 };
 
-describe("Fr4Page", () => {
+describe("So4Page", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   it("surfaces negative MCC and the scientific caveat language, not a hidden/omitted result", async () => {
+    // @ts-ignore
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => MOCK_RESPONSE,
     }) as unknown as typeof fetch;
 
-    render(<Fr4Page />);
+    render(<So4Page />);
 
     await waitFor(() => expect(screen.getAllByText("PN").length).toBeGreaterThan(0));
     // @ts-ignore
